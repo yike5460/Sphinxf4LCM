@@ -1,0 +1,151 @@
+TC_VNF_STATE_TERM_006 VNF terminate from state Instantiated-Not Configured with traffic load
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF is in state Instantiated
+3. Start the traffic load
+4. Validate no traffic goes through
+5. Terminate VNF (--> time stamp)
+6. Validate VNF is terminate and all resources have been released (--> time stamp)
+7. Stop traffic
+8. Validate no traffic has been forwarded while the termination
+9. Calculate the time for the termination
+
+Pseudo Code:
+
+Input
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    Traffic Configuration Parameter -> trafficConfigParameter
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import VNFM.VNF
+import Traffic
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_STATE_TERM_006.txt")
+
+def TC_VNF_STATE_TERM_006(tcInput):
+
+    logger.write_info("Starting TC_VNF_STATE_TERM_006")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    traffic = Traffic.TrafficClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1.  Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF is in state Instantiated
+    logger.write_info("Validating VNF is in state 'Not-Configured'")
+
+    #allow the VNF to get into the instantiated-not-configured state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_NOT_CONFIGURED :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at validating the VNF is in 'Not-Configured' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at waiting for the VNF to be in 'Not-Configured' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start the traffic load
+    logger.write_info("Starting traffic load")
+
+    if (status = traffic.ConfigTrafficLoad( NORMAL_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at configuring normal traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.StartTraffic()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at starting traffic")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate no traffic goes through
+    logger.write_info("Validating no traffic goes through")
+
+    if (status = traffic.DoesTrafficFlow()) <> FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at validating no traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    5. Terminate VNF (--> time stamp)
+    logger.write_info("Terminating VNF")
+
+    tcResult.timeRecord.terminateVNFStart = time.clock()
+    status = vnfm_vnf.Terminate( vnfRecord )
+    if  status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at terminating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate VNF is terminate and all resources have been released (--> time stamp)
+    logger.write_info("Validating all resources have been released")
+
+    wait_time = MAX_VNF_RESOURCES_RELEASE_TIME
+    while (status = vnfm_vnf.AllvResourcesReleased( vnfRecord )) <> TRUE :
+        if wait_time-- == 0 :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at validating allocated vResources have been released")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+    tcResult.timeRecord.terminateVNFEnd = time.clock()
+
+    7. Stop traffic
+    logger.write_info("Stopping traffic")
+
+    if (status = traffic.Stop()) <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at stopping traffic")
+        logger.close_handlers()
+        return ERROR
+
+    8. Validate no traffic has been forwarded while the termination
+    logger.write_info("Validating no traffic has been forwarded while the termination")
+
+    if (status = traffic.DoesTrafficFlow()) <> FALSE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_TERM_006 execution completed with failure at validating no traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    9. Calculate the time for the termination
+    logger.write_info("Calculating the time for termination")
+
+    tcResult.timeRecord.TerminateCompletionTime = tcResult.timeRecord.terminateVNFEnd - tcResult.timeRecord.terminateVNFStart
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_STATE_TERM_006 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

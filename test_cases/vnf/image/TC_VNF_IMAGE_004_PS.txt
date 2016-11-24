@@ -1,0 +1,139 @@
+TC_VNF_IMAGE_004 Life-Cycle management information
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    Number of installed images -> noInstalledImages
+    Name of software image -> swImageName
+    Name of software image provider -> swImageProvider
+    Version of software image 1 from provider with name "swImageProvider" -> swImage1Version
+    Checksum of software image 1 from provider with name "swImageProvider" -> swImage1Checksum
+    Container format of software image 1 from provider with name "swImageProvider" -> swImage1ContainerFormat
+    Version of software image 2 from provider with name "swImageProvider" -> swImage2Version
+    Checksum of software image 2 from provide3 with name "swImageProvider" -> swImage2Checksum
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFM
+import VNFM.VNFD
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_IMAGE_004.txt")
+
+def TC_VNF_IMAGE_004(tcInput):
+
+    logger.write_info("Starting TC_VNF_IMAGE_004")
+
+    vnfm_vnfd = VNFM.VNFD.VNFM_VNFDClass(logger)
+    vnfm_swimage = VNFM.SwImage.VNFM_SwImageClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    1. No filter image retrieval (all installed images should be listed)
+    logger.write_info("Listing software images using no filter")
+
+    tcResult.swImages.noFilter = vnfm_swimage.ListSwImage()
+    if len(tcResult.swImages.noFilter) <> tcInput.noInstalledImages :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using no filter")
+        logger.write_error("Expected list with %s images, found %s" % (tcInput.noInstalledImages, len(tcResult.swImages.noFilter)))
+        logger.close_handlers()
+        return ERROR
+
+    2. Partial filter image retrieval
+    logger.write_info("Listing software images using partial filter")
+
+    # Assuming there are two images named swImageName from the provider swImageProvider, but with different versions.
+    # Identify the first image in the returned list by its checksum and then check the image version is as expected
+    tcResult.swImages.partialFilter = vnfm_swimage.ListSwImage(Name = tcInput.swImageName, Provider = tcInput.swImageProvider)
+    if len(tcResult.swImages.partialFilter) <> 2 :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
+        logger.write_error("Expected list with 2 images, found %s" % len(tcResult.swImages.partialFilter))
+        logger.close_handlers()
+        return ERROR
+
+    if tcResult.swImages.partialFilter[0].Checksum == tcInput.swImage1Checksum :
+        if tcResult.swImages.partialFilter[0].Version <> tcInput.swImage1Version :
+            logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
+            logger.write_error("Expected version %s, found %s" % (tcInput.swImage1Version, tcResult.swImages.partialFilter[0].Version))
+            logger.close_handlers()
+            return ERROR
+    else if tcResult.swImages.partialFilter[0].Checksum == tcInput.swImage2Checksum :
+        if tcResult.swImages.partialFilter[0].Version <> tcInput.swImage2Version :
+            logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
+            logger.write_error("Expected version %s, found %s" % (tcInput.swImage2Version, tcResult.swImages.partialFilter[0].Version))
+            logger.close_handlers()
+            return ERROR
+    else :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
+        logger.write_error("Expected image with checksum %s or %s, found %s" % (tcInput.swImage1Checksum,
+                                                                                tcInput.swImage2Checksum,
+                                                                                tcResult.swImages.partialFilter[0].Checksum))
+        logger.close_handlers()
+        return ERROR
+
+    3. Exact match filter image retrieval
+    logger.write_info("Listing software images using exact filter")
+
+    # Assuming there is only one image named swImageName, from provider swImageProvider, with version swImage1Version,
+    # with checksum swImage1Checksum and image format swImage1ContainerFormat
+    tcResult.swImages.exactFilter = vnfm_swimage.ListSwImage(Name = tcInput.swImageName,
+                                                             Provider = tcInput.swImageProvider,
+                                                             Version = tcInput.swImage1Version,
+                                                             Checksum = tcInput.swImage1Checksum,
+                                                             ContainerFormat = tcInput.swImage1ContainerFormat)
+
+    if len(tcResult.swImages.exactFilter) <> 1 :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
+        logger.write_error("Expected list with 1 image, found %s" % len(tcResult.swImages.exactFilter))
+        logger.close_handlers()
+        return ERROR
+
+    if tcResult.swImages.exactFilter[0].Name <> tcInput.swImageName :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
+        logger.write_error("Expected image name %s, found %" % (tcInput.swImageName, tcResult.swImages.exactFilter[0].Name))
+        logger.close_handlers()
+        return ERROR
+
+    if tcResult.swImages.exactFilter[0].Provider <> tcInput.swImageProvider :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
+        logger.write_error("Expected image provider %s, found %" % (tcInput.swImageProvider, tcResult.swImages.exactFilter[0].Provider))
+        logger.close_handlers()
+        return ERROR
+
+    if tcResult.swImages.exactFilter[0].Version <> tcInput.swImage1Version :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
+        logger.write_error("Expected image version %s, found %" % (tcInput.swImage1Version, tcResult.swImages.exactFilter[0].Version))
+        logger.close_handlers()
+        return ERROR
+
+    if tcResult.swImages.exactFilter[0].Checksum <> tcInput.swImage1Checksum :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
+        logger.write_error("Expected image checksum %s, found %" % (tcInput.swImage1Checksum, tcResult.swImages.exactFilter[0].Checksum))
+        logger.close_handlers()
+        return ERROR
+
+    if tcResult.swImages.exactFilter[0].ContainerFormat <> tcInput.swImage1ContainerFormat :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
+        logger.write_error("Expected image format %s, found %" % (tcInput.swImage1ContainerFormat, tcResult.swImages.exactFilter[0].ContainerFormat))
+        logger.close_handlers()
+        return ERROR
+
+    4. Query the LifeCycle Management Information for the specific image
+    logger.write_info("Querying the life cycle management information for specific image")
+
+    swImageID = tcResult.swImages.exactFilter[0].SwImageID
+
+    tcResult.swImages.LifeCycleMgmtInfo = vnfm_vnfd.GetLifecyleManagementInfo(swImageID)
+    # Assuming function vnfm_vnfd.GetLifecyleManagementInfo() returns a list of life cycle management scripts
+    if len(tcResult.swImages.LifeCycleMgmtInfo) == 0 :
+        logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at getting the life cycle management information")
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("TC_VNF_IMAGE_004 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

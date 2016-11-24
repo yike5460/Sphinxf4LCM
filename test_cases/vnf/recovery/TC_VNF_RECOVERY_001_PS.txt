@@ -1,0 +1,329 @@
+TC_VNF_RECOVERY_001 Manual VNF recover of a faulty VNF
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF state is Inactive
+3. Start VNF
+4. Validate VNF state is Active
+5. Generate normal traffic load
+6. Validate that traffic flows through without issues (-> no dropped packets)
+7. Issue command to inject a fault
+8. Validate that traffic gets dropped as VNF is now in fault condition (-> dropped packets)
+9. Manually issue VNFM command healing trigger (-> time stamp)
+10. Validate fault has been removed (-> time stamp)
+11. Validate traffic flows through without issues (-> no dropped packets, -> time stamp)
+12. Stop Traffic
+13. Terminate VNF
+
+Pseudo Code:
+
+Input
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+    Fault Command -> faultCommand
+        - VIM command to stop the VNF
+        - VIM command to stop one of the compute notes of the VNF
+        - VIM command to cause vStorage fault
+        - VIM command to cause vMemory fault
+        - VIM command to cause vNetwork fault
+        - VIM command to cause EM communication fault
+        - VIM command to cause VNF and VNFM communication fault
+    Fault Type -> faultType
+        - vCPU
+        - vMemory
+        - vNetwork
+        - vStorage
+    Fault Severity -> faultSeverity
+        - Critical
+        - Major
+        - Minor
+        - Warning
+        - Indeterminate
+        - ANY
+    Source of the recovery instruction -> recoverySource
+         - VNFM
+         - NFVO
+         - EM
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import ElementManagement
+import VNF
+import VNFM
+import VNFM.VNF
+import VNFM.Fault
+import NFVO
+import Traffic
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_RECOVERY_001.txt")
+
+def TC_VNF_RECOVERY_001(tcInput):
+
+    logger.write_info("Starting TC_VNF_RECOVERY_001")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm = VNFm.VNFMClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    vnfm_fault = VNFM.Fault.VNFM_FaultClass(logger)
+    nfvo = NFVO.NFVOClass(logger)
+    traffic = Traffic.TrafficClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1. Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate ElementManagement
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = VNF.SetVNFConfigFile( tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = VNF.SetVNFLicense( tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF state is Inactive
+    logger.write_info("Validating VNF state is 'Inactive'")
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start VNF
+    logger.write_info("Starting VNF")
+
+    status = vnfm_vnf.Start( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at starting the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate VNF state is Active
+    logger.write_info("Validating VNF state is 'Active'")
+
+    wait_time = MAX_VNF_ACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating the VNF is in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at waiting for the VNF to be in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    5. Generate normal traffic load
+    logger.write_info("Generating normal traffic load")
+
+    if (status = traffic.ConfigTrafficLoad( NORMAL_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at configuring normal traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.StartTraffic()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at starting traffic")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate that traffic flows through without issues (-> no dropped packets)
+    logger.write_info("Validating that traffic flows through without issues")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.AnyTrafficLoss()) == TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating there is no traffic loss")
+        logger.close_handlers()
+        return ERROR
+
+    7. Issue command to inject a fault
+    logger.write_info("Issuing command to inject a fault")
+
+    # Issue command to the VNFM to register for fault notification
+    if ( faultRegisterID =  vnfm_fault.RegisterForNotification( vnfRecord, tcInput.faultType, tcInput.faultSeverity )) == FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at VNFM registering for fault notification")
+        logger.close_handlers()
+        return ERROR
+
+    # Validate via VNFM interface that registration was successful
+    vnfmFaultNotRegList = vnfm_fault.ListFaultNotificationRegistration(vnfRecord, tcInput.faultType, tcInput.faultSeverity)
+    if len(vnfmFaultNotRegList) <> 1 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating VNFM list of fault notification registrations")
+        logger.write_error("Expected one fault notification registration, found %s" % len(vnfmFaultNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    # Issue command to inject a fault
+    faultInjectionID = vim_fault.VNFFaultInjection(tcInput.faultCommand, tcInput.faultType, tcInput.faultSeverity)
+    if faultInjectionID == FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = faultInjectionID
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at VIM injecting fault")
+        logger.close_handlers()
+        return ERROR
+
+    # Get the fault notification information
+    faultNotificationInfo = vnfm_fault.ListFaultNotificationInformation( faultRegisterID, vnfRecord, tcInput.faultType )
+
+    if faultNotificationInfo.AlarmState <> "Fired" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating the alarm state in the VNFM fault notification information")
+        logger.write_error("Expected alarm state Fired, found %s" % faultNotificationInfo.AlarmState)
+        logger.close_handlers()
+        return ERROR
+
+    8. Validate that traffic gets dropped as VNF is now in fault condition (-> dropped packets)
+    logger.write_info("Validating that traffic gets dropped")
+
+    if (status = traffic.AnyTrafficLoss()) == FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating there is traffic loss")
+        logger.close_handlers()
+        return ERROR
+
+    9. Manually issue VNFM command healing trigger (-> time stamp)
+    logger.write_info("Issuing tcInput.recoverySource command healing trigger")
+
+    tcResult.timeRecord.recoveryStart = time.clock()
+
+    if tcInput.recoverySource == "VNFM" :
+        status = vnfm.RecoveryCMDtoVNFM( vnfRecord )
+    else if tcInput.recoverySource == "NFVO" :
+        status = nfvo.RecoveryCMDtoNFVO(vnfRecord)
+    else :
+        status = em.RecoveryCMDtoEM(vnfRecord)
+    if status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at tcInput.recoverySource starting the VNF recovery process")
+        logger.close_handlers()
+        return ERROR
+
+    10. Validate fault has been removed (-> time stamp)
+    logger.write_info("Validating fault has been removed")
+
+    wait_time = MAX_VNF_RECOVERY_TIME
+    while vnfm_fault.ListFaultNotificationInformation( faultRegisterID, vnfRecord, tcInput.faultType ).AlarmState <> "Cleared" :
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating the alarm state in the VNFM fault notification information")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    tcResult.timeRecord.recoveryEnd = time.clock()
+
+    tcResult.timeRecord.recoveryTime = tcResult.timeRecord.recoveryEnd - tcResult.timeRecord.recoveryStart
+
+    11. Validate traffic flows through without issues (-> no dropped packets, -> time stamp)
+    logger.write_info("Validating traffic flows through without issues")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.AnyTrafficLoss()) == TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at validating there is no traffic loss")
+        logger.close_handlers()
+        return ERROR
+
+    tcResult.timeRecord.recoveryEndTrafficFlows = time.clock()
+
+    tcResult.timeRecord.recoveryTimeNoTrafficLoss = tcResult.timeRecord.recoveryEndTrafficFlows - tcResult.timeRecord.recoveryStart
+
+    tcResults.serviceDisruptionLength = traffic.CalculateServiceDisruptionLength()
+
+    12. Stop Traffic
+    logger.write_info("Stopping Traffic")
+
+    if (status = traffic.Stop()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_RECOVERY_001 execution completed with failure at stopping traffic")
+        logger.close_handlers()
+        return ERROR
+
+    13. Terminate VNF
+    logger.write_info("Terminating VNF")
+
+    vnfm_vnf.Terminate( vnfRecord )
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_RECOVERY_001 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

@@ -1,0 +1,101 @@
+TC_VNFD_DEPLOY_001 VNFD Connection Points Unit validation
+
+Sequence:
+1. Verify VNF flavor identifier (vnfd:deployment_flavour:id)
+2. Verify monitoring parameter and its value against which this flavor is being described (vnfd:deployment_flavour:flavor_key)
+3. Verify constraints in place for a specific deployment flavor (vnfd:deployment_flavour:constraint)
+4. Verify references for a specific VDU which should be used for this deployment flavor (vnfd:deployment_flavour:constituent_vdu:vdu_reference)
+5. Verify number of VDU instances required (vnfd:deployment_flavour:constituent_vdu:number_of_instances)
+6. Verify references to the VNFCs which should be used for this deployment flavor (vnfd:deployment_flavour:constituent_vdu:constituent_vnfc)
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    VNFD File Link (from Vendor) -> vnfd
+    VNFD Template Link (for validation) -> VNFD
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_DEPLOY_001.txt")
+
+def TC_VNFD_DEPLOY_001(tcInput):
+
+    logger.write_info("Starting TC_VNFD_DEPLOY_001")
+
+    tcResult.overallStatus = SUCCESS
+
+    1. Verify VNF flavor identifier
+    logger.write_info("Verifying vnfd:deployment_flavour:id)
+
+    if tcInput.vnfd:deployment_flavour:id <> tcInput.VNFD:deployment_flavour:id :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_DEPLOY_001 execution completed with failure at validating the deployment flavor ID")
+        logger.write_error("Expected flavor ID %s, found %s" % (tcInput.VNFD:deployment_flavour:id,
+                                                                tcInput.vnfd:deployment_flavour:id))
+        logger.close_handlers()
+        return ERROR
+
+    2. Verify monitoring parameter and its value against which this flavor is being described
+    logger.write_info("Verifying vnfd:deployment_flavour:flavor_key)
+
+    if tcInput.vnfd:deployment_flavour:flavor_key <> tcInput.VNFD:deployment_flavour:flavor_key :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_DEPLOY_001 execution completed with failure at validating the deployment flavour key")
+        logger.write_error("Expected flavour key %s, found %s" % (tcInput.VNFD:deployment_flavour:flavor_key,
+                                                                  tcInput.vnfd:deployment_flavour:flavor_key))
+        logger.close_handlers()
+        return ERROR
+
+    3. Verify constraints in place for a specific deployment flavor
+    logger.write_info("Verifying vnfd:deployment_flavour:constraint)
+
+    if tcInput.vnfd:deployment_flavour:constraint <> tcInput.VNFD:deployment_flavour:constraint :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_DEPLOY_001 execution completed with failure at validating the deployment flavour constraint")
+        logger.write_error("Expected flavour constraint %s, found %s" % (tcInput.VNFD:deployment_flavour:constraint,
+                                                                         tcInput.vnfd:deployment_flavour:constraint))
+        logger.close_handlers()
+        return ERROR
+
+    4. Verify references for a specific VDU which should be used for this deployment flavor
+    logger.write_info("Verifying vnfd:deployment_flavour:constituent_vdu:vdu_reference)
+
+    if tcInput.vnfd:deployment_flavour:constituent_vdu:vdu_reference <> tcInput.VNFD:deployment_flavour:constituent_vdu:vdu_reference :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_DEPLOY_001 execution completed with failure at validating the deployment flavour VDU reference")
+        logger.write_error("Expected flavour VDU reference %s, found %s" % (tcInput.VNFD:deployment_flavour:constituent_vdu:vdu_reference,
+                                                                            tcInput.vnfd:deployment_flavour:constituent_vdu:vdu_reference))
+        logger.close_handlers()
+        return ERROR
+
+    5. Verify number of VDU instances required
+    logger.write_info("Verifying vnfd:deployment_flavour:constituent_vdu:number_of_instances)
+
+    if tcInput.vnfd:deployment_flavour:constituent_vdu:number_of_instances <> tcInput.VNFD:deployment_flavour:constituent_vdu:number_of_instances :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_DEPLOY_001 execution completed with failure at validating the deployment flavour number of VDU instances required")
+        logger.write_error("Expected number of VDU instances required %s, found %s" % (tcInput.VNFD:deployment_flavour:constituent_vdu:number_of_instances,
+                                                                                       tcInput.vnfd:deployment_flavour:constituent_vdu:number_of_instances))
+        logger.close_handlers()
+        return ERROR
+
+    6. Verify references to the VNFCs which should be used for this deployment flavor
+    logger.write_info("Verifying vnfd:deployment_flavour:constituent_vdu:constituent_vnfc)
+
+    if tcInput.vnfd:deployment_flavour:constituent_vdu:constituent_vnfc <> tcInput.VNFD:deployment_flavour:constituent_vdu:constituent_vnfc :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_DEPLOY_001 execution completed with failure at validating the deployment flavour constituent VNFC")
+        logger.write_error("Expected constituent VNFC %s, found %s" % (tcInput.VNFD:deployment_flavour:constituent_vdu:constituent_vnfc,
+                                                                       tcInput.vnfd:deployment_flavour:constituent_vdu:constituent_vnfc))
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("TC_VNFD_DEPLOY_001 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

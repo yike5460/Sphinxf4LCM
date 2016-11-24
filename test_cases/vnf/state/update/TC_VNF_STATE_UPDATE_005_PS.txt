@@ -1,0 +1,247 @@
+TC_VNF_STATE_UPDATE_005 VNF upgrade, update or rollback in state Active with normal traffic
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF is in state Inactive
+3. Start the VNF
+4. Validate VNF is in state Active
+5. Start the normal traffic load
+6. Validate traffic goes through (--> no dropped packets)
+7. Initiate the upgrade, update or rollback process
+8. Validate VNF new version is active and state is Active
+9. Validate traffic gets forwarded and measure the length of service disruption
+10. Stop Traffic
+11. Terminate VNF
+12. Validate that all vResources have been released
+
+Pseudo Code:
+
+Input
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    NewSwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+    Traffic Configuration Parameter -> trafficConfigParameter
+    Process type --> processType
+        - upgrade
+        - update
+        - rollback
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import ElementManagement
+import VNF
+import VNFM.VNF
+import Traffic
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_STATE_UPDATE_005.txt")
+
+def TC_VNF_STATE_UPDATE_005(tcInput):
+
+    logger.write_info("Starting TC_VNF_STATE_UPDATE_005")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    traffic = Traffic.TrafficClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1. Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate ElementManagement
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = vnf.SetVNFConfigFile( vnfRecord, tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = vnf.SetVNFLicense( vnfRecord, tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF is in state Inactive
+    logger.write_info("Validating VNF is in state 'Inactive'")
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start the VNF
+    logger.write_info("Starting the VNF")
+
+    status = vnfm_vnf.Start( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at starting the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate VNF is in state Active
+    logger.write_info("Validating VNF is in state 'Active'")
+
+    wait_time = MAX_VNF_ACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating the VNF is in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at waiting for the VNF to be in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    5. Start the normal traffic load
+    logger.write_info("Starting traffic load")
+
+    if (status = traffic.ConfigTrafficLoad( NORMAL_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at configuring normal traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.StartTraffic()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at starting traffic")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate traffic goes through (--> no dropped packets)
+    logger.write_info("Validating traffic goes through")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.AnyTrafficLoss()) == TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating there is no traffic loss")
+        logger.close_handlers()
+        return ERROR
+
+    7. Initiate the upgrade, update or rollback process
+    logger.write_info("Initiates the tcInput.processType process")
+
+    if tcInput.processType == "upgrade":
+        status = vnfm_vnf.Upgrade( vnfRecord, tcInput.NewSwImageID )
+    if tcInput.rocessType == "update" :
+        status = vnfm_vnf.Update( vnfRecord, tcInput.NewSwImageID )
+    if tcInput.processType == "rollback" :
+        status = vnfm_vnf.Rollback( vnfRecord, tcInput.NewSwImageID )
+
+    8. Validate VNF new version is active and state is Active
+    logger.write_info("Validating new VNF version is in place and state is 'Active'")
+
+    if status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating the new VNF version is in place")
+        logger.close_handlers()
+        return ERROR
+
+    if ( vnfState = vnfm_vnf.GetVNFState( vnfRecord )) <> VNF_STATE_ACTIVE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating the new VNF version is in 'Active' state")
+        logger.close_handlers()
+        return ERROR
+
+    9. Validate traffic gets forwarded and measure the length of service disruption
+    logger.write_info("Validating traffic gets forwarded and measuring the length of service disruption")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    tcResult.serviceDisruption = traffic.CalculateServiceDisruptionLength()
+
+    10. Stop Traffic
+    logger.write_info("Stopping traffic")
+
+    if (status = traffic.Stop()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at stopping traffic")
+        logger.close_handlers()
+        return ERROR
+
+    11. Terminate VNF
+    logger.write_info("Terminating VNF")
+
+    vnfm_vnf.Terminate( vnfRecord )
+
+    12. Validate that all vResources have been released
+    logger.write_info("Validating all vResources have been released")
+
+    if (status = vnfm_vnf.AllvResourcesReleased( vnfRecord )) <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_UPDATE_005 execution completed with failure at terminating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_STATE_UPDATE_005 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

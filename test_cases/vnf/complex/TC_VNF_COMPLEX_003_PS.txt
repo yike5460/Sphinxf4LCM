@@ -1,0 +1,287 @@
+TC_VNF_COMPLEX_003 Terminate max scale-up/out VNF in state Active under max traffic load
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF state is Inactive
+3. Start VNF
+4. Validate VNF state is Active
+5. Generate low traffic load
+6. Validate that traffic flows through without issues (--> no dropped packets)
+7. Trigger a resize of the NFV resources to the maximum
+8. Generate max traffic load to load all VNF instances
+9. Validate VNF has resized to the max and has max capacity
+10. Terminate the VNF (--> time stamp)
+11. Validate VNF has been terminated and all resources have been release (--> time stamp)
+12. Validate no traffic flows through
+13. Stop traffic
+14. Calculate the time to terminate the max scaled VNF under load
+
+Pseudo Code:
+
+Input:
+ # All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+    Traffic Configuration Parameter -> trafficConfigParameter
+    Trigger type --> triggerType
+        - command to the VNFM
+        - higher traffic load over a longer period of time
+        - triggered by EM
+        - triggered by VNF
+    Type of vResource to be resized --> vResourceType
+        - vMemory
+        - vCPU cores
+        - vStorage
+        - vNIC or specialized hardware
+        - vResource = any
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import ElementManagement
+import VNF
+import VNFM.VNF
+import VNFM.VNFD
+import Traffic
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_COMPLEX_003.txt")
+
+def TC_VNF_COMPLEX_003(tcInput):
+
+    logger.write_info("Starting TC_VNF_COMPLEX_003")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    traffic = Traffic.TrafficClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1. Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    # Check Element Manger or configuration file
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate Element Management
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = vnf.SetVNFConfigFile( vnfRecord, tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = vnf.SetVNFLicense( vnfRecord, tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF state is Inactive
+    logger.write_info("Validating VNF state is 'Inactive'")
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTATIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start VNF
+    logger.write_info("Starting VNF")
+
+    tcResult.timeRecord.startVNFStart = time.clock()
+    status = vnfm_vnf.Start( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at starting the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate VNF state is Active
+    logger.write_info("Validating VNF state is 'Active'")
+
+    wait_time = MAX_VNF_ACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating the VNF is in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at waiting for the VNF to be in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    5. Generate low traffic load
+    logger.write_info("Generating low traffic load")
+
+    if (status = traffic.ConfigTrafficLoad( LOW_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at configuring low traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.StartTraffic()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at starting traffic")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate that traffic flows through without issues (--> no dropped packets)
+    logger.write_info("Validating that traffic flows through without issues")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.AnyTrafficLoss()) == TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating there is no traffic loss")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = vnfm_vnf.ValidateAllocatedvResources( vnfRecord, tcInput.SwImageID, NORMAL_VRESOURCE_LEVEL )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating allocated vResources")
+        logger.close_handlers()
+        return ERROR
+
+    7. Trigger a resize of the NFV resources to the maximum
+    logger.write_info("Triggering a resize of the NFV resources to the maximum")
+
+    if (status = vnfm_vnf.TriggerResizevRresources( vnfRecord, tcInput.triggerType, MAX_RESIZE_LEVEL, tcInput.vResourceType )) <> TRUE :
+        traffic.stopTraffic()
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at resizing the VNF resources to the maximum")
+        logger.close_handlers()
+        return ERROR
+
+    8. Generate max traffic load to load all VNF instances
+    logger.write_info("Generating max traffic load to load all VNF instances")
+
+    if (status = traffic.ConfigTrafficLoad( MAX_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at configuring max traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    9. Validate VNF has resized to the max and has max capacity
+    logger.write_info("Validating VNF has resized to the max and has max capacity")
+
+    tcResult.resourceList.maxResource = vnfm_vnf.GetvResourceList( vnfRecord )
+
+    if (status = vnfm_vnf.ValidateAllocatedvResources( vnfRecord, tcInput.SwImageID, MAX_VRESOURCE_LEVEL )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating the allocated vResources")
+        logger.close_handlers()
+        return ERROR
+
+    10. Terminate the VNF (--> time stamp)
+    logger.write_info("Terminating the VNF")
+
+    tcResult.timeRecord.terminateVNFStart = time.clock()
+
+    status = vnfm_vnf.Terminate( vnfRecord )
+    if  status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at terminating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    11. Validate VNF has been terminated and all resources have been release (--> time stamp)
+    logger.write_info("Validating VNF has been terminated and all resources have been released")
+
+    wait_time = MAX_VNF_RESOURCES_RELEASE_TIME
+    while (status = vnfm_vnf.AllvResourcesReleased( vnfRecord )) <> TRUE :
+        if wait_time-- == 0 :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating allocated vResources have been released")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    tcResult.timeRecord.terminateVNFEnd = time.clock()
+
+    12. Validate no traffic flows through
+    logger.write_info("Validating no traffic flows through")
+
+    if (status = traffic.DoesTrafficFlow()) == TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at validating no traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    13. Stop traffic
+    logger.write_info("Stopping traffic")
+
+    if (status = traffic.Stop()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_COMPLEX_003 execution completed with failure at stopping traffic")
+        logger.close_handlers()
+        return ERROR
+
+    14. Calculate the time to terminate the max scaled VNF under load
+    logger.write_info("Calculating the time to terminate a max scaled VNF under load")
+
+    tcResult.timeRecord.deactivationTime = traffic.CalculateDeactivationTime()
+
+    tcResult.timeRecord.TerminationTime = tcResult.timeRecord.terminateVNFEnd - tcResult.timeRecord.terminateVNFStart
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_COMPLEX_003 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

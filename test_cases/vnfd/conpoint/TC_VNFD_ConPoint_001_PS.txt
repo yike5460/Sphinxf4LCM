@@ -1,0 +1,65 @@
+TC_VNFD_ConPoint_001 VNFD Connection Points Unit validation
+
+Sequence:
+1. Verify Connection Point identifier (vnfd:connection_point:id)
+2. Verify Virtual Link reference (vnfd:connection_point:virtual_link_reference)
+3. Verify Connection Point type (vnfd:connection_point:type)
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    VNFD File Link (from Vendor) -> vnfd
+    VNFD Template Link (for validation) -> VNFD
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_ConPoint_001.txt")
+
+def TC_VNFD_ConPoint_001(tcInput):
+
+    logger.write_info("Starting TC_VNFD_ConPoint_001")
+
+    tcResult.overallStatus = SUCCESS
+
+    1. Verify Connection Point identifier
+    logger.write_info("Verifying vnfd:connection_point:id")
+
+    if tcInput.vnfd:connection_point:id <> tcInput.VNFD:connection_point:id :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_ConPoint_001 execution completed with failure at validating the connection point ID")
+        logger.write_error("Expected connection point ID %s, found %s" % (tcInput.VNFD:connection_point:id,
+                                                                          tcInput.vnfd:connection_point:id))
+        logger.close_handlers()
+        return ERROR
+
+    2. Verify Virtual Link reference
+    logger.write_info("vnfd:connection_point:virtual_link_reference")
+
+    if tcInput.vnfd:connection_point:virtual_link_reference <> tcInput.VNFD:connection_point:virtual_link_reference :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_ConPoint_001 execution completed with failure at validating the virtual link reference")
+        logger.write_error("Expected virtual link reference %s, found %s" % (tcInput.VNFD:connection_point:virtual_link_reference,
+                                                                             tcInput.vnfd:connection_point:virtual_link_reference))
+        logger.close_handlers()
+        return ERROR
+
+    3. Verify Connection Point type
+    logger.write_info("vnfd:connection_point:type")
+
+    if tcInput.vnfd:connection_point:type <> tcInput.VNFD:connection_point:type :
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_ConPoint_001 execution completed with failure at validating the connection point type")
+        logger.write_error("Expected connection point type %s, found %s" % (tcInput.VNFD:connection_point:type,
+                                                                            tcInput.vnfd:connection_point:type))
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("TC_VNFD_ConPoint_001 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

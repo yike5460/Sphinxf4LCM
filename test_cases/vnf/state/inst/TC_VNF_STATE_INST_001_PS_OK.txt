@@ -1,0 +1,110 @@
+TC_VNF_STATE_INST_001 VNF Instantiation without Element Management with configuration file without traffic
+
+Sequence:
+1. Instantiate the VNF without load (--> time stamp)
+2. Validate VNFM reports the state "Inactive" (--> time stamp when correct state reached)
+3. Validate the right vResources have been allocated
+4. Terminate VNF
+5. Calculate the instantiation time
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import VNF
+import VNFM.VNF
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_STATE_INST_001.txt")
+
+def TC_VNF_STATE_INST_001(tcInput):
+
+    logger.write_info("Starting TC_VNF_STATE_INST_001")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1. Instantiate the VNF without load (--> time stamp)
+    logger.write_info("Instantiating the VNF")
+
+    # No Element Manager required, set VNF config and license
+    if ( status = vnf.SetVNFConfigFile( vnfRecord, tcInput.vnfConfigFile ) ) <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_INST_001 execution completed with failure at setting the VNF config file")
+        logger.close_handlers()
+        return ERROR
+
+    if ( status = vnf.SetVNFLicense( vnfRecord, tcInput.vnfLicenseFile ) ) <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_INST_001 execution completed with failure at setting the VNF License file")
+        logger.close_handlers()
+        return ERROR
+
+    tcResult.timeRecord.instantiationStart = time.clock()
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_INST_001 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNFM reports the state "Inactive" (--> time stamp when correct state reached)
+    logger.write_info("Validating VNFM reports the state 'Inactive'")
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_INST_001 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_INST_001 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    tcResult.timeRecord.instantiationEnd = time.clock()
+
+    3. Validate the right vResources have been allocated
+    logger.write_info("Validating the right vResources have been allocated")
+
+    if (status = vnfm_vnf.ValidateAllocatedvResources( vnfRecord, tcInput.SwImageID, INITIAL_VRESOURCE_LEVEL )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_INST_001 execution completed with failure at validating allocated vResources")
+        logger.close_handlers()
+        return ERROR
+
+    4. Terminate VNF
+    logger.write_info("Terminating VNF")
+
+    vnfm_vnf.Terminate( vnfRecord )
+
+    5. Calculate the instantiation time
+    logger.write_info("Calculating the instantiation time")
+
+    tcResult.timeRecord.instantiationTime = tcResult.timeRecord.instantiationEnd - tcResult.timeRecord.instantiationStart
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_STATE_INST_001 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

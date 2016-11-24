@@ -1,0 +1,248 @@
+TC_VNF_STATE_STOP_003 VNF Stop with normal traffic load and measure stop time
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF is in state Inactive
+3. Start the VNF
+4. Validate the state is "Active"
+5. Start the normal traffic load
+6. Validate the provided functionality (--> no dropped packets)
+7. Stop VNF (--> time stamp)
+8. Validate VNF state is "Inactive"
+9. Ensure that no traffic flows once stop is completed (--> time stamp)
+10. Stop Traffic Load
+11. Calculate the time for the deactivation (last time stamp arrival)
+12. Terminate VNF
+
+Pseudo Code:
+
+Input
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+    Traffic Configuration Parameter -> trafficConfigParameter
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import ElementManagement
+import VNF
+import VNFM.VNF
+import Traffic
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_STATE_STOP_003.txt")
+
+def TC_VNF_STATE_STOP_003(tcInput):
+
+    logger.write_info("Starting TC_VNF_STATE_STOP_003")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    traffic = Traffic.TrafficClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1. Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate ElementManagement
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = vnf.SetVNFConfigFile( vnfRecord, tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = vnf.SetVNFLicense( vnfRecord, tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF is in state Inactive
+    logger.write_info("Validating VNF is in state 'Inactive'")
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start the VNF
+    logger.write_info("Starting the VNF")
+
+    status = vnfm_vnf.Start( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at starting the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate the state is "Active"
+    logger.write_info("Validating VNF is in state 'Active'")
+
+    wait_time = MAX_VNF_ACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating the VNF is in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at waiting for the VNF to be in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    5. Start the low traffic load
+    logger.write_info("Starting low traffic load")
+
+    if (status = traffic.ConfigTrafficLoad( NORMAL_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at configuring normal traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.StartTraffic()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at starting traffic")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate the provided functionality (--> no dropped packets)
+    logger.write_info("Validating the provided functionality")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.AnyTrafficLoss()) == TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating there is no traffic loss")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = vnfm_vnf.ValidateAllocatedvResources( vnfRecord, tcInput.SwImageID, NORMAL_VRESOURCE_LEVEL )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating allocated vResources")
+        logger.close_handlers()
+        return ERROR
+
+    7. Stop VNF (--> time stamp)
+    logger.write_info("Stopping VNF")
+
+    tcResult.timeRecord.stopVNFStart = time.clock()
+    status = vnfm_vnf.Stop( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at stopping the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    8. Validate VNF state is "Inactive"
+    logger.write_info("Validating VNF state is 'Inactive'")
+
+    wait_time = MAX_VNF_INACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    9. Ensure that no traffic flows once stop is completed (--> time stamp)
+    logger.write_info("Validating no traffic flows")
+
+    if (status = traffic.DoesTrafficFlow()) <> FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at validating no traffic flows")
+        logger.close_handlers()
+        return ERROR
+    tcResult.timeRecord.stopVNFEnd = time.clock()
+
+    10. Stop Traffic Load
+    logger.write_info("Stopping traffic load")
+
+    if (status = traffic.Stop()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_STOP_003 execution completed with failure at stopping traffic")
+        logger.close_handlers()
+        return ERROR
+
+    11. Calculate the time for the deactivation (last time stamp arrival)
+    logger.write_info("Calculating the time for deactivation")
+
+    tcResult.timeRecord.StopCompletionTime = tcResult.timeRecord.stopVNFStart - tcResult.timeRecord.stopVNFEnd
+
+    12. Terminate VNF
+    logger.write_info("Terminating VNF")
+
+    vnfm_vnf.Terminate( vnfRecord )
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_STATE_STOP_003 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

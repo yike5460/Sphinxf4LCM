@@ -1,0 +1,332 @@
+TC_VNF_FAULT_005 vStorage resource fault notification subscription and notification
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF state is Inactive
+3. Start VNF
+4. Validate VNF state is Active
+5. Issue command to the VNFM to register for vStorage fault notification
+6. Validate via VNFM and VIM interface that registration was successful
+7. Issue a command to VIM that causes a vStorage fault for the VNFM
+8. Validate that VNFM processes the vStorage fault notification
+9. Issue a command to VIM that clears the vStorage fault for the VNFM
+10. Validate that VNFM processes the vStorage fault clear notification
+11. Issue command to the VNFM to deregister for vStorage fault notification
+12. Validate via VNFM and VIM interface that deregistration was successful
+13. Terminate VNF
+
+Pseudo Code:
+
+Input
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+    Fault Notification Severity -> faultSeverity
+        - Critical
+        - Major
+        - Minor
+        - Warning
+        - Indeterminate
+        - ANY
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import ElementManagement
+import VNF
+import VNFM.VNF
+import VNFM.Fault
+import VIM.Fault
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_FAULT_005.txt")
+
+def TC_VNF_FAULT_005(tcInput):
+
+    logger.write_info("Starting TC_VNF_FAULT_005")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    vnfm_fault = VNFM.Fault.VNFM_FaultClass(logger)
+    vim_fault = VIM.Fault.VIM_FaultClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1.  Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate ElementManagement
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = VNF.SetVNFConfigFile( tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = VNF.SetVNFLicense( tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF state is Inactive
+    logger.write_info("Validating VNF state is 'Inactive')
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start VNF
+    logger.write_info("Starting VNF")
+
+    status = vnfm_vnf.Start( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at starting the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate VNF state is Active
+    logger.write_info("Validating VNF state is 'Active'")
+
+    wait_time = MAX_VNF_ACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the VNF is in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_FAULT_005 execution completed with failure at waiting for the VNF to be in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    5. Issue command to the VNFM to register for vStorage fault notification
+    logger.write_info("Issuing command to the VNFM to register for vStorage fault notification")
+
+    if ( faultRegisterID =  vnfm_fault.RegisterForNotification( vnfRecord, vStorage, tcInput.faultSeverity )) == FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at VNFM registering for vStorage fault notification")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate via VNFM and VIM interface that registration was successful
+    logger.write_info("Validating via VNFM and VIM interface that registration was successful")
+
+    vnfmFaultNotRegList = vnfm_fault.ListFaultNotificationRegistration(vnfRecord, vStorage, tcInput.faultSeverity)
+    if len(vnfmFaultNotRegList) <> 1 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating VNFM list of fault notification registrations")
+        logger.write_error("Expected one fault notification registration, found %s" % len(vnfmFaultNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmFaultNotRegList[0].FaultRegisterID <> faultRegisterID :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the registration ID of the VNFM fault notification registration")
+        logger.write_error("Expected registration ID %s, found %s" % (faultRegisterID, vnfmFaultNotRegList[0].FaultRegisterID))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmFaultNotRegList[0].Type <> "vStorage" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the fault type of the VNFM fault notification registration")
+        logger.write_error("Expected fault type vStorage, found %s" % vnfmFaultNotRegList[0].Type)
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmFaultNotRegList[0].Severity <> tcInput.faultSeverity :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the severity of the VNFM fault notification registration")
+        logger.write_error("Expected fault severity %s, found %s" % (tcInput.faultSeverity, vnfmFaultNotRegList[0].Severity))
+        logger.close_handlers()
+        return ERROR
+
+    vimFaultNotRegList = vim_fault.ListFaultNotificationRegistration(vStorage, tcInput.faultSeverity)
+    if len(vimFaultNotRegList) <> 1 :
+        VIM.VNF.Terminate(vnfID)
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating VIM list of fault notification registrations")
+        logger.write_error("Expected one fault notification registration, found %s" % len(vimFaultNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    if vimFaultNotRegList[0].FaultRegisterID <> faultRegisterID :
+        VIM.VNF.Terminate(vnfID)
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the registration ID of the VIM fault notification registration")
+        logger.write_error("Expected registration ID %s, found %s" % (faultRegisterID, vimFaultNotRegList[0].FaultRegisterID))
+        logger.close_handlers()
+        return ERROR
+
+    if vimFaultNotRegList[0].Type <> "vStorage" :
+        VIM.VNF.Terminate(vnfID)
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the fault type of the VIM fault notification registration")
+        logger.write_error("Expected fault type vStorage, found %s" % vimFaultNotRegList[0].Type)
+        logger.close_handlers()
+        return ERROR
+
+    if vimFaultNotRegList[0].Severity <> tcInput.faultSeverity :
+        VIM.VNF.Terminate(vnfID)
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the severity of the VIM fault notification registration")
+        logger.write_error("Expected fault severity %s, found %s" % (tcInput.faultSeverity, vimFaultNotRegList[0].Severity))
+        logger.close_handlers()
+        return ERROR
+
+    7. Issue a command to VIM that causes a vStorage fault for the VNFM
+    logger.write_info("Issuing a command to VIM that causes a vStorage fault for the VNFM")
+
+    faultInjectionID = vim_fault.VNFFaultInjection("VIM command to stop one of the compute nodes of the VNF", vStorage, tcInput.faultSeverity)
+    if faultInjectionID ==  FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = faultInjectionID
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at VIM injecting the first vStorage fault")
+        logger.close_handlers()
+        return ERROR
+
+    8. Validate that VNFM processes the vStorage fault notification
+    logger.write_info("Validating that VNFM processes the vStorage fault notification")
+
+    faultNotificationInfo = vnfm_fault.ListFaultNotificationInformation( faultRegisterID, vnfRecord, "vStorage" )
+
+    if faultNotificationInfo.FaultRegisterID <> faultRegisterID :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the registration ID in the VNFM fault notification information")
+        logger.write_error("Expected registration ID %s, found %s" % (faultRegisterID, faultNotificationInfo.FaultRegisterID))
+        logger.close_handlers()
+        return ERROR
+
+    if faultNotificationInfo.vnfRecord.id <> vnfRecord.id :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the VNF record in the VNFM fault notification information")
+        logger.write_error("Expected VNF record ID %s, found %s" % (vnfRecord.id, faultNotificationInfo.vnfRecord.id))
+        logger.close_handlers()
+        return ERROR
+
+    if faultNotificationInfo.Type <> "vStorage" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the notification type in the VNFM fault notification information")
+        logger.write_error("Expected fault type vStorage, found %s" % faultNotificationInfo.Type)
+        logger.close_handlers()
+        return ERROR
+
+    if faultNotificationInfo.Severity <> tcInput.faultSeverity :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the severity in the VNFM fault notification information")
+        logger.write_error("Expected fault severity %s, found %s" % (tcInput.faultSeverity, faultNotificationInfo.Severity))
+        logger.close_handlers()
+        return ERROR
+
+    if faultNotificationInfo.AlarmState <> "Fired" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the alarm state in the VNFM fault notification information")
+        logger.write_error("Expected alarm state Fired, found %s" % faultNotificationInfo.AlarmState)
+        logger.close_handlers()
+        return ERROR
+
+    9. Issue a command to VIM that clears the vStorage fault for the VNFM
+    logger.write_info("Issuing a command to VIM that clears the vStorage fault for the VNFM")
+
+    status = vim_fault.VNFFaultInjectionRemoval( faultInjectionID )
+    if status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at VIM clearing the vStorage fault")
+        logger.close_handlers()
+        return ERROR
+
+    10. Validate that VNFM processes the vStorage fault clear notification
+    logger.write_info("Validating that VNFM processes the vStorage fault clear notification")
+
+    faultNotificationInfo = vnfm_fault.ListFaultNotificationInformation( faultRegisterID, vnfRecord, vStorage )
+
+    if faultNotificationInfo.AlarmState <> "Cleared" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating the alarm state in the VNFM fault notification information")
+        logger.write_error("Expected alarm state Cleared, found %s" % faultNotificationInfo.AlarmState)
+        logger.close_handlers()
+        return ERROR
+
+    11. Issue command to the VNFM to deregister for vStorage fault notification
+    logger.write_info("Issuing command to VNFM to deregister for vStorage fault notification")
+
+    if (status = vnfm_fault.DeregisterForNotification( vnfRecord, faultRegisterID )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at VNFM deregistering for vPU fault notification")
+        logger.close_handlers()
+        return ERROR
+
+    12. Validate via VNFM and VIM interface that deregistration was successful
+    logger.write_info("Validating via VNFM and VIM interface that deregistration was successful")
+
+    vnfmFaultNotRegList = vnfm_fault.ListFaultNotificationRegistration(vnfRecord, vStorage, tcInput.faultSeverity)
+    if len(vnfmFaultNotRegList) <> 0 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating VNFM reports the deregistration was successful")
+        logger.write_error("Expected no fault notification registrations after deregistration, found %s" % len(vnfmFaultNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    vimFaultNotRegList = vim_fault.ListFaultNotificationRegistration(vStorage, tcInput.faultSeverity)
+    if len(vimFaultNotRegList) <> 0 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_FAULT_005 execution completed with failure at validating VIM reports the deregistration was successful")
+        logger.write_error("Expected no fault notification registrations after deregistration, found %s" % len(vimFaultNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    13. Terminate VNF
+    logger.write_info("Terminating VNF")
+
+    vnfm_vnf.Terminate( vnfRecord )
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_FAULT_005 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

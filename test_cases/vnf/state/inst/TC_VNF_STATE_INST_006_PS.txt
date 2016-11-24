@@ -1,0 +1,99 @@
+TC_VNF_STATE_INST_006 VNF Instantiation Failure with missing required virtual resources
+
+Sequence:
+1. Eliminate one or more required virtual resources
+2. Instantiate VNF - validate VNFM reports no VNF instance and the error
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    vResource type to be removed -> vResourceType
+    Number of vResources ro be removed ->
+    SwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import VIM
+import ElementManagement
+import VNF
+import VNFM.VNF
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_STATE_INST_006.txt")
+
+def TC_VNF_STATE_INST_006(tcInput):
+
+    logger.write_info("Starting TC_VNF_STATE_INST_006")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vim = VIM.VIMClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1. Eliminate one or more required virtual resources
+    logger.write_info("Eliminating required virtual resources")
+
+    TODO Make sure this is according to the test plan
+
+    if ( vResourceRemovalID = vim.RemovevResourceCapability ( tcInput.vResourceType, tcInput. )) == FALSE :
+            tcResult.overallStatus = vResourceRemovalID
+            logger.write_error("TC_VNF_STATE_INST_006 execution completed with failure at removing virtual resources")
+            logger.close_handlers()
+            return ERROR
+
+    2. Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate ElementManagement
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_INST_006 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_INST_006 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = vnf.SetVNFConfigFile( vnfRecord, tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_INST_006 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = vnf.SetVNFLicense( vnfRecord, tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_STATE_INST_006 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> FALSE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_STATE_INST_006 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_STATE_INST_006 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus
