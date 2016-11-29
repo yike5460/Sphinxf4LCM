@@ -1,0 +1,60 @@
+﻿TC.13	VNFD:VDU General Reliability and Availability Unit validation
+
+Sequence:
+1.	Verify tracking system status for CORRECTABLE errors
+    vnfd:vdu:corrected_error_notification
+2.	Verify tracking system status for UNCORRECTABLE errors
+    vnfd:vdu:uncorrected_error_notification
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+	VNFD File Link  vnfdFile
+
+# Test Results are stored in the test case result variable tcResult
+
+Comment: To make the pseudo code simpler to read, in a Python implementation the following code
+	tcResult.overallStatus = status
+	tcInput.emConfigFile
+should be translated to dictionaries
+	tcResult[ ‘overallStatus’ ] = status
+	tcInput[ ‘emConfigFile’ ]
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "test_case_13.txt")
+
+def test_case_13():
+
+    logger.write_info("Starting test case 13")
+
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    1.	Verify tracking system status for CORRECTABLE errors
+    logger.write_info("Verifying vnfd:vdu:corrected_error_notification")
+
+    tcResult.overallStatus = SUCCESS
+
+    if tcInput.vnfd.vdu.generalReliabilityAvailability.corrected_error_notification <> VNFD.VDU.generalReliabilityAvailability.corrected_error_notification :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 13 - Execution completed with errors - Unable to validate corrected_error_notification parameter")
+        logger.close_handlers()
+        return ERROR
+
+    2.	Verify tracking system status for UNCORRECTABLE errors
+    logger.write_info("Verifying vnfd:vdu:uncorrected_error_notification")
+
+    if tcInput.vnfd.vdu.generalReliabilityAvailability.uncorrected_error_notification <> VNFD.VDU.generalReliabilityAvailability.uncorrected_error_notification :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 13 - Execution completed with errors - Unable to validate uncorrected_error_notification parameter")
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("Test case 13 - Execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

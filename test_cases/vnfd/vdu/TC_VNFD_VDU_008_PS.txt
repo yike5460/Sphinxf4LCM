@@ -1,0 +1,49 @@
+﻿TC.12	VNFD:VDU Virtual Switches validation
+
+Sequence:
+1.	Verify vSwitch type, version and key features such as overlay tunnel termination support
+vnfd:vdu:vswitch_capability
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+	VNFD File Link  vnfdFile
+
+# Test Results are stored in the test case result variable tcResult
+
+Comment: To make the pseudo code simpler to read, in a Python implementation the following code
+	tcResult.overallStatus = status
+	tcInput.emConfigFile
+should be translated to dictionaries
+	tcResult[ ‘overallStatus’ ] = status
+	tcInput[ ‘emConfigFile’ ]
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "test_case_12.txt")
+
+def test_case_12():
+
+    logger.write_info("Starting test case 12")
+
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    1.	Verify vSwitch type, version and key features such as overlay tunnel termination support
+        logger.write_info("Verifying vnfd:vdu:vswitch_capability")
+
+    tcResult.overallStatus = SUCCESS
+
+    if tcInput.vnfd.vdu.vswitch.vswitch_capability <> VNFD.VDU.vswitch.vswitch_capability :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 12 - Execution completed with errors - Unable to validate vswitch_capability parameter")
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("Test case 12 - Execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

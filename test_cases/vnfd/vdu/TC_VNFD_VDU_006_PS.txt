@@ -1,0 +1,58 @@
+﻿TC.10   VNFD:VDU HyperVisor Unit validation
+
+Sequence:
+1.	Verify hypervisor related parameters like
+Hypervisor type, Hypervisor version, Hypervisor Address Translation support parameters including:
+    a.	Second Level Address Translation
+    b.	Second Level Address Translation with Large page support
+    c.	Second Level Address Translation for I/O
+    d.	Second Level Address Translation for I/O with Large page support
+    e.	Support for interrupt remapping
+    f.	Support for data processing acceleration libraries in the hypervisor
+vnfd:vdu:hypervisor_parameter
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+	VNFD File Link  vnfdFile
+
+# Test Results are stored in the test case result variable tcResult
+
+Comment: To make the pseudo code simpler to read, in a Python implementation the following code
+	tcResult.overallStatus = status
+	tcInput.emConfigFile
+should be translated to dictionaries
+	tcResult[ ‘overallStatus’ ] = status
+	tcInput[ ‘emConfigFile’ ]
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "test_case_10.txt")
+
+def test_case_10():
+
+    logger.write_info("Starting test case 10")
+
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    1. Verify HyperVisor related parameters
+    logger.write_info("Verifying vnfd:vdu:hypervisor_parameter")
+
+    tcResult.overallStatus = SUCCESS
+
+    if tcInput.vnfd:vdu:hypervisor_parameter <> VNFD.VDU.hypervisor_parameter :
+        tcResult.overallStatus = status
+        logger.write_error("Test case 10 - Execution completed with errors - Unable to validate HyperVisor related parameters")
+        [KS] log the difference or both 
+        logger.close_handlers()
+        return ERROR
+
+
+    logger.write_info("Test case 10 - Execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

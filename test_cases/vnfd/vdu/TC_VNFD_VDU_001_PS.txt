@@ -1,0 +1,218 @@
+﻿TC.5	VNFD:VDU Base Unit validation
+
+Sequence:
+1.	Verify VDU's unique identifier for a specific VNF
+vnfd:vdu:id
+2.	Verify VM image reference - may be omitted
+vnfd:vdu:vm_image
+3.	Verify required computation resources characteristics (e.g. processor power, number of virtual CPUs), including Key Quality Indicatiors (KQIs) for performance and reliability/availability
+vnfd:vdu:computation_requirement
+4.	Verify virtual memory needed for the VDU
+vnfd:vdu:virtual_memory_resource_element
+5.	Verify requirements in terms of the virtual network bandwidth needed for the VDU
+vnfd:vdu:virtual_network_bandwidth_resource
+6.	Verify LifeCycle Events - may be omitted
+vnfd:vdu:lifecycle_event
+7.	Verify constraints - may be omitted
+vnfd:vdu:constraint
+8.	Verify redundancy model to ensure high availability (examples include ActiveActive and ActivePassive) - may be omitted
+vnfd:vdu:high_availability
+9.	Verify minimum and maximum number of instances which can be created to support scale out/in functionality - may be omitted
+vnfd:vdu:scale_in_out
+10.	Verify monitoring parameters trackable for this VNF like memory-consumption, CPU-utilisation, bandwidth-consumption, VNFC downtime - may be omitted
+vnfd:vdu:monitoring_parameter
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+	VNFD File Link  vnfdFile
+
+# Test Results are stored in the test case result variable tcResult
+
+Comment: To make the pseudo code simpler to read, in a Python implementation the following code
+	tcResult.overallStatus = status
+	tcInput.emConfigFile
+should be translated to dictionaries
+	tcResult[ ‘overallStatus’ ] = status
+	tcInput[ ‘emConfigFile’ ]
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "test_case_5.txt")
+
+def test_case_5():
+
+    logger.write_info("Starting test case 5")
+
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    1.	Verify VDU's unique identifier for a specific VNF
+    logger.write_info("Verifying vnfd:vdu:id")
+
+    tcResult.overallStatus = SUCCESS
+
+    if VNFD.VDU.id <> tcInput.vnfd.vdu.id :
+        tcResult.overallStatus = status
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate VDU's unique id")
+        logger.write_error("vnfd:vdu:id - Actual value is %s, expected %s" % (VNFD.VDU.id, tcInput.vnfd.vdu.id))
+        logger.close_handlers()
+        return ERROR
+
+    2.	Verify VM image reference
+    logger.write_info("Verifying vnfd:vdu:vm_image")
+
+    try : tcInput.vnfd.vdu.vm_image
+    except NameError:
+        tcInput.vnfd.vdu.vm_image = None
+        if VNFD.VDU.vm_image is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing vm_image attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.vm_image <> tcInput.vnfd.vdu.vm_image) and (tcInput.vnfd.vdu.vm_image is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate VM image reference")
+        //DONE [KS] Log the difference so that we can use it for debugging and inform the user of the problem
+        logger.write_error("vnfd:vdu:vm_image - Actual value is %s, expected %s" % (VNFD.VDU.vm_image, tcInput.vnfd.vdu.vm_image))
+        logger.close_handlers()
+        return ERROR
+
+    3.	Verify required computation resources characteristics (e.g. processor power, number of virtual CPUs), including Key Quality Indicatiors (KQIs) for performance and reliability/availability
+    logger.write_info("Verifying vnfd:vdu:computation_requirement")
+
+    if VNFD.VDU.computation_requirement <> tcInput.vnfd.vdu.computation_requirement :
+        tcResult.overallStatus = status
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate computation_requirement parameter")
+        //DONE [KS] dito
+        logger.write_error("vnfd:vdu:computation_requirement - Actual value is %s, expected %s" % (VNFD.VDU.computation_requirement, tcInput.vnfd.vdu.computation_requirement))
+        logger.close_handlers()
+        return ERROR
+
+    4.	Verify virtual memory needed for the VDU
+    logger.write_info("Verifying vnfd:vdu:virtual_memory_resource_element")
+
+    if VNFD.VDU.virtual_memory_resource_element <> tcInput.vnfd.vdu.virtual_memory_resource_element :
+        tcResult.overallStatus = status
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate virtual_memory_resource_element parameter")
+        //DONE [KS] dito
+        logger.write_error("vnfd:vdu:virtual_memory_resource_element - Actual value is %s, expected %s" % (VNFD.VDU.virtual_memory_resource_element, tcInput.vnfd.vdu.virtual_memory_resource_element))
+        logger.close_handlers()
+        return ERROR
+
+    5.	Verify requirements in terms of the virtual network bandwidth needed for the VDU
+    logger.write_info("Verifying vnfd:vdu:virtual_network_bandwidth_resource")
+
+    if VNFD.VDU.virtual_network_bandwidth_resource <> tcInput.vnfd.vdu.virtual_network_bandwidth_resource :
+        tcResult.overallStatus = status
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate virtual_network_bandwidth_resource parameter")
+        //DONE [KS] dito
+        logger.write_error("vnfd:vdu:virtual_network_bandwidth_resource - Actual value is %s, expected %s" % (VNFD.VDU.virtual_network_bandwidth_resource, tcInput.vnfd.vdu.virtual_network_bandwidth_resource))
+        logger.close_handlers()
+        return ERROR
+
+    6.	Verify LifeCycle Events - may be omitted
+    logger.write_info("Verifying vnfd:vdu:lifecycle_event")
+
+    try : tcInput.vnfd.vdu.lifecycle_event
+    except NameError:
+        tcInput.vnfd.vdu.lifecycle_event = None
+        if VNFD.VDU.lifecycle_event is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing lifecycle_event attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.lifecycle_event <> tcInput.vnfd.vdu.lifecycle_event) and (tcInput.vnfd.vdu.lifecycle_event is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate lifecycle_event parameter")
+        //DONE [KS] dito
+        logger.write_error("vnfd:vdu:lifecycle_event - Actual value is %s, expected %s" % (VNFD.VDU.lifecycle_event, tcInput.vnfd.vdu.lifecycle_event))
+        logger.close_handlers()
+        return ERROR
+
+    7.	Verify constraints - may be omitted
+    logger.write_info("Verifying vnfd:vdu:constraint")
+
+    try : tcInput.vnfd.vdu.constraint
+    except NameError:
+        tcInput.vnfd.vdu.constraint = None
+        if VNFD.VDU.constraint is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing constraint attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.constraint <> tcInput.vnfd.vdu.constraint) and (tcInput.vnfd.vdu.constraint is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate constraint parameter")
+        //DONE [KS] dito
+        logger.write_error("vnfd:vdu:constraint - Actual value is %s, expected %s" % (VNFD.VDU.constraint, tcInput.vnfd.vdu.constraint))
+        logger.close_handlers()
+        return ERROR
+
+    8.	Verify redundancy model to ensure high availability (examples include ActiveActive and ActivePassive) - may be omitted
+    logger.write_info("Verifying vnfd:vdu:high_availability")
+
+    try : tcInput.vnfd.vdu.high_availability
+    except NameError:
+        tcInput.vnfd.vdu.high_availability = None
+        if VNFD.VDU.high_availability is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing high_availability attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.high_availability <> tcInput.vnfd.vdu.high_availability) and (tcInput.vnfd.vdu.high_availability is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate high_availability parameter")
+        logger.write_error("vnfd:vdu:high_availability - Actual value is %s, expected %s" % (VNFD.VDU.high_availability, tcInput.vnfd.vdu.high_availability))
+        logger.close_handlers()
+        return ERROR
+
+    9.	Verify minimum and maximum number of instances which can be created to support scale out/in functionality - may be omitted
+    logger.write_info("Verifying vnfd:vdu:scale_in_out")
+
+    try : tcInput.vnfd.vdu.scale_in_out
+    except NameError:
+        tcInput.vnfd.vdu.scale_in_out = None
+        if VNFD.VDU.scale_in_out is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing scale_in_out attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.scale_in_out <> tcInput.vnfd.vdu.scale_in_out) and (tcInput.vnfd.vdu.scale_in_out is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate scale_in_out parameter")
+        logger.write_error("vnfd:vdu:scale_in_out - Actual value is %s, expected %s" % (VNFD.VDU.scale_in_out, tcInput.vnfd.vdu.scale_in_out))
+        logger.close_handlers()
+        return ERROR
+
+    10.	Verify monitoring parameters trackable for this VNF like memory-consumption, CPU-utilisation, bandwidth-consumption, VNFC downtime - may be omitted
+    logger.write_info("Verifying vnfd:vdu:monitoring_parameter")
+
+    try : tcInput.vnfd.vdu.monitoring_parameter
+    except NameError:
+        tcInput.vnfd.vdu.monitoring_parameter = None
+        if VNFD.VDU.monitoring_parameter is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing monitoring_parameter attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.monitoring_parameter <> tcInput.vnfd.vdu.monitoring_parameter) and (tcInput.vnfd.vdu.monitoring_parameter is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate monitoring_parameter parameter")
+        logger.write_error("vnfd:vdu:monitoring_parameter - Actual value is %s, expected %s" % (VNFD.VDU.monitoring_parameter, tcInput.vnfd.vdu.monitoring_parameter))
+        logger.close_handlers()
+        return ERROR    
+
+    logger.write_info("Test case 5 - Execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus

@@ -1,0 +1,317 @@
+﻿TC.7	VNFD:VDU CPU Unit validation
+Note - all these parameters may be omitted
+
+Sequence:
+1.	Verify CPU instruction set extensions for which VDU has been developed, optimized or tested with
+vnfd:vdu:cpu_instruction_set_extension
+2.	Verify CPU model
+vnfd:vdu:cpu_model
+3.	Verify CPU model specification binding
+vnfd:vdu:cpu_model_specification_binding
+4.	Verify minimum CPU clock speed
+vnfd:vdu:cpu_min_clock_speed
+5.	Verify number of CPU cores allocated to the VDU
+vnfd:vdu:cpu_core_reservation
+6.	Verify Simultaneous Multi-Threading HW thread specification
+vnfd:vdu:cpu_simultaneous_multi_threading_hw_thread_specification
+7.	Verify CPU core oversubscription policy in terms of virtual cores to physical cores/threads on the platform
+vnfd:vdu:cpu_core_oversubscription_policy
+8.	Verify CPU core and HW thread allocation topology policy
+vnfd:vdu:cpu_core_and_hw_thread_allocation_topology_policy
+9.	Verify size of the last level cache
+vnfd:vdu:cpu_last_level_cache_size
+10.	Verify ability of an I/O device to have direct access to the CPU cache
+vnfd:vdu:cpu_direct_io_access_to_cache
+11.	Verify Translation Look-aside Buffer (TLB) parameters such as:
+    a.	TLB Size
+    b.	TLB Large Page Support
+    c.	IOTLB Size
+    d.	IOTLB Large Page Support
+vnfd:vdu:cpu_translation_look_aside_buffer_parameter
+12.	Verify Hot add CPU support
+vnfd:vdu:cpu_hot_add
+13.	Verify data processing accelerator framework support
+vnfd:vdu:cpu_support_accelerator
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+	VNFD File Link  vnfdFile
+
+# Test Results are stored in the test case result variable tcResult
+
+Comment: To make the pseudo code simpler to read, in a Python implementation the following code
+	tcResult.overallStatus = status
+	tcInput.emConfigFile
+should be translated to dictionaries
+	tcResult[ ‘overallStatus’ ] = status
+	tcInput[ ‘emConfigFile’ ]
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "test_case_7.txt")
+
+def test_case_7():
+
+    logger.write_info("Starting test case 7")
+
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    1.	Verify CPU instruction set extensions for which VDU has been developed, optimized or tested with
+    logger.write_info("Verifying vnfd:vdu:cpu_instruction_set_extension")
+
+    tcResult.overallStatus = SUCCESS
+
+    try : tcInput.vnfd.vdu.cpu_instruction_set_extension
+    except NameError:
+        tcInput.vnfd.vdu.cpu_instruction_set_extension = None
+        if VNFD.VDU.cpu_instruction_set_extension is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_instruction_set_extension attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_instruction_set_extension <> tcInput.vnfd.vdu.cpu_instruction_set_extension) and (tcInput.vnfd.vdu.cpu_instruction_set_extension is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_instruction_set_extension parameter")
+        //DONE [KS] Log the difference or both values for later research; apply the same to below statements
+        logger.write_error("vnfd:vdu:cpu_instruction_set_extension - Actual value is %s, expected %s" % (VNFD.VDU.cpu_instruction_set_extension, tcInput.vnfd.vdu.cpu_instruction_set_extension))    
+        logger.close_handlers()
+        return ERROR
+
+    2.	Verify CPU model
+    logger.write_info("Verifying vnfd:vdu:cpu_model")
+
+    try : tcInput.vnfd.vdu.cpu_model
+    except NameError:
+        tcInput.vnfd.vdu.cpu_model = None
+        if VNFD.VDU.cpu_model is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_model attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_model <> tcInput.vnfd.vdu.cpu_model) and (tcInput.vnfd.vdu.cpu_model is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate CPU model")
+        logger.write_error("vnfd:vdu:cpu_model - Actual value is %s, expected %s" % (VNFD.VDU.cpu_model, tcInput.vnfd.vdu.cpu_model))     
+        logger.close_handlers()
+        return ERROR
+
+    3.	Verify CPU model specification binding
+    logger.write_info("Verifying vnfd:vdu:cpu_model_specification_binding")
+
+    try : tcInput.vnfd.vdu.cpu_model_specification_binding
+    except NameError:
+        tcInput.vnfd.vdu.cpu_model_specification_binding = None
+        if VNFD.VDU.cpu_model_specification_binding is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_model_specification_binding attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_model_specification_binding <> tcInput.vnfd.vdu.cpu_model_specification_binding) and (tcInput.vnfd.vdu.cpu_model_specification_binding is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_model_specification_binding parameter")
+        logger.write_error("vnfd:vdu:cpu_model_specification_binding - Actual value is %s, expected %s" % (VNFD.VDU.cpu_model_specification_binding, tcInput.vnfd.vdu.cpu_model_specification_binding))    
+        logger.close_handlers()
+        return ERROR
+
+    4.	Verify minimum CPU clock speed
+    logger.write_info("Verifying vnfd:vdu:cpu_min_clock_speed")
+
+    try : tcInput.vnfd.vdu.cpu_min_clock_speed
+    except NameError:
+        tcInput.vnfd.vdu.cpu_min_clock_speed = None
+        if VNFD.VDU.cpu_min_clock_speed is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_min_clock_speed attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_min_clock_speed <> tcInput.vnfd.vdu.cpu_min_clock_speed) and (tcInput.vnfd.vdu.cpu_min_clock_speed is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_min_clock_speed parameter")
+        logger.write_error("vnfd:vdu:cpu_min_clock_speed - Actual value is %s, expected %s" % (VNFD.VDU.cpu_min_clock_speed, tcInput.vnfd.vdu.cpu_min_clock_speed))    
+        logger.close_handlers()
+        return ERROR
+
+    5.	Verify number of CPU cores allocated to the VDU
+    logger.write_info("Verifying vnfd:vdu:cpu_core_reservation")
+
+    try : tcInput.vnfd.vdu.cpu_core_reservation
+    except NameError:
+        tcInput.vnfd.vdu.cpu_core_reservation = None
+        if VNFD.VDU.cpu_core_reservation is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_core_reservation attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_core_reservation <> tcInput.vnfd.vdu.cpu_core_reservation) and (tcInput.vnfd.vdu.cpu_core_reservation is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_core_reservation parameter")
+        logger.write_error("vnfd:vdu:cpu_core_reservation - Actual value is %s, expected %s" % (VNFD.VDU.cpu_core_reservation, tcInput.vnfd.vdu.cpu_core_reservation))    
+        logger.close_handlers()
+        return ERROR
+
+    6.	Verify Simultaneous Multi-Threading HW thread specification
+    logger.write_info("Verifying vnfd:vdu:cpu_simultaneous_multi_threading_hw_thread_specification")
+
+    try : tcInput.vnfd.vdu.cpu_simultaneous_multi_threading_hw_thread_specification
+    except NameError:
+        tcInput.vnfd.vdu.cpu_simultaneous_multi_threading_hw_thread_specification = None
+        if VNFD.VDU.cpu_simultaneous_multi_threading_hw_thread_specification is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_simultaneous_multi_threading_hw_thread_specification attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_simultaneous_multi_threading_hw_thread_specification <> tcInput.vnfd.vdu.cpu_simultaneous_multi_threading_hw_thread_specification) and (tcInput.vnfd.vdu.cpu_simultaneous_multi_threading_hw_thread_specification is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_simultaneous_multi_threading_hw_thread_specification parameter")
+        logger.write_error("vnfd:vdu:cpu_simultaneous_multi_threading_hw_thread_specification - Actual value is %s, expected %s" % (VNFD.VDU.cpu_simultaneous_multi_threading_hw_thread_specification, tcInput.vnfd.vdu.cpu_simultaneous_multi_threading_hw_thread_specification))    
+        logger.close_handlers()
+        return ERROR
+
+    7.	Verify CPU core oversubscription policy in terms of virtual cores to physical cores/threads on the platform
+    logger.write_info("Verifying vnfd:vdu:cpu_core_oversubscription_policy")
+
+    try : tcInput.vnfd.vdu.cpu_core_oversubscription_policy
+    except NameError:
+        tcInput.vnfd.vdu.cpu_core_oversubscription_policy = None
+        if VNFD.VDU.cpu_core_oversubscription_policy is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_core_oversubscription_policy attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_core_oversubscription_policy <> tcInput.vnfd.vdu.cpu_core_oversubscription_policy) and (tcInput.vnfd.vdu.cpu_core_oversubscription_policy is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_core_oversubscription_policy parameter")
+        logger.write_error("vnfd:vdu:cpu_core_oversubscription_policy - Actual value is %s, expected %s" % (VNFD.VDU.cpu_core_oversubscription_policy, tcInput.vnfd.vdu.cpu_core_oversubscription_policy))  
+        logger.close_handlers()
+        return ERROR
+
+    8.	Verify CPU core and HW thread allocation topology policy
+    logger.write_info("Verifying vnfd:vdu:cpu_core_and_hw_thread_allocation_topology_policy")
+
+    try : tcInput.vnfd.vdu.cpu_core_and_hw_thread_allocation_topology_policy
+    except NameError:
+        tcInput.vnfd.vdu.cpu_core_and_hw_thread_allocation_topology_policy = None
+        if VNFD.VDU.cpu_core_and_hw_thread_allocation_topology_policy is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_core_and_hw_thread_allocation_topology_policy attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_core_and_hw_thread_allocation_topology_policy <> tcInput.vnfd.vdu.cpu_core_and_hw_thread_allocation_topology_policy) and (tcInput.vnfd.vdu.cpu_core_and_hw_thread_allocation_topology_policy is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_core_and_hw_thread_allocation_topology_policy parameter")
+        logger.write_error("vnfd:vdu:cpu_core_and_hw_thread_allocation_topology_policy - Actual value is %s, expected %s" % (VNFD.VDU.cpu_core_and_hw_thread_allocation_topology_policy, tcInput.vnfd.vdu.cpu_core_and_hw_thread_allocation_topology_policy))    
+        logger.close_handlers()
+        return ERROR
+        
+    9.	Verify size of the last level cache
+    logger.write_info("Verifying vnfd:vdu:cpu_last_level_cache_size")
+
+    try : tcInput.vnfd.vdu.cpu_last_level_cache_size
+    except NameError:
+        tcInput.vnfd.vdu.cpu_last_level_cache_size = None
+        if VNFD.VDU.cpu_last_level_cache_size is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_last_level_cache_size attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_last_level_cache_size <> tcInput.vnfd.vdu.cpu_last_level_cache_size) and (tcInput.vnfd.vdu.cpu_last_level_cache_size is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_last_level_cache_size parameter")
+        logger.write_error("vnfd:vdu:cpu_last_level_cache_size - Actual value is %s, expected %s" % (VNFD.VDU.cpu_last_level_cache_size, tcInput.vnfd.vdu.cpu_last_level_cache_size))      
+        logger.close_handlers()
+        return ERROR
+
+    10.	Verify ability of an I/O device to have direct access to the CPU cache
+    logger.write_info("Verifying vnfd:vdu:cpu_direct_io_access_to_cache")
+
+    try : tcInput.vnfd.vdu.cpu_direct_io_access_to_cache
+    except NameError:
+        tcInput.vnfd.vdu.cpu_direct_io_access_to_cache = None
+        if VNFD.VDU.cpu_direct_io_access_to_cache is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_direct_io_access_to_cache attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_direct_io_access_to_cache <> tcInput.vnfd.vdu.cpu_direct_io_access_to_cache) and (tcInput.vnfd.vdu.cpu_direct_io_access_to_cache is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_direct_io_access_to_cache parameter")
+        logger.write_error("vnfd:vdu:cpu_direct_io_access_to_cache - Actual value is %s, expected %s" % (VNFD.VDU.cpu_direct_io_access_to_cache, tcInput.vnfd.vdu.cpu_direct_io_access_to_cache))    
+        logger.close_handlers()
+        return ERROR
+
+    11.	Verify Translation Look-aside Buffer (TLB) parameters
+    logger.write_info("Verifying vnfd:vdu:cpu_translation_look_aside_buffer_parameter")
+
+    try : tcInput.vnfd.vdu.cpu_translation_look_aside_buffer_parameter
+    except NameError:
+        tcInput.vnfd.vdu.cpu_translation_look_aside_buffer_parameter = None
+        if VNFD.VDU.cpu_translation_look_aside_buffer_parameter is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_translation_look_aside_buffer_parameter attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_translation_look_aside_buffer_parameter <> tcInput.vnfd.vdu.cpu_translation_look_aside_buffer_parameter) and (tcInput.vnfd.vdu.cpu_translation_look_aside_buffer_parameter is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_translation_look_aside_buffer_parameter parameter")
+        logger.write_error("vnfd:vdu:cpu_translation_look_aside_buffer_parameter - Actual value is %s, expected %s" % (VNFD.VDU.cpu_translation_look_aside_buffer_parameter, tcInput.vnfd.vdu.cpu_translation_look_aside_buffer_parameter))    
+        logger.close_handlers()
+        return ERROR
+
+    12.	Verify Hot add CPU support
+    logger.write_info("Verifying vnfd:vdu:cpu_hot_add")
+
+    try : tcInput.vnfd.vdu.cpu_hot_add
+    except NameError:
+        tcInput.vnfd.vdu.cpu_hot_add = None
+        if VNFD.VDU.cpu_hot_add is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_hot_add attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_hot_add <> tcInput.vnfd.vdu.cpu_hot_add) and (tcInput.vnfd.vdu.cpu_hot_add is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate Hot add CPU support")
+        logger.write_error("vnfd:vdu:cpu_hot_add - Actual value is %s, expected %s" % (VNFD.VDU.cpu_hot_add, tcInput.vnfd.vdu.cpu_hot_add))    
+        logger.close_handlers()
+        return ERROR
+
+    13.	Verify data processing accelerator framework support
+    logger.write_info("Verifying vnfd:vdu:cpu_support_accelerator")
+
+    try : tcInput.vnfd.vdu.cpu_support_accelerator
+    except NameError:
+        tcInput.vnfd.vdu.cpu_support_accelerator = None
+        if VNFD.VDU.cpu_support_accelerator is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing cpu_support_accelerator attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.cpu_support_accelerator <> tcInput.vnfd.vdu.cpu_support_accelerator) and (tcInput.vnfd.vdu.cpu_support_accelerator is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 7 - Execution completed with errors - Unable to validate cpu_support_accelerator parameter")
+        logger.write_error("vnfd:vdu:cpu_support_accelerator - Actual value is %s, expected %s" % (VNFD.VDU.cpu_support_accelerator, tcInput.vnfd.vdu.cpu_support_accelerator))    
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("Test case 7 - Execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus
