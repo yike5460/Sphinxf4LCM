@@ -1,0 +1,115 @@
+﻿TC.15	VNFD:VDU Virtual Link validation
+
+Sequence:
+1.	Verify internal Virtual Link unique identifier
+vnfd:vdu:virtual_link:id
+2.	Verify connectivity type (e.g. E-LINE, E-LAN or E-Tree)
+vnfd:vdu:virtual_link:connectivity_type
+3.	Verify references to Connection Points (vnfd:vdu:vnfc:connection_point:id, vnfd:connection_point:id)
+vnfd:vdu:virtual_link:connection_points_references
+4.	Verify required throughput of the link (e.g. bandwidth of E-Line, root bandwidth of E-Tree and aggregate capacity of E_LAN)
+vnfd:vdu:virtual_link:root_requirements
+5.	Verify required throughput of leaf connections to the link (for E-Tree and E-LAN branches)
+vnfd:vdu:virtual_link:leaf_requirements
+6.	Verify QoS options to be supported on the VL e.g. latency, jitter, etc.
+vnfd:vdu:virtual_link:qos
+7.	Verify test access facilities to be supported on the VL (e.g. none, passive monitoring, or active (intrusive) loopbacks at endpoints)
+vnfd:vdu:virtual_link:test_access
+
+Pseudo Code:
+
+Input:
+# All required input information are stored in the test case input variable tcInput and includes following information:
+	VNFD File Link  vnfdFile
+
+# Test Results are stored in the test case result variable tcResult
+
+Comment: To make the pseudo code simpler to read, in a Python implementation the following code
+	tcResult.overallStatus = status
+	tcInput.emConfigFile
+should be translated to dictionaries
+	tcResult[ ‘overallStatus’ ] = status
+	tcInput[ ‘emConfigFile’ ]
+
+import logging_module
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "test_case_15.txt")
+
+def test_case_15():
+
+    logger.write_info("Starting test case 15")
+
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+
+    1.	Verify internal Virtual Link unique identifier
+    logger.write_info("Verifying vnfd:vdu:virtual_link:id")
+
+    tcResult.overallStatus = SUCCESS
+
+    if tcInput.vnfd.vdu.virtual_link.id <> VNFD.VDU.virtual_link.id :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate Virtual link id parameter")
+        logger.close_handlers()
+        return ERROR
+
+    2.	Verify connectivity type (e.g. E-LINE, E-LAN or E-Tree)
+    logger.write_info("Verifying vnfd:vdu:virtual_link:connectivity_type")
+
+    if tcInput.vnfd.vdu.virtual_link.connectivity_type <> VNFD.VDU.virtual_link.connectivity_type :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate connectivity_type parameter")
+        logger.close_handlers()
+        return ERROR
+
+    3.	Verify references to Connection Points (vnfd:vdu:vnfc:connection_point:id, vnfd:connection_point:id)
+    logger.write_info("Verifying vnfd:vdu:virtual_link:connection_points_references")
+
+    if tcInput.vnfd.vdu.virtual_link.connection_points_references <> VNFD.VDU.virtual_link.connection_points_references :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate connection_points_references parameter")
+        logger.close_handlers()
+        return ERROR
+
+    4.	Verify required throughput of the link (e.g. bandwidth of E-Line, root bandwidth of E-Tree and aggregate capacity of E_LAN)
+    logger.write_info("Verifying vnfd:vdu:virtual_link:root_requirements")
+
+    if tcInput.vnfd.vdu.virtual_link.root_requirement <> VNFD.VDU.virtual_link.root_requirement :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate root_requirement parameter")
+        logger.close_handlers()
+        return ERROR
+
+    5.	Verify required throughput of leaf connections to the link (for E-Tree and E-LAN branches)
+    logger.write_info("Verifying vnfd:vdu:virtual_link:leaf_requirements")
+
+    if tcInput.vnfd.vdu.virtual_link.leaf_requirement <> VNFD.VDU.virtual_link.leaf_requirement :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate leaf_requirement parameter")
+        logger.close_handlers()
+        return ERROR
+
+    6.	Verify QoS options to be supported on the VL e.g. latency, jitter, etc.
+    logger.write_info("Verifying vnfd:vdu:virtual_link:qos")
+
+    if tcInput.vnfd.vdu.virtual_link.qos <> VNFD.VDU.virtual_link.qos :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate qos parameter")
+        logger.close_handlers()
+        return ERROR
+
+    7.	Verify test access facilities to be supported on the VL (e.g. none, passive monitoring, or active (intrusive) loopbacks at endpoints)
+    logger.write_info("Verifying vnfd:vdu:virtual_link:test_access")
+
+    if tcInput.vnfd.vdu.virtual_link.test_access <> VNFD.VDU.virtual_link.test_access :
+        tcResult.overallStatus = FAILED
+        logger.write_error("Test case 15 - Execution completed with errors - Unable to validate test_access parameter")
+        logger.close_handlers()
+        return ERROR
+
+    logger.write_info("Test case 15 - Execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus
