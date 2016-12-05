@@ -1,4 +1,4 @@
-﻿TC.3	VNFD Base unit validation
+﻿TC_VNFD_Base_001	VNFD Base unit validation
 
 Sequence:
 1.	Verify VNFD ID (e.g. name)
@@ -9,17 +9,17 @@ vnfd:vendor
 vnfd:descriptor_version
 4.	Verify version of the VNF software
 vnfd:version
-5.	Verify lifecycle events
+5.	Verify lifecycle events (optional)
 vnfd:lifecycle_event
-6.	Verify dependencies between VDUs
+6.	Verify dependencies between VDUs (optional)
 vnfd:dependency
-7.	Verify monitoring parameter, which can be tracked for this VNF
+7.	Verify monitoring parameter, which can be tracked for this VNF (optional)
 vnfd:monitoring_parameter
-8.	Verify auto scale policy
+8.	Verify auto scale policy (optional)
 vnfd:auto_scale_policy
-9.	Verify manifest file
+9.	Verify manifest file (optional)
 vnfd:manifest_file
-10.	Verify manifest file security
+10.	Verify manifest file security (optional)
 vnfd:manifest_file_security
 
 Pseudo Code:
@@ -40,11 +40,11 @@ should be translated to dictionaries
 import logging_module
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_3.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_Base_001.txt")
 
-def test_case_3():
+def TC_VNFD_Base_001():
 
-    logger.write_info("Starting test case 3")
+    logger.write_info("Starting TC_VNFD_Base_001")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -54,94 +54,158 @@ def test_case_3():
 
     tcResult.overallStatus = SUCCESS
 
-    if tcInput.vnfd.Id <> VNFD.Id :
+    if VNFD.Id <> tcInput.vnfd.Id :
         tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate VNFD's ID")
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate VNFD's ID")
+        logger.write_error("vnfd:Id - Actual value is %s, expected %s" % (VNFD.Id, tcInput.vnfd.Id))
         logger.close_handlers()
         return ERROR
 
     2.	Verify vendor name
     logger.write_info("Verifying vnfd:vendor")
 
-    if tcInput.vnfd.vendor <> VNFD.vendor :
+    if VNFD.vendor <> tcInput.vnfd.vendor :
         tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate vendor name")
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate vendor name")
+        logger.write_error("vnfd:vendor - Actual value is %s, expected %s" % (VNFD.vendor, tcInput.vnfd.vendor))
         logger.close_handlers()
         return ERROR
 
     3.	Verify version of the VNF Descriptor
     logger.write_info("Verifying vnfd:descriptor_version")
 
-    if tcInput.vnfd.descriptor_version <> VNFD.descriptor_version :
+    if VNFD.descriptor_version <> tcInput.vnfd.descriptor_version :
         tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate VNFD version")
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate descriptor_version parameter")
+        logger.write_error("vnfd:descriptor_version - Actual value is %s, expected %s" % (VNFD.descriptor_version, tcInput.vnfd.descriptor_version))
         logger.close_handlers()
         return ERROR
 
     4.	Verify version of the VNF software
     logger.write_info("Verifying vnfd:version")
 
-    if tcInput.vnfd.version <> VNFD.version :
+    if VNFD.version <> tcInput.vnfd.version :
         tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate VNF software version")
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate version parameter")
+        logger.write_error("vnfd:version - Actual value is %s, expected %s" % (VNFD.version, tcInput.vnfd.version))
         logger.close_handlers()
         return ERROR
 
     5.	Verify lifecycle events
     logger.write_info("Verifying vnfd:lifecycle_event")
 
-    if tcInput.vnfd.lifecycle_event <> VNFD.lifecycle_event :
-        tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate lifecycle_event parameter")
+    try : tcInput.vnfd.lifecycle_event
+    except NameError:
+        tcInput.vnfd.lifecycle_event = None
+        if VNFD.lifecycle_event is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - VNFD file is containing lifecycle_event attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.lifecycle_event <> tcInput.vnfd.lifecycle_event) and (tcInput.vnfd.lifecycle_event is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate lifecycle_event parameter")
+        logger.write_error("vnfd:lifecycle_event - Actual value is %s, expected %s" % (VNFD.lifecycle_event, tcInput.vnfd.lifecycle_event))
         logger.close_handlers()
         return ERROR
 
     6.	Verify dependencies between VDUs
     logger.write_info("Verifying vnfd:dependency")
 
-    if tcInput.vnfd.dependency <> VNFD.dependency :
-        tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate dependency parameter")
+    try : tcInput.vnfd.dependency
+    except NameError:
+        tcInput.vnfd.dependency = None
+        if VNFD.dependency is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - VNFD file is containing dependency attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.dependency <> tcInput.vnfd.dependency) and (tcInput.vnfd.dependency is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate dependency parameter")
+        logger.write_error("vnfd:dependency - Actual value is %s, expected %s" % (VNFD.dependency, tcInput.vnfd.dependency))
         logger.close_handlers()
         return ERROR
 
     7.	Verify monitoring parameter, which can be tracked for this VNF
     logger.write_info("Verifying vnfd:monitoring_parameter")
 
-    if tcInput.vnfd.monitoring_parameter <> VNFD.monitoring_parameter :
-        tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate monitoring_parameter parameter")
+    try : tcInput.vnfd.monitoring_parameter
+    except NameError:
+        tcInput.vnfd.monitoring_parameter = None
+        if VNFD.dependency is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - VNFD file is containing monitoring_parameter attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.monitoring_parameter <> tcInput.vnfd.monitoring_parameter) and (tcInput.vnfd.monitoring_parameter is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate monitoring_parameter parameter")
+        logger.write_error("vnfd:monitoring_parameter - Actual value is %s, expected %s" % (VNFD.monitoring_parameter, tcInput.vnfd.monitoring_parameter))
         logger.close_handlers()
         return ERROR
 
     8.	Verify auto scale policy
     logger.write_info("Verifying vnfd:auto_scale_policy")
 
-    if tcInput.vnfd.auto_scale_policy <> VNFD.auto_scale_policy :
-        tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate auto_scale_policy parameter")
+    try : tcInput.vnfd.auto_scale_policy
+    except NameError:
+        tcInput.vnfd.auto_scale_policy = None
+        if VNFD.auto_scale_policy is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - VNFD file is containing auto_scale_policy attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.auto_scale_policy <> tcInput.vnfd.auto_scale_policy) and (tcInput.vnfd.auto_scale_policy is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate auto_scale_policy parameter")
+        logger.write_error("vnfd:auto_scale_policy - Actual value is %s, expected %s" % (VNFD.auto_scale_policy, tcInput.vnfd.auto_scale_policy))
         logger.close_handlers()
         return ERROR
 
     9.	Verify manifest file
     logger.write_info("Verifying vnfd:manifest_file")
 
-    if tcInput.vnfd.manifest_file <> VNFD.manifest_file :
-        tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate manifest_file parameter")
+    try : tcInput.vnfd.manifest_file
+    except NameError:
+        tcInput.vnfd.manifest_file = None
+        if VNFD.manifest_file is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - VNFD file is containing manifest_file attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.manifest_file <> tcInput.vnfd.manifest_file) and (tcInput.vnfd.manifest_file is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate manifest_file parameter")
+        logger.write_error("vnfd:manifest_file - Actual value is %s, expected %s" % (VNFD.manifest_file, tcInput.vnfd.manifest_file))
         logger.close_handlers()
         return ERROR
 
     10.	Verify manifest file security
     logger.write_info("Verifying vnfd:manifest_file_security")
 
-    if tcInput.vnfd.manifest_file_security <> VNFD.manifest_file_security :
-        tcResult.overallStatus = status
-        logger.write_error("Test case 3 - Execution completed with errors - Unable to validate manifest_file_security parameter")
+    try : tcInput.vnfd.manifest_file_security
+    except NameError:
+        tcInput.vnfd.manifest_file_security = None
+        if VNFD.manifest_file_security is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - VNFD file is containing manifest_file_security attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.manifest_file_security <> tcInput.vnfd.manifest_file_security) and (tcInput.vnfd.manifest_file_security is not None):
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNFD_Base_001 - Execution completed with errors - Unable to validate manifest_file_security parameter")
+        logger.write_error("vnfd:manifest_file_security - Actual value is %s, expected %s" % (VNFD.manifest_file_security, tcInput.vnfd.manifest_file_security))
         logger.close_handlers()
         return ERROR
 
-    logger.write_info("Test case 3 - Execution completed successfully")
+    logger.write_info("TC_VNFD_Base_001 - Execution completed successfully")
 
     logger.close_handlers()
 
