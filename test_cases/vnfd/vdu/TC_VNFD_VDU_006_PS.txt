@@ -1,4 +1,4 @@
-﻿TC.10   VNFD:VDU HyperVisor Unit validation
+﻿TC_VNFD_VDU_006   VNFD:VDU HyperVisor Unit validation
 
 Sequence:
 1.	Verify hypervisor related parameters like
@@ -29,11 +29,11 @@ should be translated to dictionaries
 import logging_module
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_10.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_VDU_006.txt")
 
-def test_case_10():
+def TC_VNFD_VDU_006():
 
-    logger.write_info("Starting test case 10")
+    logger.write_info("Starting TC_VNFD_VDU_006")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -43,15 +43,15 @@ def test_case_10():
 
     tcResult.overallStatus = SUCCESS
 
-    if tcInput.vnfd:vdu:hypervisor_parameter <> VNFD.VDU.hypervisor_parameter :
+    if VNFD.VDU.hypervisor_parameter <> tcInput.vnfd.vdu:hypervisor_parameter :
         tcResult.overallStatus = status
-        logger.write_error("Test case 10 - Execution completed with errors - Unable to validate HyperVisor related parameters")
-        [KS] log the difference or both 
+        logger.write_error("TC_VNFD_VDU_006 - Execution completed with errors - Unable to validate hypervisor_parameter")
+        //DONE [KS] log the difference or both
+        logger.write_error("vnfd:vdu:hypervisor_parameter - Actual value is %s, expected %s" % (VNFD.VDU.hypervisor_parameter, tcInput.vnfd.vdu:hypervisor_parameter))
         logger.close_handlers()
         return ERROR
 
-
-    logger.write_info("Test case 10 - Execution completed successfully")
+    logger.write_info("TC_VNFD_VDU_006 - Execution completed successfully")
 
     logger.close_handlers()
 

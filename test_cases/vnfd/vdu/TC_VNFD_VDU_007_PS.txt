@@ -1,12 +1,13 @@
-﻿TC.11	VNFD:VDU Network Elements Unit validation
+﻿TC_VNFD_VDU_007	VNFD:VDU Network Elements Unit validation
 
 Sequence:
 1.  Verify network interface card capabilities like
     TCP Offload, Checksum Offload, Jumbo Frame, VLAN Tag stripping, RDMA support, SR-IOV support, DPDK support
+    This is an optional attribute.
     vnfd:vdu:network_interface_card_capability
-2.  Verify network speed/bandwidth to be guaranteed per requested NIC
+2.  Verify network speed/bandwidth to be guaranteed per requested NIC (optional)
     vnfd:vdu:network_interface_bandwidth
-3.  Verify name and version of the data processing acceleration library used
+3.  Verify name and version of the data processing acceleration library used (optional)
     vnfd:vdu:data_processing_acceleration_library
 
 Pseudo Code:
@@ -27,11 +28,11 @@ should be translated to dictionaries
 import logging_module
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_11.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_VDU_007.txt")
 
-def test_case_11():
+def TC_VNFD_VDU_007():
 
-    logger.write_info("Starting test case 11")
+    logger.write_info("Starting TC_VNFD_VDU_007")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -41,32 +42,62 @@ def test_case_11():
 
     tcResult.overallStatus = SUCCESS
 
-    if tcInput.vnfd.vdu.network.network_interface_card_capability <> VNFD.VDU.network.network_interface_card_capability :
+    try : tcInput.vnfd.vdu.network_interface_card_capability
+    except NameError:
+        tcInput.vnfd.vdu.network_interface_card_capability = None
+        if VNFD.VDU.network_interface_card_capability is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_VDU_007 - Execution completed with errors - VNFD file is containing network_interface_card_capability attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.network_interface_card_capability <> tcInput.vnfd.vdu.network_interface_card_capability) and (tcInput.vnfd.vdu.network_interface_card_capability is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 11 - Execution completed with errors - Unable to validate network_interface_card_capability parameter")
-        [KS] Log the difference or both values; apply to below cases too
+        logger.write_error("TC_VNFD_VDU_007 - Execution completed with errors - Unable to validate network_interface_card_capability parameter")
+        //DONE [KS] Log the difference or both values; apply to below cases too
+        logger.write_error("vnfd:vdu:network_interface_card_capability - Actual value is %s, expected %s" % (VNFD.VDU.network_interface_card_capability, tcInput.vnfd.vdu.network_interface_card_capability))
         logger.close_handlers()
         return ERROR
 
     2. Verify network speed/bandwidth to be guaranteed per requested NIC
     logger.write_info("Verifying vnfd:vdu:network_interface_bandwidth")
 
-    if tcInput.vnfd.vdu.network.network_interface_bandwidth <> VNFD.VDU.network.network_interface_bandwidth :
+    try : tcInput.vnfd.vdu.network_interface_bandwidth
+    except NameError:
+        tcInput.vnfd.vdu.network_interface_bandwidth = None
+        if VNFD.VDU.network_interface_bandwidth is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_VDU_007 - Execution completed with errors - VNFD file is containing network_interface_bandwidth attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.network_interface_bandwidth <> tcInput.vnfd.vdu.network_interface_bandwidth) and (tcInput.vnfd.vdu.network_interface_bandwidth is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 11 - Execution completed with errors - Unable to validate network_interface_bandwidth")
+        logger.write_error("TC_VNFD_VDU_007 - Execution completed with errors - Unable to validate network_interface_bandwidth parameter")
+        logger.write_error("vnfd:vdu:network_interface_bandwidth - Actual value is %s, expected %s" % (VNFD.VDU.network_interface_bandwidth, tcInput.vnfd.vdu.network_interface_bandwidth))
         logger.close_handlers()
         return ERROR
 
     3. Verify name and version of the data processing acceleration library used
     logger.write_info("Verifying vnfd:vdu:data_processing_acceleration_library")
 
-    if tcInput.vnfd.vdu.network.data_processing_acceleration_library <> VNFD.VDU.network.data_processing_acceleration_library :
+    try : tcInput.vnfd.vdu.data_processing_acceleration_library
+    except NameError:
+        tcInput.vnfd.vdu.data_processing_acceleration_library = None
+        if VNFD.VDU.data_processing_acceleration_library is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_VDU_007 - Execution completed with errors - VNFD file is containing data_processing_acceleration_library attribut")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.data_processing_acceleration_library <> tcInput.vnfd.vdu.data_processing_acceleration_library) and (tcInput.vnfd.vdu.data_processing_acceleration_library is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 11 - Execution completed with errors - Unable to validate data_processing_acceleration_library")
+        logger.write_error("TC_VNFD_VDU_007 - Execution completed with errors - Unable to validate data_processing_acceleration_library parameter")
+        logger.write_error("vnfd:vdu:data_processing_acceleration_library - Actual value is %s, expected %s" % (VNFD.VDU.data_processing_acceleration_library, tcInput.vnfd.vdu.data_processing_acceleration_library))
         logger.close_handlers()
         return ERROR
 
-    logger.write_info("Test case 11 - Execution completed successfully")
+    logger.write_info("TC_VNFD_VDU_007 - Execution completed successfully")
 
     logger.close_handlers()
 

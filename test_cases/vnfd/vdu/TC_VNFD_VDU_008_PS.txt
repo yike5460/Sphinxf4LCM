@@ -1,7 +1,7 @@
-﻿TC.12	VNFD:VDU Virtual Switches validation
+﻿TC_VNFD_VDU_008	VNFD:VDU Virtual Switches validation
 
 Sequence:
-1.	Verify vSwitch type, version and key features such as overlay tunnel termination support
+1.	Verify vSwitch type, version and key features such as overlay tunnel termination support (optional)
 vnfd:vdu:vswitch_capability
 
 Pseudo Code:
@@ -22,11 +22,11 @@ should be translated to dictionaries
 import logging_module
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_12.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_VDU_008.txt")
 
-def test_case_12():
+def TC_VNFD_VDU_008():
 
-    logger.write_info("Starting test case 12")
+    logger.write_info("Starting TC_VNFD_VDU_008")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -36,13 +36,23 @@ def test_case_12():
 
     tcResult.overallStatus = SUCCESS
 
-    if tcInput.vnfd.vdu.vswitch.vswitch_capability <> VNFD.VDU.vswitch.vswitch_capability :
+    try : tcInput.vnfd.vdu.vswitch_capability
+    except NameError:
+        tcInput.vnfd.vdu.vswitch_capability = None
+        if VNFD.VDU.vswitch_capability is not None :
+            tcResult.overallStatus = FAILED
+            logger.write_error("TC_VNFD_VDU_008 - Execution completed with errors - VNFD file is containing vswitch_capability attribute")
+            logger.close_handlers()
+            return ERROR
+
+    if (VNFD.VDU.vswitch_capability <> tcInput.vnfd.vdu.vswitch_capability) and (tcInput.vnfd.vdu.vswitch_capability is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 12 - Execution completed with errors - Unable to validate vswitch_capability parameter")
+        logger.write_error("TC_VNFD_VDU_008 - Execution completed with errors - Unable to validate vswitch_capability parameter")
+        logger.write_error("vnfd:vdu:vswitch_capability - Actual value is %s, expected %s" % (VNFD.VDU.vswitch_capability, tcInput.vnfd.vdu.vswitch_capability))
         logger.close_handlers()
         return ERROR
 
-    logger.write_info("Test case 12 - Execution completed successfully")
+    logger.write_info("TC_VNFD_VDU_008 - Execution completed successfully")
 
     logger.close_handlers()
 

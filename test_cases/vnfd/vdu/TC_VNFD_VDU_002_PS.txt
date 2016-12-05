@@ -1,4 +1,4 @@
-﻿TC.6	VNFD:VDU VNFC Elements validation
+﻿TC_VNFD_VDU_002	VNFD:VDU VNFC Elements validation
 
 Sequence:
 1.	Verify VNFC unique identifier within the namespace of a specific VNF
@@ -28,11 +28,11 @@ should be translated to dictionaries
 import logging_module
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_6.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_VDU_002.txt")
 
-def test_case_6():
+def TC_VNFD_VDU_002():
 
-    logger.write_info("Starting test case 6")
+    logger.write_info("Starting TC_VNFD_VDU_002")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -44,7 +44,7 @@ def test_case_6():
 
     if VNFD.VDU.vnfc.id <> tcInput.vnfd.vdu.vnfc.id :
         tcResult.overallStatus = status
-        logger.write_error("Test case 6 - Execution completed with errors - Unable to validate VNFC's ID")
+        logger.write_error("TC_VNFD_VDU_002 - Execution completed with errors - Unable to validate VNFC's ID")
         //DONE [KS] Log the two IDs for later error reserach and apply it to the below conditions too 
         logger.write_error("vnfd:vdu:vnfc:id - Actual value is %s, expected %s" % (VNFD.VDU.vnfc.id, tcInput.vnfd.vdu.vnfc.id))
         logger.close_handlers()
@@ -55,7 +55,7 @@ def test_case_6():
 
     if VNFD.VDU.vnfc:connection_point:id <> tcInput.vnfd.vdu.vnfc:connection_point:id :
         tcResult.overallStatus = status
-        logger.write_error("Test case 6 - Execution completed with errors - Unable to validate Connection Point ID")
+        logger.write_error("TC_VNFD_VDU_002 - Execution completed with errors - Unable to validate Connection Point ID")
         logger.write_error("vnfd:vdu:connection_point:id - Actual value is %s, expected %s" % (VNFD.VDU.connection_point.id, tcInput.vnfd.vdu.connection_point.id))        
         logger.close_handlers()
         return ERROR
@@ -65,7 +65,7 @@ def test_case_6():
 
     if VNFD.VDU.vnfc:connection_point:type <> tcInput.vnfd.vdu.vnfc:connection_point:type :
         tcResult.overallStatus = status
-        logger.write_error("Test case 6 - Execution completed with errors - Unable to validate Connection Point type")
+        logger.write_error("TC_VNFD_VDU_002 - Execution completed with errors - Unable to validate Connection Point type")
         logger.write_error("vnfd:vdu:vnfc:connection_point:type - Actual value is %s, expected %s" % (VNFD.VDU.vnfc.connection_point:type, tcInput.vnfd.vdu.vnfc.connection_point:type))        
         logger.close_handlers()
         return ERROR
@@ -75,12 +75,12 @@ def test_case_6():
 
     if VNFD.VDU.vnfc:connection_point:virtual_link_reference <> tcInput.vnfd.vdu.vnfc:connection_point:virtual_link_reference :
         tcResult.overallStatus = status
-        logger.write_error("Test case 6 - Execution completed with errors - Unable to validate Connection Point virtual_link_reference parameter")
+        logger.write_error("TC_VNFD_VDU_002 - Execution completed with errors - Unable to validate Connection Point virtual_link_reference parameter")
         logger.write_error("vnfd:vdu:vnfc:connection_point:virtual_link_reference - Actual value is %s, expected %s" % (VNFD.VDU.vnfc.connection_point:virtual_link_reference, tcInput.vnfd.vdu.vnfc.connection_point:virtual_link_reference))             
         logger.close_handlers()
         return ERROR
 
-    logger.write_info("Test case 6 - Execution completed successfully")
+    logger.write_info("TC_VNFD_VDU_002 - Execution completed successfully")
 
     logger.close_handlers()
 

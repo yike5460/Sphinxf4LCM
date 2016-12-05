@@ -1,4 +1,4 @@
-﻿TC.5	VNFD:VDU Base Unit validation
+﻿TC_VNFD_VDU_001	VNFD:VDU Base Unit validation
 
 Sequence:
 1.	Verify VDU's unique identifier for a specific VNF
@@ -40,11 +40,11 @@ should be translated to dictionaries
 import logging_module
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_5.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNFD_VDU_001.txt")
 
-def test_case_5():
+def TC_VNFD_VDU_001():
 
-    logger.write_info("Starting test case 5")
+    logger.write_info("Starting TC_VNFD_VDU_001")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -56,7 +56,7 @@ def test_case_5():
 
     if VNFD.VDU.id <> tcInput.vnfd.vdu.id :
         tcResult.overallStatus = status
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate VDU's unique id")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate VDU's unique id")
         logger.write_error("vnfd:vdu:id - Actual value is %s, expected %s" % (VNFD.VDU.id, tcInput.vnfd.vdu.id))
         logger.close_handlers()
         return ERROR
@@ -69,13 +69,13 @@ def test_case_5():
         tcInput.vnfd.vdu.vm_image = None
         if VNFD.VDU.vm_image is not None :
             tcResult.overallStatus = FAILED
-            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing vm_image attribut")
+            logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - VNFD file is containing vm_image attribut")
             logger.close_handlers()
             return ERROR
 
     if (VNFD.VDU.vm_image <> tcInput.vnfd.vdu.vm_image) and (tcInput.vnfd.vdu.vm_image is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate VM image reference")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate VM image reference")
         //DONE [KS] Log the difference so that we can use it for debugging and inform the user of the problem
         logger.write_error("vnfd:vdu:vm_image - Actual value is %s, expected %s" % (VNFD.VDU.vm_image, tcInput.vnfd.vdu.vm_image))
         logger.close_handlers()
@@ -86,7 +86,7 @@ def test_case_5():
 
     if VNFD.VDU.computation_requirement <> tcInput.vnfd.vdu.computation_requirement :
         tcResult.overallStatus = status
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate computation_requirement parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate computation_requirement parameter")
         //DONE [KS] dito
         logger.write_error("vnfd:vdu:computation_requirement - Actual value is %s, expected %s" % (VNFD.VDU.computation_requirement, tcInput.vnfd.vdu.computation_requirement))
         logger.close_handlers()
@@ -97,7 +97,7 @@ def test_case_5():
 
     if VNFD.VDU.virtual_memory_resource_element <> tcInput.vnfd.vdu.virtual_memory_resource_element :
         tcResult.overallStatus = status
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate virtual_memory_resource_element parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate virtual_memory_resource_element parameter")
         //DONE [KS] dito
         logger.write_error("vnfd:vdu:virtual_memory_resource_element - Actual value is %s, expected %s" % (VNFD.VDU.virtual_memory_resource_element, tcInput.vnfd.vdu.virtual_memory_resource_element))
         logger.close_handlers()
@@ -108,7 +108,7 @@ def test_case_5():
 
     if VNFD.VDU.virtual_network_bandwidth_resource <> tcInput.vnfd.vdu.virtual_network_bandwidth_resource :
         tcResult.overallStatus = status
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate virtual_network_bandwidth_resource parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate virtual_network_bandwidth_resource parameter")
         //DONE [KS] dito
         logger.write_error("vnfd:vdu:virtual_network_bandwidth_resource - Actual value is %s, expected %s" % (VNFD.VDU.virtual_network_bandwidth_resource, tcInput.vnfd.vdu.virtual_network_bandwidth_resource))
         logger.close_handlers()
@@ -122,13 +122,13 @@ def test_case_5():
         tcInput.vnfd.vdu.lifecycle_event = None
         if VNFD.VDU.lifecycle_event is not None :
             tcResult.overallStatus = FAILED
-            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing lifecycle_event attribut")
+            logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - VNFD file is containing lifecycle_event attribut")
             logger.close_handlers()
             return ERROR
 
     if (VNFD.VDU.lifecycle_event <> tcInput.vnfd.vdu.lifecycle_event) and (tcInput.vnfd.vdu.lifecycle_event is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate lifecycle_event parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate lifecycle_event parameter")
         //DONE [KS] dito
         logger.write_error("vnfd:vdu:lifecycle_event - Actual value is %s, expected %s" % (VNFD.VDU.lifecycle_event, tcInput.vnfd.vdu.lifecycle_event))
         logger.close_handlers()
@@ -142,13 +142,13 @@ def test_case_5():
         tcInput.vnfd.vdu.constraint = None
         if VNFD.VDU.constraint is not None :
             tcResult.overallStatus = FAILED
-            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing constraint attribut")
+            logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - VNFD file is containing constraint attribut")
             logger.close_handlers()
             return ERROR
 
     if (VNFD.VDU.constraint <> tcInput.vnfd.vdu.constraint) and (tcInput.vnfd.vdu.constraint is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate constraint parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate constraint parameter")
         //DONE [KS] dito
         logger.write_error("vnfd:vdu:constraint - Actual value is %s, expected %s" % (VNFD.VDU.constraint, tcInput.vnfd.vdu.constraint))
         logger.close_handlers()
@@ -162,13 +162,13 @@ def test_case_5():
         tcInput.vnfd.vdu.high_availability = None
         if VNFD.VDU.high_availability is not None :
             tcResult.overallStatus = FAILED
-            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing high_availability attribut")
+            logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - VNFD file is containing high_availability attribut")
             logger.close_handlers()
             return ERROR
 
     if (VNFD.VDU.high_availability <> tcInput.vnfd.vdu.high_availability) and (tcInput.vnfd.vdu.high_availability is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate high_availability parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate high_availability parameter")
         logger.write_error("vnfd:vdu:high_availability - Actual value is %s, expected %s" % (VNFD.VDU.high_availability, tcInput.vnfd.vdu.high_availability))
         logger.close_handlers()
         return ERROR
@@ -181,13 +181,13 @@ def test_case_5():
         tcInput.vnfd.vdu.scale_in_out = None
         if VNFD.VDU.scale_in_out is not None :
             tcResult.overallStatus = FAILED
-            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing scale_in_out attribut")
+            logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - VNFD file is containing scale_in_out attribut")
             logger.close_handlers()
             return ERROR
 
     if (VNFD.VDU.scale_in_out <> tcInput.vnfd.vdu.scale_in_out) and (tcInput.vnfd.vdu.scale_in_out is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate scale_in_out parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate scale_in_out parameter")
         logger.write_error("vnfd:vdu:scale_in_out - Actual value is %s, expected %s" % (VNFD.VDU.scale_in_out, tcInput.vnfd.vdu.scale_in_out))
         logger.close_handlers()
         return ERROR
@@ -200,18 +200,18 @@ def test_case_5():
         tcInput.vnfd.vdu.monitoring_parameter = None
         if VNFD.VDU.monitoring_parameter is not None :
             tcResult.overallStatus = FAILED
-            logger.write_error("Test case 5 - Execution completed with errors - VNFD file is containing monitoring_parameter attribut")
+            logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - VNFD file is containing monitoring_parameter attribut")
             logger.close_handlers()
             return ERROR
 
     if (VNFD.VDU.monitoring_parameter <> tcInput.vnfd.vdu.monitoring_parameter) and (tcInput.vnfd.vdu.monitoring_parameter is not None):
         tcResult.overallStatus = FAILED
-        logger.write_error("Test case 5 - Execution completed with errors - Unable to validate monitoring_parameter parameter")
+        logger.write_error("TC_VNFD_VDU_001 - Execution completed with errors - Unable to validate monitoring_parameter parameter")
         logger.write_error("vnfd:vdu:monitoring_parameter - Actual value is %s, expected %s" % (VNFD.VDU.monitoring_parameter, tcInput.vnfd.vdu.monitoring_parameter))
         logger.close_handlers()
         return ERROR    
 
-    logger.write_info("Test case 5 - Execution completed successfully")
+    logger.write_info("TC_VNFD_VDU_001 - Execution completed successfully")
 
     logger.close_handlers()
 
