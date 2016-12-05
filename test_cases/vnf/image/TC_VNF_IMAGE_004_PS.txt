@@ -39,7 +39,8 @@ def TC_VNF_IMAGE_004(tcInput):
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using no filter")
         logger.write_error("Expected list with %s images, found %s" % (tcInput.noInstalledImages, len(tcResult.swImages.noFilter)))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     2. Partial filter image retrieval
     logger.write_info("Listing software images using partial filter")
@@ -51,27 +52,31 @@ def TC_VNF_IMAGE_004(tcInput):
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
         logger.write_error("Expected list with 2 images, found %s" % len(tcResult.swImages.partialFilter))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     if tcResult.swImages.partialFilter[0].Checksum == tcInput.swImage1Checksum :
         if tcResult.swImages.partialFilter[0].Version <> tcInput.swImage1Version :
             logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
             logger.write_error("Expected version %s, found %s" % (tcInput.swImage1Version, tcResult.swImages.partialFilter[0].Version))
             logger.close_handlers()
-            return ERROR
+			tcResult.overallStatus = ERROR
+            return tcResult
     else if tcResult.swImages.partialFilter[0].Checksum == tcInput.swImage2Checksum :
         if tcResult.swImages.partialFilter[0].Version <> tcInput.swImage2Version :
             logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
             logger.write_error("Expected version %s, found %s" % (tcInput.swImage2Version, tcResult.swImages.partialFilter[0].Version))
             logger.close_handlers()
-            return ERROR
+			tcResult.overallStatus = ERROR
+            return tcResult
     else :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using partial filter")
         logger.write_error("Expected image with checksum %s or %s, found %s" % (tcInput.swImage1Checksum,
                                                                                 tcInput.swImage2Checksum,
                                                                                 tcResult.swImages.partialFilter[0].Checksum))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     3. Exact match filter image retrieval
     logger.write_info("Listing software images using exact filter")
@@ -88,37 +93,43 @@ def TC_VNF_IMAGE_004(tcInput):
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
         logger.write_error("Expected list with 1 image, found %s" % len(tcResult.swImages.exactFilter))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     if tcResult.swImages.exactFilter[0].Name <> tcInput.swImageName :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
         logger.write_error("Expected image name %s, found %" % (tcInput.swImageName, tcResult.swImages.exactFilter[0].Name))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     if tcResult.swImages.exactFilter[0].Provider <> tcInput.swImageProvider :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
         logger.write_error("Expected image provider %s, found %" % (tcInput.swImageProvider, tcResult.swImages.exactFilter[0].Provider))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     if tcResult.swImages.exactFilter[0].Version <> tcInput.swImage1Version :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
         logger.write_error("Expected image version %s, found %" % (tcInput.swImage1Version, tcResult.swImages.exactFilter[0].Version))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     if tcResult.swImages.exactFilter[0].Checksum <> tcInput.swImage1Checksum :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
         logger.write_error("Expected image checksum %s, found %" % (tcInput.swImage1Checksum, tcResult.swImages.exactFilter[0].Checksum))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     if tcResult.swImages.exactFilter[0].ContainerFormat <> tcInput.swImage1ContainerFormat :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at listing software images using exact filter")
         logger.write_error("Expected image format %s, found %" % (tcInput.swImage1ContainerFormat, tcResult.swImages.exactFilter[0].ContainerFormat))
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     4. Query the LifeCycle Management Information for the specific image
     logger.write_info("Querying the life cycle management information for specific image")
@@ -130,10 +141,11 @@ def TC_VNF_IMAGE_004(tcInput):
     if len(tcResult.swImages.LifeCycleMgmtInfo) == 0 :
         logger.write_error("TC_VNF_IMAGE_004 execution completed with failure at getting the life cycle management information")
         logger.close_handlers()
-        return ERROR
+		tcResult.overallStatus = ERROR
+        return tcResult
 
     logger.write_info("TC_VNF_IMAGE_004 execution completed successfully")
 
     logger.close_handlers()
 
-    return tcResult.overallStatus
+    return tcResult

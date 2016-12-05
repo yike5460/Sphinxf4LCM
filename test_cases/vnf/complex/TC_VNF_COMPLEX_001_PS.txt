@@ -57,33 +57,58 @@ def TC_VNF_COMPLEX_001(tcInput):
         # Instantiate ElementManagement
         # Set the required EM configuration so that VNF can be configured by EM
         if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
-            tcResult.overallStatus = status
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = status
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at setting the EM config file")
             logger.close_handlers()
             return tcResult
         # Start the EM so that it can service the VNF
         if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
-            tcResult.overallStatus = status
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = status
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at starting the EM")
             logger.close_handlers()
             return tcResult
     else:
         # No Element Manager required, set VNF config and license
         if ( status = vnf.SetVNFConfigFile( vnfRecord, tcInput.vnfConfigFile ) ) <> TRUE :
-            tcResult.overallStatus = status
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = status
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at setting the VNF config file")
             logger.close_handlers()
             return tcResult
 
         if ( status = vnf.SetVNFLicense( vnfRecord, tcInput.vnfLicenseFile ) ) <> TRUE :
-            tcResult.overallStatus = status
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = status
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at setting the VNF license file")
             logger.close_handlers()
             return tcResult
 
     status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
     if status <> TRUE :
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at instantiating the VNF")
         logger.close_handlers()
         return tcResult
@@ -95,12 +120,22 @@ def TC_VNF_COMPLEX_001(tcInput):
     wait_time = MAX_VNF_INSTANTIATION_TIME
     while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
         if vnfState == VNF_STATE_ERROR :
-            tcResult.overallStatus = vnfState
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = vnfState
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating the VNF is in 'Inactive' state")
             logger.close_handlers()
             return tcResult
         if wait_time-- == 0 :
-            tcResult.overallStatus = VNF_STATE_ERROR
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = VNF_STATE_ERROR
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
             logger.close_handlers()
             return tcResult
@@ -110,15 +145,23 @@ def TC_VNF_COMPLEX_001(tcInput):
     logger.write_info("Starting the max traffic load")
 
     if (status = traffic.ConfigTrafficLoad( MAX_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
         tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at configuring max traffic load")
         logger.close_handlers()
         return tcResult
 
     if (status = traffic.StartTraffic()) <> TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at starting traffic")
         logger.close_handlers()
         return tcResult
@@ -127,8 +170,12 @@ def TC_VNF_COMPLEX_001(tcInput):
     logger.write_info("Validating no traffic goes through")
 
     if (status = traffic.DoesTrafficFlow()) <> FALSE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating no traffic flows")
         logger.close_handlers()
         return tcResult
@@ -140,8 +187,12 @@ def TC_VNF_COMPLEX_001(tcInput):
 
     status = vnfm_vnf.Start( vnfRecord )
     if  status <> TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at starting the VNF")
         logger.close_handlers()
         return tcResult
@@ -152,13 +203,22 @@ def TC_VNF_COMPLEX_001(tcInput):
     wait_time = MAX_VNF_ACTIVATE_TIME
     while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
         if vnfState == VNF_STATE_ERROR :
-            vnfm_vnf.Terminate( vnfRecord )
-            tcResult.overallStatus = vnfState
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = vnfState
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating the VNF is in 'Active' state")
             logger.close_handlers()
             return tcResult
         if wait_time-- == 0 :
-            tcResult.overallStatus = VNF_STATE_ERROR
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = VNF_STATE_ERROR
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at waiting for the VNF to be in 'Active' state")
             logger.close_handlers()
             return tcResult
@@ -171,7 +231,12 @@ def TC_VNF_COMPLEX_001(tcInput):
     wait_time = MAX_VNF_SCALING_UP_TIME
     while ( status = traffic.AnyTrafficLoss() ) == TRUE  :
         if wait_time-- == 0 :
-            tcResult.overallStatus = status
+            em.Terminate()
+			vnf.Terminate()
+			traffic.Terminate()
+			vnfm_vnf.Terminate()
+			vnfrecord.Delete()
+			tcResult.overallStatus = status
             logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at waiting for the VNF to scale up to the maximum)
             logger.close_handlers()
             return tcResult
@@ -182,15 +247,23 @@ def TC_VNF_COMPLEX_001(tcInput):
     logger.write_info("Validating traffic flows with no dropped packets")
 
     if (status = traffic.DoesTrafficFlow()) <> TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating traffic flows")
         logger.close_handlers()
         return tcResult
 
     if (status = traffic.AnyTrafficLoss()) == TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating there is no traffic loss")
         logger.close_handlers()
         return tcResult
@@ -201,8 +274,12 @@ def TC_VNF_COMPLEX_001(tcInput):
     logger.write_info("Validating the allocated vResources are on max level")
 
     if (status = vnfm_vnf.ValidateAllocatedvResources( vnfRecord, tcInput.SwImageID, MAX_VRESOURCE_LEVEL )) <> TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating the allocated vResources")
         logger.close_handlers()
         return tcResult
@@ -223,8 +300,12 @@ def TC_VNF_COMPLEX_001(tcInput):
 
     status = vnfm_vnf.Stop( vnfRecord )
     if  status <> SUCCESS :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at stopping the VNF")
         logger.close_handlers()
         return tcResult
@@ -233,8 +314,12 @@ def TC_VNF_COMPLEX_001(tcInput):
     logger.write_info("Validating no traffic flows through")
 
     if (status = traffic.DoesTrafficFlow()) == TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at validating no traffic flows")
         logger.close_handlers()
         return tcResult
@@ -243,8 +328,12 @@ def TC_VNF_COMPLEX_001(tcInput):
     logger.write_info("Stopping traffic load")
 
     if (status = traffic.Stop()) <> TRUE :
-        vnfm_vnf.Terminate( vnfRecord )
-        tcResult.overallStatus = status
+        em.Terminate()
+		vnf.Terminate()
+		traffic.Terminate()
+		vnfm_vnf.Terminate()
+		vnfrecord.Delete()
+		tcResult.overallStatus = status
         logger.write_error("TC_VNF_COMPLEX_001 execution completed with failure at stopping traffic")
         logger.close_handlers()
         return tcResult
@@ -252,9 +341,11 @@ def TC_VNF_COMPLEX_001(tcInput):
     14. Terminate VNF
     logger.write_info("Terminating VNF")
 
-    vnfm_vnf.Terminate( vnfRecord )
-
-    vnfrecord.Delete()
+	em.Terminate()
+	vnf.Terminate()
+	traffic.Terminate()
+	vnfm_vnf.Terminate()
+	vnfrecord.Delete()
 
     logger.write_info("TC_VNF_COMPLEX_001 execution completed successfully")
 
