@@ -1,18 +1,19 @@
-TC.64	Migration of virtual resource with live migration set under traffic load
+TC_VNF_MIGRATE_002	Migration of virtual resource with live migration set under traffic load
 
 Sequence:
 1.	Instantiate VNF
 2.	Validate VNF state is Inactive
 3.	Start VNF
 4.	Validate VNF state is Active
-5.	Generate low traffic load
-6.	Validate that traffic flows through without issues (--> no dropped packets)
-7.	Trigger a migration of the vResource by issuing a command to the VNFM (--> time stamp)
-8.	Validate VNF has migrated, the new vResource is been used and the older vResource is released (--> time stamp)
-9.	Validate that traffic flows through without issues (--> no dropped packets)
-10.	Determine the service disruption by packet drop calculation
-11.	Stop Traffic
-12.	Terminate VNF
+5.	Verify VNF supports live migration
+6.	Generate low traffic load
+7.	Validate that traffic flows through without issues (--> no dropped packets)
+8.	Trigger a migration of the vResource by issuing a command to the VNFM (--> time stamp)
+9.	Validate VNF has migrated, the new vResource is been used and the older vResource is released (--> time stamp)
+10.	Validate that traffic flows through without issues (--> no dropped packets)
+11.	Determine the service disruption by packet drop calculation
+12.	Stop Traffic
+13.	Terminate VNF
 
 Pseudo Code:
 
@@ -52,11 +53,11 @@ import VNFM.Migration
 import traffic
 
 # instantiate logger
-logger = logging_module.LoggingClass(__name__, "test_case_64.txt")
+logger = logging_module.LoggingClass(__name__, "TC_VNF_MIGRATE_002.txt")
 
-def test_case_64():
+def TC_VNF_MIGRATE_002():
 
-    logger.write_info("Starting test case 64")
+    logger.write_info("Starting TC_VNF_MIGRATE_002")
 
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
@@ -70,7 +71,7 @@ def test_case_64():
     vnfRecord = VNFRECORD.Create()
     if vnfRecord == FALSE :
         tcResult.overallStatus = vnfRecord
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to create vnfRecord")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to create vnfRecord")
         logger.close_handlers()
         return ERROR
 
@@ -80,32 +81,32 @@ def test_case_64():
         # Set the required EM configuration so that VNF can be configured by EM
         if ( status = ElementManagement.SetEMConfiguration(vnfRecord, tcInput.emConfigFile)) <> TRUE :
             tcResult.overallStatus = status
-            logger.write_error("Test case 64 - Execution completed with errors - Unable to set EM config file")
+            logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to set EM config file")
             logger.close_handlers()
             return ERROR
         # Start the EM so that it can service the VNF
         if ( status = ElementManagement.StartEM(vnfRecord) ) <> TRUE :
             tcResult.overallStatus = status
-			logger.write_error("Test case 64 - Execution completed with errors - Unable to start EM")
+			logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to start EM")
             logger.close_handlers()
             return ERROR
     else:
         # No Element Manager required, set VNF config and license
         if ( status = VNF.SetVNFConfigFile(vnfRecord, tcInput.vnfConfigFile) ) <> TRUE :
             tcResult.overallStatus = status
-            logger.write_error("Test case 64 - Execution completed with errors - Unable to set VNF config file")
+            logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to set VNF config file")
             logger.close_handlers()
             return ERROR
 
     if ( status = VNF.SetVNFLicense(vnfRecord, tcInput.vnfLicenseFile) ) <> TRUE :
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to set VNF License file")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to set VNF License file")
         logger.close_handlers()
         return ERROR
 
     if ( status = VNFM.VNF.Instantiate(vnfRecord, tcInput.SwImageID) ) <> TRUE
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to instantiate VNF")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to instantiate VNF")
         logger.close_handlers()
         return ERROR
 
@@ -117,12 +118,12 @@ def test_case_64():
     while ( vnfState = VNFM.VNF.GetVNFState(vnfRecord) ) <> VNF_STATE_INACTIVE :
         if vnfState == VNF_STATE_ERROR :
             tcResult.overallStatus = vnfState
-            logger.write_error("Test case 64 - Execution completed with errors - Unable to validate VNF state")
+            logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to validate VNF state")
             logger.close_handlers()
             return ERROR
         if wait_time-- == 0 :
             tcResult.overallStatus = VNF_STATE_ERROR
-            logger.write_error("Test case 64 - Timeout - VNF transition into "Inactive" state failed")
+            logger.write_error("TC_VNF_MIGRATE_002 - Timeout - VNF transition into "Inactive" state failed")
             logger.close_handlers()
             return ERROR
         time.sleep( 1 sec )
@@ -139,7 +140,7 @@ def test_case_64():
     if  status <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to start VNF")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to start VNF")
         logger.close_handlers()
         return ERROR
 
@@ -151,12 +152,12 @@ def test_case_64():
         if vnfState == VNF_STATE_ERROR :
             VNFM.VNF.Terminate(vnfRecord)
             tcResult.overallStatus = vnfState
-            logger.write_error("Test case 64 - Execution completed with errors - Unable to validate VNF state")
+            logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to validate VNF state")
             logger.close_handlers()
             return ERROR
         if wait_time-- == 0 :
             tcResult.overallStatus = VNF_STATE_ERROR
-            logger.write_error("Test case 64 - Timeout - VNF transition into "Active" state failed")
+            logger.write_error("TC_VNF_MIGRATE_002 - Timeout - VNF transition into "Active" state failed")
             logger.close_handlers()
             return ERROR
         time.sleep( 1 sec )
@@ -169,118 +170,128 @@ def test_case_64():
     if (status = VNFM.VNF.ValidateAllocatedvResources(vnfRecord, SwImageID, INITIAL_VRESOURCE_LEVEL)) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to validate INITIAL resources")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to validate INITIAL resources")
         logger.close_handlers()
         return ERROR
 
-    5.	Generate low traffic load
+    5.	Verify VNF supports live migration
+    logger.write_info("Validating VNF supports live migration")
+
+    if (status = VNFM.Migration.GetMigrationType(vnfRecord)) <> LIVE_MIGRATION :
+        VNFM.VNF.Terminate(vnfRecord)
+        tcResult.overallStatus = FAILED
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to validate live migration support")
+        logger.close_handlers()
+        return ERROR
+
+    6.	Generate low traffic load
     logger.write_info("Starting the low traffic load")
 
     if (status = traffic.ConfigTrafficLoad(LOW_TRAFFIC_LOAD, trafficConfigParameter)) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to set traffic config parameters")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to set traffic config parameters")
         logger.close_handlers()
         return ERROR
 
     if (status = traffic.StartTraffic()) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to start traffic")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to start traffic")
         logger.close_handlers()
         return ERROR
 
-    6.	Validate that traffic flows through without issues (--> no dropped packets)
+    7.	Validate that traffic flows through without issues (--> no dropped packets)
     logger.write_info("Validating traffic goes through (--> no dropped packets)")
 
     if (status = traffic.DoesTrafficFlow()) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Traffic flow not detected")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Traffic flow not detected")
         logger.close_handlers()
         return ERROR
 
     if (status = traffic.AnyTrafficLoss()) == TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Traffic lost")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Traffic lost")
         logger.close_handlers()
         return ERROR
 
-    7.	Trigger a migration of the vResource by issuing a command to the VNFM (--> time stamp)
+    8.	Trigger a migration of the vResource by issuing a command to the VNFM (--> time stamp)
     logger.write_info("Triggering a migration of the vResource by issuing a command to the VNFM")
 
     if (status = VNFM.Migration.TriggerMigration(vnfRecord, vResourceType)) <> TRUE :
         traffic.stopTraffic()
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = not status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to trigger the migration")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to trigger the migration")
         logger.close_handlers()
         return ERROR
 
     tcResult.timeRecord.startvResourceMigration = time.clock()
 
-    8.	Validate VNF has migrated, the new vResource is been used and the older vResource is released (--> time stamp)
+    9.	Validate VNF has migrated, the new vResource is been used and the older vResource is released (--> time stamp)
     logger.write_info("Validating VNF has migrated")
 
     if (status = VNFM.Migration.ValidateMigrationSuccess(vnfRecord)) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Migration process not performed")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Migration process not performed")
         logger.close_handlers()
         return ERROR
 
     tcResult.timeRecord.completevResourceMigration = time.clock()
 
-    9.	Validate that traffic flows through without issues (--> no dropped packets)
+    10.	Validate that traffic flows through without issues (--> no dropped packets)
     logger.write_info("Validating traffic goes through (--> no dropped packets)")
 
     if (status = traffic.DoesTrafficFlow()) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Traffic flow not detected")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Traffic flow not detected")
         logger.close_handlers()
         return ERROR
 
     if (status = traffic.AnyTrafficLoss()) == TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Traffic lost")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Traffic lost")
         logger.close_handlers()
         return ERROR
 
-    10.	Determine the service disruption by packet drop calculation
+    11.	Determine the service disruption by packet drop calculation
     logger.write_info("Calculating the service disruption")
 
     tcResult.traffic.serviceDisruption = Traffic.CalculateServiceDisruptionLength()
 
-    11.	Stop traffic
+    12.	Stop traffic
     logger.write_info("Stopping the traffic")
 
     if (status = traffic.Stop()) <> TRUE :
         VNFM.VNF.Terminate(vnfRecord)
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to stop traffic")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to stop traffic")
         logger.close_handlers()
         return ERROR
 
-    12. Terminate VNF
+    13. Terminate VNF
     logger.write_info("Terminating VNF")
 
     status = VNFM.VNF.Terminate(vnfRecord)
     if  status <> SUCCESS :
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to terminate VNF")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to terminate VNF")
         logger.close_handlers()
         return ERROR
 
     if ( status = VNFRECORD.delete(vnfRecord) ) <> TRUE :
         tcResult.overallStatus = status
-        logger.write_error("Test case 64 - Execution completed with errors - Unable to delete vnfRecord")
+        logger.write_error("TC_VNF_MIGRATE_002 - Execution completed with errors - Unable to delete vnfRecord")
         logger.close_handlers()
         return ERROR
 
-    logger.write_info("Test case 64 - Execution completed successfully")
+    logger.write_info("TC_VNF_MIGRATE_002 - Execution completed successfully")
 
     logger.close_handlers()
 
