@@ -288,7 +288,7 @@ def TC_VNF_MIGRATE_004():
 
     if ( status = vnfRecord.delete(vnfRecord) ) <> TRUE :
          tcResult.overallStatus = status
-         logger.write_error("TC_VNF_MIGRATE_001 - Execution completed with errors - Unable to delete vnfRecord")
+         logger.write_error("TC_VNF_MIGRATE_004 - Execution completed with errors - Unable to delete vnfRecord")
          logger.close_handlers()
          return tcResult
 
