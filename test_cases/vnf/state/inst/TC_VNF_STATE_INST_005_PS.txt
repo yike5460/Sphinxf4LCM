@@ -27,13 +27,11 @@ def TC_VNF_STATE_INST_005(tcInput):
 
     logger.write_info("Starting TC_VNF_STATE_INST_005")
 
-    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfrecord = VNFRECORD.Create(logger)
     em = ElementManagement.EMClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
 
     tcResult.overallStatus = SUCCESS
-
-    vnfRecord = vnfrecord.Create()
 
     1. Deactivate EM if needed
     logger.write_info("Deactivating EM")

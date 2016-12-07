@@ -29,13 +29,11 @@ def TC_VNF_STATE_INST_001(tcInput):
 
     logger.write_info("Starting TC_VNF_STATE_INST_001")
 
-    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfrecord = VNFRECORD.Create(logger)
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
 
     tcResult.overallStatus = SUCCESS
-
-    vnfRecord = vnfrecord.Create()
 
     1. Instantiate the VNF without load (--> time stamp)
     logger.write_info("Instantiating the VNF")

@@ -67,7 +67,7 @@ def TC_VNF_RECOVERY_001(tcInput):
 
     logger.write_info("Starting TC_VNF_RECOVERY_001")
 
-    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfrecord = VNFRECORD.Create(logger)
     em = ElementManagement.EMClass(logger)
     vnf = VNF.VNFClass(logger)
     vnfm = VNFm.VNFMClass(logger)
@@ -77,8 +77,6 @@ def TC_VNF_RECOVERY_001(tcInput):
     traffic = Traffic.TrafficClass(logger)
 
     tcResult.overallStatus = SUCCESS
-
-    vnfRecord = vnfrecord.Create()
 
     1. Instantiate VNF
     logger.write_info("Instantiating VNF")

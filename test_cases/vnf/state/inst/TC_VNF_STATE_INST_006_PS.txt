@@ -31,15 +31,13 @@ def TC_VNF_STATE_INST_006(tcInput):
 
     logger.write_info("Starting TC_VNF_STATE_INST_006")
 
-    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfrecord = VNFRECORD.Create(logger)
     vim = VIM.VIMClass(logger)
     em = ElementManagement.EMClass(logger)
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
 
     tcResult.overallStatus = SUCCESS
-
-    vnfRecord = vnfrecord.Create()
 
     1. Eliminate one or more required virtual resources
     logger.write_info("Eliminating required virtual resources")

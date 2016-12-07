@@ -44,15 +44,13 @@ def TC_VNF_STATE_UPDATE_002(tcInput):
 
     logger.write_info("Starting TC_VNF_STATE_UPDATE_002")
 
-    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfrecord = VNFRECORD.Create(logger)
     em = ElementManagement.EMClass(logger)
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
     traffic = Traffic.TrafficClass(logger)
 
     tcResult.overallStatus = SUCCESS
-
-    vnfRecord = vnfrecord.Create()
 
     1.  Ensure EM is up or config file is present
     logger.write_info("Ensuring EM is up or config file is present")

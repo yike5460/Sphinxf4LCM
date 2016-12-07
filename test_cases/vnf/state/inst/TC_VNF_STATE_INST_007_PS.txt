@@ -33,14 +33,12 @@ def TC_VNF_STATE_INST_007(tcInput):
 
     logger.write_info("Starting TC_VNF_STATE_INST_007")
 
-    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    vnfrecord = VNFRECORD.Create(logger)
     traffic = Traffic.TrafficClass(logger)
     vnf = VNF.VNFClass(logger)
     vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
 
     tcResult.overallStatus = SUCCESS
-
-    vnfRecord = vnfrecord.Create()
 
     1. Start traffic load
     logger.write_info("Starting traffic load")
