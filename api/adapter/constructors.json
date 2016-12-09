@@ -1,0 +1,4 @@
+{
+  "openstack" : "api.adapter.openstack.vnfm.VnfmOpenstackAdapter",
+  "dummy"     : "api.adapter.dummy.vnfm.VnfmDummyAdapter"
+}
