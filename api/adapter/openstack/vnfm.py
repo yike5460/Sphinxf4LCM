@@ -38,8 +38,13 @@ class VnfmOpenstackAdapter(object):
                         **kwargs):
         pass
 
+    # Working in progress for adding vnf_instance_description
     def create_vnf_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
-        pass
+        vnf_dict = dict()
+        vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
+                            'name': vnf_instance_name}}
+        vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
+        return vnf_instance['vnf']['id']
 
     def get_vnf_state(self, vnf_id):
         tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
