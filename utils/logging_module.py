@@ -6,7 +6,7 @@ class LoggingClass:
     Class used for logging
 
     :param logger_name:     The name of the logger
-    :param log_file_name:   The name of the file to write logs to; Exanple "log.txt"
+    :param log_file_name:   The name of the file to write logs to; Example "log.txt"
     :param file_level:      The desired logging level of the logs that are to be written to file
                             Possible values: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
                             Default value: 'DEBUG'
