@@ -1,6 +1,7 @@
 import os_client_config
 from tackerclient.tacker.client import Client as TackerClient
 
+
 class VnfmOpenstackAdapter(object):
     def __init__(self,
                  auth_url=None,
@@ -27,8 +28,6 @@ class VnfmOpenstackAdapter(object):
             print 'Unable to create', self.__class__.__name__, 'instance'
             raise
 
-
-
     def vnf_instantiate(self,
                         vnf_instance_id,
                         flavour_id,
@@ -46,6 +45,6 @@ class VnfmOpenstackAdapter(object):
         vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
         return vnf_instance['vnf']['id']
 
-    def get_vnf_state(self, vnf_id):
+    def vnf_get_state(self, vnf_id):
         tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
         return tacker_show_vnf['vnf']['status']
