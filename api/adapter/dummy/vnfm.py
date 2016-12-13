@@ -10,9 +10,13 @@ class VnfmDummyAdapter(object):
         :return:                                    The status of the operation ex. "Processing", "Failed".
         """
         self.logger.write_debug("Entering function %s.get_operation" % self.__module__)
+
         operation_status = "Successfully done"
+
         self.logger.write_debug("Instantiation operation status: %s" % operation_status)
+
         self.logger.write_debug("Exiting function %s.get_operation" % self.__module__)
+
         return operation_status
 
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
@@ -28,9 +32,13 @@ class VnfmDummyAdapter(object):
         :return:                            VNF instance identifier just created.
         """
         self.logger.write_debug("Entering function %s.vnf_create_id" % self.__module__)
+
         vnf_instance_id = "vnfinstanceid"
+
         self.logger.write_debug("VNF ID: %s" % vnf_instance_id)
+
         self.logger.write_debug("Exiting function %s.vnf_create_id" % self.__module__)
+
         return vnf_instance_id
 
     def vnf_instantiate(self,

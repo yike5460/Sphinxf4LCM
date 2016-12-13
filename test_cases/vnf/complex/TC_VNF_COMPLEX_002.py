@@ -1,6 +1,6 @@
 from utils.logging_module import LoggingClass
 from api.generic.vnfm import Vnfm
-import time
+from api.generic.tools import check_operation_status
 
 # Instantiate logger
 logger_object = LoggingClass(__name__, "TC_VNF_COMPLEX_002.log")
@@ -32,9 +32,6 @@ def tc_vnf_complex_002_body(logger):
 
     logger.write_info("Starting TC_VNF_COMPLEX_002")
 
-    max_operation_time = 3
-    max_vnf_instantiation_time = 3
-    max_vnf_activation_time = 3
     vnfm = Vnfm(vendor="dummy", logger=logger)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -52,64 +49,38 @@ def tc_vnf_complex_002_body(logger):
     life_cycle_operation_occurrence_id = vnfm.vnf_instantiate(vnf_instance_id=vnf_instance_id, flavour_id="12345")
 
     # Check the status of the operation
-    for time_index in xrange(1, max_operation_time+1):
-        status = vnfm.get_operation(life_cycle_operation_occurrence_id)
-        if status == "Successfully done":
-            break
-        if status == "Failed":
-            logger.write_error("TC_VNF_COMPLEX_002 execution failed")
-            logger.write_debug("The status of the instantiation operation was Failed")
-            tc_vnf_complex_002_cleanup(logger)
-            return
-        if time_index == max_operation_time:
-            logger.write_error("TC_VNF_COMPLEX_002 execution failed")
-            logger.write_debug("The status of the instantiation operation was %s, waited %s seconds" % (status, max_operation_time))
-            tc_vnf_complex_002_cleanup(logger)
-            return
-        logger.write_debug("Sleeping one second")
-        time.sleep(1)
+    if not check_operation_status(logger, vnfm.get_operation, life_cycle_operation_occurrence_id, "Successfully done"):
+        logger.write_error("TC_VNF_COMPLEX_002 execution failed")
+        logger.write_debug("The status of the operation not as expected")
+        tc_vnf_complex_002_cleanup(logger)
+        return
 
     # ------------------------------------------------------------------------------------------------------------------
-    # 3. Validate VNF state is Inactive
+    # 3. Validate VNF instantiation state is INSTANTIATED
     # ------------------------------------------------------------------------------------------------------------------
-    logger.write_info("Validating VNF state is Inactive")
-    for time_index in xrange(1, max_vnf_instantiation_time+1):
-        vnf_instantiatiob_state = vnfm.vnf_query(vnf_instance_id, "instantiation_state")
-        if vnf_instantiatiob_state == "INSTANTIATED":
-            break
-        if time_index == max_vnf_instantiation_time:
-            logger.write_error("TC_VNF_COMPLEX_002 execution failed")
-            logger.write_debug("The VNF instantiation state was %s, waited %s seconds" % (vnf_instantiatiob_state, max_vnf_instantiation_time))
-            tc_vnf_complex_002_cleanup(logger)
-            return
-        logger.write_debug("Sleeping one second")
-        time.sleep(1)
+    logger.write_info("Validating VNF instantiation state is INSTANTIATED")
+    vnf_instantiation_state = vnfm.vnf_query(vnf_instance_id, "instantiation_state")
+    if vnf_instantiation_state != "INSTANTIATED":
+        logger.write_error("TC_VNF_COMPLEX_002 execution failed")
+        logger.write_debug("The VNF instantiation state was %s, expected INSTANTIATED" % vnf_instantiation_state)
+        tc_vnf_complex_002_cleanup(logger)
+        return
 
     # ------------------------------------------------------------------------------------------------------------------
     # 4. Start VNF
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Starting VNF")
-    # TODO by Raluca
 
     # ------------------------------------------------------------------------------------------------------------------
-    # 4. Validate VNF state is Active
+    # 5. Validate VNF state is STARTED
     # ------------------------------------------------------------------------------------------------------------------
-    logger.write_info("Validating VNF state is Active")
-
-    for time_index in xrange(1, max_vnf_activation_time+1):
-        vnf_state = vnfm.vnf_query(vnf_instance_id, "vnf_state")
-        if vnf_state == "STARTED":
-            break
-        if time_index == max_vnf_activation_time:
-            logger.write_error("TC_VNF_COMPLEX_002 execution failed")
-            logger.write_debug("The VNF state was %s, waited %s seconds" % (vnf_state, max_vnf_activation_time))
-            tc_vnf_complex_002_cleanup(logger)
-            return
-        logger.write_debug("Sleeping one second")
-        time.sleep(1)
-
-
-
+    logger.write_info("Validating VNF state is STARTED")
+    vnf_state = vnfm.vnf_query(vnf_instance_id, "vnf_state")
+    if vnf_state != "STARTED":
+        logger.write_error("TC_VNF_COMPLEX_002 execution failed")
+        logger.write_debug("The VNF state was %s, expected STARTED" % vnf_state)
+        tc_vnf_complex_002_cleanup(logger)
+        return
 
     logger.write_info("TC_VNF_COMPLEX_002 execution completed successfully")
 
