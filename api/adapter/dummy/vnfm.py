@@ -1,7 +1,6 @@
 class VnfmDummyAdapter(object):
     def __init__(self, logger, **kwargs):
         self.logger = logger
-        pass
 
     def get_operation(self, lifecycle_operation_occurrence_id):
         """
@@ -83,7 +82,7 @@ class VnfmDummyAdapter(object):
         """
         self.logger.write_debug("Entering function %s.vnf_query" % self.__module__)
 
-        vnf_info = {'instantiation_state': 'NOT_INSTANTIATED',
+        vnf_info = {'instantiation_state': 'INSTANTIATED',
                     'instantiated_vnf_info': {'vnf_state': 'STARTED'}}
 
         if attribute_selector == "instantiation_state":
