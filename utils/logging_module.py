@@ -30,7 +30,7 @@ class LoggingClass:
         fh.setLevel(getattr(logging, str(file_level)))
 
         # create formatter and add it to the handlers
-        fh_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+        fh_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         fh.setFormatter(fh_formatter)
 
         # add the file handler to the logger
@@ -41,7 +41,7 @@ class LoggingClass:
         ch.setLevel(getattr(logging, str(console_level)))
 
         # create formatter and add it to the handlers
-        ch_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+        ch_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         ch.setFormatter(ch_formatter)
 
         # add the console handler to the logger
