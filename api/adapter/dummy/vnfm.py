@@ -104,3 +104,30 @@ class VnfmDummyAdapter(object):
         else:
             self.logger.write_debug("Exiting function %s.vnf_query" % self.__module__)
             return vnf_info
+
+    def change_vnf_state(self,
+        vnf_instance_id,
+        change_state_to,
+        stop_type=None,
+        graceful_stop_timeout=None):
+
+        """
+        change_vnf_state() - change the state of a VNF instance, including starting and stopping the VNF instance.
+
+        :param vnf_instance_id:             Identifier of the VNF instance.
+        :param change_state_to:             The desired state to change the VNF to. Permitted values are: start, stop.
+        :param stop_type:                   It signals whether forceful or graceful stop is requested. Allowed values
+                                            are: forceful and graceful.
+        :param graceful_stop_timeout:       The time interval to wait for the VNF to be taken out of service during
+                                            graceful stop, before stopping the VNF.
+        :return:                            The identifier of the VNF lifecycle operation occurrence.
+        """
+        self.logger.write_debug("Entering function %s.change_vnf_state" % self.__module__)
+
+        lifecycle_operation_occurrence_id = "12346"
+
+        self.logger.write_debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
+
+        self.logger.write_debug("Exiting function %s.change_vnf_state" % self.__module__)
+
+        return lifecycle_operation_occurrence_id
