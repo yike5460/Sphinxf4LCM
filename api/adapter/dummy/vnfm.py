@@ -106,10 +106,10 @@ class VnfmDummyAdapter(object):
             return vnf_info
 
     def change_vnf_state(self,
-        vnf_instance_id,
-        change_state_to,
-        stop_type=None,
-        graceful_stop_timeout=None):
+                         vnf_instance_id,
+                         change_state_to,
+                         stop_type=None,
+                         graceful_stop_timeout=None):
 
         """
         change_vnf_state() - change the state of a VNF instance, including starting and stopping the VNF instance.
