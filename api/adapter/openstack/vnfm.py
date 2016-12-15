@@ -38,7 +38,7 @@ class VnfmOpenstackAdapter(object):
         pass
 
     # Working in progress for adding vnf_instance_description
-    def create_vnf_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
+    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
         vnf_dict = dict()
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
