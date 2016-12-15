@@ -113,8 +113,41 @@ class VnfmDummyAdapter(object):
         """
         self.logger.write_debug("Entering function %s.vnf_query" % self.__module__)
 
-        vnf_info = {'instantiation_state': 'INSTANTIATED',
-                    'instantiated_vnf_info': {'vnf_state': 'STARTED'}}
+        vnf_info = {'vnf_instance_id': '',
+                    'vnf_instance_name': '',
+                    'vnf_instance_description': '',
+                    'vnfd_id': '',
+                    'vnf_provider': '',
+                    'vnf_product_name': '',
+                    'vnf_software_version': '',
+                    'vnfd_version': '',
+                    'onboarded_vnf_pkg_info_id': '',
+                    'vnf_configurable_property': '',
+                    'instantiation_state': 'INSTANTIATED',
+                    'instantiated_vnf_info': {'flavour_id': '',
+                                              'vnf_state': 'STARTED',
+                                              'scale_status': '',
+                                              'ext_cp_info': '',
+                                              'ext_virtual_link_info': '',
+                                              'ext_managed_virtual_link_info': '',
+                                              'monitoring_parameter': '',
+                                              'localization_language': '',
+                                              'vim_info': '',
+                                              'vnfc_resource_info': {'vnfc_instance_id': '',
+                                                                     'vdu_id': '',
+                                                                     'compute_resource': '',
+                                                                     'storage_resource_id': '',
+                                                                     'reservation_id': ''},
+                                              'virtual_link_resource_info': {'virtual_link_instance_id': '',
+                                                                             'virtual_link_desc_id': '',
+                                                                             'network_resource': '',
+                                                                             'reservation_id': ''},
+                                              'virtual_storage_resource_info': {'virtual_storage_instance_id': '',
+                                                                                'virtual_storage_desc_id': '',
+                                                                                'storage_resource': '',
+                                                                                'reservation_id': ''}},
+                    'metadata': '',
+                    'extension': ''}
 
         if attribute_selector == "instantiation_state":
             self.logger.write_debug("VNF instantiation state: %s" % vnf_info['instantiation_state'])
