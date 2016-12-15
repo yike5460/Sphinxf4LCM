@@ -2,6 +2,7 @@ from utils.logging_module import LoggingClass
 from api.generic.vnfm import Vnfm
 from api.generic.vnf import Vnf
 from api.generic.tools import check_operation_status
+from datetime import datetime
 
 # Instantiate logger
 logger_object = LoggingClass(__name__, "TC_VNF_COMPLEX_002.log")
@@ -41,7 +42,8 @@ def tc_vnf_complex_002_body(logger, tc_input):
     vnf = Vnf(vendor=tc_input['vnf_vendor'], logger=logger)
 
     tc_result = {'overall_status': 'Success',
-                 'error_info': 'No errors'}
+                 'error_info': 'No errors',
+                 'timeRecord': {'startVNF': None, 'stopVNF': None}}
 
     # ------------------------------------------------------------------------------------------------------------------
     # 1. Create VNF ID
@@ -82,7 +84,17 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 4. Start VNF
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Starting VNF")
-    # TODO
+    life_cycle_operation_occurrence_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="start")
+    tc_result['timeRecord']['stopVNF'] = datetime.utcnow()
+
+    # Check the status of the starting operation
+    if not check_operation_status(logger, vnfm.get_operation, instantiation_operation_id, "Successfully done"):
+        logger.write_error("TC_VNF_COMPLEX_002 execution failed")
+        logger.write_debug("Unexpected status for starting operation")
+        tc_vnf_complex_002_cleanup(logger)
+        tc_result['overall_status'] = 'Fail'
+        tc_result['error_info'] = 'Unexpected status for starting operation'
+        return tc_result
 
     # ------------------------------------------------------------------------------------------------------------------
     # 5. Validate VNF state is STARTED
@@ -167,7 +179,17 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 13. Validate VNF has been stopped (--> time stamp)
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Validating VNF has been stopped")
-    # TODO
+    life_cycle_operation_occurrence_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="stop")
+    tc_result['timeRecord']['stopVNF'] = datetime.utcnow()
+
+    # Check the status of the stopping operation
+    if not check_operation_status(logger, vnfm.get_operation, instantiation_operation_id, "Successfully done"):
+        logger.write_error("TC_VNF_COMPLEX_002 execution failed")
+        logger.write_debug("Unexpected status for stopping operation")
+        tc_vnf_complex_002_cleanup(logger)
+        tc_result['overall_status'] = 'Fail'
+        tc_result['error_info'] = 'Unexpected status for stopping operation'
+        return tc_result
 
     # ------------------------------------------------------------------------------------------------------------------
     # 14. Validate no traffic flows through (--> last arrival time stamp)
