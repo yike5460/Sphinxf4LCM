@@ -1,4 +1,10 @@
 {
-  "openstack" : "api.adapter.openstack.vnfm.VnfmOpenstackAdapter",
-  "dummy"     : "api.adapter.dummy.vnfm.VnfmDummyAdapter"
+  "openstack": {
+    "vnfm"  : "api.adapter.openstack.vnfm.VnfmOpenstackAdapter",
+    "vnf"   : "api.adapter.openstack.vnf.VnfmOpenstackAdapter"
+  },
+  "dummy" : {
+    "vnfm"  : "api.adapter.dummy.vnfm.VnfmDummyAdapter",
+    "vnf"   : "api.adapter.dummy.vnf.VnfDummyAdapter"
+  }
 }

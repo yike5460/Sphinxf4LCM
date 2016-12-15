@@ -67,11 +67,34 @@ class VnfmDummyAdapter(object):
         """
         self.logger.write_debug("Entering function %s.vnf_instantiate" % self.__module__)
 
-        lifecycle_operation_occurrence_id = "12345"
+        lifecycle_operation_occurrence_id = "vnf_instantiate_operation_id"
 
         self.logger.write_debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
 
         self.logger.write_debug("Exiting function %s.vnf_instantiate" % self.__module__)
+
+        return lifecycle_operation_occurrence_id
+
+    def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
+        """
+        This function scales an instantiated VNF of a particular DF to a target size.
+
+        :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
+        :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
+                                        VNF is requested to be scaled. Either instantiationLevelId or scaleInfo
+                                        but not both shall be present.
+        :param scale_info:              For each scaling aspect of the current DF, defines the target scale level to
+                                        which the VNF is to be scaled. Either instantiationLevelId or scaleInfo
+                                        but not both shall be present.
+        :param additional_param:        Additional parameters passed as input to the scaling process, specific to the
+                                        VNF being scaled.
+        :return:                        The identifier of the VNF lifecycle operation occurrence.
+        """
+        self.logger.write_debug("Entering function %s.vnf_scale_to_level" % self.__module__)
+
+        lifecycle_operation_occurrence_id = "vnf_scale_to_level_operation_id"
+
+        self.logger.write_debug("Exiting function %s.vnf_scale_to_level" % self.__module__)
 
         return lifecycle_operation_occurrence_id
 
