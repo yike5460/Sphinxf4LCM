@@ -2,7 +2,8 @@ from utils.logging_module import LoggingClass
 from api.generic.vnfm import Vnfm
 from api.generic.vnf import Vnf
 from api.generic.tools import check_operation_status
-from datetime import datetime
+from api.generic.tools import vnfinfo_check_instantiation_state, vnfinfo_check_vnf_state
+import time
 
 # Instantiate logger
 logger_object = LoggingClass(__name__, "TC_VNF_COMPLEX_002.log")
@@ -43,7 +44,7 @@ def tc_vnf_complex_002_body(logger, tc_input):
 
     tc_result = {'overall_status': 'Success',
                  'error_info': 'No errors',
-                 'timeRecord': {'startVNFStart': None, 'stopVNFStart': None, 'stopVNFEnd': None}}
+                 'timeRecord': {}}
 
     # ------------------------------------------------------------------------------------------------------------------
     # 1. Create VNF ID
@@ -57,10 +58,11 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 2. Instantiate VNF
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Instantiating VNF")
+    tc_result['timeRecord']['instantiateVNFStart'] = time.clock()
     instantiation_operation_id = vnfm.vnf_instantiate(vnf_instance_id=vnf_instance_id, flavour_id="123456")
 
     # Check the status of the instantiation operation
-    if not check_operation_status(logger, vnfm.get_operation, instantiation_operation_id, "Successfully done"):
+    if not check_operation_status(logger, vnfm.get_operation_status, instantiation_operation_id, "Successfully done"):
         logger.write_error("TC_VNF_COMPLEX_002 execution failed")
         logger.write_debug("Unexpected status for the instantiation operation")
         tc_vnf_complex_002_cleanup(logger)
@@ -72,23 +74,29 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 3. Validate VNF instantiation state is INSTANTIATED
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Validating VNF instantiation state is INSTANTIATED")
-    vnf_instantiation_state = vnfm.vnf_query(vnf_instance_id, "instantiation_state")
-    if vnf_instantiation_state != "INSTANTIATED":
+    vnf_info = vnfm.vnf_query(vnf_instance_id)
+    if not vnfinfo_check_instantiation_state(logger, vnf_info, "INSTANTIATED"):
         logger.write_error("TC_VNF_COMPLEX_002 execution failed")
-        logger.write_debug("The VNF instantiation state was %s, expected INSTANTIATED" % vnf_instantiation_state)
+        logger.write_debug("Unexpected VNF instantiation state")
         tc_vnf_complex_002_cleanup(logger)
         tc_result['overall_status'] = 'Fail'
+        tc_result['error_info'] = 'Unexpected VNF instantiation state'
         return tc_result
+
+    tc_result['timeRecord']['instantiateVNFEnd'] = time.clock()
+
+    tc_result['timeRecord']['instantiateVNFTime'] = \
+        round(tc_result['timeRecord']['instantiateVNFEnd'] - tc_result['timeRecord']['instantiateVNFStart'], 6)
 
     # ------------------------------------------------------------------------------------------------------------------
     # 4. Start VNF
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Starting VNF")
-    life_cycle_operation_occurrence_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="start")
-    tc_result['timeRecord']['stopVNFStart'] = datetime.utcnow()
+    tc_result['timeRecord']['startVNFStart'] = time.clock()
+    start_operation_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="start")
 
     # Check the status of the starting operation
-    if not check_operation_status(logger, vnfm.get_operation, instantiation_operation_id, "Successfully done"):
+    if not check_operation_status(logger, vnfm.get_operation_status, start_operation_id, "Successfully done"):
         logger.write_error("TC_VNF_COMPLEX_002 execution failed")
         logger.write_debug("Unexpected status for starting operation")
         tc_vnf_complex_002_cleanup(logger)
@@ -100,19 +108,25 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 5. Validate VNF state is STARTED
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Validating VNF state is STARTED")
-    vnf_state = vnfm.vnf_query(vnf_instance_id, "vnf_state")
-    if vnf_state != "STARTED":
+    vnf_info = vnfm.vnf_query(vnf_instance_id)
+    if not vnfinfo_check_vnf_state(logger, vnf_info, "STARTED"):
         logger.write_error("TC_VNF_COMPLEX_002 execution failed")
-        logger.write_debug("The VNF state was %s, expected STARTED" % vnf_state)
+        logger.write_debug("Unexpected VNF state")
         tc_vnf_complex_002_cleanup(logger)
         tc_result['overall_status'] = 'Fail'
-        tc_result['error_info'] = 'The VNF state was %s, expected STARTED' % vnf_state
+        tc_result['error_info'] = 'Unexpected VNF state'
         return tc_result
+
+    tc_result['timeRecord']['startVNFEnd'] = time.clock()
+
+    tc_result['timeRecord']['StartVNFTime'] = \
+        round(tc_result['timeRecord']['startVNFEnd'] - tc_result['timeRecord']['startVNFStart'], 6)
 
     # ------------------------------------------------------------------------------------------------------------------
     # 6. Validate that traffic flows through without issues
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Validating that traffic flows through without issues")
+    # TODO
 
     # ------------------------------------------------------------------------------------------------------------------
     # 7. Trigger a resize of the NFV resources to reach the maximum
@@ -125,7 +139,7 @@ def tc_vnf_complex_002_body(logger, tc_input):
 
         # Get the status of the instantiation operation
         trigger_successful = check_operation_status(logger,
-                                                    vnfm.get_operation,
+                                                    vnfm.get_operation_status,
                                                     trigger_operation_id,
                                                     "Successfully done")
     elif tc_input['scaling_trigger'] == "triggered_by_vnf":
@@ -133,7 +147,7 @@ def tc_vnf_complex_002_body(logger, tc_input):
                                                   instantiation_level_id="max_level_id")
         # Get the status of the instantiation operation
         trigger_successful = check_operation_status(logger,
-                                                    vnf.get_operation,
+                                                    vnf.get_operation_status,
                                                     trigger_operation_id,
                                                     "Successfully done")
     # Check the status of the instantiation operation
@@ -173,11 +187,11 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 12. Stop the VNF (--> time stamp)
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Stopping the VNF")
-    life_cycle_operation_occurrence_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="stop")
-    tc_result['timeRecord']['stopVNFStart'] = datetime.utcnow()
+    tc_result['timeRecord']['stopVNFStart'] = time.clock()
+    stop_operation_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="stop")
 
     # Check the status of the stopping operation
-    if not check_operation_status(logger, vnfm.get_operation, instantiation_operation_id, "Successfully done"):
+    if not check_operation_status(logger, vnfm.get_operation_status, stop_operation_id, "Successfully done"):
         logger.write_error("TC_VNF_COMPLEX_002 execution failed")
         logger.write_debug("Unexpected status for stopping operation")
         tc_vnf_complex_002_cleanup(logger)
@@ -198,7 +212,7 @@ def tc_vnf_complex_002_body(logger, tc_input):
         tc_result['error_info'] = 'The VNF state was %s, expected STOPPED' % vnf_state
         return tc_result
 
-    tc_result['timeRecord']['stopVNFEnd'] = datetime.utcnow()
+    tc_result['timeRecord']['stopVNFEnd'] = time.clock()
 
     # ------------------------------------------------------------------------------------------------------------------
     # 14. Validate no traffic flows through (--> last arrival time stamp)
@@ -216,11 +230,15 @@ def tc_vnf_complex_002_body(logger, tc_input):
     # 16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
     # ------------------------------------------------------------------------------------------------------------------
     logger.write_info("Calculating the time to stop a max scaled VNF under load")
-    # TODO
+
+    tc_result['timeRecord']['stopVNFTime'] = \
+        round(tc_result['timeRecord']['stopVNFEnd'] - tc_result['timeRecord']['stopVNFStart'], 6)
 
     logger.write_info("TC_VNF_COMPLEX_002 execution completed successfully")
 
     tc_vnf_complex_002_cleanup(logger)
+
+    print tc_result
 
     return tc_result
 

@@ -26,3 +26,44 @@ def check_operation_status(logger, function_get_status, operation_id, expected_s
             return False
         logger.write_debug("Sleeping %s second(s)" % interval)
         time.sleep(interval)
+
+
+def vnfinfo_check_instantiation_state(logger, vnfinfo_dict, expected_instantiation_state):
+    """
+    This function checks that the value for key instantiation_state is as expected in the provided vnfInfo dictionary.
+
+    :param logger:                          Reference to the logger object.
+    :param vnfinfo_dict:                    vnfInfo dictionary.
+    :param expected_instantiation_state:    Expected value for key instantiation_state.
+    :return:                                True if the value for key instantiation_state is as expected, False
+                                            otherwise.
+    """
+    if 'instantiation_state' in vnfinfo_dict.keys():
+        logger.write_debug("Expected VNF instantiation state %s, actual instantiation state %s" %
+                           (expected_instantiation_state, vnfinfo_dict['instantiation_state']))
+        if vnfinfo_dict['instantiation_state'] == expected_instantiation_state:
+            return True
+        else:
+            return False
+    else:
+        raise Exception("Unable to find key instantiation_state in the provided dictionary")
+
+
+def vnfinfo_check_vnf_state(logger, vnfinfo_dict, expected_vnf_state):
+    """
+    This function checks that the value for key vnf_state is as expected in the provided vnfInfo dictionary.
+
+    :param logger:              Reference to the logger object.
+    :param vnfinfo_dict:        vnfInfo dictionary.
+    :param expected_vnf_state:  Expected value for key vnf_state.
+    :return:                    True if the value for key vnf_state is as expected, False otherwise.
+    """
+    if 'vnf_state' in vnfinfo_dict['instantiated_vnf_info'].keys():
+        logger.write_debug("Expected VNF state %s, actual state %s" %
+                           (expected_vnf_state, vnfinfo_dict['instantiated_vnf_info']['vnf_state']))
+        if vnfinfo_dict['instantiated_vnf_info']['vnf_state'] == expected_vnf_state:
+            return True
+        else:
+            return False
+    else:
+        raise Exception("Unable to find key vnf_state in the provided dictionary")

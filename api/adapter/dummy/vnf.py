@@ -2,12 +2,14 @@ class VnfDummyAdapter(object):
     def __init__(self, logger, **kwargs):
         self.logger = logger
 
-    def get_operation(self, lifecycle_operation_occurrence_id):
+    def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
         This function provides the status of a VNF lifecycle management operation.
 
+        This function was written in accordance with section 7.2.13 of GS NFV-IFA 008 - v2.1.1.
+
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
-        :return:                                    The status of the operation ex. "Processing", "Failed".
+        :return:                                    Status of the operation ex. "Processing", "Failed".
         """
         self.logger.write_debug("Entering function %s.get_operation" % self.__module__)
 
@@ -23,6 +25,8 @@ class VnfDummyAdapter(object):
         """
         This function scales an instantiated VNF of a particular DF to a target size.
 
+        This function was written in accordance with section 7.2.5 of GS NFV-IFA 008 - v2.1.1.
+
         :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
         :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
                                         VNF is requested to be scaled. Either instantiationLevelId or scaleInfo
@@ -32,7 +36,7 @@ class VnfDummyAdapter(object):
                                         but not both shall be present.
         :param additional_param:        Additional parameters passed as input to the scaling process, specific to the
                                         VNF being scaled.
-        :return:                        The identifier of the VNF lifecycle operation occurrence.
+        :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
         self.logger.write_debug("Entering function %s.scale_to_level" % self.__module__)
 
