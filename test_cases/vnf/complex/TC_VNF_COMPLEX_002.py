@@ -38,7 +38,7 @@ def tc_vnf_complex_002_body(tc_input):
     :return:            Dictionary containing test case results.
     """
     configure_logger(LOG,
-                     log_file_name="/home/mdragomir/Documents/VNFLifeCycleMgnt/logs/TC_VNF_COMPLEX_002.log",
+                     log_file_name="/tmp/TC_VNF_COMPLEX_002.log",
                      console_level="INFO",
                      override_parent=True)
 
