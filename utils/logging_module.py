@@ -1,4 +1,5 @@
 import logging
+import functools
 
 
 def configure_logger(logger,
@@ -61,3 +62,15 @@ def configure_logger(logger,
 
         # Making sure we avoid logging loops.
         logger.propagate = False
+
+
+def log_entry_exit(logger):
+    def func_wrapper(func):
+        @functools.wraps(func)
+        def logger_wrapper(*args, **kwargs):
+            logger.write_debug("Entering function %s" % func.__name__)
+            func_result = func(*args, **kwargs)
+            logger.write_debug("Exiting function %s" % func.__name__)
+            return func_result
+        return logger_wrapper
+    return func_wrapper

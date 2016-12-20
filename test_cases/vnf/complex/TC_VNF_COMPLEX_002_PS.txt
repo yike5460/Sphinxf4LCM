@@ -27,7 +27,7 @@ Input:
     VNF Config File Link -> vnfConfigFile
     VNF License File Link -> vnfLicenseFile
     Traffic Configuration Parameter -> trafficConfigParameter
-    Trigger type --> triggerType
+  Trigger type --> triggerType
         - command to the VNFM
         - higher traffic load over a longer period of time
         - triggered by EM
