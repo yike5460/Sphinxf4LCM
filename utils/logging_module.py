@@ -1,10 +1,12 @@
 import logging
 import functools
+import os
+
+LOG_DIR = '/tmp/nfv'
 
 
 def configure_logger(logger,
-                     log_file_name,
-                     file_level="DEBUG",
+                     file_level=None,
                      console_level=None,
                      propagate=False,
                      override_parent=False):
@@ -31,9 +33,17 @@ def configure_logger(logger,
     # set the desired propagation for the logger
     logger.propagate = propagate
 
-    if log_file_name:
+    if file_level:
+        module_name = logger.name.rsplit('.', 1)[-1]
+        log_file_path = os.path.join(LOG_DIR, module_name + ".log")
+
+        try:
+            os.stat(LOG_DIR)
+        except:
+            os.mkdir(LOG_DIR)
+
         # create file handler
-        fh = logging.FileHandler(filename=log_file_name, mode="w")
+        fh = logging.FileHandler(filename=log_file_path, mode="w")
         fh.setLevel(getattr(logging, str(file_level)))
 
         # create formatter and add it to the handlers
