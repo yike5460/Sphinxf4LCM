@@ -1,4 +1,5 @@
 import logging
+from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
 
@@ -7,6 +8,7 @@ class VnfmDummyAdapter(object):
     def __init__(self, **kwargs):
         pass
 
+    @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
         This function provides the status of a VNF lifecycle management operation.
@@ -16,17 +18,14 @@ class VnfmDummyAdapter(object):
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    The status of the operation ex. "Processing", "Failed".
         """
-        LOG.debug("Entering function %s.get_operation" % self.__module__)
-
         operation_status = "Successfully done"
 
         LOG.debug("Operation status for operation with ID %s: %s" % (lifecycle_operation_occurrence_id,
                                                                                    operation_status))
 
-        LOG.debug("Exiting function %s.get_operation" % self.__module__)
-
         return operation_status
 
+    @log_entry_exit(LOG)
     def vnf_change_state(self,
                          vnf_instance_id,
                          change_state_to,
@@ -44,16 +43,13 @@ class VnfmDummyAdapter(object):
                                             graceful stop, before stopping the VNF.
         :return:                            The identifier of the VNF lifecycle operation occurrence.
         """
-        LOG.debug("Entering function %s.vnf_change_state" % self.__module__)
-
         lifecycle_operation_occurrence_id = "12346"
 
         LOG.debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
 
-        LOG.debug("Exiting function %s.vnf_change_state" % self.__module__)
-
         return lifecycle_operation_occurrence_id
 
+    @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         """
         This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified
@@ -68,16 +64,13 @@ class VnfmDummyAdapter(object):
         :param vnf_instance_description:    Human-readable description of the VNF instance to be created.
         :return:                            VNF instance identifier just created.
         """
-        LOG.debug("Entering function %s.vnf_create_id" % self.__module__)
-
         vnf_instance_id = "vnfinstanceid"
 
         LOG.debug("VNF ID: %s" % vnf_instance_id)
 
-        LOG.debug("Exiting function %s.vnf_create_id" % self.__module__)
-
         return vnf_instance_id
 
+    @log_entry_exit(LOG)
     def vnf_instantiate(self,
                         vnf_instance_id,
                         flavour_id,
@@ -104,16 +97,13 @@ class VnfmDummyAdapter(object):
                                             to the VNF being instantiated.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-        LOG.debug("Entering function %s.vnf_instantiate" % self.__module__)
-
         lifecycle_operation_occurrence_id = "vnf_instantiate_operation_id"
 
         LOG.debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
 
-        LOG.debug("Exiting function %s.vnf_instantiate" % self.__module__)
-
         return lifecycle_operation_occurrence_id
 
+    @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
         """
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
@@ -129,8 +119,6 @@ class VnfmDummyAdapter(object):
                                     attribute_selector is present, only the attributes listed in attribute_selector are
                                     returned for the selected VNF instance(s).
         """
-        LOG.debug("Entering function %s.vnf_query" % self.__module__)
-
         vnf_info = {'vnf_instance_id': '',
                     'vnf_instance_name': '',
                     'vnf_instance_description': '',
@@ -170,10 +158,9 @@ class VnfmDummyAdapter(object):
         # TODO Add code to parse the vnfInfo dictionary and return a specific attribute.
         # For the moment, return the entire dictionary.
 
-        LOG.debug("Exiting function %s.vnf_query" % self.__module__)
-
         return vnf_info
 
+    @log_entry_exit(LOG)
     def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
         """
         This function scales an instantiated VNF of a particular DF to a target size.
@@ -191,14 +178,11 @@ class VnfmDummyAdapter(object):
                                         VNF being scaled.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
-        LOG.debug("Entering function %s.vnf_scale_to_level" % self.__module__)
-
         lifecycle_operation_occurrence_id = "vnf_scale_to_level_operation_id"
-
-        LOG.debug("Exiting function %s.vnf_scale_to_level" % self.__module__)
 
         return lifecycle_operation_occurrence_id
 
+    @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
         """
         This function terminates a VNF.
@@ -212,11 +196,6 @@ class VnfmDummyAdapter(object):
                                             resources.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-
-        LOG.debug("Entering function %s.vnf_terminate" % self.__module__)
-
         lifecycle_operation_occurrence_id = "vnf_vnf_terminate_operation_id"
-
-        LOG.debug("Exiting function %s.vnf_terminate" % self.__module__)
 
         return lifecycle_operation_occurrence_id
