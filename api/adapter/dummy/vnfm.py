@@ -1,6 +1,11 @@
+import logging
+
+LOG = logging.getLogger(__name__)
+
+
 class VnfmDummyAdapter(object):
-    def __init__(self, logger, **kwargs):
-        self.logger = logger
+    def __init__(self, **kwargs):
+        pass
 
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
@@ -11,14 +16,14 @@ class VnfmDummyAdapter(object):
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    The status of the operation ex. "Processing", "Failed".
         """
-        self.logger.write_debug("Entering function %s.get_operation" % self.__module__)
+        LOG.debug("Entering function %s.get_operation" % self.__module__)
 
         operation_status = "Successfully done"
 
-        self.logger.write_debug("Operation status for operation with ID %s: %s" % (lifecycle_operation_occurrence_id,
+        LOG.debug("Operation status for operation with ID %s: %s" % (lifecycle_operation_occurrence_id,
                                                                                    operation_status))
 
-        self.logger.write_debug("Exiting function %s.get_operation" % self.__module__)
+        LOG.debug("Exiting function %s.get_operation" % self.__module__)
 
         return operation_status
 
@@ -39,13 +44,13 @@ class VnfmDummyAdapter(object):
                                             graceful stop, before stopping the VNF.
         :return:                            The identifier of the VNF lifecycle operation occurrence.
         """
-        self.logger.write_debug("Entering function %s.vnf_change_state" % self.__module__)
+        LOG.debug("Entering function %s.vnf_change_state" % self.__module__)
 
         lifecycle_operation_occurrence_id = "12346"
 
-        self.logger.write_debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
+        LOG.debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
 
-        self.logger.write_debug("Exiting function %s.vnf_change_state" % self.__module__)
+        LOG.debug("Exiting function %s.vnf_change_state" % self.__module__)
 
         return lifecycle_operation_occurrence_id
 
@@ -63,13 +68,13 @@ class VnfmDummyAdapter(object):
         :param vnf_instance_description:    Human-readable description of the VNF instance to be created.
         :return:                            VNF instance identifier just created.
         """
-        self.logger.write_debug("Entering function %s.vnf_create_id" % self.__module__)
+        LOG.debug("Entering function %s.vnf_create_id" % self.__module__)
 
         vnf_instance_id = "vnfinstanceid"
 
-        self.logger.write_debug("VNF ID: %s" % vnf_instance_id)
+        LOG.debug("VNF ID: %s" % vnf_instance_id)
 
-        self.logger.write_debug("Exiting function %s.vnf_create_id" % self.__module__)
+        LOG.debug("Exiting function %s.vnf_create_id" % self.__module__)
 
         return vnf_instance_id
 
@@ -99,13 +104,13 @@ class VnfmDummyAdapter(object):
                                             to the VNF being instantiated.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-        self.logger.write_debug("Entering function %s.vnf_instantiate" % self.__module__)
+        LOG.debug("Entering function %s.vnf_instantiate" % self.__module__)
 
         lifecycle_operation_occurrence_id = "vnf_instantiate_operation_id"
 
-        self.logger.write_debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
+        LOG.debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
 
-        self.logger.write_debug("Exiting function %s.vnf_instantiate" % self.__module__)
+        LOG.debug("Exiting function %s.vnf_instantiate" % self.__module__)
 
         return lifecycle_operation_occurrence_id
 
@@ -124,7 +129,7 @@ class VnfmDummyAdapter(object):
                                     attribute_selector is present, only the attributes listed in attribute_selector are
                                     returned for the selected VNF instance(s).
         """
-        self.logger.write_debug("Entering function %s.vnf_query" % self.__module__)
+        LOG.debug("Entering function %s.vnf_query" % self.__module__)
 
         vnf_info = {'vnf_instance_id': '',
                     'vnf_instance_name': '',
@@ -165,7 +170,7 @@ class VnfmDummyAdapter(object):
         # TODO Add code to parse the vnfInfo dictionary and return a specific attribute.
         # For the moment, return the entire dictionary.
 
-        self.logger.write_debug("Exiting function %s.vnf_query" % self.__module__)
+        LOG.debug("Exiting function %s.vnf_query" % self.__module__)
 
         return vnf_info
 
@@ -186,11 +191,11 @@ class VnfmDummyAdapter(object):
                                         VNF being scaled.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
-        self.logger.write_debug("Entering function %s.vnf_scale_to_level" % self.__module__)
+        LOG.debug("Entering function %s.vnf_scale_to_level" % self.__module__)
 
         lifecycle_operation_occurrence_id = "vnf_scale_to_level_operation_id"
 
-        self.logger.write_debug("Exiting function %s.vnf_scale_to_level" % self.__module__)
+        LOG.debug("Exiting function %s.vnf_scale_to_level" % self.__module__)
 
         return lifecycle_operation_occurrence_id
 
@@ -208,10 +213,10 @@ class VnfmDummyAdapter(object):
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
 
-        self.logger.write_debug("Entering function %s.vnf_terminate" % self.__module__)
+        LOG.debug("Entering function %s.vnf_terminate" % self.__module__)
 
         lifecycle_operation_occurrence_id = "vnf_vnf_terminate_operation_id"
 
-        self.logger.write_debug("Exiting function %s.vnf_terminate" % self.__module__)
+        LOG.debug("Exiting function %s.vnf_terminate" % self.__module__)
 
         return lifecycle_operation_occurrence_id

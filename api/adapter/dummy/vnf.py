@@ -1,6 +1,11 @@
+import logging
+
+LOG = logging.getLogger(__name__)
+
+
 class VnfDummyAdapter(object):
-    def __init__(self, logger, **kwargs):
-        self.logger = logger
+    def __init__(self, **kwargs):
+        pass
 
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
@@ -11,13 +16,13 @@ class VnfDummyAdapter(object):
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    Status of the operation ex. "Processing", "Failed".
         """
-        self.logger.write_debug("Entering function %s.get_operation" % self.__module__)
+        LOG.debug("Entering function %s.get_operation" % self.__module__)
 
         operation_status = "Successfully done"
 
-        self.logger.write_debug("Instantiation operation status: %s" % operation_status)
+        LOG.debug("Instantiation operation status: %s" % operation_status)
 
-        self.logger.write_debug("Exiting function %s.get_operation" % self.__module__)
+        LOG.debug("Exiting function %s.get_operation" % self.__module__)
 
         return operation_status
 
@@ -38,10 +43,10 @@ class VnfDummyAdapter(object):
                                         VNF being scaled.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
-        self.logger.write_debug("Entering function %s.scale_to_level" % self.__module__)
+        LOG.debug("Entering function %s.scale_to_level" % self.__module__)
 
         lifecycle_operation_occurrence_id = "scale_to_level_operation_id"
 
-        self.logger.write_debug("Exiting function %s.scale_to_level" % self.__module__)
+        LOG.debug("Exiting function %s.scale_to_level" % self.__module__)
 
         return lifecycle_operation_occurrence_id
