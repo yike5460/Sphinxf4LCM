@@ -64,13 +64,13 @@ def configure_logger(logger,
         logger.propagate = False
 
 
-def log_entry_exit(logger):
+def log_entry_exit(LOG):
     def func_wrapper(func):
         @functools.wraps(func)
         def logger_wrapper(*args, **kwargs):
-            logger.write_debug("Entering function %s" % func.__name__)
+            LOG.debug("Entering function %s" % func.__name__)
             func_result = func(*args, **kwargs)
-            logger.write_debug("Exiting function %s" % func.__name__)
+            LOG.debug("Exiting function %s" % func.__name__)
             return func_result
         return logger_wrapper
     return func_wrapper
