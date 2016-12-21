@@ -34,8 +34,9 @@ class TC_VNF_COMPLEX_002(TestCase):
     16. Stop traffic
     17. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
     """
+
     def initialize(self):
-        configure_logger(globals()['LOG'], file_level='DEBUG', console_level='INFO', override_parent=True)
+        configure_logger(LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
     def run(self):
         LOG.info("Starting TC_VNF_COMPLEX_002")
