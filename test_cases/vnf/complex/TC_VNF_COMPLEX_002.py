@@ -34,7 +34,6 @@ class TC_VNF_COMPLEX_002(TestCase):
     16. Stop traffic
     17. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
     """
-
     def initialize(self):
         configure_logger(LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
@@ -158,8 +157,9 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 8. Validate VNF has resized to the max and has max capacity
         # ------------------------------------------------------------------------------------------------------------------
         LOG.info("Validating VNF has resized to the max and has max capacity")
+        self.tc_result['resource_list'] = {}
         self.tc_result['resource_list']['max_resource'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
-        if not vnfm.validate_allocated_vResources(vnf_vResource_list=self.tc_result['resourceList']['maxResource'],
+        if not vnfm.validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['max_resource'],
                                                   instantiation_level_id="max_level_id",
                                                   resource_type_list=self.tc_input['resource_type']):
             LOG.error("TC_VNF_COMPLEX_002 execution failed")
