@@ -1,4 +1,6 @@
-from utils.logging_module import configure_logger
+class TestExecutionError(Exception):
+    pass
+
 
 class TestCase(object):
     def __init__(self, tc_input):
@@ -17,19 +19,19 @@ class TestCase(object):
     def cleanup(self):
         return True
 
-    def launch(self):
+    def execute(self):
         self.initialize()
 
         try:
             if not self.setup():
-                raise RuntimeError
+                raise TestExecutionError
 
             if not self.run():
-                raise RuntimeError
+                raise TestExecutionError
 
             if not self.cleanup():
-                raise RuntimeError
-        except:
+                raise TestExecutionError
+        except TestExecutionError:
             self.cleanup()
 
         return self.tc_result
