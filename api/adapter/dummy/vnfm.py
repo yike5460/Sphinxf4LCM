@@ -234,7 +234,7 @@ class VnfmDummyAdapter(object):
         :return:                            TRUE - vResources are the expected ones, FALSE - vResource mismatch.
         """
 
-        status = "TRUE"
+        status = True
 
         return status
 

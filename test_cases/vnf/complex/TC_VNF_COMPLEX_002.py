@@ -158,7 +158,15 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 8. Validate VNF has resized to the max and has max capacity
         # ------------------------------------------------------------------------------------------------------------------
         LOG.info("Validating VNF has resized to the max and has max capacity")
-        # TODO
+        self.tc_result['resource_list']['max_resource'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
+        if not vnfm.validate_allocated_vResources(vnf_vResource_list=self.tc_result['resourceList']['maxResource'],
+                                                  instantiation_level_id="max_level_id",
+                                                  resource_type_list=self.tc_input['resource_type']):
+            LOG.error("TC_VNF_COMPLEX_002 execution failed")
+            LOG.debug("Unable to validate maximum resources")
+            self.tc_result['overall_status'] = 'Fail'
+            self.tc_result['error_info'] = 'Unable to validate maximum resources'
+            return False
 
         # ------------------------------------------------------------------------------------------------------------------
         # 9. Generate max traffic load to load all VNF instances
