@@ -199,3 +199,42 @@ class VnfmDummyAdapter(object):
         lifecycle_operation_occurrence_id = "vnf_vnf_terminate_operation_id"
 
         return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def get_vResource(self, vnf_instance_id):
+        """
+        This function returns a list of all allocated vResources of the instantiated VNF.
+
+        :param vnf_instance_id:             Identifier of the VNF instance to be queried for allocated vResources.
+        :return:                            A list of lists containing dictionaries of the following structure:
+                                            [[{'vnfc_instance_id': compute_resource_handle}],
+                                             [{'virtual_link_instance_id': network_resource_handle}],
+                                             [{'virtual_storage_instance_id': storage_resource_handle}]]
+        """
+
+        vnf_vResource_list = []
+        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, "compute_resource"))
+        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, "network_resource"))
+        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, "storage_resource"))
+
+        return vnf_vResource_list
+
+    @log_entry_exit(LOG)
+    def validate_allocated_vResources(self, vnf_vResource_list, instantiation_level_id, resource_type_list):
+        """
+        This function validates that the VNF has been assigned the expected vResources in the current state.
+
+        :param vnf_vResource_list:          A list of lists containing dictionaries of the following structure:
+                                            [[{'vnfc_instance_id': compute_resource_handle}],
+                                             [{'virtual_link_instance_id': network_resource_handle}],
+                                             [{'virtual_storage_instance_id': storage_resource_handle}]]
+        :param instantiation_level_id:      Identifier of the target instantiation level of the current DF to which the
+                                            VNF is requested to be validated.
+        :param resource_type_list:          A list with types of vResources to be validated.
+        :return:                            TRUE - vResources are the expected ones, FALSE - vResource mismatch.
+        """
+
+        status = "TRUE"
+
+        return status
+
