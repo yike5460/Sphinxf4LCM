@@ -1,5 +1,9 @@
+import logging
 import os_client_config
+from utils.logging_module import log_entry_exit
 from tackerclient.tacker.client import Client as TackerClient
+
+LOG = logging.getLogger(__name__)
 
 
 class VnfmOpenstackAdapter(object):
@@ -28,14 +32,27 @@ class VnfmOpenstackAdapter(object):
             print 'Unable to create', self.__class__.__name__, 'instance'
             raise
 
-    def vnf_instantiate(self,
-                        vnf_instance_id,
-                        flavour_id,
-                        ext_virtual_link,
-                        ext_managed_virtual_link,
-                        localization_language,
-                        **kwargs):
-        pass
+
+    def get_operation_status(self, lifecycle_operation_occurrence_id):
+        LOG.warning('"Lifecycle Operation Occurence Id" is not implemented in OpenStack!')
+        LOG.warning('Will return the state of the resource with given Id')
+
+        vnf_id = lifecycle_operation_occurrence_id
+        tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
+
+        vnf_states_mapping = {'ACTIVE': 'SUCCESS',
+                              'ERROR': 'FAILED',
+                              'PENDING_CREATE': 'PENDING',
+                              'PENDING_DELETE': 'PENDING'}
+
+        return vnf_states_mapping[tacker_show_vnf['vnf']['status']]
+
+
+    def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                        ext_managed_virtual_link=None, localization_language=None, additional_param=None):
+        LOG.warning('"VNF Instantiate" operation is not implemented in OpenStack!')
+        LOG.warning('Instead of "Lifecycle Operation Occurence Id", will just return the "VNF Instance Id"')
+        return vnf_instance_id
 
     # Working in progress for adding vnf_instance_description
     def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
@@ -45,6 +62,3 @@ class VnfmOpenstackAdapter(object):
         vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
         return vnf_instance['vnf']['id']
 
-    def vnf_get_state(self, vnf_id):
-        tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
-        return tacker_show_vnf['vnf']['status']
