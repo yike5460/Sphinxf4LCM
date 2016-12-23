@@ -100,6 +100,9 @@ class Vnfm(object):
         """
         vnf_instance_id = self.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
 
+        if vnf_instance_id is None:
+            return None
+
         lifecycle_operation_occurrence_id = self.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id,
                                                                  ext_virtual_link, ext_managed_virtual_link,
                                                                  localization_language, additional_param)
