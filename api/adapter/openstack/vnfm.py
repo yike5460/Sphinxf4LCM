@@ -1,8 +1,11 @@
 import logging
+import json
 import os_client_config
 from utils.logging_module import log_entry_exit
 from tackerclient.tacker.client import Client as TackerClient
-from api.adapter.openstack import constants_dict
+from api.generic import constants
+import tackerclient.common.exceptions
+
 
 LOG = logging.getLogger(__name__)
 
@@ -10,7 +13,6 @@ LOG = logging.getLogger(__name__)
 class VnfmOpenstackAdapter(object):
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        self.__dict__ = constants_dict
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,
@@ -34,12 +36,9 @@ class VnfmOpenstackAdapter(object):
         vnf_id = lifecycle_operation_occurrence_id
         tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
 
-        vnf_states_mapping = {'ACTIVE': 'SUCCESS',
-                              'ERROR': 'FAILED',
-                              'PENDING_CREATE': 'PENDING',
-                              'PENDING_DELETE': 'PENDING'}
+        tacker_status = tacker_show_vnf['vnf']['status']
 
-        return vnf_states_mapping[tacker_show_vnf['vnf']['status']]
+        return constants.OPENSTACK_VNF_STATES_MAPPING[tacker_status]
 
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
@@ -47,10 +46,16 @@ class VnfmOpenstackAdapter(object):
         LOG.warning('Instead of "Lifecycle Operation Occurence Id", will just return the "VNF Instance Id"')
         return vnf_instance_id
 
-    # Working in progress for adding vnf_instance_description
+
+    @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description, **kwargs):
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
-        vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
+
+        try:
+            vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
+            LOG.info("Response from vnfm:\n%s" % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
+        except tackerclient.common.exceptions.TackerException:
+            return None
         return vnf_instance['vnf']['id']
 
