@@ -16,24 +16,24 @@ class TC_VNF_COMPLEX_002(TestCase):
     TC_VNF_COMPLEX_002 Stop a max scale-up/scaled-out VNF instance in state Active under max traffic load
 
     Sequence:
-    1. Create VNF ID
-    2. Instantiate VNF
-    3. Validate VNF instantiation state is INSTANTIATED
-    4. Start VNF
-    5. Validate VNF state is STARTED
-    6. Generate low traffic load
-    7. Validate that traffic flows through without issues (-> no dropped packets)
-    8. Trigger a resize of the NFV resources to reach the maximum
-    9. Validate VNF has resized to the max and has max capacity
-    10. Generate max traffic load to load all VNF instances
-    11. Validate all traffic flows through and has reached max capacity
-    12. Clear counters
-    13. Stop the VNF (--> time stamp)
-    14. Validate VNF has been stopped (--> time stamp)
-    15. Validate no traffic flows through (--> last arrival time stamp)
-    16. Stop traffic
-    17. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
+    1. Instantiate VNF
+    2. Validate VNF instantiation state is INSTANTIATED
+    3. Start VNF
+    4. Validate VNF state is STARTED
+    5. Generate low traffic load
+    6. Validate that traffic flows through without issues (-> no dropped packets)
+    7. Trigger a resize of the NFV resources to reach the maximum
+    8. Validate VNF has resized to the max and has max capacity
+    9. Generate max traffic load to load all VNF instances
+    10. Validate all traffic flows through and has reached max capacity
+    11. Clear counters
+    12. Stop the VNF (--> time stamp)
+    13. Validate VNF has been stopped (--> time stamp)
+    14. Validate no traffic flows through (--> last arrival time stamp)
+    15. Stop traffic
+    16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
     """
+
     def initialize(self):
         configure_logger(LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
@@ -43,36 +43,20 @@ class TC_VNF_COMPLEX_002(TestCase):
         vnfm = Vnfm(vendor=self.tc_input['vnfm_vendor'])
         vnf = Vnf(vendor=self.tc_input['vnf_vendor'])
 
-        self.tc_result = {'overall_status': 'Success',
-                     'error_info': 'No errors',
-                     'timeRecord': {}}
+        self.tc_result = {'overall_status': 'Success', 'error_info': 'No errors', 'timeRecord': {}}
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 1. Create VNF ID
-        # ------------------------------------------------------------------------------------------------------------------
-        LOG.info("Creating VNF ID")
-        vnf_instance_id = vnfm.vnf_create_id(vnfd_id="vnfd_id",
-                                             vnf_instance_name="test_vnf",
-                                             vnf_instance_description="VNF used for testing")
-
-        # ------------------------------------------------------------------------------------------------------------------
-        # 2. Instantiate VNF
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 1. Instantiate VNF
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Instantiating VNF")
-        self.tc_result['timeRecord']['instantiateVNFStart'] = time.clock()
-        instantiation_operation_id = vnfm.vnf_instantiate(vnf_instance_id=vnf_instance_id, flavour_id="123456")
+        self.tc_result['timeRecord']['instantiateVNFStart'] = time.time()
+        vnf_instance_id = vnfm.vnf_create_and_instantiate(vnfd_id="vnfd_id", flavour_id="123456",
+                                                          vnf_instance_name="test_vnf",
+                                                          vnf_instance_description="VNF used for testing")
 
-        # Check the status of the instantiation operation
-        if not check_operation_status(vnfm.get_operation_status, instantiation_operation_id, "Successfully done"):
-            LOG.error("TC_VNF_COMPLEX_002 execution failed")
-            LOG.debug("Unexpected status for the instantiation operation")
-            self.tc_result['overall_status'] = 'Fail'
-            self.tc_result['error_info'] = 'Unexpected status for the instantiation operation'
-            return False
-
-        # ------------------------------------------------------------------------------------------------------------------
-        # 3. Validate VNF instantiation state is INSTANTIATED
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 2. Validate VNF instantiation state is INSTANTIATED
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating VNF instantiation state is INSTANTIATED")
         vnf_info = vnfm.vnf_query(vnf_instance_id)
         if not vnfinfo_check_instantiation_state(vnf_info, "INSTANTIATED"):
@@ -82,16 +66,17 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected VNF instantiation state'
             return False
 
-        self.tc_result['timeRecord']['instantiateVNFEnd'] = time.clock()
+        self.tc_result['timeRecord']['instantiateVNFEnd'] = time.time()
 
-        self.tc_result['timeRecord']['instantiateVNFTime'] = \
-            round(self.tc_result['timeRecord']['instantiateVNFEnd'] - self.tc_result['timeRecord']['instantiateVNFStart'], 6)
+        self.tc_result['timeRecord']['instantiateVNFTime'] = round(self.tc_result['timeRecord']['instantiateVNFEnd'] -
+                                                                   self.tc_result['timeRecord']['instantiateVNFStart'],
+                                                                   6)
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 4. Start VNF
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 3. Start VNF
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Starting VNF")
-        self.tc_result['timeRecord']['startVNFStart'] = time.clock()
+        self.tc_result['timeRecord']['startVNFStart'] = time.time()
         start_operation_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="start")
 
         # Check the status of the starting operation
@@ -102,9 +87,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected status for starting operation'
             return False
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 5. Validate VNF state is STARTED
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 4. Validate VNF state is STARTED
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating VNF state is STARTED")
         vnf_info = vnfm.vnf_query(vnf_instance_id)
         if not vnfinfo_check_vnf_state(vnf_info, "STARTED"):
@@ -114,20 +99,20 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected VNF state'
             return False
 
-        self.tc_result['timeRecord']['startVNFEnd'] = time.clock()
+        self.tc_result['timeRecord']['startVNFEnd'] = time.time()
 
         self.tc_result['timeRecord']['StartVNFTime'] = \
             round(self.tc_result['timeRecord']['startVNFEnd'] - self.tc_result['timeRecord']['startVNFStart'], 6)
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 6. Validate that traffic flows through without issues
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 5. Validate that traffic flows through without issues
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating that traffic flows through without issues")
         # TODO
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 7. Trigger a resize of the NFV resources to reach the maximum
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 6. Trigger a resize of the NFV resources to reach the maximum
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Triggering a resize of the NFV resources to reach the maximum")
         trigger_successful = False
         if self.tc_input['scaling_trigger'] == "command_to_vnfm":
@@ -153,9 +138,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected status for the triggering operation'
             return False
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 8. Validate VNF has resized to the max and has max capacity
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 7. Validate VNF has resized to the max and has max capacity
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating VNF has resized to the max and has max capacity")
         self.tc_result['resource_list'] = {}
         self.tc_result['resource_list']['max_resource'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
@@ -168,29 +153,29 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unable to validate maximum resources'
             return False
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 9. Generate max traffic load to load all VNF instances
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 8. Generate max traffic load to load all VNF instances
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Generating max traffic load to load all VNF instances")
         # TODO
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 10. Validate all traffic flows through and has reached max capacity
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 9. Validate all traffic flows through and has reached max capacity
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating all traffic flows through and has reached max capacity")
         # TODO
 
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # 11. Clear counters
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Clearing counters")
         # TODO
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 12. Stop the VNF (--> time stamp)
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 11. Stop the VNF (--> time stamp)
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Stopping the VNF")
-        self.tc_result['timeRecord']['stopVNFStart'] = time.clock()
+        self.tc_result['timeRecord']['stopVNFStart'] = time.time()
         stop_operation_id = vnfm.vnf_change_state(vnf_instance_id=vnf_instance_id, change_state_to="stop")
 
         # Check the status of the stopping operation
@@ -201,9 +186,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected status for stopping operation'
             return False
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 13. Validate VNF has been stopped (--> time stamp)
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 12. Validate VNF has been stopped (--> time stamp)
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating VNF state is STOPPED")
         vnf_state = vnfm.vnf_query(vnf_instance_id, "vnf_state")
         if vnf_state != "STOPPED":
@@ -213,23 +198,23 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'The VNF state was %s, expected STOPPED' % vnf_state
             return False
 
-        self.tc_result['timeRecord']['stopVNFEnd'] = time.clock()
+        self.tc_result['timeRecord']['stopVNFEnd'] = time.time()
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 14. Validate no traffic flows through (--> last arrival time stamp)
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 13. Validate no traffic flows through (--> last arrival time stamp)
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Validating no traffic flows through")
         # TODO
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 15. Stop traffic
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 14. Stop traffic
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Stopping traffic")
         # TODO
 
-        # ------------------------------------------------------------------------------------------------------------------
-        # 16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
-        # ------------------------------------------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
+        # 15. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
+        # --------------------------------------------------------------------------------------------------------------
         LOG.info("Calculating the time to stop a max scaled VNF under load")
 
         self.tc_result['timeRecord']['stopVNFTime'] = \

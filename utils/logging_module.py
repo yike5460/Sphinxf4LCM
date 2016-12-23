@@ -5,16 +5,11 @@ import os
 LOG_DIR = '/tmp/nfv'
 
 
-def configure_logger(logger,
-                     file_level=None,
-                     console_level=None,
-                     propagate=False,
-                     override_parent=False):
+def configure_logger(logger, file_level=None, console_level=None, propagate=False, override_parent=False):
     """
     This function configures a logger.
 
     :param logger:          Reference to the logger object.
-    :param log_file_name:   Name of the file to log to.
     :param file_level:      Desired logging level of the logs that are to be written to file.
                             Possible values: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
                             Default value: 'DEBUG'

@@ -1,5 +1,6 @@
 import logging
 from utils.logging_module import log_entry_exit
+from api.generic import constants
 
 LOG = logging.getLogger(__name__)
 
@@ -21,9 +22,9 @@ class VnfmDummyAdapter(object):
         operation_status = "Successfully done"
 
         LOG.debug("Operation status for operation with ID %s: %s" % (lifecycle_operation_occurrence_id,
-                                                                                   operation_status))
+                                                                     operation_status))
 
-        return operation_status
+        return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
     def vnf_change_state(self,
@@ -50,7 +51,7 @@ class VnfmDummyAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
+    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None, **kwargs):
         """
         This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified
         by that identifier, in the NOT_INSTANTIATED state without instantiating the VNF or doing any additional

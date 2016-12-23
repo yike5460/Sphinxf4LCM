@@ -2,20 +2,15 @@ import logging
 import os_client_config
 from utils.logging_module import log_entry_exit
 from tackerclient.tacker.client import Client as TackerClient
+from api.adapter.openstack import constants_dict
 
 LOG = logging.getLogger(__name__)
 
 
 class VnfmOpenstackAdapter(object):
-    def __init__(self,
-                 auth_url=None,
-                 username=None,
-                 password=None,
-                 identity_api_version=None,
-                 project_name=None,
-                 project_domain_name=None,
-                 user_domain_name=None
-                 ):
+    def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
+                 project_domain_name=None, user_domain_name=None):
+        self.__dict__ = constants_dict
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,
@@ -32,7 +27,6 @@ class VnfmOpenstackAdapter(object):
             print 'Unable to create', self.__class__.__name__, 'instance'
             raise
 
-
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         LOG.warning('"Lifecycle Operation Occurence Id" is not implemented in OpenStack!')
         LOG.warning('Will return the state of the resource with given Id')
@@ -47,7 +41,6 @@ class VnfmOpenstackAdapter(object):
 
         return vnf_states_mapping[tacker_show_vnf['vnf']['status']]
 
-
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         LOG.warning('"VNF Instantiate" operation is not implemented in OpenStack!')
@@ -55,8 +48,7 @@ class VnfmOpenstackAdapter(object):
         return vnf_instance_id
 
     # Working in progress for adding vnf_instance_description
-    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
-        vnf_dict = dict()
+    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description, **kwargs):
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
         vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
