@@ -17,38 +17,14 @@ class VnfmDummyAdapter(object):
         This function was written in accordance with section 7.2.13 of GS NFV-IFA 007 - v2.1.1.
 
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
-        :return:                                    The status of the operation ex. "Processing", "Failed".
+        :return:                                    The status of the operation ex. 'Processing', 'Failed'.
         """
-        operation_status = "Successfully done"
+        operation_status = 'Successfully done'
 
-        LOG.debug("Operation status for operation with ID %s: %s" % (lifecycle_operation_occurrence_id,
+        LOG.debug('Operation status for operation with ID %s: %s' % (lifecycle_operation_occurrence_id,
                                                                      operation_status))
 
         return constants.OPERATION_SUCCESS
-
-    @log_entry_exit(LOG)
-    def vnf_change_state(self,
-                         vnf_instance_id,
-                         change_state_to,
-                         stop_type=None,
-                         graceful_stop_timeout=None):
-
-        """
-        vnf_change_state() - change the state of a VNF instance, including starting and stopping the VNF instance.
-
-        :param vnf_instance_id:             Identifier of the VNF instance.
-        :param change_state_to:             Desired state to change the VNF to. Permitted values are: start, stop.
-        :param stop_type:                   It signals whether forceful or graceful stop is requested. Allowed values
-                                            are: forceful and graceful.
-        :param graceful_stop_timeout:       Time interval to wait for the VNF to be taken out of service during
-                                            graceful stop, before stopping the VNF.
-        :return:                            The identifier of the VNF lifecycle operation occurrence.
-        """
-        lifecycle_operation_occurrence_id = "12346"
-
-        LOG.debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
-
-        return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None, **kwargs):
@@ -65,21 +41,15 @@ class VnfmDummyAdapter(object):
         :param vnf_instance_description:    Human-readable description of the VNF instance to be created.
         :return:                            VNF instance identifier just created.
         """
-        vnf_instance_id = "vnfinstanceid"
+        vnf_instance_id = 'vnfinstanceid'
 
-        LOG.debug("VNF ID: %s" % vnf_instance_id)
+        LOG.debug('VNF ID: %s' % vnf_instance_id)
 
         return vnf_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_instantiate(self,
-                        vnf_instance_id,
-                        flavour_id,
-                        instantiation_level_id=None,
-                        ext_virtual_link=None,
-                        ext_managed_virtual_link=None,
-                        localization_language=None,
-                        additional_param=None):
+    def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                        ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         """
         This function instantiates a particular deployment flavour of a VNF based on the definition in the VNFD.
 
@@ -98,9 +68,30 @@ class VnfmDummyAdapter(object):
                                             to the VNF being instantiated.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-        lifecycle_operation_occurrence_id = "vnf_instantiate_operation_id"
+        lifecycle_operation_occurrence_id = 'vnf_instantiate_operation_id'
 
-        LOG.debug("Lifecycle operation occurrence ID: %s" % lifecycle_operation_occurrence_id)
+        LOG.debug('Lifecycle operation occurrence ID: %s' % lifecycle_operation_occurrence_id)
+
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+        """
+        This function changes the state of a VNF instance.
+
+         This function was written in accordance with section 7.2.11 of GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:             Identifier of the VNF instance.
+        :param change_state_to:             Desired state to change the VNF to. Permitted values are: start, stop.
+        :param stop_type:                   It signals whether forceful or graceful stop is requested. Allowed values
+                                            are: forceful and graceful.
+        :param graceful_stop_timeout:       Time interval to wait for the VNF to be taken out of service during
+                                            graceful stop, before stopping the VNF.
+        :return:                            The identifier of the VNF lifecycle operation occurrence.
+        """
+        lifecycle_operation_occurrence_id = '12346'
+
+        LOG.debug('Lifecycle operation occurrence ID: %s' % lifecycle_operation_occurrence_id)
 
         return lifecycle_operation_occurrence_id
 
@@ -156,9 +147,6 @@ class VnfmDummyAdapter(object):
                     'metadata': '',
                     'extension': ''}
 
-        # TODO Add code to parse the vnfInfo dictionary and return a specific attribute.
-        # For the moment, return the entire dictionary.
-
         return vnf_info
 
     @log_entry_exit(LOG)
@@ -179,7 +167,7 @@ class VnfmDummyAdapter(object):
                                         VNF being scaled.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
-        lifecycle_operation_occurrence_id = "vnf_scale_to_level_operation_id"
+        lifecycle_operation_occurrence_id = 'vnf_scale_to_level_operation_id'
 
         return lifecycle_operation_occurrence_id
 
@@ -197,7 +185,7 @@ class VnfmDummyAdapter(object):
                                             resources.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-        lifecycle_operation_occurrence_id = "vnf_vnf_terminate_operation_id"
+        lifecycle_operation_occurrence_id = 'vnf_vnf_terminate_operation_id'
 
         return lifecycle_operation_occurrence_id
 
@@ -214,9 +202,9 @@ class VnfmDummyAdapter(object):
         """
 
         vnf_vResource_list = []
-        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, "compute_resource"))
-        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, "network_resource"))
-        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, "storage_resource"))
+        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'compute_resource'))
+        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'network_resource'))
+        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'storage_resource'))
 
         return vnf_vResource_list
 
