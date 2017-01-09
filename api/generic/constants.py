@@ -27,3 +27,6 @@ VNF_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_STARTED,
                                     'ERROR': VNF_STOPPED,
                                     'PENDING_CREATE': VNF_STOPPED,
                                     'PENDING_DELETE': VNF_STOPPED}
+
+TEST_FAILED = 'Failed'
+TEST_PASSED = 'Passed'

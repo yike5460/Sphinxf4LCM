@@ -39,7 +39,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         vnfm = Vnfm(vendor=self.tc_input['vnfm_vendor'])
         vnf = Vnf(vendor=self.tc_input['vnf_vendor'])
 
-        self.tc_result = {'overall_status': 'Success', 'error_info': 'No errors', 'timeRecord': {}}
+        self.tc_result = {'overall_status': constants.TEST_PASSED, 'error_info': 'No errors', 'timeRecord': {}}
 
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate VNF
@@ -52,7 +52,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         if vnf_instance_id is None:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
-            self.tc_result['overall_status'] = 'Fail'
+            self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Unexpected VNF instantiation ID'
             return False
 
@@ -64,7 +64,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         if vnfinfo_get_instantiation_state(vnfinfo_dict=vnf_info) != constants.VNF_INSTANTIATED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
-            self.tc_result['overall_status'] = 'Fail'
+            self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Unexpected VNF instantiation state'
             return False
 
@@ -83,7 +83,7 @@ class TC_VNF_COMPLEX_002(TestCase):
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected status for starting VNF operation')
-            self.tc_result['overall_status'] = 'Fail'
+            self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Unexpected status for starting VNF operation'
             return False
 
@@ -95,7 +95,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STARTED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
-            self.tc_result['overall_status'] = 'Fail'
+            self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Unexpected VNF state'
             return False
 
@@ -125,7 +125,7 @@ class TC_VNF_COMPLEX_002(TestCase):
                     constants.OPERATION_SUCCESS:
                 LOG.error('TC_VNF_COMPLEX_002 execution failed')
                 LOG.debug('Unexpected status for resize triggering operation')
-                self.tc_result['overall_status'] = 'Fail'
+                self.tc_result['overall_status'] = constants.TEST_FAILED
                 self.tc_result['error_info'] = 'Unexpected status for resize triggering operation'
                 return False
 
@@ -134,7 +134,7 @@ class TC_VNF_COMPLEX_002(TestCase):
                     constants.OPERATION_SUCCESS:
                 LOG.error('TC_VNF_COMPLEX_002 execution failed')
                 LOG.debug('Unexpected status for resize triggering operation')
-                self.tc_result['overall_status'] = 'Fail'
+                self.tc_result['overall_status'] = constants.TEST_FAILED
                 self.tc_result['error_info'] = 'Unexpected status for resize triggering operation'
                 return False
 
@@ -142,16 +142,16 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 8. Validate VNF has resized to the max and has max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max and has max capacity')
-        # self.tc_result['resource_list'] = {}
-        # self.tc_result['resource_list']['max_resource'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
-        # if not vnfm.validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['max_resource'],
-        #                                           instantiation_level_id='max_level_id',
-        #                                           resource_type_list=self.tc_input['resource_type']):
-        #     LOG.error('TC_VNF_COMPLEX_002 execution failed')
-        #     LOG.debug('Unable to validate maximum resources')
-        #     self.tc_result['overall_status'] = 'Fail'
-        #     self.tc_result['error_info'] = 'Unable to validate maximum resources'
-        #     return False
+        self.tc_result['resource_list'] = {}
+        self.tc_result['resource_list']['max_resource'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
+        if not vnfm.validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['max_resource'],
+                                                  instantiation_level_id='max_level_id',
+                                                  resource_type_list=self.tc_input['resource_type']):
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Unable to validate maximum resources')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Unable to validate maximum resources'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Generate max traffic load to load all VNF instances
@@ -180,7 +180,7 @@ class TC_VNF_COMPLEX_002(TestCase):
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected status for starting VNF operation')
-            self.tc_result['overall_status'] = 'Fail'
+            self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Unexpected status for starting VNF operation'
             return False
 
@@ -188,13 +188,13 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 13. Validate VNF has been stopped (--> time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF state is STOPPED')
-        # vnf_info = vnfm.vnf_query(filter=vnf_instance_id)
-        # if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STOPPED:
-        #     LOG.error('TC_VNF_COMPLEX_002 execution failed')
-        #     LOG.debug('Unexpected VNF state')
-        #     self.tc_result['overall_status'] = 'Fail'
-        #     self.tc_result['error_info'] = 'Unexpected VNF state'
-        #     return False
+        vnf_info = vnfm.vnf_query(filter=vnf_instance_id)
+        if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STOPPED:
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Unexpected VNF state')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Unexpected VNF state'
+            return False
 
         self.tc_result['timeRecord']['stopVNFEnd'] = time.time()
 
