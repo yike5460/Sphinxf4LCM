@@ -1,5 +1,4 @@
 import logging
-from utils.logging_module import configure_logger
 from api.generic.vnfm import Vnfm
 from api.generic.vnf import Vnf
 from api.generic.tools import vnfinfo_get_instantiation_state, vnfinfo_get_vnf_state
@@ -106,13 +105,19 @@ class TC_VNF_COMPLEX_002(TestCase):
             round(self.tc_result['timeRecord']['startVNFEnd'] - self.tc_result['timeRecord']['startVNFStart'], 6)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Validate that traffic flows through without issues
+        # 5. Generate low traffic load
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Generating low traffic load')
+        # TODO
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 6. Validate that traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that traffic flows through without issues')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Trigger a resize of the NFV resources to reach the maximum
+        # 7. Trigger a resize of the NFV resources to reach the maximum
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering a resize of the NFV resources to reach the maximum')
         if self.tc_input['scaling_trigger'] == 'command_to_vnfm':
@@ -134,7 +139,7 @@ class TC_VNF_COMPLEX_002(TestCase):
                 return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Validate VNF has resized to the max and has max capacity
+        # 8. Validate VNF has resized to the max and has max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max and has max capacity')
         # self.tc_result['resource_list'] = {}
@@ -149,13 +154,13 @@ class TC_VNF_COMPLEX_002(TestCase):
         #     return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Generate max traffic load to load all VNF instances
+        # 9. Generate max traffic load to load all VNF instances
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Generating max traffic load to load all VNF instances')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 9. Validate all traffic flows through and has reached max capacity
+        # 10. Validate all traffic flows through and has reached max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating all traffic flows through and has reached max capacity')
         # TODO
@@ -167,7 +172,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 11. Stop the VNF (--> time stamp)
+        # 12. Stop the VNF (--> time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the VNF')
         self.tc_result['timeRecord']['stopVNFStart'] = time.time()
@@ -180,7 +185,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 12. Validate VNF has been stopped (--> time stamp)
+        # 13. Validate VNF has been stopped (--> time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF state is STOPPED')
         # vnf_info = vnfm.vnf_query(filter=vnf_instance_id)
@@ -194,19 +199,19 @@ class TC_VNF_COMPLEX_002(TestCase):
         self.tc_result['timeRecord']['stopVNFEnd'] = time.time()
 
         # --------------------------------------------------------------------------------------------------------------
-        # 13. Validate no traffic flows through (--> last arrival time stamp)
+        # 14. Validate no traffic flows through (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows through')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 14. Stop traffic
+        # 15. Stop traffic
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping traffic')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 15. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
+        # 16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the time to stop a max scaled VNF under load')
 
@@ -214,6 +219,8 @@ class TC_VNF_COMPLEX_002(TestCase):
             round(self.tc_result['timeRecord']['stopVNFEnd'] - self.tc_result['timeRecord']['stopVNFStart'], 6)
 
         LOG.info('TC_VNF_COMPLEX_002 execution completed successfully')
+
+        print self.tc_result
 
         return True
 
