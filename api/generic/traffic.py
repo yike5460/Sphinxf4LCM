@@ -59,3 +59,13 @@ class Traffic(object):
         """
 
         return True
+
+    @log_entry_exit(LOG)
+    def clear_counters(self):
+        """
+        This function clears all traffic counters.
+
+        :return:                            True if all counters have been cleared, False otherwise.
+        """
+
+        return True
