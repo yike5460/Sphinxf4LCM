@@ -5,6 +5,7 @@ from api.generic.tools import vnfinfo_get_instantiation_state, vnfinfo_get_vnf_s
 from test_cases import TestCase
 import time
 from api.generic import constants
+from api.generic.traffic import Traffic
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         vnfm = Vnfm(vendor=self.tc_input['vnfm_vendor'])
         vnf = Vnf(vendor=self.tc_input['vnf_vendor'])
+        traffic = Traffic()
 
         self.tc_result = {'overall_status': constants.TEST_PASSED, 'error_info': 'No errors', 'timeRecord': {}}
 
@@ -108,35 +110,53 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 5. Generate low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Generating low traffic load')
-        # TODO
+        if not traffic.configure(traffic_load="LOW_TRAFFIC_LOAD",
+                                 traffic_configuration_parameter=self.tc_input['traffic_config']):
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
+            return False
+
+        if not traffic.start():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic could not be started')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic could not be started'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate that traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that traffic flows through without issues')
+        if not traffic.does_traffic_flow():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic is not flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic is not flowing'
+            return False
+
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Trigger a resize of the NFV resources to reach the maximum
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering a resize of the NFV resources to reach the maximum')
+        scaling_result = constants.OPERATION_FAILED
         if self.tc_input['scaling_trigger'] == 'command_to_vnfm':
-            if vnfm.vnf_scale_to_level_sync(vnf_instance_id=vnf_instance_id, instantiation_level_id='max_level_id') != \
-                    constants.OPERATION_SUCCESS:
-                LOG.error('TC_VNF_COMPLEX_002 execution failed')
-                LOG.debug('Unexpected status for resize triggering operation')
-                self.tc_result['overall_status'] = constants.TEST_FAILED
-                self.tc_result['error_info'] = 'Unexpected status for resize triggering operation'
-                return False
+            scaling_result = vnfm.vnf_scale_to_level_sync(vnf_instance_id=vnf_instance_id,
+                                                          instantiation_level_id='max_level_id')
 
         elif self.tc_input['scaling_trigger'] == 'triggered_by_vnf':
-            if vnf.scale_to_level_sync(vnf_instance_id=vnf_instance_id, instantiation_level_id='max_level_id') != \
-                    constants.OPERATION_SUCCESS:
-                LOG.error('TC_VNF_COMPLEX_002 execution failed')
-                LOG.debug('Unexpected status for resize triggering operation')
-                self.tc_result['overall_status'] = constants.TEST_FAILED
-                self.tc_result['error_info'] = 'Unexpected status for resize triggering operation'
-                return False
+            scaling_result = vnf.scale_to_level_sync(vnf_instance_id=vnf_instance_id,
+                                                     instantiation_level_id='max_level_id')
+
+        if scaling_result != constants.OPERATION_SUCCESS:
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Unexpected status for resize triggering operation')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Unexpected status for resize triggering operation'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate VNF has resized to the max and has max capacity
@@ -157,7 +177,13 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 9. Generate max traffic load to load all VNF instances
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Generating max traffic load to load all VNF instances')
-        # TODO
+        if not traffic.configure(traffic_load="MAX_TRAFFIC_LOAD",
+                                 traffic_configuration_parameter=self.tc_input['traffic_config']):
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Max traffic load and traffic configuration parameter could not be applied')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Max traffic load and traffic configuration parameter could not be applied'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Validate all traffic flows through and has reached max capacity
@@ -202,7 +228,12 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 14. Validate no traffic flows through (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows through')
-        # TODO
+        if not traffic.does_traffic_flow():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic is not flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic is not flowing'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 15. Stop traffic
@@ -219,8 +250,6 @@ class TC_VNF_COMPLEX_002(TestCase):
             round(self.tc_result['timeRecord']['stopVNFEnd'] - self.tc_result['timeRecord']['stopVNFStart'], 6)
 
         LOG.info('TC_VNF_COMPLEX_002 execution completed successfully')
-
-        print self.tc_result
 
         return True
 
