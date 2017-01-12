@@ -69,3 +69,13 @@ class Traffic(object):
         """
 
         return True
+
+    @log_entry_exit(LOG)
+    def any_traffic_loss(self):
+        """
+        This function checks if any packets are dropped.
+
+        :return:                            True if traffic flows with dropped packets, False otherwise
+        """
+
+        return True
