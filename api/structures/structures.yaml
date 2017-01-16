@@ -1,6 +1,5 @@
 VnfInfo:
-  description: >
-    This clause defines information elements related to VNF Lifecycle Management
+  description: This clause defines information elements related to VNF Lifecycle Management
   attributes:
     vnf_instance_id:
       description: Identifier of the VNF instance that is represented by this VnfInfo information element
@@ -48,7 +47,7 @@ VnfInfo:
       type: mapping
       required: false
 
-     instantiation_state:
+    instantiation_state:
       description: The instantiation state of the VNF. Possible values - NOT_INSTANTIATED (VNF is terminated or not instantiated), INSTANTIATED (VNF is instantiated).
       type: string
       required: true
