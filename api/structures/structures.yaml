@@ -1,0 +1,78 @@
+VnfInfo:
+  description: >
+    This clause defines information elements related to VNF Lifecycle Management
+  attributes:
+    vnf_instance_id:
+      description: Identifier of the VNF instance that is represented by this VnfInfo information element
+      type: uuid
+      required: true
+
+    vnf_instance_name:
+      description: VNF instance name
+      type: string
+      required: false
+
+    vnf_instance_description:
+      description: Human-readable description of the VNF instance.
+      type: string
+      required: false
+
+    vnfd_id:
+      description: Identifier of the VNFD on which the VNF instance is based.
+      type: uuid
+      required: true
+
+    vnf_provider:
+      type: string
+      required: true
+
+    vnf_product_name:
+      type: string
+      required: true
+
+    vnf_software_version:
+      type: Version
+      required: true
+
+    vnfd_version:
+      type: Version
+      required: true
+
+    onboarded_vnf_pkg_info_id:
+      description: Identifier of information held by the NFVO about the specific VNF Package on which the VNF is based. This identifier was allocated by the NFVO.
+      type: uuid
+      required: true
+
+    vnf_configurable_property:
+      description: Current values of the configurable properties of the VNF instance. Configurable properties as declared in the VNFD
+      type: mapping
+      required: false
+
+     instantiation_state:
+      description: The instantiation state of the VNF. Possible values - NOT_INSTANTIATED (VNF is terminated or not instantiated), INSTANTIATED (VNF is instantiated).
+      type: string
+      required: true
+      constraints:
+        - valid_values: [ INSTANTIATED, NOT_INSTANTIATED ]
+
+      instantiated_vnf_info:
+        description: Information specific to an instantiated VNF instance. Shall be present if the VNF is in INSTANTIATED state.
+        type: InstantiatedVnfInfo
+        required: false
+
+      metadata:
+        description: Additional metadata describing the VNF instance.
+        type: mapping
+        required: false
+
+      extension:
+        description: VNF-specific attributes.
+        type: mapping
+        required: false
+
+
+
+
+
+
+
