@@ -46,3 +46,36 @@ class Traffic(object):
         """
 
         return True
+
+    @log_entry_exit(LOG)
+    def stop(self, delay_time=0, return_when_emission_stops=True):
+        """
+        This function stops the traffic emission.
+
+        :param delay_time:                  Time, in seconds, to wait until stopping traffic.
+        :param return_when_emission_stops:  Flag influencing if the command should return back immediately or only when
+                                            the emission actually stopped.
+        :return:                            True if emission stopped, False otherwise.
+        """
+
+        return True
+
+    @log_entry_exit(LOG)
+    def clear_counters(self):
+        """
+        This function clears all traffic counters.
+
+        :return:                            True if all counters have been cleared, False otherwise.
+        """
+
+        return True
+
+    @log_entry_exit(LOG)
+    def any_traffic_loss(self):
+        """
+        This function checks if any packets are dropped.
+
+        :return:                            True if traffic flows with dropped packets, False otherwise
+        """
+
+        return True

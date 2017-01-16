@@ -206,6 +206,16 @@ class VnfmDummyAdapter(object):
         vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'network_resource'))
         vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'storage_resource'))
 
+        vnf_vResource_list = [[{'vnfc_instance_id': {'vim_id': '',
+                                                     'resource_provider_id': '',
+                                                     'resource_id': ''}}],
+                              [{'virtual_link_instance_id': {'vim_id': '',
+                                                             'resource_provider_id': '',
+                                                             'resource_id': ''}}],
+                              [{'virtual_storage_instance_id': {'vim_id': '',
+                                                                'resource_provider_id': '',
+                                                                'resource_id': ''}}]]
+
         return vnf_vResource_list
 
     @log_entry_exit(LOG)
@@ -226,4 +236,3 @@ class VnfmDummyAdapter(object):
         status = True
 
         return status
-

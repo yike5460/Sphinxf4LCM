@@ -1,5 +1,6 @@
 import importlib
 from utils.logging_module import configure_logger
+from utils import timestamps
 
 
 class TestExecutionError(Exception):
@@ -18,8 +19,10 @@ class TestCase(object):
     __metaclass__ = TestMeta
 
     def __init__(self, tc_input):
+        self.time_record = timestamps.TimeRecord()
         self.tc_input = tc_input
-        self.tc_result = {}
+        self.tc_result = dict()
+        self.tc_result['time_records'] = {}
 
     @classmethod
     def initialize(cls):
