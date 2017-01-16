@@ -47,7 +47,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 1. Instantiate VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating VNF')
-        self.start_clock('instantiate_vnf')
+        self.time_record.START('instantiate_vnf')
         vnf_instance_id = vnfm.vnf_create_and_instantiate(vnfd_id='vnfd_id', flavour_id='123456',
                                                           vnf_instance_name='test_vnf',
                                                           vnf_instance_description='VNF used for testing')
@@ -70,13 +70,13 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected VNF instantiation state'
             return False
 
-        self.stop_clock('instantiate_vnf')
+        self.time_record.STOP('instantiate_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting VNF')
-        self.start_clock('start_vnf')
+        self.time_record.START('start_vnf')
         if vnfm.vnf_operate_sync(vnf_instance_id=vnf_instance_id, change_state_to='start') != \
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
@@ -97,7 +97,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected VNF state'
             return False
 
-        self.stop_clock('start_vnf')
+        self.time_record.STOP('start_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Generate low traffic load
@@ -194,7 +194,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 12. Stop the VNF (--> time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the VNF')
-        self.start_clock('stop_vnf')
+        self.time_record.START('stop_vnf')
         if vnfm.vnf_operate_sync(vnf_instance_id=vnf_instance_id, change_state_to='stop') != \
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
@@ -215,7 +215,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Unexpected VNF state'
             return False
 
-        self.stop_clock('stop_vnf')
+        self.time_record.STOP('stop_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 14. Validate no traffic flows through (--> last arrival time stamp)
@@ -238,8 +238,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the time to stop a max scaled VNF under load')
-        self.tc_result['timeRecord']['stopVNFTime'] = self.tc_result['timeRecord']['stopVNFEnd'] - \
-                                                      self.tc_result['timeRecord']['stopVNFStart']
+        self.tc_result['timeRecord']['stopVNFTime'] = self.time_record.duration('stop_vnf')
 
         LOG.info('TC_VNF_COMPLEX_002 execution completed successfully')
 
