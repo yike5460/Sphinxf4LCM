@@ -55,7 +55,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected VNF instantiation ID'
+            self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
@@ -67,10 +67,10 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected VNF instantiation state'
+            self.tc_result['error_info'] = 'VNF was not in "%s" state after instantiation' % constants.VNF_INSTANTIATED
             return False
 
-        self.time_record.STOP('instantiate_vnf')
+        self.time_record.END('instantiate_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start VNF
@@ -82,7 +82,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected status for starting VNF operation')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected status for starting VNF operation'
+            self.tc_result['error_info'] = 'VNF start operation failed'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
@@ -94,10 +94,10 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected VNF state'
+            self.tc_result['error_info'] = 'VNF was not in "%s" state after it was started' % constants.VNF_STARTED
             return False
 
-        self.time_record.STOP('start_vnf')
+        self.time_record.END('start_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Generate low traffic load
@@ -115,7 +115,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Traffic could not be started')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic could not be started'
+            self.tc_result['error_info'] = 'Low traffic could not be started'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
@@ -126,10 +126,26 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Traffic is not flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic is not flowing'
+            self.tc_result['error_info'] = 'Low traffic did not flow'
             return False
 
-        # TODO
+        if traffic.any_traffic_loss():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic is flowing with packet loss')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
+            return False
+
+        self.tc_result['resource_list'] = {}
+        self.tc_result['resource_list']['normal_level'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
+        if not vnfm.validate_allocated_vResources(
+                           vnf_vResource_list=self.tc_result['resource_list']['normal_level'],
+                           instantiation_level_id='normal_level_id', resource_type_list=self.tc_input['resource_type']):
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Unable to validate normal resource')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'VNF has not been assigned normal resources'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Trigger a resize of the NFV resources to reach the maximum
@@ -148,22 +164,21 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected status for resize triggering operation')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected status for resize triggering operation'
+            self.tc_result['error_info'] = 'VNF resize operation failed'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate VNF has resized to the max and has max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max and has max capacity')
-        self.tc_result['resource_list'] = {}
-        self.tc_result['resource_list']['max_resource'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
-        if not vnfm.validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['max_resource'],
-                                                  instantiation_level_id='max_level_id',
-                                                  resource_type_list=self.tc_input['resource_type']):
+        self.tc_result['resource_list']['after_resize'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
+        if not vnfm.validate_allocated_vResources(
+                              vnf_vResource_list=self.tc_result['resource_list']['after_resize'],
+                              instantiation_level_id='max_level_id', resource_type_list=self.tc_input['resource_type']):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
-            LOG.debug('Unable to validate maximum resources')
+            LOG.debug('Unable to validate resources after resize')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unable to validate maximum resources'
+            self.tc_result['error_info'] = 'VNF has not been assigned max resources after resize'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
@@ -182,13 +197,40 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 10. Validate all traffic flows through and has reached max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating all traffic flows through and has reached max capacity')
-        # TODO
+        if not traffic.does_traffic_flow():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic is not flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Max traffic is not flowing'
+            return False
+
+        if traffic.any_traffic_loss():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic is flowing with packet loss')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Max traffic is flowing with packet loss'
+            return False
+
+        self.tc_result['resource_list']['after_max_traffic'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
+        if not vnfm.validate_allocated_vResources(
+                vnf_vResource_list=self.tc_result['resource_list']['after_max_traffic'],
+                instantiation_level_id='max_level_id', resource_type_list=self.tc_input['resource_type']):
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Unable to validate maximum resources')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'vResource change after applying max traffic'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 11. Clear counters
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Clearing counters')
-        # TODO
+        if not traffic.clear_counters():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic counters could not be cleared')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic counters could not be cleared'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 12. Stop the VNF (--> time stamp)
@@ -200,7 +242,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected status for starting VNF operation')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected status for starting VNF operation'
+            self.tc_result['error_info'] = 'VNF stop operation failed'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
@@ -212,33 +254,38 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Unexpected VNF state'
+            self.tc_result['error_info'] = 'VNF was not in "%s" state after it was stopped' % constants.VNF_STOPPED
             return False
 
-        self.time_record.STOP('stop_vnf')
+        self.time_record.END('stop_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 14. Validate no traffic flows through (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows through')
-        if not traffic.does_traffic_flow():
+        if traffic.does_traffic_flow():
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
-            LOG.debug('Traffic is not flowing')
+            LOG.debug('Traffic is flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic is not flowing'
+            self.tc_result['error_info'] = 'Traffic still flown after the VNF was stopped'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 15. Stop traffic
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping traffic')
-        # TODO
+        if not traffic.stop():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic could not be stopped')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic could not be stopped'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the time to stop a max scaled VNF under load')
-        self.tc_result['timeRecord']['stopVNFTime'] = self.time_record.duration('stop_vnf')
+        self.tc_result['time_records']['stop_vnf_time'] = self.time_record.duration('stop_vnf')
 
         LOG.info('TC_VNF_COMPLEX_002 execution completed successfully')
 
