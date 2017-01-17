@@ -78,4 +78,4 @@ class Traffic(object):
         :return:                            True if traffic flows with dropped packets, False otherwise
         """
 
-        return True
+        return False
