@@ -1,10 +1,12 @@
 {
   "openstack": {
     "vnfm"  : "api.adapter.openstack.vnfm.VnfmOpenstackAdapter",
-    "vnf"   : "api.adapter.openstack.vnf.VnfmOpenstackAdapter"
+    "vnf"   : "api.adapter.openstack.vnf.VnfmOpenstackAdapter",
+    "vim"   : "api.adapter.openstack.vim.VimOpenstackAdapter"
   },
   "dummy" : {
     "vnfm"  : "api.adapter.dummy.vnfm.VnfmDummyAdapter",
-    "vnf"   : "api.adapter.dummy.vnf.VnfDummyAdapter"
+    "vnf"   : "api.adapter.dummy.vnf.VnfDummyAdapter",
+    "vim"   : "api.adapter.dummy.vim.VimDummyAdapter"
   }
 }

@@ -217,22 +217,3 @@ class VnfmDummyAdapter(object):
                                                                 'resource_id': ''}}]]
 
         return vnf_vResource_list
-
-    @log_entry_exit(LOG)
-    def validate_allocated_vResources(self, vnf_vResource_list, instantiation_level_id, resource_type_list):
-        """
-        This function validates that the VNF has been assigned the expected vResources in the current state.
-
-        :param vnf_vResource_list:          A list of lists containing dictionaries of the following structure:
-                                            [[{'vnfc_instance_id': compute_resource_handle}],
-                                             [{'virtual_link_instance_id': network_resource_handle}],
-                                             [{'virtual_storage_instance_id': storage_resource_handle}]]
-        :param instantiation_level_id:      Identifier of the target instantiation level of the current DF to which the
-                                            VNF is requested to be validated.
-        :param resource_type_list:          A list with types of vResources to be validated.
-        :return:                            TRUE - vResources are the expected ones, FALSE - vResource mismatch.
-        """
-
-        status = True
-
-        return status
