@@ -2,7 +2,7 @@ import logging
 from api.generic import constants
 from api.generic.vnf import Vnf
 from api.generic.vnfm import Vnfm
-from api.generic.tools import vnfinfo_get_instantiation_state, vnfinfo_get_vnf_state
+from api.generic.tools import vnfinfo_get_instantiation_state, vnfinfo_get_vnf_state, validate_allocated_vResources
 from api.generic.traffic import Traffic
 from test_cases import TestCase
 
@@ -138,7 +138,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.tc_result['resource_list'] = {}
         self.tc_result['resource_list']['normal_level'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
-        if not vnfm.validate_allocated_vResources(
+        if not validate_allocated_vResources(
                            vnf_vResource_list=self.tc_result['resource_list']['normal_level'],
                            instantiation_level_id='normal_level_id', resource_type_list=self.tc_input['resource_type']):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
@@ -172,7 +172,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max and has max capacity')
         self.tc_result['resource_list']['after_resize'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
-        if not vnfm.validate_allocated_vResources(
+        if not validate_allocated_vResources(
                               vnf_vResource_list=self.tc_result['resource_list']['after_resize'],
                               instantiation_level_id='max_level_id', resource_type_list=self.tc_input['resource_type']):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
@@ -212,7 +212,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         self.tc_result['resource_list']['after_max_traffic'] = vnfm.get_vResource(vnf_instance_id=vnf_instance_id)
-        if not vnfm.validate_allocated_vResources(
+        if not validate_allocated_vResources(
                 vnf_vResource_list=self.tc_result['resource_list']['after_max_traffic'],
                 instantiation_level_id='max_level_id', resource_type_list=self.tc_input['resource_type']):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
@@ -296,3 +296,10 @@ class TC_VNF_COMPLEX_002(TestCase):
         LOG.info('Finished cleanup for TC_VNF_COMPLEX_002')
 
         return True
+
+if __name__ == "__main__":
+    test = TC_VNF_COMPLEX_002(TestCase)
+    test.tc_input = {'vnfm_vendor': 'dummy', 'vnf_vendor': 'dummy', 'traffic_config': 'traffic_config',
+                     'scaling_trigger': 'command_to_vnfm', 'resource_type': 'vNetwork'}
+    test.initialize()
+    test.run()

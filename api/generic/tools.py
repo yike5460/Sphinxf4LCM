@@ -31,7 +31,6 @@ def vnfinfo_get_vnf_state(vnfinfo_dict):
     LOG.debug('VNF state: %s' % vnf_state)
     return vnf_state
 
-@log_entry_exit(LOG)
 def validate_allocated_vResources(vnf_vResource_list, instantiation_level_id, resource_type_list):
     """
     This function validates that the VNF has been assigned the expected vResources in the current state.
