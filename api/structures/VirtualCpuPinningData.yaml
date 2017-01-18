@@ -8,5 +8,5 @@ VirtualCpuPinningData:
 
     cpu_pinning_map:
       description: The cpuPinningMap provides the map of pinning virtual CPU cores to physical CPU cores/threads (when cpuPinningPolicy is "static")
-      type: Enum
+      type: NotSpecified 
       required: false
