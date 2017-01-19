@@ -29,8 +29,7 @@ class TC_VNF_COMPLEX_002(TestCase):
     12. Stop the VNF (--> time stamp)
     13. Validate VNF has been stopped (--> time stamp)
     14. Validate no traffic flows through (--> last arrival time stamp)
-    15. Stop traffic
-    16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
+    15. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
     """
 
     def run(self):
@@ -250,7 +249,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF state is STOPPED')
         vnf_info = self.vnfm.vnf_query(filter=self.vnf_instance_id)
-        if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STARTED:
+        if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STOPPED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -263,7 +262,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 14. Validate no traffic flows through (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows through')
-        if not self.traffic.does_traffic_flow():
+        if self.traffic.does_traffic_flow():
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Traffic is flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -271,18 +270,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 15. Stop traffic
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic')
-        if not self.traffic.stop():
-            LOG.error('TC_VNF_COMPLEX_002 execution failed')
-            LOG.debug('Traffic could not be stopped')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic could not be stopped'
-            return False
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 16. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
+        # 15. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the time to stop a max scaled VNF under load')
         self.tc_result['durations']['stop_vnf_time'] = self.time_record.duration('stop_vnf')
