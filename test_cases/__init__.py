@@ -1,3 +1,4 @@
+import collections
 import importlib
 from utils.logging_module import configure_logger
 from utils import timestamps
@@ -19,10 +20,16 @@ class TestCase(object):
     __metaclass__ = TestMeta
 
     def __init__(self, tc_input):
-        self.time_record = timestamps.TimeRecord()
         self.tc_input = tc_input
         self.tc_result = dict()
-        self.tc_result['time_records'] = {}
+        self.tc_result['timestamps'] = collections.OrderedDict()
+        self.tc_result['durations'] = {}
+        self.time_record = timestamps.TimeRecord()
+        self.traffic = None
+        self.vim = None
+        self.vnf = None
+        self.vnf_instance_id = None
+        self.vnfm = None
 
     @classmethod
     def initialize(cls):
@@ -37,6 +44,9 @@ class TestCase(object):
     def cleanup(self):
         return True
 
+    def collect_timestamps(self):
+        self.tc_result['timestamps'].update(self.time_record.dump_data())
+
     def execute(self):
         self.initialize()
 
@@ -46,6 +56,8 @@ class TestCase(object):
 
             if not self.run():
                 raise TestExecutionError
+
+            self.collect_timestamps()
 
             if not self.cleanup():
                 raise TestExecutionError
