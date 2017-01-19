@@ -1,6 +1,8 @@
 import logging
+
 from utils.logging_module import log_entry_exit
 
+# Instantiate logger
 LOG = logging.getLogger(__name__)
 
 
@@ -78,4 +80,4 @@ class Traffic(object):
         :return:                            True if traffic flows with dropped packets, False otherwise
         """
 
-        return True
+        return False

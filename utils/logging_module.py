@@ -1,5 +1,5 @@
-import logging
 import functools
+import logging
 import os
 
 LOG_DIR = '/tmp/nfv'

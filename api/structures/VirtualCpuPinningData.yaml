@@ -1,0 +1,12 @@
+VirtualCpuPinningData:
+  description: This clause defines attributes of the VirtualCpuData information element
+  attributes:
+    cpu_pinning_policy:
+      description: Indicates the policy for CPU pinning
+      type: Enum
+      required: false
+
+    cpu_pinning_map:
+      description: The cpuPinningMap provides the map of pinning virtual CPU cores to physical CPU cores/threads (when cpuPinningPolicy is "static")
+      type: NotSpecified 
+      required: false

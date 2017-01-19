@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 mapping_file_name = 'constructors.json'
 _vendor_constructor_mapping = None

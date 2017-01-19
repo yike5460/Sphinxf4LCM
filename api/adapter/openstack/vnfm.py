@@ -1,11 +1,14 @@
-import logging
 import json
+import logging
+
 import os_client_config
-from utils.logging_module import log_entry_exit
 from tackerclient.tacker.client import Client as TackerClient
-from api.generic import constants
 import tackerclient.common.exceptions
 
+from api.generic import constants
+from utils.logging_module import log_entry_exit
+
+# Instantiate logger
 LOG = logging.getLogger(__name__)
 
 
@@ -28,6 +31,7 @@ class VnfmOpenstackAdapter(object):
             print 'Unable to create', self.__class__.__name__, 'instance'
             raise
 
+    @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         LOG.warning('"Lifecycle Operation Occurence Id" is not implemented in OpenStack!')
         LOG.warning('Will return the state of the resource with given Id')
@@ -40,6 +44,7 @@ class VnfmOpenstackAdapter(object):
 
         return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
 
+    @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         LOG.warning('"VNF Instantiate" operation is not implemented in OpenStack!')

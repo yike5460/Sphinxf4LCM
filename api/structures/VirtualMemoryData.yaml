@@ -1,0 +1,17 @@
+VirtualMemoryData:
+  description: This clause defines attributes of the VirtualMemoryData information element
+  attributes:
+    virtual_mem_size:
+      description: Amount of virtual Memory (e.g. in MB)
+      type: Number
+      required: true
+
+    virtual_mem_oversubscription_policy:
+      description: The memory core oversubscription policy in terms of virtual memory to physical memory on the platform
+      type: NotSpecified
+      required: false
+
+    numa_enabled:
+      description: It specifies the memory allocation to be cognisant of the relevant process/core allocation
+      type: Boolean
+      required: false

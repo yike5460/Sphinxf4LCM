@@ -1,9 +1,11 @@
 import logging
 import time
+
+from api.generic import constants
 from api.adapter import construct_adapter
 from utils.logging_module import log_entry_exit
-from api.generic import constants
 
+# Instantiate logger
 LOG = logging.getLogger(__name__)
 
 
@@ -108,7 +110,7 @@ class Vnfm(object):
     def vnf_scale_to_level_sync(self, vnf_instance_id, instantiation_level_id=None, scale_info=None,
                                 additional_param=None):
         """
-        This function scales an instantiated VNF of a particular DF to a target size.
+        This function scales synchronously an instantiated VNF of a particular DF to a target size.
 
         :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
         :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
@@ -123,6 +125,26 @@ class Vnfm(object):
         """
         lifecycle_operation_occurrence_id = self.vnf_scale_to_level(vnf_instance_id, instantiation_level_id, scale_info,
                                                                     additional_param)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES)
+
+        return operation_status
+
+    @log_entry_exit(LOG)
+    def vnf_terminate_sync(self, vnf_instance_id, termination_type, graceful_termination_type=None):
+        """
+        This function terminates synchronously a VNF.
+
+        :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
+        :param termination_type:            Signals whether forceful or graceful termination is requested.
+        :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
+                                            graceful termination, before shutting down the VNF and releasing the
+                                            resources.
+        :return:                            Identifier of the VNF lifecycle operation occurrence.
+        """
+        lifecycle_operation_occurrence_id = self.vnf_terminate(vnf_instance_id, termination_type,
+                                                               graceful_termination_type)
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES)

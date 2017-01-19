@@ -1,9 +1,11 @@
 import logging
 import time
+
+from api.generic import constants
 from api.adapter import construct_adapter
 from utils.logging_module import log_entry_exit
-from api.generic import constants
 
+# Instantiate logger
 LOG = logging.getLogger(__name__)
 
 

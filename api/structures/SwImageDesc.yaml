@@ -1,0 +1,65 @@
+SwImageDesc:
+  description: This clause defines attributes of the SwImageDesc information element for a specific VDU
+  attributes:
+    id:
+      description: The identifier of this software image
+      type: Identifier
+      required: true
+
+    name:
+      description: The name of this software image
+      type: String
+      required: true
+
+    version:
+      description: The version of this software image
+      type: String
+      required: true
+
+    checksum:
+      description: The checksum of the software image file
+      type: String
+      required: true
+
+    container_format:
+      description: The container file format in which software image is provided
+      type: String
+      required: true
+
+    disk_format:
+      description: The format of the underlying disk image
+      type: String
+      required: true
+
+    min_disk:
+      description: The minimal disk size requirement for this software image
+      type: Number
+      required: true
+
+    min_ram:
+      description: The minimal RAM requirement for this software image
+      type: Number
+      required: false
+
+    size:
+      description: The size of this software image
+      type: Number
+      required: true
+
+    sw_image:
+      description: The reference to the actual software image
+      type: Identifier
+      required: true
+
+    operating_system:
+      description: Identifies the operating system used in the software image
+      type: String
+      required: false
+
+    supported_virtualisation_environment:
+      description: Identifies the virtualisation environments (e.g. hypervisor) compatible with this software image
+      type: List
+      required: true
+      constraints:
+        - entry_values: String
+        

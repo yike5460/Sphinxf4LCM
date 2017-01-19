@@ -1,0 +1,27 @@
+VirtualCpuData:
+  description: This clause defines attributes of the VirtualCpuData information element
+  attributes:
+    cpu_architecture:
+      description: CPU architecture type
+      type: String
+      required: false
+
+    num_virtual_cpu:
+      description: Number of virtual CPUs
+      type: Integer
+      required: true
+
+    virtual_cpu_clock:
+      description: Minimum virtual CPU clock rate (e.g. in MHz)
+      type: Number
+      required: false
+
+    virtual_cpu_oversubscription_policy:
+      description: The virtual CPU(s) of the virtualised compute
+      type: NotSpecified
+      required: false
+
+    virtual_cpu_pinning:
+      description: The virtual CPU pinning configuration for the virtualised compute resource
+      type: VirtualCpuPinningData
+      required: false
