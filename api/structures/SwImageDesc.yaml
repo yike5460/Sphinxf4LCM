@@ -57,7 +57,7 @@ SwImageDesc:
       required: false
 
     supported_virtualisation_environment:
-      description: dentifies the virtualisation environments (e.g. hypervisor) compatible with this software image
+      description: Identifies the virtualisation environments (e.g. hypervisor) compatible with this software image
       type: List
       required: true
       constraints:
