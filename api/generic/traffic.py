@@ -1,6 +1,8 @@
 import logging
+
 from utils.logging_module import log_entry_exit
 
+# Instantiate logger
 LOG = logging.getLogger(__name__)
 
 

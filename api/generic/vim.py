@@ -1,4 +1,5 @@
 import logging
+
 from api.adapter import construct_adapter
 
 LOG = logging.getLogger(__name__)

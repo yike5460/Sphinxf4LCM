@@ -1,10 +1,11 @@
 import logging
+
 from api.generic import constants
+from test_cases import TestCase
+from api.generic.traffic import Traffic
 from api.generic.vnf import Vnf
 from api.generic.vnfm import Vnfm
 from api.generic.tools import vnfinfo_get_instantiation_state, vnfinfo_get_vnf_state, validate_allocated_vResources
-from api.generic.traffic import Traffic
-from test_cases import TestCase
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -285,6 +286,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # Stop traffic
         # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Stopping traffic')
         if not self.traffic.stop():
             LOG.error('TC_VNF_COMPLEX_002 cleanup failed')
             LOG.debug('Traffic could not be stopped')
@@ -293,6 +295,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # Terminate VNF
         # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Terminating VNF')
         if self.vnfm.vnf_terminate_sync(vnf_instance_id=self.vnf_instance_id,
                                         termination_type='graceful') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_COMPLEX_002 cleanup failed')
@@ -300,8 +303,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # Delete VNF ID
+        # Delete VNF instance ID
         # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Deleting VNF instance ID')
         self.vnfm.vnf_delete_id(self.vnf_instance_id)
 
         LOG.info('Cleanup for TC_VNF_COMPLEX_002 completed successfully')

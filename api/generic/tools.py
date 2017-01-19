@@ -1,10 +1,13 @@
-import time
 import logging
+
+from utils.logging_module import log_entry_exit
 from api.generic.vim import Vim
 
+# Instantiate logger
 LOG = logging.getLogger(__name__)
 
 
+@log_entry_exit(LOG)
 def vnfinfo_get_instantiation_state(vnfinfo_dict):
     """
     This function retrieves the value for key instantiation_state is as expected in the provided vnfInfo dictionary.
@@ -19,6 +22,7 @@ def vnfinfo_get_instantiation_state(vnfinfo_dict):
     return vnf_instantiation_state
 
 
+@log_entry_exit(LOG)
 def vnfinfo_get_vnf_state(vnfinfo_dict):
     """
     This function retrieves the value for key vnf_state is as expected in the provided vnfInfo dictionary.
@@ -31,6 +35,8 @@ def vnfinfo_get_vnf_state(vnfinfo_dict):
     LOG.debug('VNF state: %s' % vnf_state)
     return vnf_state
 
+
+@log_entry_exit(LOG)
 def validate_allocated_vResources(vnf_vResource_list, instantiation_level_id, resource_type_list):
     """
     This function validates that the VNF has been assigned the expected vResources in the current state.
