@@ -48,6 +48,17 @@ class VnfmDummyAdapter(object):
         return vnf_instance_id
 
     @log_entry_exit(LOG)
+    def vnf_delete_id(self, vnf_instance_id):
+        """
+        This function deletes a VNF instance ID and the associated instance of a VnfInfo information element.
+
+        This function was written in accordance with section 7.2.8 of GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id: VNF instance identifier to be deleted.
+        :return:                Nothing.
+        """
+
+    @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         """
