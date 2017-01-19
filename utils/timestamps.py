@@ -1,3 +1,4 @@
+import collections
 import time
 
 
@@ -7,13 +8,15 @@ class TimeRecord(object):
 
     Attributes:
         time_records:   Dictionary containing time record names as keys and time record objects as values.
+        dump_dict:      Ordered dictionary containing object names as keys and timestamps as values.
 
     """
     def __init__(self):
         """
         This method initializes the time records dictionary.
         """
-        self.time_records = dict()
+        self.time_records = collections.OrderedDict()
+        self.dump_dict = collections.OrderedDict()
 
     def START(self, label):
         """
@@ -91,6 +94,16 @@ class TimeRecord(object):
         except AttributeError:
             raise ValueError('Time record "%s" does not have a "%s" attribute' % (time_record_label, time_record_attr))
 
+    def dump_data(self):
+        """
+        This method calls the dump_data method on each object in the time_records dictionary.
+
+        :return:    Ordered dictionary containing object names as keys and timestamps as values.
+        """
+        for label in self.time_records:
+            self.dump_dict.update(self.time_records[label].dump_data())
+        return self.dump_dict
+
 
 class TimeRecordEventEntry(object):
     """
@@ -98,8 +111,9 @@ class TimeRecordEventEntry(object):
 
     Attributes:
         name:   Name of the time record.
-        _START: Floating number representing the start timestamp.
-        _END:   Floating number representing the end timestamp.
+        _START:     Floating number representing the start timestamp.
+        _END:       Floating number representing the end timestamp.
+        dump_dict:  Dictionary containing object name as key and timestamps as values.
     """
 
     def __init__(self, name):
@@ -114,11 +128,12 @@ class TimeRecordEventEntry(object):
             raise ValueError('The label must not contain the "." character')
         self._START = None
         self._END = None
+        self.dump_dict = collections.OrderedDict()
 
     @property
     def START(self):
         """
-        This method returns the start label of the time record.
+        This method returns the start timestamp of the time record.
         """
         if self._START is not None:
             return self._START
@@ -135,7 +150,7 @@ class TimeRecordEventEntry(object):
     @property
     def END(self):
         """
-        This method returns the end label of the time record.
+        This method returns the end timestamp of the time record.
         """
         if self._END is not None:
             return self._END
@@ -155,11 +170,23 @@ class TimeRecordEventEntry(object):
     @property
     def duration(self):
         """
-        This method subtracts the start label from the end label.
+        This method subtracts the start timestamp from the end timestamp.
 
         :return: The subtraction result.
         """
         return self.END - self.START
+
+    def dump_data(self):
+        """
+        This method dumps the current object name and timestamps in an ordered dictionary.
+
+        :return:    Ordered dictionary containing object name as key and timestamps as values.
+        """
+        if self._START is not None:
+            self.dump_dict[self.name + '.START'] = self._START
+        if self._END is not None:
+            self.dump_dict[self.name + '.END'] = self._END
+        return self.dump_dict
 
 
 class TimeRecordMomentEntry(object):
@@ -167,8 +194,9 @@ class TimeRecordMomentEntry(object):
     This class is used for time record entries that have only one label.
 
     Attributes:
-        name:   Name of the time record.
-        _MARK:  Floating number representing the timestamp.
+        name:       Name of the time record.
+        _MARK:      Floating number representing the timestamp.
+        dump_dict:  Dictionary containing object name as key and timestamp as value.
     """
 
     def __init__(self, name):
@@ -182,6 +210,7 @@ class TimeRecordMomentEntry(object):
         else:
             raise ValueError('The label must not contain the "." character')
         self._MARK = None
+        self.dump_dict = dict()
 
     @property
     def MARK(self):
@@ -201,3 +230,12 @@ class TimeRecordMomentEntry(object):
             self._MARK = value
         else:
             raise ValueError('Time record with name %s already has a timestamp' % self.name)
+
+    def dump_data(self):
+        """
+        This method dumps the name of the object and the timestamp in a dictionary.
+
+        :return:    Dictionary containing object name as key and timestamp as value.
+        """
+        self.dump_dict = {self.name: self._MARK}
+        return self.dump_dict
