@@ -1,0 +1,29 @@
+VnfcResourceInfo:
+  description: VnfcResourceInfo provides information on virtualised compute and storage resources used by a VNFC
+  attributes:
+    vnfc_instance_id:
+      description: Identifier of this VNFC instance
+      type: Identifier
+      required: true
+
+    vdu_id:
+      description: Reference to the applicable Vdu information element in the VNFD
+      type: Identifier
+      required: true
+
+    compute_resource:
+      description: Reference to the VirtualCompute resource
+      type: ResourceHandle
+      required: true
+
+    storage_resource_id:
+      description: Reference(s) to the VirtualStorage resource(s)
+      type: List
+      required: false
+      constraints:
+        - entry_type: Identifier
+
+    reservation_id:
+      description: The reservation identifier applicable to the resource
+      type: Identifier
+      required: false

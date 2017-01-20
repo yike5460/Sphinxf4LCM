@@ -1,0 +1,22 @@
+VirtualStorageResourceInfo:
+  description:  VirtualStorageResourceInfo provides information on virtualised storage resources used by a storage instance in a VNF
+  attributes:
+    virtual_storage_instance_id:
+      description: Identifier of this virtual storage resource instance
+      type: Identifier
+      required: true
+
+    virtual_storage_desc_id:
+      description: Identifier of the VirtualStorageDesc in the VNFD
+      type: Identifier
+      required: true
+
+    storage_resource:
+      description: Reference to the VirtualStorage resource
+      type: ResourceHandle
+      required: true
+
+    reservation_id:
+      description: The reservation identifier applicable to the resource
+      type: Identifier
+      required: false

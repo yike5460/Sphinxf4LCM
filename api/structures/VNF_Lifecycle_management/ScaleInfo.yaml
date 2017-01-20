@@ -1,0 +1,12 @@
+ScaleInfo:
+  description:  ScaleInfo information element provides information about the scale level of a VNF instance w.r.t. one scaling aspect
+  attributes:
+    aspect_id:
+      description: Reference to the scaling aspect
+      type: Identifier
+      required: true
+
+    scale_level:
+      description: The scale level for that aspect
+      type: Integer
+      required: true

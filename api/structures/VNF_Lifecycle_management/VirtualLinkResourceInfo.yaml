@@ -1,0 +1,22 @@
+VirtualLinkResourceInfo:
+  description:  VirtualLinkResourceInfo provides information on virtualised network resources used by a VL instance in a VNF
+  attributes:
+    virtual_link_instance_id:
+      description: Identifier of this VL instance
+      type: Identifier
+      required: true
+
+    virtual_link_desc_id:
+      description: Identifier of the Virtual Link Descriptor (VLD) in the VNFD
+      type: Identifier
+      required: true
+
+    network_resource:
+      description: Reference to the VirtualNetwork resource
+      type: ResourceHandle
+      required: true
+
+    reservation_id:
+      description: The reservation identifier applicable to the resource
+      type: Identifier
+      required: false

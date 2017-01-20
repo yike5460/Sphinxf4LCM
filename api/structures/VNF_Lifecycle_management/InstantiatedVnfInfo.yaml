@@ -1,0 +1,82 @@
+InstantiatedVnfInfo:
+  description: InstantiatedVnfInfo provides run-time information specific to an instantiated VNF instance
+  attributes:
+    flavour_id:
+      description: Identifier of the VNF DF applied to this VNF instance (reference to VnfDf)
+      type: Identifier
+      required: true
+
+    vnf_state:
+      description: The state of the VNF instance
+      type: Enum
+      required: true
+      constraints:
+        - valid_values: [ STARTED, STOPPED ]
+
+    scale_status:
+      description: Scale status of the VNF, one entry per aspect
+      type: List
+      required: false
+      constraints:
+        - entry_type: ScaleInfo
+
+    ext_cp_info:
+      description: External CPs exposed by the VNF instance
+      type: List
+      required: true
+      constraints:
+        - entry_type: VnfExtCpInfo
+
+    ext_virtual_link_info:
+      description: External VLs the VNF instance is connected to
+      type: List
+      required: false
+      constraints:
+        - entry_type: ExtVirtualLinkInfo
+
+    ext_managed_virtual_link_info:
+      description: Externally-managed internal VLs of the VNF instance
+      type: List
+      required: false
+      constraints:
+        - entry_type: ExtManagedVirtualLinfo
+
+    monitoring_parameter:
+      description: Active monitoring parameters
+      type: List
+      required: true
+      constraints:
+        - entry_type: NotSpecified
+
+    localization_language:
+      description: Information about localization language of the VNF
+      type: NotSpecified
+      required: false
+
+    vim_info:
+      description: Information about VIM(s) managing resources for the VNF instance
+      type: List
+      required: false
+      constraints:
+        - entry_type: VimInfo
+
+    vnfc_resource_info:
+      description: Information on the virtualised compute and storage resource(s) used by the VNFCs of the VNF instance
+      type: List
+      required: false
+      constraints:
+        - entry_type: VnfcResourceInfo
+
+    virtual_link_resource_info:
+      description: Information on the virtualised network resource(s) used by the VLs of the VNF instance
+      type: List
+      required: false
+      constraints:
+        - entry_type: VirtualLinkResourceInfo
+
+    virtual_storage_resource_info:
+      description: Information on the virtualised storage resource(s) used as storage for the VNF instance
+      type: List
+      required: false
+      constraints:
+        - entry_type: VirtualStorageResourceInfo

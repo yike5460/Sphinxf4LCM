@@ -1,0 +1,12 @@
+VnfLinkPort:
+  description: VnfLinkPort provides information about a port of a VNF VL
+  attributes:
+    resource_handle:
+      description: Identifier of the virtualised network resource realizing this link port
+      type: ResourceHandle
+      required: true
+
+    cp_instance_id:
+      description: External CP of the VNF to be connected to this link port
+      type: Identifier
+      required: false

@@ -1,0 +1,19 @@
+ExtManagedVirtualLinkInfo:
+  description: ExtManagedVirtualLinkInfo provides provides a reference to an externally-managed internal VL
+  attributes:
+    ext_managed_virtual_link_id:
+      description: Identifier of this externally-managed internal VL
+      type: Identifier
+      required: true
+
+    virtual_link_resource_info_id:
+      description: Reference the VirtualLinkResourceInfo information element which represents this externally-managed internal VL
+      type: Identifier
+      required: true
+
+    link_port:
+      description: Link ports of this VL. May be absent for externally-managed internal VLs
+      type: List
+      required: false
+      constraints:
+        - entry_type: VnfLinkPort

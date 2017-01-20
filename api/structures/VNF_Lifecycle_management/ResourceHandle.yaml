@@ -1,0 +1,17 @@
+ResourceHandle:
+  description:  ResourceHandle information element allows addressing a resource that is used by a VNF instance
+  attributes:
+    vim_id:
+      description: Reference to the identifier of the VimInfo information element defining the VIM under whose control this resource is to be placed
+      type: Identifier
+      required: false
+
+    resource_provider_id:
+      description: Identifies the entity responsible for the management of the virtualised resource
+      type: Identifier
+      required: false
+
+    resource_id:
+      description: Identifier of the resource in the scope of the VIM or the resource provider
+      type: Identifier
+      required: true

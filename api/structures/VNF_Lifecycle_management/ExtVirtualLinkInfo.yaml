@@ -1,0 +1,19 @@
+ExtVirtualLinkInfo:
+  description: ExtVirtualLinkInfo provides provides a reference to an external VL
+  attributes:
+    ext_virtual_link_id:
+      description: Identifier of this external VL
+      type: Identifier
+      required: true
+
+    resource_handle:
+      description: Identifier of the resource realizing this VL
+      type: ResourceHandle
+      required: true
+
+    link_port:
+      description: Link ports of this VL
+      type: List
+      required: false
+      constraints:
+        - entry_type: VnfLinkPort
