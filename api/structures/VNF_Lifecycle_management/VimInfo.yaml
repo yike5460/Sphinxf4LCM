@@ -1,0 +1,31 @@
+VimInfo:
+  description:  VimInfo information element provides information regarding a VIM
+  attributes:
+    vim_info_id:
+      description: The identifier of this VimInfo information element, for the purpose of referencing it from other information elements
+      type: Identifier
+      required: true
+
+    vim_id:
+      description: The identifier of the VIM
+      type: Identifier
+      required: true
+
+    interface_info:
+      description: Information about the interface(s) to the VIM, including VIM provider type, API version, and protocol type
+      type: List
+      required: false
+      constraints:
+        entry_type: KeyValuePair
+
+    access_info:
+      description: Authentication credentials for accessing the VIM
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    interface_endpoint:
+      description: Information about the interface endpoint
+      type: String
+      required: true
