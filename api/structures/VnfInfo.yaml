@@ -70,11 +70,6 @@ VnfInfo:
       type: Mapping
       required: false
 
-    pateu:
-      type: List
-      required: true
-      constraints:
-        entry_type: String
 
 
 
