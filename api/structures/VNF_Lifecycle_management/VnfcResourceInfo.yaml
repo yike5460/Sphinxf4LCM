@@ -21,7 +21,7 @@ VnfcResourceInfo:
       type: List
       required: false
       constraints:
-        - entry_type: Identifier
+        entry_type: Identifier
 
     reservation_id:
       description: The reservation identifier applicable to the resource

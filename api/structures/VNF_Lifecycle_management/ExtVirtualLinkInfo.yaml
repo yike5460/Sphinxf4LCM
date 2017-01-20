@@ -16,4 +16,4 @@ ExtVirtualLinkInfo:
       type: List
       required: false
       constraints:
-        - entry_type: VnfLinkPort
+        entry_type: VnfLinkPort

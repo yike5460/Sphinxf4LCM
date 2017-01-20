@@ -52,8 +52,8 @@ VnfInfo:
       type: Enum
       required: true
       constraints:
-        - entry_type: String
-        - valid_values: [ INSTANTIATED, NOT_INSTANTIATED ]
+        entry_type: String
+        valid_values: [ INSTANTIATED, NOT_INSTANTIATED ]
 
     instantiated_vnf_info:
       description: Information specific to an instantiated VNF instance. Shall be present if the VNF is in INSTANTIATED state.
@@ -69,6 +69,12 @@ VnfInfo:
       description: VNF-specific attributes.
       type: Mapping
       required: false
+
+    pateu:
+      type: List
+      required: true
+      constraints:
+        entry_type: String
 
 
 

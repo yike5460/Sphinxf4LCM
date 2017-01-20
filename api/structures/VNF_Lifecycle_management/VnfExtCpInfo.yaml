@@ -16,4 +16,4 @@ VnfExtCpInfo:
       type: List
       required: false
       constraints:
-        - entry_type: NotSpecified
+        entry_type: NotSpecified

@@ -13,10 +13,8 @@ VimInfo:
 
     interface_info:
       description: Information about the interface(s) to the VIM, including VIM provider type, API version, and protocol type
-      type: List
+      type: Mapping
       required: false
-      constraints:
-        entry_type: KeyValuePair
 
     access_info:
       description: Authentication credentials for accessing the VIM
