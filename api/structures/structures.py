@@ -1,7 +1,8 @@
+from collections import MutableSequence
 import os
 import sys
-import yaml
 from weakref import WeakKeyDictionary
+import yaml
 
 
 schema_file_name = 'structures.yaml'
@@ -42,6 +43,37 @@ class Attribute(object):
             raise ValueError('value %s should be of type: %s' % (repr(value), repr(cls.TYPE)))
 
 
+class MyList(MutableSequence):
+    def __init__(self, data):
+        super(MyList, self).__init__()
+        if data is None:
+            self._list = list()
+        else:
+            self._list = list(data)
+
+    def __delitem__(self, key):
+        self._list.__delitem__(key)
+
+    def __getitem__(self, item):
+        return self._list.__getitem__(item)
+
+    def __len__(self):
+        return self._list.__len__()
+
+    def __setitem__(self, key, value):
+        if not isinstance(value, str):
+            raise ValueError('Value %s must be str' % value)
+        self._list.__setitem__(key, value)
+
+    def insert(self, index, value):
+        if not isinstance(value, str):
+            raise ValueError('Value %s must be str' % value)
+        self._list.insert(index, value)
+
+    def __str__(self):
+        return str(self._list)
+
+
 class List(Attribute):
     TYPE = list
 
@@ -50,6 +82,11 @@ class List(Attribute):
             raise TypeError('container entry type should be an Attribute subtype')
         self.ENTRY_TYPE = entry_type
         super(List, self).__init__()
+
+    def __set__(self, instance, value):
+        self._validate(value)
+        new_value = MyList(value)
+        self._values[instance] = new_value
 
     def _validate(self, value):
         super(List, self)._validate(value)
