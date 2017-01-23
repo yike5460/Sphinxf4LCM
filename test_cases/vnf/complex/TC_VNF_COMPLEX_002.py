@@ -33,8 +33,8 @@ class TC_VNF_COMPLEX_002(TestCase):
     15. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
     """
 
-    def run(self):
-        LOG.info('Starting TC_VNF_COMPLEX_002')
+    def setup(self):
+        LOG.info('Starting setup for TC_VNF_COMPLEX_002')
 
         self.vnfm = Vnfm(vendor=self.tc_input['vnfm_vendor'])
         self.vnf = Vnf(vendor=self.tc_input['vnf_vendor'])
@@ -42,6 +42,14 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+
+        LOG.info('Finished setup for TC_VNF_COMPLEX_002')
+
+        return True
+
+    def run(self):
+        LOG.info('Starting TC_VNF_COMPLEX_002')
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate VNF
         # --------------------------------------------------------------------------------------------------------------
@@ -56,6 +64,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
+
+        self.register_for_cleanup(self.vnfm.vnf_delete_id, [self.vnf_instance_id])
+        self.register_for_cleanup(self.vnfm.vnf_terminate_sync, [self.vnf_instance_id, 'graceful'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED
@@ -116,6 +127,8 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Low traffic could not be started'
             return False
+
+        self.register_for_cleanup(self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate that traffic flows through without issues
@@ -277,37 +290,5 @@ class TC_VNF_COMPLEX_002(TestCase):
         self.tc_result['durations']['stop_vnf_time'] = self.time_record.duration('stop_vnf')
 
         LOG.info('TC_VNF_COMPLEX_002 execution completed successfully')
-
-        return True
-
-    def cleanup(self):
-        LOG.info('Starting cleanup for TC_VNF_COMPLEX_002')
-
-        # --------------------------------------------------------------------------------------------------------------
-        # Stop traffic
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic')
-        if not self.traffic.stop():
-            LOG.error('TC_VNF_COMPLEX_002 cleanup failed')
-            LOG.debug('Traffic could not be stopped')
-            return False
-
-        # --------------------------------------------------------------------------------------------------------------
-        # Terminate VNF
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Terminating VNF')
-        if self.vnfm.vnf_terminate_sync(vnf_instance_id=self.vnf_instance_id,
-                                        termination_type='graceful') != constants.OPERATION_SUCCESS:
-            LOG.error('TC_VNF_COMPLEX_002 cleanup failed')
-            LOG.debug('VNF could not be terminated')
-            return False
-
-        # --------------------------------------------------------------------------------------------------------------
-        # Delete VNF instance ID
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Deleting VNF instance ID')
-        self.vnfm.vnf_delete_id(self.vnf_instance_id)
-
-        LOG.info('Cleanup for TC_VNF_COMPLEX_002 completed successfully')
 
         return True

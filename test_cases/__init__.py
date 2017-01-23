@@ -5,6 +5,9 @@ from utils.logging_module import configure_logger
 from utils import timestamps
 
 
+Function = collections.namedtuple('function', 'function_reference function_params')
+
+
 class TestExecutionError(Exception):
     pass
 
@@ -31,6 +34,7 @@ class TestCase(object):
         self.vnf = None
         self.vnf_instance_id = None
         self.vnfm = None
+        self.cleanup_registrations = list()
 
     @classmethod
     def initialize(cls):
@@ -42,7 +46,15 @@ class TestCase(object):
     def run(self):
         return True
 
+    def register_for_cleanup(self, function_reference, function_params=[]):
+        new_function = Function(function_reference=function_reference, function_params=function_params)
+        self.cleanup_registrations.append(new_function)
+
     def cleanup(self):
+        self._LOG.info('Starting main cleanup')
+        for function in reversed(self.cleanup_registrations):
+            function.function_reference(*function.function_params)
+        self._LOG.info('Finished main cleanup')
         return True
 
     def collect_timestamps(self):
@@ -63,6 +75,7 @@ class TestCase(object):
             if not self.cleanup():
                 raise TestExecutionError
         except TestExecutionError:
+            self.collect_timestamps()
             self.cleanup()
 
         return self.tc_result
