@@ -287,7 +287,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 15. Calculate the time to stop a max scaled VNF under load (--> last arrival time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the time to stop a max scaled VNF under load')
-        self.tc_result['durations']['stop_vnf_time'] = self.time_record.duration('stop_vnf')
+        self.tc_result['durations']['stop_vnf'] = self.time_record.duration('stop_vnf')
 
         LOG.info('TC_VNF_COMPLEX_002 execution completed successfully')
 
