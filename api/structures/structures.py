@@ -37,11 +37,23 @@ def get_schema_location(name):
     return schema_locations[name]
 
 
-class Attribute(object):
-    TYPE = NotImplemented
+class TypeValidator(object):
+    def __init__(self, attribute_type):
+        self._type = attribute_type
 
-    def __init__(self):
+    def validate(self, value):
+        if self._type is NotImplemented:
+            raise NotImplementedError
+        if self._type is None:
+            return
+        if not isinstance(value, self._type):
+            raise ValueError('value %s should be of type: %s' % (repr(value), repr(self._type)))
+
+
+class Attribute(object):
+    def __init__(self, attribute_type):
         self._values = WeakKeyDictionary()
+        self._type_validator = TypeValidator(attribute_type)
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -57,18 +69,22 @@ class Attribute(object):
     def _coerce(self, value):
         return value
 
-    @classmethod
     def _validate(self, value):
-        if self.TYPE is NotImplemented:
-            raise NotImplementedError
-        if not isinstance(value, self.TYPE):
-            raise ValueError('value %s should be of type: %s' % (repr(value), repr(self.TYPE)))
+        self._type_validator.validate(value)
+
+
+
+class StaticTypeAttribute(Attribute):
+    TYPE = NotImplemented
+
+    def __init__(self):
+        super(StaticTypeAttribute, self).__init__(self.TYPE)
 
 
 class CoercedList(MutableSequence):
     def __init__(self, entry_type, data):
         super(CoercedList, self).__init__()
-        self.ENTRY_TYPE = entry_type
+        self._entry_type_validator = TypeValidator(entry_type)
         if data is None:
             self._list = list()
         else:
@@ -84,65 +100,52 @@ class CoercedList(MutableSequence):
         return self._list.__len__()
 
     def __setitem__(self, key, value):
-        self.ENTRY_TYPE._validate(value)
+        self._entry_type_validator.validate(value)
         self._list.__setitem__(key, value)
 
     def insert(self, index, value):
-        self.ENTRY_TYPE._validate(value)
+        self._entry_type_validator.validate(value)
         self._list.insert(index, value)
 
     def __str__(self):
         return str(self._list)
 
 
-class List(Attribute):
+class List(StaticTypeAttribute):
     TYPE = list
 
     def __init__(self, entry_type, **kwargs):
-        if not issubclass(entry_type, Attribute):
-            if issubclass(entry_type, InformationElement):
-                entry_type = Object(entry_type)
-            else:
-                raise TypeError('container entry type should be an Attribute subtype')
+        if issubclass(entry_type, Attribute):
+            self._entry_type_validator = entry_type()._type_validator
+        elif issubclass(entry_type, InformationElement):
+            self._entry_type_validator = Attribute(entry_type)._type_validator
+        else:
+            raise TypeError('invalid entry type %s. It should be an Attribute or InformationElement subclass' % entry_type)
 
-        self.ENTRY_TYPE = entry_type
+        self.entry_type = entry_type
         super(List, self).__init__()
 
     def _coerce(self, value):
-        return CoercedList(self.ENTRY_TYPE, value)
+        return CoercedList(self.entry_type, value)
 
     def _validate(self, value):
         super(List, self)._validate(value)
-        if self.ENTRY_TYPE is NotImplemented:
-            raise NotImplementedError
         for entry in value:
-            self.ENTRY_TYPE._validate(entry)
-
-
-class Object(Attribute):
-    def __init__(self, obj_type):
-        self.OBJ_TYPE = obj_type
-        super(Object, self).__init__()
-
-    def _validate(self, value):
-        if not isinstance(value, self.OBJ_TYPE):
-            raise ValueError('value %s should be of type %s' % (repr(value), repr(self.OBJ_TYPE)))
-
+            self._entry_type_validator.validate(entry)
 
 
 class Enum(Attribute):
     def __init__(self, entry_type, valid_values):
-        self.ENTRY_TYPE = entry_type
-        self._valid_values = map(self.ENTRY_TYPE.TYPE, valid_values)
-        super(Enum, self).__init__()
+        super(Enum, self).__init__(entry_type.TYPE)
+        self._valid_values = valid_values
 
     def _validate(self, value):
-        self.ENTRY_TYPE._validate(value)
+        super(Enum, self)._validate(value)
         if value not in self._valid_values:
             raise ValueError('%s value should be in %s' % (repr(value), repr(self._valid_values)))
 
 
-class String(Attribute):
+class String(StaticTypeAttribute):
     TYPE = str
 
 
@@ -158,16 +161,16 @@ class Number(Attribute):
     TYPE = int
 
 
-class Integer(Attribute):
+class Integer(StaticTypeAttribute):
     TYPE = int
 
 
-class Mapping(Attribute):
+class Mapping(StaticTypeAttribute):
     TYPE = dict
 
 
-class NotSpecified(Attribute):
-    pass
+class NotSpecified(StaticTypeAttribute):
+    TYPE = None
 
 
 class SchemaLoader(type):
@@ -183,7 +186,7 @@ class SchemaLoader(type):
                 constructor = getattr(this_module, class_attribute_type)
                 if not issubclass(constructor, Attribute):
                     if issubclass(constructor, InformationElement):
-                        class_attribute = Object(obj_type=constructor)
+                        class_attribute = Attribute(constructor)
                     else:
                         raise TypeError('%s attribute type should be an Attribute subtype' % repr(class_attribute_type))
                 else:
@@ -191,7 +194,11 @@ class SchemaLoader(type):
                         class_attribute = constructor(entry_type=getattr(this_module, class_attribute_constraints.get('entry_type')),
                                                       valid_values=class_attribute_constraints.get('valid_values'))
                     else:
-                        class_attribute = constructor()
+                        try:
+                            class_attribute = constructor()
+                        except TypeError:
+                            raise TypeError('unable to call __init__ for %s' % class_attribute_type)
+
                 class_dict[class_attribute_name] = class_attribute
         return type.__new__(meta, name, bases, class_dict)
 
@@ -218,4 +225,5 @@ class ScaleInfo(InformationElementWithExternalSchema): pass
 class VimInfo(InformationElementWithExternalSchema): pass
 class InstantiatedVnfInfo(InformationElementWithExternalSchema): pass
 class VnfInfo(InformationElementWithExternalSchema): pass
+
 
