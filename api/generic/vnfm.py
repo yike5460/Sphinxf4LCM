@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 class Vnfm(object):
     def __init__(self, vendor=None, **kwargs):
         self.vendor = vendor
-        self.vnfm_adapter = construct_adapter(vendor, 'vnfm', **kwargs)
+        self.vnfm_adapter = construct_adapter(vendor, module_type='vnfm', **kwargs)
 
     def __getattr__(self, attr):
         return getattr(self.vnfm_adapter, attr)

@@ -31,7 +31,8 @@ def load_schema_from_file(name):
 def get_schema_location(name):
     global schema_locations
     if schema_locations is None:
-        schema_locations_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_locations_file_name)
+        schema_locations_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                  schema_locations_file_name)
         with open(schema_locations_file_path, 'r') as schema_locations_file:
             schema_locations = json.load(schema_locations_file)
     return schema_locations[name]
@@ -71,7 +72,6 @@ class Attribute(object):
 
     def _validate(self, value):
         self._type_validator.validate(value)
-
 
 
 class StaticTypeAttribute(Attribute):
@@ -120,7 +120,8 @@ class List(StaticTypeAttribute):
         elif issubclass(entry_type, InformationElement):
             self._entry_type_validator = Attribute(entry_type)._type_validator
         else:
-            raise TypeError('invalid entry type %s. It should be an Attribute or InformationElement subclass' % entry_type)
+            raise TypeError(
+                'invalid entry type %s. It should be an Attribute or InformationElement subclass' % entry_type)
 
         self.entry_type = entry_type
         super(List, self).__init__()
@@ -191,8 +192,9 @@ class SchemaLoader(type):
                         raise TypeError('%s attribute type should be an Attribute subtype' % repr(class_attribute_type))
                 else:
                     if class_attribute_constraints is not None:
-                        class_attribute = constructor(entry_type=getattr(this_module, class_attribute_constraints.get('entry_type')),
-                                                      valid_values=class_attribute_constraints.get('valid_values'))
+                        class_attribute = constructor(
+                            entry_type=getattr(this_module, class_attribute_constraints.get('entry_type')),
+                            valid_values=class_attribute_constraints.get('valid_values'))
                     else:
                         try:
                             class_attribute = constructor()
@@ -213,17 +215,50 @@ class InformationElement(object):
 class InformationElementWithExternalSchema(InformationElement):
     __metaclass__ = SchemaLoader
 
-class VnfExtCpInfo(InformationElementWithExternalSchema): pass
-class ResourceHandle(InformationElementWithExternalSchema): pass
-class VirtualLinkResourceInfo(InformationElementWithExternalSchema): pass
-class VnfLinkPort(InformationElementWithExternalSchema): pass
-class ExtVirtualLinkInfo(InformationElementWithExternalSchema): pass
-class ExtManagedVirtualLinkInfo(InformationElementWithExternalSchema): pass
-class VnfcResourceInfo(InformationElementWithExternalSchema): pass
-class VirtualStorageResourceInfo(InformationElementWithExternalSchema): pass
-class ScaleInfo(InformationElementWithExternalSchema): pass
-class VimInfo(InformationElementWithExternalSchema): pass
-class InstantiatedVnfInfo(InformationElementWithExternalSchema): pass
-class VnfInfo(InformationElementWithExternalSchema): pass
+
+class VnfExtCpInfo(InformationElementWithExternalSchema):
+    pass
 
 
+class ResourceHandle(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkResourceInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfLinkPort(InformationElementWithExternalSchema):
+    pass
+
+
+class ExtVirtualLinkInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class ExtManagedVirtualLinkInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfcResourceInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualStorageResourceInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VimInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class InstantiatedVnfInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfInfo(InformationElementWithExternalSchema):
+    pass
