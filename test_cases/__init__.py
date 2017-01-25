@@ -5,7 +5,7 @@ from utils.logging_module import configure_logger
 from utils import timestamps
 
 
-Function = collections.namedtuple('function', 'function_reference function_params')
+Function = collections.namedtuple('function', 'function_reference function_args function_kwargs')
 
 
 class TestExecutionError(Exception):
@@ -46,14 +46,14 @@ class TestCase(object):
     def run(self):
         return True
 
-    def register_for_cleanup(self, function_reference, function_params=[]):
-        new_function = Function(function_reference=function_reference, function_params=function_params)
+    def register_for_cleanup(self, function_reference, *args, **kwargs):
+        new_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
         self.cleanup_registrations.append(new_function)
 
     def cleanup(self):
         self._LOG.info('Starting main cleanup')
         for function in reversed(self.cleanup_registrations):
-            function.function_reference(*function.function_params)
+            function.function_reference(*function.function_args, **function.function_kwargs)
         self._LOG.info('Finished main cleanup')
         return True
 
