@@ -65,8 +65,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
-        self.register_for_cleanup(self.vnfm.vnf_delete_id, [self.vnf_instance_id])
-        self.register_for_cleanup(self.vnfm.vnf_terminate_sync, [self.vnf_instance_id, 'graceful'])
+        self.register_for_cleanup(self.vnfm.vnf_delete_id, vnf_instance_id=self.vnf_instance_id)
+        self.register_for_cleanup(self.vnfm.vnf_terminate_sync, vnf_instance_id=self.vnf_instance_id,
+                                  termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED
@@ -81,6 +82,8 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         self.time_record.END('instantiate_vnf')
+
+        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start VNF
@@ -108,6 +111,8 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         self.time_record.END('start_vnf')
+
+        self.tc_result['durations']['start_vnf'] = self.time_record.duration('start_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Generate low traffic load
