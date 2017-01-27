@@ -10,7 +10,13 @@ LOG = logging.getLogger(__name__)
 
 
 class Vnf(object):
+    """
+    Generic VNF class.
+    """
     def __init__(self, vendor=None, **kwargs):
+        """
+        Construct the VNF object corresponding to the specified vendor.
+        """
         self.vendor = vendor
         self.vnf_adapter = construct_adapter(vendor, module_type='vnf', **kwargs)
 
@@ -20,7 +26,7 @@ class Vnf(object):
     @log_entry_exit(LOG)
     def scale_to_level_sync(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
         """
-        This function scales an instantiated VNF of a particular DF to a target size.
+        This function synchronously scales an instantiated VNF of a particular DF to a target size.
 
         :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
         :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the

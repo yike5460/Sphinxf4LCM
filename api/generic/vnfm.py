@@ -10,7 +10,13 @@ LOG = logging.getLogger(__name__)
 
 
 class Vnfm(object):
+    """
+    Generic VNFM class.
+    """
     def __init__(self, vendor=None, **kwargs):
+        """
+        Construct the VNFM object corresponding to the specified vendor.
+        """
         self.vendor = vendor
         self.vnfm_adapter = construct_adapter(vendor, module_type='vnfm', **kwargs)
 
@@ -22,7 +28,7 @@ class Vnfm(object):
                                    instantiation_level_id=None, ext_virtual_link=None, ext_managed_virtual_link=None,
                                    localization_language=None, additional_param=None):
         """
-        This function creates a VNF instance ID and synchronously instantiates it.
+        This function creates a VNF instance ID and synchronously instantiates a VNF.
 
         :param vnfd_id:                     Identifier that identifies the VNFD which defines the VNF instance to be
                                             created.

@@ -13,8 +13,15 @@ LOG = logging.getLogger(__name__)
 
 
 class VnfmOpenstackAdapter(object):
+    """
+    Class of functions that map the ETSI standard operations exposed by the VNFM to the operations exposed by the
+    OpenStack Tacker Client.
+    """
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
+        """
+        Create the Tacker Client.
+        """
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,
@@ -33,6 +40,10 @@ class VnfmOpenstackAdapter(object):
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
+        """
+        This function does not have a direct mapping in OpenStack so it will just return the status of the VNF with
+        given ID.
+        """
         LOG.warning('"Lifecycle Operation Occurence Id" is not implemented in OpenStack!')
         LOG.warning('Will return the state of the resource with given Id')
 
@@ -47,12 +58,18 @@ class VnfmOpenstackAdapter(object):
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
+        """
+        This function does not have a direct mapping in OpenStack so it will just return one of the input arguments.
+        """
         LOG.warning('"VNF Instantiate" operation is not implemented in OpenStack!')
         LOG.warning('Instead of "Lifecycle Operation Occurence Id", will just return the "VNF Instance Id"')
         return vnf_instance_id
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description, **kwargs):
+        """
+        This function creates a VNF with the specified ID and name.
+        """
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
 
@@ -91,9 +108,11 @@ class VnfmOpenstackAdapter(object):
         vnf_info['vnf_instance_name'] = tacker_show_vnf['name']
         vnf_info['vnf_instance_description'] = tacker_show_vnf['description']
         vnf_info['vnfd_id'] = tacker_show_vnf['vnfd_id']
-        vnf_info['instantiation_state'] = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][tacker_show_vnf['status']]
+        vnf_info['instantiation_state'] = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][
+            tacker_show_vnf['status']]
 
         vnf_info['instantiated_vnf_info'] = dict()
-        vnf_info['instantiated_vnf_info']['vnf_state'] = constants.VNF_STATE['OPENSTACK_VNF_STATE'][tacker_show_vnf['status']]
+        vnf_info['instantiated_vnf_info']['vnf_state'] = constants.VNF_STATE['OPENSTACK_VNF_STATE'][
+            tacker_show_vnf['status']]
 
         return vnf_info

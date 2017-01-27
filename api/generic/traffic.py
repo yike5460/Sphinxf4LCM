@@ -7,6 +7,9 @@ LOG = logging.getLogger(__name__)
 
 
 class Traffic(object):
+    """
+    Class of functions used to control the test traffic.
+    """
     def __init__(self):
         pass
 

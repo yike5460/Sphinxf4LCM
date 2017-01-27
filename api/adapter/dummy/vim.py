@@ -7,13 +7,16 @@ LOG = logging.getLogger(__name__)
 
 
 class VimDummyAdapter(object):
+    """
+    Class of stub functions representing operations exposed by the VIM towards the NFVO as defined by GS NFV-IFA 005.
+    """
     def __init__(self, **kwargs):
         pass
 
     @log_entry_exit(LOG)
     def vim_query_compute(self, query_compute_filter):
         """
-        This operation allows querying information about instantiated virtualized compute resources.
+        This function allows querying information about instantiated virtualized compute resources.
 
         This function was written in accordance with section 7.3.1.3 and 8.4.3 of GS NFV-IFA 005 - v2.1.1.
 
@@ -60,7 +63,7 @@ class VimDummyAdapter(object):
     @log_entry_exit(LOG)
     def vim_query_network(self, query_network_filter):
         """
-        This operation allows querying information about instantiated virtualized network resources.
+        This function allows querying information about instantiated virtualized network resources.
 
         This function was written in accordance with section 7.4.1.3 and 8.4.5 of GS NFV-IFA 005 - v2.1.1.
 
@@ -96,7 +99,7 @@ class VimDummyAdapter(object):
     @log_entry_exit(LOG)
     def vim_query_storage(self, query_storage_filter):
         """
-        This operation allows querying information about instantiated virtualized storage resources.
+        This function allows querying information about instantiated virtualized storage resources.
 
         This function was written in accordance with section 7.5.1.3 and 8.4.7 of GS NFV-IFA 005 - v2.1.1.
 

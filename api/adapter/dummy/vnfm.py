@@ -8,6 +8,9 @@ LOG = logging.getLogger(__name__)
 
 
 class VnfmDummyAdapter(object):
+    """
+    Class of stub functions representing operations exposed by the VNFM towards the NFVO as defined by GS NFV-IFA 007.
+    """
     def __init__(self, **kwargs):
         pass
 
