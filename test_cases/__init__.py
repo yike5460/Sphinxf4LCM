@@ -5,7 +5,7 @@ from utils.logging_module import configure_logger
 from utils import timestamps
 
 
-Function = collections.namedtuple('function', 'function_reference function_args function_kwargs')
+Function = collections.namedtuple('Function', 'function_reference function_args function_kwargs')
 
 
 class TestExecutionError(Exception):
@@ -13,6 +13,9 @@ class TestExecutionError(Exception):
 
 
 class TestMeta(type):
+    """
+    Meta class that adds the logger object to the class dictionary of the class that is an instance of this meta class.
+    """
     def __new__(meta, name, bases, class_dict):
         if bases != (object,):
             originating_module = importlib.import_module(class_dict['__module__'])
@@ -21,6 +24,9 @@ class TestMeta(type):
 
 
 class TestCase(object):
+    """
+    Test case class.
+    """
     __metaclass__ = TestMeta
 
     def __init__(self, tc_input):
@@ -38,6 +44,9 @@ class TestCase(object):
 
     @classmethod
     def initialize(cls):
+        """
+        This method configures the test case logger.
+        """
         configure_logger(cls._LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
     def setup(self):
@@ -47,10 +56,16 @@ class TestCase(object):
         return True
 
     def register_for_cleanup(self, function_reference, *args, **kwargs):
+        """
+        This method adds a "function" named tuple to the cleanup_registrations list.
+        """
         new_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
         self.cleanup_registrations.append(new_function)
 
     def cleanup(self):
+        """
+        This method calls all the functions that were registered for cleanup in reverse order.
+        """
         self._LOG.info('Starting main cleanup')
         for function in reversed(self.cleanup_registrations):
             function.function_reference(*function.function_args, **function.function_kwargs)
@@ -58,9 +73,15 @@ class TestCase(object):
         return True
 
     def collect_timestamps(self):
+        """
+        This method copies all the timestamps that were recorded during the test in the tc_result dictionary.
+        """
         self.tc_result['timestamps'].update(self.time_record.dump_data())
 
     def execute(self):
+        """
+        This method implements the test case execution logic.
+        """
         self.initialize()
 
         try:
