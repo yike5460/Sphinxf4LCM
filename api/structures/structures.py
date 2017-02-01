@@ -60,7 +60,7 @@ class Attribute(object):
         if instance is None:
             return self
         else:
-            return self._values[instance]
+            return self._values.get(instance, None)
 
     def __set__(self, instance, value):
         self._validate(value)
@@ -210,6 +210,20 @@ class InformationElement(object):
         if key not in type(self).__dict__:
             raise ValueError('trying to set invalid attribute %s' % key)
         super(InformationElement, self).__setattr__(key, value)
+
+    @property
+    def dump(self):
+        data = dict()
+        for key, value in type(self).__dict__.items():
+            if isinstance(value, Attribute):
+                data_value = getattr(self, key)
+                if isinstance(data_value, InformationElement):
+                    data_value = data_value.dump
+                data[key] = data_value
+        return data
+
+    def __str__(self):
+        return yaml.dump(self.dump, default_flow_style=False)
 
 
 class InformationElementWithExternalSchema(InformationElement):
