@@ -1,0 +1,90 @@
+# This structure was written in accordance with section 8.4.3.2 of ETSI GS NFV-IFA 005 - v2.1.1.
+
+VirtualCompute:
+  description: This clause describes the attributes for the VirtualCompute information element.
+  attributes:
+    compute_id:
+      description: Identifier of the virtualised compute resource
+      type: Identifier
+      required: true
+
+    compute_name:
+      description: Name of the virtualised compute resource
+      type: String
+      required: false
+
+    flavour_id:
+      description: Identifier of the given compute flavour used to instantiate this virtual compute
+      type: Identifier
+      required: true
+
+    acceleration_capability:
+      description: Selected acceleration capabilities (e.g. crypto, GPU) from the set of capabilities offered by the compute node acceleration resources. The cardinality can be 0, if no particular acceleration capability is provided.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    virtual_cpu:
+      description: The virtual CPU(s) of the virtualised compute. See clause 8.4.3.3.
+      type: VirtualCpu
+      required: true
+
+    virtual_memory:
+      description: The virtual memory of the compute. See clause 8.4.3.5.
+      type: VirtualMemory
+      required: true
+
+    virtual_network_interface:
+      description: Element with information of the instantiated virtual network interfaces of the compute resource. See clause 8.4.3.6.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualNetworkInterface
+
+    virtual_disks:
+      description: Element with information of the virtualised storage resources (volumes, ephemeral that are attached to the compute resource. See clause 8.4.7.2.
+      type: List
+      required: true
+      constraints:
+        entry_type: VirtualStorage
+
+    vc_image_id:
+      description: Identifier of the virtualisation container software image (e.g. virtual machine image). Cardinality can be 0 if an "empty" virtualisation container is allocated.
+      type: Identifier
+      required: false
+
+    zone_id:
+      description: If present, it identifies the Resource Zone where the virtual compute resources have been allocated.
+      type: Identifier
+      required: false
+
+    host_id:
+      description: Identifier of the host the virtualised compute resource is allocated on.
+      type: Identifier
+      required: true
+
+    operational_state:
+      description: Operational state of the compute resource.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false
+
+
+
+
+
+
+
+
+
+
+
+
