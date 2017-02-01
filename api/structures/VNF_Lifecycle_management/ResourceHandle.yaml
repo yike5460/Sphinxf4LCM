@@ -1,3 +1,5 @@
+# This structure was written in accordance with section 8.5.7 of ETSI GS NFV-IFA 007 - v2.1.1.
+
 ResourceHandle:
   description:  ResourceHandle information element allows addressing a resource that is used by a VNF instance
   attributes:

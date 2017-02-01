@@ -1,3 +1,5 @@
+# This structure was written in accordance with section 8.5.2 of ETSI GS NFV-IFA 007 - v2.1.1.
+
 VnfInfo:
   description: This clause defines information elements related to VNF Lifecycle Management
   attributes:
