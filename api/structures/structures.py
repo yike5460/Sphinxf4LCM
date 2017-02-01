@@ -110,6 +110,16 @@ class CoercedList(MutableSequence):
     def __str__(self):
         return str(self._list)
 
+    @property
+    def dump(self):
+        data = []
+        for entry in self:
+            if isinstance(entry, InformationElement):
+                entry = entry.dump
+            data.append(entry)
+
+        return data
+
 
 class List(StaticTypeAttribute):
     TYPE = list
@@ -217,8 +227,12 @@ class InformationElement(object):
         for key, value in type(self).__dict__.items():
             if isinstance(value, Attribute):
                 data_value = getattr(self, key)
+
                 if isinstance(data_value, InformationElement):
                     data_value = data_value.dump
+                if isinstance(data_value, CoercedList):
+                    data_value = data_value.dump
+
                 data[key] = data_value
         return data
 
