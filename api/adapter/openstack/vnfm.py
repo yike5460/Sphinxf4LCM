@@ -6,6 +6,7 @@ from tackerclient.tacker.client import Client as TackerClient
 import tackerclient.common.exceptions
 
 from api.generic import constants
+from api.structures.structures import VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -17,6 +18,7 @@ class VnfmOpenstackAdapter(object):
     Class of functions that map the ETSI standard operations exposed by the VNFM to the operations exposed by the
     OpenStack Tacker Client.
     """
+
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
         """
@@ -97,22 +99,42 @@ class VnfmOpenstackAdapter(object):
                                     returned for the selected VNF instance(s).
         """
         vnf_instance_id = filter['vnf_instance_id']
-        vnf_info = dict()
-        vnf_info['vnf_instance_id'] = vnf_instance_id
+        vnf_info = VnfInfo()
+        vnf_info.vnf_instance_id = vnf_instance_id
 
         try:
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
         except tackerclient.common.exceptions.TackerException:
             return vnf_info
 
-        vnf_info['vnf_instance_name'] = tacker_show_vnf['name']
-        vnf_info['vnf_instance_description'] = tacker_show_vnf['description']
-        vnf_info['vnfd_id'] = tacker_show_vnf['vnfd_id']
-        vnf_info['instantiation_state'] = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][
+        vnf_info.vnf_instance_name = tacker_show_vnf['name'].encode()
+        vnf_info.vnf_instance_description = tacker_show_vnf['description'].encode()
+        vnf_info.vnfd_id = tacker_show_vnf['vnfd_id'].encode()
+        vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][
             tacker_show_vnf['status']]
 
-        vnf_info['instantiated_vnf_info'] = dict()
-        vnf_info['instantiated_vnf_info']['vnf_state'] = constants.VNF_STATE['OPENSTACK_VNF_STATE'][
+        vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
+        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_VNF_STATE'][
             tacker_show_vnf['status']]
+
+        vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+        try:
+            tacker_list_vnf_resources = self.tacker_client.list_vnf_resources(vnf_instance_id)['resources']
+            for vnf_resource in tacker_list_vnf_resources:
+                vnf_resource_type = vnf_resource.get('type')
+                vnf_resource_id = vnf_resource.get('id')
+
+                if vnf_resource_type == 'OS::Nova::Server':
+                    vnfc_resource_info = VnfcResourceInfo()
+                    vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+
+                    vnfc_resource_info.compute_resource = ResourceHandle()
+                    vnfc_resource_info.compute_resource.vim_id = tacker_show_vnf['vim_id'].encode()
+                    vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+
+                    vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+        except tackerclient.common.exceptions.TackerException:
+            return vnf_info
 
         return vnf_info
