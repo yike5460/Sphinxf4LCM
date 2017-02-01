@@ -10,5 +10,8 @@
   "VnfLinkPort"                 : "VNF_Lifecycle_management/VnfLinkPort.yaml",
   "VirtualLinkResourceInfo"     : "VNF_Lifecycle_management/VirtualLinkResourceInfo.yaml",
   "ExtManagedVirtualLinkInfo"   : "VNF_Lifecycle_management/ExtManagedVirtualLinkInfo.yaml",
-  "VnfExtCpInfo"                : "VNF_Lifecycle_management/VnfExtCpInfo.yaml"
+  "VnfExtCpInfo"                : "VNF_Lifecycle_management/VnfExtCpInfo.yaml",
+  "VirtualCompute"              : "VirtualCompute.yaml",
+  "VirtualMemory"               : "VirtualMemory.yaml",
+  "VirtualCpu"                  : "VirtualCpu.yaml"
 }
