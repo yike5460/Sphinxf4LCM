@@ -168,7 +168,11 @@ class Version(String):
     pass
 
 
-class Number(Attribute):
+class Boolean(StaticTypeAttribute):
+    TYPE = bool
+
+
+class Number(StaticTypeAttribute):
     TYPE = int
 
 
@@ -289,4 +293,16 @@ class InstantiatedVnfInfo(InformationElementWithExternalSchema):
 
 
 class VnfInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualMemory(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualCpu(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualCompute(InformationElementWithExternalSchema):
     pass
