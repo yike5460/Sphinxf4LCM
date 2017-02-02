@@ -6,7 +6,7 @@ from tackerclient.tacker.client import Client as TackerClient
 import tackerclient.common.exceptions
 
 from api.generic import constants
-from api.structures.structures import VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
+from api.structures.objects import VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
