@@ -76,15 +76,3 @@ VirtualCompute:
       description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
       type: Mapping
       required: false
-
-
-
-
-
-
-
-
-
-
-
-

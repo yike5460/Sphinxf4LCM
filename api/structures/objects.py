@@ -188,6 +188,14 @@ class NotSpecified(StaticTypeAttribute):
     TYPE = None
 
 
+class MacAddress(StaticTypeAttribute):
+    TYPE = str
+
+
+class IpAddress(StaticTypeAttribute):
+    TYPE = str
+
+
 class SchemaLoader(type):
     def __new__(meta, name, bases, class_dict):
         if bases != (InformationElement,):
@@ -300,7 +308,15 @@ class VirtualMemory(InformationElementWithExternalSchema):
     pass
 
 
+class VirtualCpuPinning(InformationElementWithExternalSchema):
+    pass
+
+
 class VirtualCpu(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkInterface(InformationElementWithExternalSchema):
     pass
 
 

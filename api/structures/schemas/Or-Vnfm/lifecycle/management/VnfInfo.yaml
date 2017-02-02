@@ -71,11 +71,3 @@ VnfInfo:
       description: VNF-specific attributes.
       type: Mapping
       required: false
-
-
-
-
-
-
-
-

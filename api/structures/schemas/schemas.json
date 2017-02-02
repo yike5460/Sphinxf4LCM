@@ -1,0 +1,19 @@
+{
+  "VirtualCompute"              : "VirtualCompute/VirtualCompute.yaml",
+  "VirtualCpu"                  : "VirtualCompute/VirtualCpu.yaml",
+  "VirtualCpuPinning"           : "VirtualCompute/VirtualCpuPinning.yaml",
+  "VirtualMemory"               : "VirtualCompute/VirtualMemory.yaml",
+  "VirtualNetworkInterface"     : "VirtualCompute/VirtualNetworkInterface.yaml",
+  "ExtManagedVirtualLinkInfo"   : "VnfInfo/ExtManagedVirtualLinkInfo.yaml",
+  "ExtVirtualLinkInfo"          : "VnfInfo/ExtVirtualLinkInfo.yaml",
+  "InstantiatedVnfInfo"         : "VnfInfo/InstantiatedVnfInfo.yaml",
+  "ResourceHandle"              : "VnfInfo/ResourceHandle.yaml",
+  "ScaleInfo"                   : "VnfInfo/ScaleInfo.yaml",
+  "VirtualLinkResourceInfo"     : "VnfInfo/VirtualLinkResourceInfo.yaml",
+  "VirtualStorageResourceInfo"  : "VnfInfo/VirtualStorageResourceInfo.yaml",
+  "VnfcResourceInfo"            : "VnfInfo/VnfcResourceInfo.yaml",
+  "VnfExtCpInfo"                : "VnfInfo/VnfExtCpInfo.yaml",
+  "VnfInfo"                     : "VnfInfo/VnfInfo.yaml",
+  "VnfLinkPort"                 : "VnfInfo/VnfLinkPort.yaml",
+  "VimInfo"                     : "Other/VimInfo.yaml"
+}
