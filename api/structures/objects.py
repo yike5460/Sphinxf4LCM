@@ -8,7 +8,7 @@ from weakref import WeakKeyDictionary
 
 this_module = sys.modules[__name__]
 
-schema_locations_file_name = 'schemas.json'
+schema_locations_file_name = 'schemas/schemas.json'
 schema_locations = None
 schemas = dict()
 
@@ -281,6 +281,10 @@ class ExtManagedVirtualLinkInfo(InformationElementWithExternalSchema):
 
 
 class VnfcResourceInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualStorage(InformationElementWithExternalSchema):
     pass
 
 
