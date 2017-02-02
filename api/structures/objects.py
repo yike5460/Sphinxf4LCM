@@ -172,6 +172,10 @@ class Boolean(StaticTypeAttribute):
     TYPE = bool
 
 
+class Value(String):
+    pass
+
+
 class Number(StaticTypeAttribute):
     TYPE = int
 
@@ -325,4 +329,20 @@ class VirtualNetworkInterface(InformationElementWithExternalSchema):
 
 
 class VirtualCompute(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkPort(InformationElementWithExternalSchema):
+    pass
+
+
+class NetworkSubnet(InformationElementWithExternalSchema):
+    pass
+
+
+class NetworkQoS(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetwork(InformationElementWithExternalSchema):
     pass
