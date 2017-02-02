@@ -1,0 +1,73 @@
+# This structure was written in accordance with section 8.4.3.6 of ETSI GS NFV-IFA 005 - v2.1.1.
+
+VirtualNetworkInterface:
+  description:
+  attributes:
+    resource_id:
+      description: Identifier of the virtual network interface.
+      type: Identifier
+      required: true
+
+    owner_id:
+      description: Identifier of the owner of the network interface (e.g. a virtualised compute resource).
+      type: Identifier
+      required: true
+
+    network_id:
+      description: In the case when the virtual network interface is attached to the network, it identifies such a network. The cardinality can be 0 in the case that a network interface is created without being attached to any specific network.
+      type: Identifier
+      required: false
+
+    network_port_id:
+      description: If the virtual network interface is attached to a specific network port, it identifies such a network port. The cardinality can be 0 in the case that a network interface is created without any specific network port attachment.
+      type: Identifier
+      required: false
+
+    ip_address:
+      description: The virtual network interface can be configured with specific IP address(es) associated to the network to be attached to. The cardinality can be 0 in the case that a network interface is created without being attached to any specific network, or when an IP address can be automatically configured, e.g. by DHCP.
+      type: List
+      required: false
+      constraints:
+        entry_type: IpAddress
+
+    type_virtual_nic:
+      description: Type of network interface. The type allows for defining how such interface is to be realized, e.g. normal virtual NIC, with direct PCI passthrough, etc.
+      type: NotSpecified
+      required: true
+
+    type_configuration:
+      description: Extra configuration that the virtual network interface supports based on the type of virtual network interface, including support for SR- IOV with configuration of virtual functions (VF).
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    mac_address:
+      description: The MAC address of the virtual network interface.
+      type: MacAddress
+      required: true
+
+    bandwidth:
+      description: The bandwidth of the virtual network interface (in Mbps).
+      type: Number
+      required: true
+
+    acceleration_capability:
+      description: It specifies if the virtual network interface requires certain acceleration capabilities (e.g. RDMA, packet dispatch, TCP Chimney). The cardinality can be 0, if no particular acceleration capability is provided.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    operational_state:
+      description: The operational state of the virtual network interface.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false

@@ -1,0 +1,62 @@
+# This structure was written in accordance with section 8.4.7.2 of ETSI GS NFV-IFA 005 - v2.1.1.
+
+VirtualStorage:
+  description: The VirtualStorage information element encapsulates information of an instantiated virtualised storage resource.
+  attributes:
+    storage_id:
+      description: Identifier of the virtualised storage resource.
+      type: Identifier
+      required: true
+
+    storage_name:
+      description: Name of the virtualised storage resource.
+      type: String
+      required: false
+
+    flavour_id:
+      description: Identifier of the storage flavour used to instantiate this virtual storage.
+      type: Identifier
+      required: true
+
+    type_of_storage:
+      description: Type of virtualised storage resource (e.g. volume, object).
+      type: String
+      required: true
+
+    size_of_storage:
+      description: Size of virtualised storage resource (e.g. size of volume, in GB).
+      type: Number
+      required: true
+
+    rdma_enabled:
+      description: Indicates if the storage supports RDMA.
+      type: Boolean
+      required: false
+
+    owner_id:
+      description: Identifier of the virtualised resource that owns and uses such a virtualised storage resource. The value can be NULL if the virtualised storage is not attached yet to any other resource (e.g. a virtual machine).
+      type: Identifier
+      required: false
+
+    zone_id:
+      description: If present, it identifies the Resource Zone where the virtual storage resources have been allocated.
+      type: Identifier
+      required: false
+
+    host_id:
+      description: Identifier of the host where the virtualised storage resource is allocated. A cardinality of 0 refers to distributed storage solutions.
+      type: Identifier
+      required: false
+
+    operational_state:
+      description: Operational state of the resource.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false
