@@ -1,0 +1,78 @@
+# This structure was written in accordance with section 8.4.5.2 of ETSI GS NFV-IFA 005 - v2.1.1.
+
+VirtualNetwork:
+  description: This clause describes the attributes for the VirtualNetwork information element.
+  attributes:
+    network_resource_id:
+      description: Identifier of the virtualised network resource.
+      type: Identifier
+      required: true
+
+    network_resource_name:
+      description: Name of the virtualised network resource.
+      type: String
+      required: false
+
+    subnet:
+      description: Only present if the network provides layer 3 connectivity. See clause 8.4.5.3.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    network_port:
+      description: Element providing information of an instantiated virtual network port.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualNetworkPort
+
+    bandwidth:
+      description: Minimum network bandwidth (in Mbps).
+      type: Number
+      required: true
+
+    network_type:
+      description: The type of network that maps to the virtualised network. This list is extensible. Examples are "local", "vlan", "vxlan", "gre", "l3-vpn", etc.
+      type: String
+      required: true
+
+    segment_type:
+      description: The isolated segment for the virtualised network. For instance, for a "vlan" networkType, it corresponds to the vlan identifier; and for a "gre" networkType, this corresponds to a gre key. The cardinality can be "0" for flat networks without any specific segmentation.
+      type: String
+      required: false
+
+    network_qos:
+      description: Element providing information about Quality of Service attributes that the network supports. See clause 8.4.4.3. Cardinality can be "0" for virtual network without any QoS requirements.
+      type: List
+      required: false
+      constraints:
+        entry_type: NetworkQoS
+
+    is_shared:
+      description: It defines whether the virtualised network is shared among consumers.
+      type: Boolean
+      required: true
+
+    sharing_criteria:
+      description: Only present for shared networks. Indicate the sharing criteria for this network. This criteria might be a list of authorized consumers.
+      type: NotSpecified
+      required: false
+
+    zone_id:
+      description: If present, it identifies the Resource Zone where the virtual network resources have been allocated.
+      type: Identifier
+      required: false
+
+    operational_state:
+      description: The operational state of the virtualised network.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false

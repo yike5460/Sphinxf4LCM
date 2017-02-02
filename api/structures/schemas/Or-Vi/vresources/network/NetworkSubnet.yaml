@@ -1,0 +1,45 @@
+# This structure was written in accordance with section 8.4.5.3 of ETSI GS NFV-IFA 005 - v2.1.1.
+
+NetworkSubnet:
+  description: The NetworkSubnet information element encapsulates information of an instantiated virtualised sub-network.
+  attributes:
+    resource_id:
+      description: Identifier of the virtualised sub-network.
+      type: Identifier
+      required: true
+
+    network_id:
+      description: The identifier of the virtualised network that the virtualised sub-network is attached to. The cardinality can be 0 to cover the case where this type is used to describe the L3 attributes of a network rather than a subnetwork.
+      type: Identifier
+      required: false
+
+    ip_version:
+      description: The IP version of the network/subnetwork.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ IPv4, IPv6 ]
+
+    gateway_ip:
+      description: The IP address of the network/subnetwork gateway.
+      type: IpAddress
+      required: true
+
+    is_dhcp_enabled:
+      description: True when DHCP is enabled for this network/subnetwork, or false otherwise.
+      type: Boolean
+      required: true
+
+    operational_state:
+      description: The operational state of the virtualised sub-network.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false

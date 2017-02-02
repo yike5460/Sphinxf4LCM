@@ -1,0 +1,47 @@
+# This structure was written in accordance with section 8.4.5.4 of ETSI GS NFV-IFA 005 - v2.1.1.
+
+VirtualNetworkPort:
+  description: The VirtualNetworkPort information element encapsulates information of an instantiated virtual network port. A network port resource is a communication endpoint instantiated under a network resource.
+  attributes:
+    resource_id:
+      description: Identifier of the virtual network port.
+      type: Identifier
+      required: true
+
+    network_id:
+      description: Identifier of the network that the port belongs to. When creating a port, such port needs to be part of a network.
+      type: Identifier
+      required: true
+
+    attached_resource_id:
+      description: Identifier of the attached resource to the network port (e.g. a virtualised compute resource, or identifier of the virtual network interface). The cardinality can be "0" if there is no specific resource connected to the network port.
+      type: Identifier
+      required: false
+
+    port_type:
+      description: Type of network port. Examples of types are access ports (layer 2 or 3), or trunk ports (layer 1) that become transport for multiple layer 2 or layer 3 networks.
+      type: String
+      required: true
+
+    segment_id:
+      description: The isolated segment the network port belongs to. For instance, for a "vlan", it corresponds to the vlan identifier; and for a "gre", this corresponds to a gre key. The cardinality can be "0" for flat networks without any specific segmentation.
+      type: Identifier
+      required: false
+
+    bandwidth:
+      description: The bandwidth of the virtual network port (in Mbps). Cardinality can be "0" for virtual network ports without any specific allocated bandwidth.
+      type: Number
+      required: false
+
+    operational_state:
+      description: The operational state of the virtual network port.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false
