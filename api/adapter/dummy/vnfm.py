@@ -3,6 +3,8 @@ import logging
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
+from api.structures.objects import InstantiatedVnfInfo, VnfInfo
+
 # Instantiate logger
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ class VnfmDummyAdapter(object):
         """
         This function provides the status of a VNF lifecycle management operation.
 
-        This function was written in accordance with section 7.2.13 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    The status of the operation ex. 'Processing', 'Failed'.
@@ -38,7 +40,7 @@ class VnfmDummyAdapter(object):
         by that identifier, in the NOT_INSTANTIATED state without instantiating the VNF or doing any additional
         lifecycle operation(s).
 
-        This function was written in accordance with section 7.2.2 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnfd_id:                     Identifier that identifies the VNFD which defines the VNF instance to be
                                             created.
@@ -57,7 +59,7 @@ class VnfmDummyAdapter(object):
         """
         This function deletes a VNF instance ID and the associated instance of a VnfInfo information element.
 
-        This function was written in accordance with section 7.2.8 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.8 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnf_instance_id: VNF instance identifier to be deleted.
         :return:                Nothing.
@@ -69,7 +71,7 @@ class VnfmDummyAdapter(object):
         """
         This function instantiates a particular deployment flavour of a VNF based on the definition in the VNFD.
 
-        This function was written in accordance with section 7.2.3 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.3 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnf_instance_id:             Identifier of the VNF instance.
         :param flavour_id:                  Identifier of the VNF DF to be instantiated.
@@ -95,7 +97,7 @@ class VnfmDummyAdapter(object):
         """
         This function changes the state of a VNF instance.
 
-         This function was written in accordance with section 7.2.11 of GS NFV-IFA 007 - v2.1.1.
+         This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnf_instance_id:             Identifier of the VNF instance.
         :param change_state_to:             Desired state to change the VNF to. Permitted values are: start, stop.
@@ -117,7 +119,7 @@ class VnfmDummyAdapter(object):
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
         filtering criteria, and the information can be restricted to selected attributes.
 
-        This function was written in accordance with section 7.2.9 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param filter:              Filter to select the VNF instance(s) about which information is queried.
         :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
@@ -127,41 +129,10 @@ class VnfmDummyAdapter(object):
                                     attribute_selector is present, only the attributes listed in attribute_selector are
                                     returned for the selected VNF instance(s).
         """
-        vnf_info = {'vnf_instance_id': '',
-                    'vnf_instance_name': '',
-                    'vnf_instance_description': '',
-                    'vnfd_id': '',
-                    'vnf_provider': '',
-                    'vnf_product_name': '',
-                    'vnf_software_version': '',
-                    'vnfd_version': '',
-                    'onboarded_vnf_pkg_info_id': '',
-                    'vnf_configurable_property': '',
-                    'instantiation_state': 'INSTANTIATED',
-                    'instantiated_vnf_info': {'flavour_id': '',
-                                              'vnf_state': 'STARTED',
-                                              'scale_status': '',
-                                              'ext_cp_info': '',
-                                              'ext_virtual_link_info': '',
-                                              'ext_managed_virtual_link_info': '',
-                                              'monitoring_parameter': '',
-                                              'localization_language': '',
-                                              'vim_info': '',
-                                              'vnfc_resource_info': {'vnfc_instance_id': '',
-                                                                     'vdu_id': '',
-                                                                     'compute_resource': '',
-                                                                     'storage_resource_id': '',
-                                                                     'reservation_id': ''},
-                                              'virtual_link_resource_info': {'virtual_link_instance_id': '',
-                                                                             'virtual_link_desc_id': '',
-                                                                             'network_resource': '',
-                                                                             'reservation_id': ''},
-                                              'virtual_storage_resource_info': {'virtual_storage_instance_id': '',
-                                                                                'virtual_storage_desc_id': '',
-                                                                                'storage_resource': '',
-                                                                                'reservation_id': ''}},
-                    'metadata': '',
-                    'extension': ''}
+        vnf_info = VnfInfo()
+        vnf_info.instantiation_state = 'INSTANTIATED'
+        vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
+        vnf_info.instantiated_vnf_info.vnf_state = 'STARTED'
 
         return vnf_info
 
@@ -170,7 +141,7 @@ class VnfmDummyAdapter(object):
         """
         This function scales an instantiated VNF of a particular DF to a target size.
 
-        This function was written in accordance with section 7.2.5 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.5 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
         :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
@@ -192,7 +163,7 @@ class VnfmDummyAdapter(object):
         """
         This function terminates a VNF.
 
-        This function was written in accordance with section 7.2.7 of GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
         :param termination_type:            Signals whether forceful or graceful termination is requested.

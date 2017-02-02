@@ -5,7 +5,7 @@ from test_cases import TestCase
 from api.generic.traffic import Traffic
 from api.generic.vnf import Vnf
 from api.generic.vnfm import Vnfm
-from api.generic.tools import vnfinfo_get_instantiation_state, vnfinfo_get_vnf_state, validate_allocated_vResources
+from api.generic.tools import validate_allocated_vResources
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
     Sequence:
     1. Instantiate VNF
-    2. Validate VNF instantiation state is INSTANTIATED
+    2. Validate VNF state is INSTANTIATED
     3. Start VNF
     4. Validate VNF state is STARTED
     5. Generate low traffic load
@@ -42,6 +42,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+        self.tc_result['resource_list'] = {}
 
         LOG.info('Finished setup for TC_VNF_COMPLEX_002')
 
@@ -70,13 +71,13 @@ class TC_VNF_COMPLEX_002(TestCase):
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 2. Validate VNF instantiation state is INSTANTIATED
+        # 2. Validate VNF state is INSTANTIATED
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating VNF instantiation state is INSTANTIATED')
+        LOG.info('Validating VNF state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter=self.vnf_instance_id)
-        if vnfinfo_get_instantiation_state(vnfinfo_dict=vnf_info) != constants.VNF_INSTANTIATED:
+        if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
-            LOG.debug('Unexpected VNF instantiation state')
+            LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF was not in "%s" state after instantiation' % constants.VNF_INSTANTIATED
             return False
@@ -103,7 +104,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF state is STARTED')
         vnf_info = self.vnfm.vnf_query(filter=self.vnf_instance_id)
-        if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STARTED:
+        if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -153,7 +154,6 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Low traffic flew with packet loss'
             return False
 
-        self.tc_result['resource_list'] = {}
         self.tc_result['resource_list']['normal_level'] = self.vnfm.get_vResource(vnf_instance_id=self.vnf_instance_id)
         if not validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['normal_level'],
                                              instantiation_level_id='normal_level_id',
@@ -268,7 +268,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF state is STOPPED')
         vnf_info = self.vnfm.vnf_query(filter=self.vnf_instance_id)
-        if vnfinfo_get_vnf_state(vnfinfo_dict=vnf_info) != constants.VNF_STOPPED:
+        if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STOPPED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED

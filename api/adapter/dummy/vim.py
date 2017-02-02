@@ -2,6 +2,8 @@ import logging
 
 from utils.logging_module import log_entry_exit
 
+from api.structures.objects import VirtualCompute, VirtualNetwork, VirtualStorage
+
 # Instantiate logger
 LOG = logging.getLogger(__name__)
 
@@ -25,39 +27,7 @@ class VimDummyAdapter(object):
         :return:                            Element containing information about the virtual compute resource(s)
                                             matching the filter.
         """
-
-        virtual_compute = {'compute_id': '',
-                           'compute_name': '',
-                           'flavour_id': '',
-                           'acceleration_capability': '',
-                           'virtual_cpu': {'cpu_architecture': '',
-                                           'num_virtual_cpu': '',
-                                           'virtual_cpu_clock': '',
-                                           'virtual_cpu_oversubscriptionPolicy': '',
-                                           'virtual_cpu_pinning': {'cpu_pinning_policy': '',
-                                                                   'cpu_pinning_map': ''}},
-                           'virtual_memory': {'virtual_mem_size': '',
-                                              'virtual_mem_oversubscription_policy': '',
-                                              'numa_enabled': ''},
-                           'virtual_network_interface': {'resource_id': '',
-                                                         'owner_id': '',
-                                                         'network_id': '',
-                                                         'network_port_id': '',
-                                                         'ip_address': '',
-                                                         'type_virtual_nic': '',
-                                                         'type_configuration': '',
-                                                         'mac_address': '',
-                                                         'bandwidth': '',
-                                                         'acceleration_capability': '',
-                                                         'operational_state': '',
-                                                         'metadata': ''},
-                           'virtual_disks': '',
-                           'vc_image_id': '',
-                           'zone_id': '',
-                           'host_id': '',
-                           'operational_state': '',
-                           'metadata': ''}
-
+        virtual_compute = VirtualCompute()
         return virtual_compute
 
     @log_entry_exit(LOG)
@@ -72,28 +42,7 @@ class VimDummyAdapter(object):
         :return:                            Element containing information about the virtual network resource(s)
                                             matching the filter.
         """
-
-        virtual_network = {'network_resource_id': '',
-                           'network_resource_name': '',
-                           'subnet': '',
-                           'network_port': {'resource_id': '',
-                                            'network_id': '',
-                                            'attached_resource_id': '',
-                                            'port_type': '',
-                                            'segment_id': '',
-                                            'bandwidth': '',
-                                            'operational_state': '',
-                                            'metadata': ''},
-                           'bandwidth': '',
-                           'network_type': '',
-                           'segment_type': '',
-                           'network_qos': '',
-                           'is_shared': '',
-                           'sharing_data': '',
-                           'zone_id': '',
-                           'operational_state': '',
-                           'metadata': ''}
-
+        virtual_network = VirtualNetwork()
         return virtual_network
 
     @log_entry_exit(LOG)
@@ -108,17 +57,5 @@ class VimDummyAdapter(object):
         :return:                            Element containing information about the virtual storage resource(s)
                                             matching the filter.
         """
-
-        virtual_storage = {'storage_id': '',
-                           'storage_name': '',
-                           'flavour_id': '',
-                           'type_of_storage': '',
-                           'size_of_storage': '',
-                           'rdma_enabled': '',
-                           'owner_id': '',
-                           'zone_id': '',
-                           'host_id': '',
-                           'operational_state': '',
-                           'metadata': ''}
-
+        virtual_storage = VirtualStorage()
         return virtual_storage

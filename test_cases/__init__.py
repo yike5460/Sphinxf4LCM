@@ -100,4 +100,3 @@ class TestCase(object):
             self.cleanup()
 
         return self.tc_result
-
