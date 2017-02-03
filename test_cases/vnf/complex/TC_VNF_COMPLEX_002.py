@@ -66,8 +66,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
-        self.register_for_cleanup(self.vnfm.vnf_delete_id, vnf_instance_id=self.vnf_instance_id)
-        self.register_for_cleanup(self.vnfm.vnf_terminate_sync, vnf_instance_id=self.vnf_instance_id,
+        self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
