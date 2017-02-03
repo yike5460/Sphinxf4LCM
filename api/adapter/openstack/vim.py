@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 class VimOpenstackAdapter(object):
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
-                 project_domain_name=None, user_domain_name=None):
+                 project_domain_name=None, user_domain_name=None, **kwargs):
         try:
             self.nova_client = os_client_config.make_client('compute',
                                                             auth_url=auth_url,
