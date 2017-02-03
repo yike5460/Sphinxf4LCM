@@ -46,25 +46,53 @@ class VnfmOpenstackAdapter(object):
         This function does not have a direct mapping in OpenStack so it will just return the status of the VNF with
         given ID.
         """
-        LOG.warning('"Lifecycle Operation Occurence Id" is not implemented in OpenStack!')
-        LOG.warning('Will return the state of the resource with given Id')
+        LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in OpenStack!')
+        LOG.debug('Will return the state of the resource with given Id')
 
-        # TODO: call etsi standard function
         vnf_id = lifecycle_operation_occurrence_id
-        tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
+
+        try:
+            tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
+        except tackerclient.common.exceptions.NotFound:
+            # Temporary hack. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises exception
+            # because the VNF can no longer be found
+            return constants.OPERATION_SUCCESS
 
         tacker_status = tacker_show_vnf['vnf']['status']
 
         return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
 
     @log_entry_exit(LOG)
+    def vnf_delete_id(self, vnf_instance_id):
+        """
+        This function does not have a direct mapping in OpenStack so it will just return the VNF instance ID.
+
+        :param vnf_instance_id: VNF instance identifier to be deleted.
+        :return:                Nothing.
+        """
+        LOG.warning('"VNF Delete ID" operation is not implemented in OpenStack!')
+
+    @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         """
-        This function does not have a direct mapping in OpenStack so it will just return one of the input arguments.
+        This function does not have a direct mapping in OpenStack so it will just return the VNF instance ID.
+
+        :param vnf_instance_id:             Identifier of the VNF instance.
+        :param flavour_id:                  Identifier of the VNF DF to be instantiated.
+        :param instantiation_level_id:      Identifier of the instantiation level of the DF to be instantiated. If not
+                                            present, the default instantiation level as declared in the VNFD shall be
+                                            instantiated.
+        :param ext_virtual_link:            Information about external VLs to connect the VNF to.
+        :param ext_managed_virtual_link:    Information about internal VLs that are managed by other entities than the
+                                            VNFM.
+        :param localization_language:       Localization language of the VNF to be instantiated.
+        :param additional_param:            Additional parameters passed as input to the instantiation process, specific
+                                            to the VNF being instantiated.
+        :return:                            VNF instance ID.
         """
-        LOG.warning('"VNF Instantiate" operation is not implemented in OpenStack!')
-        LOG.warning('Instead of "Lifecycle Operation Occurence Id", will just return the "VNF Instance Id"')
+        LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack!')
+        LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
         return vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -77,7 +105,7 @@ class VnfmOpenstackAdapter(object):
 
         try:
             vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
-            LOG.info("Response from vnfm:\n%s" % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
+            LOG.debug("Response from vnfm:\n%s" % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
         except tackerclient.common.exceptions.TackerException:
             return None
         return vnf_instance['vnf']['id']
@@ -100,7 +128,7 @@ class VnfmOpenstackAdapter(object):
         """
         vnf_instance_id = filter['vnf_instance_id']
         vnf_info = VnfInfo()
-        vnf_info.vnf_instance_id = vnf_instance_id
+        vnf_info.vnf_instance_id = vnf_instance_id.encode()
 
         try:
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
@@ -138,3 +166,18 @@ class VnfmOpenstackAdapter(object):
             return vnf_info
 
         return vnf_info
+
+    @log_entry_exit(LOG)
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
+        """
+        This function terminates the VNF with the given ID.
+
+        :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
+        :param termination_type:            Signals whether forceful or graceful termination is requested.
+        :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
+                                            graceful termination, before shutting down the VNF and releasing the
+                                            resources.
+        :return:                            VNF instance ID.
+        """
+        self.tacker_client.delete_vnf(vnf_instance_id)
+        return vnf_instance_id
