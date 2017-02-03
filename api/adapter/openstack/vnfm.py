@@ -1,10 +1,12 @@
 import json
 import logging
+import yaml
 
 import os_client_config
 from tackerclient.tacker.client import Client as TackerClient
 import tackerclient.common.exceptions
 
+from api.generic.vim import Vim
 from api.generic import constants
 from api.structures.objects import VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
@@ -151,10 +153,12 @@ class VnfmOpenstackAdapter(object):
             for vnf_resource in tacker_list_vnf_resources:
                 vnf_resource_type = vnf_resource.get('type')
                 vnf_resource_id = vnf_resource.get('id')
+                vnf_resource_name = vnf_resource.get('name')
 
                 if vnf_resource_type == 'OS::Nova::Server':
                     vnfc_resource_info = VnfcResourceInfo()
                     vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+                    vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
                     vnfc_resource_info.compute_resource = ResourceHandle()
                     vnfc_resource_info.compute_resource.vim_id = tacker_show_vnf['vim_id'].encode()
@@ -181,3 +185,18 @@ class VnfmOpenstackAdapter(object):
         """
         self.tacker_client.delete_vnf(vnf_instance_id)
         return vnf_instance_id
+
+    @log_entry_exit(LOG)
+    def get_vim(self, vim_id):
+        vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        vim_auth_cred = vim_details['auth_cred']
+        vim_type = vim_details['type']
+
+        # TODO: get from config file
+        vim_auth_cred['password'] = 'admin'
+
+        return Vim(vendor=vim_type, **vim_auth_cred)
+
+    @log_entry_exit(LOG)
+    def get_vnfd(self, vnfd_id):
+        return yaml.load(self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd'])
