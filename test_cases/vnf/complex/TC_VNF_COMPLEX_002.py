@@ -5,7 +5,6 @@ from test_cases import TestCase
 from api.generic.traffic import Traffic
 from api.generic.vnf import Vnf
 from api.generic.vnfm import Vnfm
-from api.generic.tools import validate_allocated_vResources
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
