@@ -240,3 +240,38 @@ class Vnfm(object):
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
         return operation_status
+
+    @log_entry_exit(LOG)
+    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id):
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnfd = self.get_vnfd(vnfd_id)
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim(vim_id)
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_network_resource(filter={'compute_id': resource_id})
+
+            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+
+            expected_num_virtual_cpu = \
+                vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities']['nfv_compute'][
+                    'properties']['num_cpus']
+            expected_virtual_memory = \
+                int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                        'nfv_compute'][
+                        'properties']['mem_size'].split(' ')[0])
+            expected_size_of_storage = \
+                int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                        'nfv_compute'][
+                        'properties']['disk_size'].split(' ')[0])
+
+            if actual_num_virtual_cpu != expected_num_virtual_cpu or \
+                            actual_virtual_memory != expected_virtual_memory or \
+                            actual_size_of_storage != expected_size_of_storage:
+                return False
+
+        return True
