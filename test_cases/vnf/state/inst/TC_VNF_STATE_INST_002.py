@@ -22,7 +22,7 @@ class TC_VNF_STATE_INST_002(TestCase):
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_002')
 
-        self.vnfm = Vnfm(vendor=self.tc_input['vnfm_vendor'])
+        self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
         self.tc_result['resource_list'] = {}
@@ -39,9 +39,10 @@ class TC_VNF_STATE_INST_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating VNF')
         self.time_record.START('instantiate_vnf')
-        self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(vnfd_id='8549a1d5-7c6f-4c71-b57d-6f90127b6dd4',
-                                                                    flavour_id=None, vnf_instance_name='openwrt_vnf',
-                                                                    vnf_instance_description=None)
+        self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
+                                                                   vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                                   vnf_instance_name=self.tc_input['vnf_instance_name'],
+                                                                   vnf_instance_description=None)
         if self.vnf_instance_id is None:
             LOG.error('TC_VNF_STATE_INST_002 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
@@ -70,7 +71,12 @@ class TC_VNF_STATE_INST_002(TestCase):
         # 3. Validate the right vResources have been allocated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the right vResources have been allocated')
-        # TODO
+        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Could not validate allocated vResources')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Could not validate allocated vResources'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Calculate the instantiation time
