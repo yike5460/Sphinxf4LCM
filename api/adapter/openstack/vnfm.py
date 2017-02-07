@@ -39,7 +39,7 @@ class VnfmOpenstackAdapter(object):
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
 
         except:
-            print 'Unable to create', self.__class__.__name__, 'instance'
+            LOG.debug('Unable to create %s instance' % self.__class__.__name__)
             raise
 
     @log_entry_exit(LOG)

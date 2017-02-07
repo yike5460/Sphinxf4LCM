@@ -22,7 +22,7 @@ class VimOpenstackAdapter(object):
                                                             user_domain_name=user_domain_name)
 
         except:
-            print 'Unable to create', self.__class__.__name__, 'instance'
+            LOG.debug('Unable to create %s instance' % self.__class__.__name__)
             raise
 
     @log_entry_exit(LOG)
