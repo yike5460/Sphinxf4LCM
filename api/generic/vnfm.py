@@ -262,16 +262,19 @@ class Vnfm(object):
                     'properties']['num_cpus']
             expected_virtual_memory = \
                 int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute'][
-                        'properties']['mem_size'].split(' ')[0])
+                        'nfv_compute']['properties']['mem_size'].split(' ')[0])
             expected_size_of_storage = \
                 int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute'][
-                        'properties']['disk_size'].split(' ')[0])
+                        'nfv_compute']['properties']['disk_size'].split(' ')[0])
 
             if actual_num_virtual_cpu != expected_num_virtual_cpu or \
-                            actual_virtual_memory != expected_virtual_memory or \
-                            actual_size_of_storage != expected_size_of_storage:
+                    actual_virtual_memory != expected_virtual_memory or \
+                    actual_size_of_storage != expected_size_of_storage:
+                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_virtual_cpu,
+                                                                                 actual_num_virtual_cpu))
+                LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_virtual_memory, actual_virtual_memory))
+                LOG.debug('Expected %s vStorage, actual vStorage: %s' % (expected_size_of_storage,
+                                                                         actual_size_of_storage))
                 return False
 
         return True
