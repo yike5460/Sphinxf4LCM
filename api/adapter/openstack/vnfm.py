@@ -98,7 +98,7 @@ class VnfmOpenstackAdapter(object):
         return vnf_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description, **kwargs):
+    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
         """
         This function creates a VNF with the specified ID and name.
         """

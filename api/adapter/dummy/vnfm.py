@@ -34,7 +34,7 @@ class VnfmDummyAdapter(object):
         return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None, **kwargs):
+    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         """
         This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified
         by that identifier, in the NOT_INSTANTIATED state without instantiating the VNF or doing any additional
