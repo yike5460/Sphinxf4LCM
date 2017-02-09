@@ -34,6 +34,19 @@ class VnfmDummyAdapter(object):
         return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
+    def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
+        """
+        This function enables providing configuration parameters information for a VNF instance.
+
+        This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:         Identifier of the VNF instance.
+        :param vnf_configuration_data:  Configuration data for the VNF instance.
+        :param ext_virtual_link:        Information about external VLs to connect the VNF to.
+        :return:                        Nothing.
+        """
+
+    @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         """
         This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified
