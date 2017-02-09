@@ -38,6 +38,7 @@ class TestCase(object):
         self.traffic = None
         self.vim = None
         self.vnf = None
+        self.vnf_config = None
         self.vnf_instance_id = None
         self.vnfm = None
         self.cleanup_registrations = list()
