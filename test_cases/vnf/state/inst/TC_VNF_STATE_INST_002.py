@@ -40,9 +40,9 @@ class TC_VNF_STATE_INST_002(TestCase):
         LOG.info('Instantiating VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
-                                                                   vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                                   vnf_instance_name=self.tc_input['vnf_instance_name'],
-                                                                   vnf_instance_description=None)
+                                                                vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                                vnf_instance_name=self.tc_input['vnf']['instance_name'],
+                                                                vnf_instance_description=None)
         if self.vnf_instance_id is None:
             LOG.error('TC_VNF_STATE_INST_002 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
