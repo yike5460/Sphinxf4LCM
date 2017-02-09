@@ -36,7 +36,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         LOG.info('Starting setup for TC_VNF_COMPLEX_002')
 
         self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
-        self.vnf = Vnf(vendor=self.tc_input['vnf_vendor'])
+        self.vnf = Vnf(vendor=self.tc_input['vnf_type'])
         self.traffic = Traffic()
 
         self.tc_result['overall_status'] = constants.TEST_PASSED
@@ -56,9 +56,9 @@ class TC_VNF_COMPLEX_002(TestCase):
         LOG.info('Instantiating VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
-                                                                   vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                                   vnf_instance_name=self.tc_input['vnf_instance_name'],
-                                                                   vnf_instance_description=None)
+                                                                vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                                vnf_instance_name=self.tc_input['vnf']['instance_name'],
+                                                                vnf_instance_description=None)
         if self.vnf_instance_id is None:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
@@ -154,9 +154,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         self.tc_result['resource_list']['normal_level'] = self.vnfm.get_vResource(vnf_instance_id=self.vnf_instance_id)
-        if not validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['normal_level'],
-                                             instantiation_level_id='normal_level_id',
-                                             resource_type_list=self.tc_input['resource_type']):
+        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unable to validate normal resource')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -188,9 +186,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max and has max capacity')
         self.tc_result['resource_list']['after_resize'] = self.vnfm.get_vResource(vnf_instance_id=self.vnf_instance_id)
-        if not validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['after_resize'],
-                                             instantiation_level_id='max_level_id',
-                                             resource_type_list=self.tc_input['resource_type']):
+        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unable to validate resources after resize')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -229,9 +225,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.tc_result['resource_list']['after_max_traffic'] = self.vnfm.get_vResource(
             vnf_instance_id=self.vnf_instance_id)
-        if not validate_allocated_vResources(vnf_vResource_list=self.tc_result['resource_list']['after_max_traffic'],
-                                             instantiation_level_id='max_level_id',
-                                             resource_type_list=self.tc_input['resource_type']):
+        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unable to validate maximum resources')
             self.tc_result['overall_status'] = constants.TEST_FAILED
