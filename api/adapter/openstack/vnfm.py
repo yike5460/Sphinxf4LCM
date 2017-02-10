@@ -66,6 +66,29 @@ class VnfmOpenstackAdapter(object):
         return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
 
     @log_entry_exit(LOG)
+    def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
+        """
+        This function enables providing configuration parameters information for a VNF instance.
+
+        This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:         Identifier of the VNF instance.
+        :param vnf_configuration_data:  Configuration data for the VNF instance.
+        :param ext_virtual_link:        Information about external VLs to connect the VNF to.
+        :return:                        True.
+        """
+        # Build a dict with the following structure (this is specified by the Tacker API):
+        # "vnf": {
+        #     "attributes": {
+        #         "config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"
+        #     }
+        # }
+        if vnf_configuration_data is not None:
+            vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
+            self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
+            return True
+
+    @log_entry_exit(LOG)
     def vnf_delete_id(self, vnf_instance_id):
         """
         This function does not have a direct mapping in OpenStack so it will just return the VNF instance ID.
@@ -96,39 +119,6 @@ class VnfmOpenstackAdapter(object):
         """
         LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack!')
         LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
-        if additional_param is not None:
-            # Initialize variables
-            lifecycle_operation_occurrence_id = vnf_instance_id
-            operation_pending = True
-            elapsed_time = 0
-            max_wait_time = 120
-            poll_interval = 3
-
-            # Make sure the VNF is in ACTIVE state
-            while operation_pending and elapsed_time < max_wait_time:
-                operation_status = self.get_operation_status(lifecycle_operation_occurrence_id)
-                LOG.debug(
-                    'Got status %s for operation with ID %s' % (operation_status, lifecycle_operation_occurrence_id))
-                if operation_status in constants.OPERATION_FINAL_STATES:
-                    operation_pending = False
-                else:
-                    LOG.debug(
-                        'Expected state to be one of %s, got %s' % (constants.OPERATION_FINAL_STATES, operation_status))
-                    LOG.debug('Sleeping %s seconds' % 3)
-                    time.sleep(poll_interval)
-                    elapsed_time += poll_interval
-                    LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
-
-            # Build a dict with the following structure (this is specified by the Tacker API):
-            # "vnf": {
-            #     "attributes": {
-            #         "config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"
-            #     }
-            # }
-            vnf_attributes = {'vnf': {'attributes': {'config': additional_param['vnf_config_file']}}}
-            # Wait 10 seconds to make sure the SSH works to the newly instantiated VNF
-            time.sleep(60)
-            self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
         return vnf_instance_id
 
     @log_entry_exit(LOG)
