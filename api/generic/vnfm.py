@@ -130,6 +130,37 @@ class Vnfm(object):
         return operation_status
 
     @log_entry_exit(LOG)
+    def modify_vnf_configuration_sync(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None,
+                                      cooldown=None, max_wait_time=120, poll_interval=3):
+        """
+        This synchronously updates a VNF.
+
+        :param vnf_instance_id:         Identifier of the VNF instance.
+        :param vnf_configuration_data:  Configuration data for the VNF instance.
+        :param ext_virtual_link:        Information about external VLs to connect the VNF to.
+        :param cooldown:                Interval of time in seconds to wait until starting the VNF update. This is used 
+                                        when the update is done after the VNF is instantiated to allow the connectivity 
+                                        between controller and VNF be established. 
+        :param max_wait_time:           Maximum interval of time in seconds to wait for the operation to reach a
+                                        final state. Default value 120 seconds.
+        :param poll_interval:           Interval of time in seconds between consecutive polls. Default value 3 seconds.
+        :return:                        True.
+        """
+        if vnf_configuration_data is not None:
+            if cooldown is not None:
+                LOG.debug(
+                   'Sleeping %s seconds to allow the connectivity between controller and VNF be established' % cooldown)
+                time.sleep(cooldown)
+            if self.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data):
+                operation_status = self.poll_for_operation_completion(vnf_instance_id,
+                                                                      final_states=constants.OPERATION_FINAL_STATES,
+                                                                      max_wait_time=max_wait_time,
+                                                                      poll_interval=poll_interval)
+                return operation_status
+            else:
+                return constants.OPERATION_FAILED
+
+    @log_entry_exit(LOG)
     def vnf_operate_sync(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
                          max_wait_time=120, poll_interval=3):
         """
@@ -222,7 +253,7 @@ class Vnfm(object):
         :param max_wait_time:                       Maximum interval of time in seconds to wait for the operation to
                                                     reach a final state.
         :param poll_interval:                       Interval of time in seconds between consecutive polls.
-        :return:                                    VNF instantiation operation status.
+        :return:                                    Operation status.
         """
         operation_pending = True
         elapsed_time = 0
