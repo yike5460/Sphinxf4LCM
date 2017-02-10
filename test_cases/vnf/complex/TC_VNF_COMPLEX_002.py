@@ -156,7 +156,6 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Low traffic flew with packet loss'
             return False
 
-        self.tc_result['resource_list']['normal_level'] = self.vnfm.get_vResource(vnf_instance_id=self.vnf_instance_id)
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unable to validate normal resource')
@@ -188,7 +187,6 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 8. Validate VNF has resized to the max and has max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max and has max capacity')
-        self.tc_result['resource_list']['after_resize'] = self.vnfm.get_vResource(vnf_instance_id=self.vnf_instance_id)
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unable to validate resources after resize')
@@ -226,8 +224,6 @@ class TC_VNF_COMPLEX_002(TestCase):
             self.tc_result['error_info'] = 'Max traffic is flowing with packet loss'
             return False
 
-        self.tc_result['resource_list']['after_max_traffic'] = self.vnfm.get_vResource(
-            vnf_instance_id=self.vnf_instance_id)
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unable to validate maximum resources')
