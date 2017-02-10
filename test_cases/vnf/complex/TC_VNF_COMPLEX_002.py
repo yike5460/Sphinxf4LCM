@@ -16,7 +16,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
     Sequence:
     1. Instantiate VNF
-    2. Validate VNF state is INSTANTIATED
+    2. Validate VNF instantiation state is INSTANTIATED
     3. Start VNF
     4. Validate VNF state is STARTED
     5. Generate low traffic load
@@ -35,10 +35,12 @@ class TC_VNF_COMPLEX_002(TestCase):
     def setup(self):
         LOG.info('Starting setup for TC_VNF_COMPLEX_002')
 
+        # Create objects needed by the test.
         self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
         self.vnf = Vnf(vendor=self.tc_input['vnf_type'])
         self.traffic = Traffic()
 
+        # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
         self.tc_result['resource_list'] = {}
@@ -70,15 +72,16 @@ class TC_VNF_COMPLEX_002(TestCase):
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 2. Validate VNF state is INSTANTIATED
+        # 2. Validate VNF instantiation state is INSTANTIATED
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating VNF state is INSTANTIATED')
+        LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter=self.vnf_instance_id)
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
-            LOG.debug('Unexpected VNF state')
+            LOG.debug('Unexpected VNF instantiation state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF was not in "%s" state after instantiation' % constants.VNF_INSTANTIATED
+            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' \
+                                           % constants.VNF_INSTANTIATED
             return False
 
         self.time_record.END('instantiate_vnf')
@@ -107,7 +110,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF was not in "%s" state after it was started' % constants.VNF_STARTED
+            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was started' % constants.VNF_STARTED
             return False
 
         self.time_record.END('start_vnf')
@@ -265,7 +268,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             LOG.error('TC_VNF_COMPLEX_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF was not in "%s" state after it was stopped' % constants.VNF_STOPPED
+            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was stopped' % constants.VNF_STOPPED
             return False
 
         self.time_record.END('stop_vnf')
