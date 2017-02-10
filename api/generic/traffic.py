@@ -14,6 +14,26 @@ class Traffic(object):
         pass
 
     @log_entry_exit(LOG)
+    def any_traffic_loss(self):
+        """
+        This function checks if any packets are dropped.
+
+        :return:                            True if traffic flows with dropped packets, False otherwise
+        """
+
+        return False
+
+    @log_entry_exit(LOG)
+    def clear_counters(self):
+        """
+        This function clears all traffic counters.
+
+        :return:                            True if all counters have been cleared, False otherwise.
+        """
+
+        return True
+
+    @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_configuration_parameter):
         """
         This function applies the new traffic load and traffic configurations. If the traffic already flows, the
@@ -64,23 +84,3 @@ class Traffic(object):
         """
 
         return True
-
-    @log_entry_exit(LOG)
-    def clear_counters(self):
-        """
-        This function clears all traffic counters.
-
-        :return:                            True if all counters have been cleared, False otherwise.
-        """
-
-        return True
-
-    @log_entry_exit(LOG)
-    def any_traffic_loss(self):
-        """
-        This function checks if any packets are dropped.
-
-        :return:                            True if traffic flows with dropped packets, False otherwise
-        """
-
-        return False

@@ -66,6 +66,21 @@ class VnfmOpenstackAdapter(object):
         return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
 
     @log_entry_exit(LOG)
+    def get_vim(self, vim_id):
+        vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        vim_auth_cred = vim_details['auth_cred']
+        vim_type = vim_details['type']
+
+        # TODO: get from config file
+        vim_auth_cred['password'] = 'stack'
+
+        return Vim(vendor=vim_type, **vim_auth_cred)
+
+    @log_entry_exit(LOG)
+    def get_vnfd(self, vnfd_id):
+        return yaml.load(self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd'])
+
+    @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
         """
         This function enables providing configuration parameters information for a VNF instance.
@@ -87,6 +102,21 @@ class VnfmOpenstackAdapter(object):
             vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
             self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
             return True
+
+    @log_entry_exit(LOG)
+    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
+        """
+        This function creates a VNF with the specified ID and name.
+        """
+        vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
+                            'name': vnf_instance_name}}
+
+        try:
+            vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
+            LOG.debug("Response from vnfm:\n%s" % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
+        except tackerclient.common.exceptions.TackerException:
+            return None
+        return vnf_instance['vnf']['id']
 
     @log_entry_exit(LOG)
     def vnf_delete_id(self, vnf_instance_id):
@@ -120,21 +150,6 @@ class VnfmOpenstackAdapter(object):
         LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack!')
         LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
         return vnf_instance_id
-
-    @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
-        """
-        This function creates a VNF with the specified ID and name.
-        """
-        vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
-                            'name': vnf_instance_name}}
-
-        try:
-            vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
-            LOG.debug("Response from vnfm:\n%s" % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
-        except tackerclient.common.exceptions.TackerException:
-            return None
-        return vnf_instance['vnf']['id']
 
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
@@ -209,18 +224,3 @@ class VnfmOpenstackAdapter(object):
         """
         self.tacker_client.delete_vnf(vnf_instance_id)
         return vnf_instance_id
-
-    @log_entry_exit(LOG)
-    def get_vim(self, vim_id):
-        vim_details = self.tacker_client.show_vim(vim_id)['vim']
-        vim_auth_cred = vim_details['auth_cred']
-        vim_type = vim_details['type']
-
-        # TODO: get from config file
-        vim_auth_cred['password'] = 'admin'
-
-        return Vim(vendor=vim_type, **vim_auth_cred)
-
-    @log_entry_exit(LOG)
-    def get_vnfd(self, vnfd_id):
-        return yaml.load(self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd'])

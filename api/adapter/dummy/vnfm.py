@@ -188,32 +188,3 @@ class VnfmDummyAdapter(object):
         lifecycle_operation_occurrence_id = 'vnf_vnf_terminate_operation_id'
 
         return lifecycle_operation_occurrence_id
-
-    @log_entry_exit(LOG)
-    def get_vResource(self, vnf_instance_id):
-        """
-        This function returns a list of all allocated vResources of the instantiated VNF.
-
-        :param vnf_instance_id:             Identifier of the VNF instance to be queried for allocated vResources.
-        :return:                            A list of lists containing dictionaries of the following structure:
-                                            [[{'vnfc_instance_id': compute_resource_handle}],
-                                             [{'virtual_link_instance_id': network_resource_handle}],
-                                             [{'virtual_storage_instance_id': storage_resource_handle}]]
-        """
-
-        vnf_vResource_list = []
-        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'compute_resource'))
-        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'network_resource'))
-        vnf_vResource_list.append(self.vnf_query(vnf_instance_id, 'storage_resource'))
-
-        vnf_vResource_list = [[{'vnfc_instance_id': {'vim_id': '',
-                                                     'resource_provider_id': '',
-                                                     'resource_id': ''}}],
-                              [{'virtual_link_instance_id': {'vim_id': '',
-                                                             'resource_provider_id': '',
-                                                             'resource_id': ''}}],
-                              [{'virtual_storage_instance_id': {'vim_id': '',
-                                                                'resource_provider_id': '',
-                                                                'resource_id': ''}}]]
-
-        return vnf_vResource_list
