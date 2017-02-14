@@ -24,8 +24,9 @@ class Vnf(object):
         return getattr(self.vnf_adapter, attr)
 
     @log_entry_exit(LOG)
-    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states, max_wait_time=120,
-                                      poll_interval=3):
+    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
+                                      max_wait_time=constants.INSTANTIATION_TIME,
+                                      poll_interval=constants.POLL_INTERVAL):
         """
         This function polls the status of an operation until it reaches a final state or time is up.
 
