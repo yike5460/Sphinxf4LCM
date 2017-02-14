@@ -85,7 +85,7 @@ class TC_VNF_STATE_INST_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Calculate the instantiation time
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Calculating the time to stop a max scaled VNF under load')
+        LOG.info('Calculating the instantiation time')
         self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
 
         LOG.info('TC_VNF_STATE_INST_002 execution completed successfully')

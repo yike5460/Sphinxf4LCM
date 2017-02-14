@@ -84,7 +84,7 @@ class TC_VNF_STATE_INST_001(TestCase):
         LOG.info('Updating VNF')
         self.time_record.START('update_vnf')
         if self.vnfm.modify_vnf_configuration_sync(self.vnf_instance_id, self.vnf_config,
-                                                   cooldown=120) != constants.OPERATION_SUCCESS:
+                                                   cooldown=constants.COLLDOWN) != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_INST_001 execution failed')
             LOG.debug('Could not update VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -120,8 +120,11 @@ class TC_VNF_STATE_INST_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Calculate the instantiation time
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Calculating the time to stop a max scaled VNF under load')
+        LOG.info('Calculating the instantiation time')
         self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
+        self.tc_result['durations']['update_vnf'] = self.time_record.duration('update_vnf')
+        self.tc_result['durations']['instantiate_update_vnf'] = self.time_record.delta('instantiate_vnf.START',
+                                                                                       'update_vnf.END')
 
         LOG.info('TC_VNF_STATE_INST_001 execution completed successfully')
 
