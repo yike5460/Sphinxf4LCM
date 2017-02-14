@@ -110,15 +110,15 @@ class VnfmDummyAdapter(object):
         """
         This function changes the state of a VNF instance.
 
-         This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 - v2.1.1.
 
-        :param vnf_instance_id:             Identifier of the VNF instance.
-        :param change_state_to:             Desired state to change the VNF to. Permitted values are: start, stop.
-        :param stop_type:                   It signals whether forceful or graceful stop is requested. Allowed values
-                                            are: forceful and graceful.
-        :param graceful_stop_timeout:       Time interval to wait for the VNF to be taken out of service during
-                                            graceful stop, before stopping the VNF.
-        :return:                            The identifier of the VNF lifecycle operation occurrence.
+        :param vnf_instance_id:         Identifier of the VNF instance.
+        :param change_state_to:         Desired state to change the VNF to. Permitted values are: start, stop.
+        :param stop_type:               It signals whether forceful or graceful stop is requested. Allowed values are: 
+                                        forceful and graceful.
+        :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during graceful 
+                                        stop, before stopping the VNF.
+        :return:                        The identifier of the VNF lifecycle operation occurrence.
         """
         lifecycle_operation_occurrence_id = '12346'
 
