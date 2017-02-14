@@ -60,7 +60,7 @@ class TimeRecord(object):
             assert time_record_event_entry is not None
             return time_record_event_entry.duration
         except AssertionError:
-            raise ValueError('Time record "%s" does not exist' % time_record_event_entry)
+            raise ValueError('Time record "%s" does not exist' % label)
         except AttributeError:
             raise ValueError('Time record "%s" does not have a "duration" attribute' % time_record_event_entry)
 
