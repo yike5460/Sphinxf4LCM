@@ -1,6 +1,5 @@
 import json
 import logging
-import time
 import yaml
 
 import os_client_config
@@ -152,6 +151,23 @@ class VnfmOpenstackAdapter(object):
         return vnf_instance_id
 
     @log_entry_exit(LOG)
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+        """
+        This function changes the state of a VNF instance.
+
+        :param vnf_instance_id:             Identifier of the VNF instance.
+        :param change_state_to:             Desired state to change the VNF to. Permitted values are: start, stop.
+        :param stop_type:                   It signals whether forceful or graceful stop is requested. Allowed values
+                                            are: forceful and graceful.
+        :param graceful_stop_timeout:       Time interval to wait for the VNF to be taken out of service during
+                                            graceful stop, before stopping the VNF.
+        :return:                            The identifier of the VNF lifecycle operation occurrence.
+        """
+        LOG.debug('"VNF Operate" operation is not implemented in OpenStack!')
+        LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
+        return vnf_instance_id
+
+    @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
         """
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
@@ -176,6 +192,14 @@ class VnfmOpenstackAdapter(object):
         except tackerclient.common.exceptions.TackerException:
             return vnf_info
 
+        # Get the Heat stack ID
+        heat_stack_id = tacker_show_vnf['instance_id'].encode()
+
+        # Query Heat stack
+        vim_id = tacker_show_vnf['vim_id'].encode()
+        vim = self.get_vim(vim_id)
+        heat_stack = vim.get_stack(heat_stack_id)
+
         vnf_info.vnf_instance_name = tacker_show_vnf['name'].encode()
         vnf_info.vnf_instance_description = tacker_show_vnf['description'].encode()
         vnf_info.vnfd_id = tacker_show_vnf['vnfd_id'].encode()
@@ -183,8 +207,7 @@ class VnfmOpenstackAdapter(object):
             tacker_show_vnf['status']]
 
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_VNF_STATE'][
-            tacker_show_vnf['status']]
+        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_VNF_STATE'][heat_stack.stack_status]
 
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
         try:
@@ -200,7 +223,7 @@ class VnfmOpenstackAdapter(object):
                     vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
                     vnfc_resource_info.compute_resource = ResourceHandle()
-                    vnfc_resource_info.compute_resource.vim_id = tacker_show_vnf['vim_id'].encode()
+                    vnfc_resource_info.compute_resource.vim_id = vim_id
                     vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
 
                     vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
@@ -222,5 +245,8 @@ class VnfmOpenstackAdapter(object):
                                             resources.
         :return:                            VNF instance ID.
         """
-        self.tacker_client.delete_vnf(vnf_instance_id)
+        try:
+            self.tacker_client.delete_vnf(vnf_instance_id)
+        except tackerclient.common.exceptions.NotFound:
+            LOG.warning('VNF with instance ID %s could not be found' % vnf_instance_id)
         return vnf_instance_id
