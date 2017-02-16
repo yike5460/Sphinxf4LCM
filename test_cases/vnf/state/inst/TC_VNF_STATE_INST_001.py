@@ -15,10 +15,11 @@ class TC_VNF_STATE_INST_001(TestCase):
 
     Sequence:
     1. Instantiate VNF without load (--> time stamp)
-    2. Update VNF (--> time stamp)
-    3. Validate VNFM reports the VNF instantiation state as INSTANTIATED (--> time stamp when correct state reached)
-    4. Validate the right vResources have been allocated
-    5. Calculate the instantiation time
+    2. Validate VNFM reports the instantiation state INSTANTIATED (--> time stamp when correct state reached)
+    3. Update VNF (--> time stamp)
+    4. Validate VNFM reports the instantiation state INSTANTIATED (--> time stamp when correct state reached)
+    5. Validate the right vResources have been allocated
+    6. Calculate the instantiation time
     """
 
     def setup(self):
@@ -30,6 +31,7 @@ class TC_VNF_STATE_INST_001(TestCase):
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+        self.tc_result['resource_list'] = {}
 
         # Store the VNF config.
         with open(self.tc_input['vnf']['config'], 'r') as vnf_config_file:
@@ -58,13 +60,26 @@ class TC_VNF_STATE_INST_001(TestCase):
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
-        self.time_record.END('instantiate_vnf')
-
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 2. Update VNF (--> time stamp)
+        # 2. Validate VNFM reports the instantiation state INSTANTIATED (--> time stamp when correct state reached)
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating VNF instantiation state is INSTANTIATED')
+        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
+            LOG.error('TC_VNF_STATE_INST_001 execution failed')
+            LOG.debug('Unexpected VNF instantiation state')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' % \
+                                           constants.VNF_INSTANTIATED
+            return False
+
+        self.time_record.END('instantiate_vnf')
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 3. Update VNF (--> time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Updating VNF')
         self.time_record.START('update_vnf')
@@ -77,8 +92,7 @@ class TC_VNF_STATE_INST_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Validate VNFM reports the VNF instantiation state as INSTANTIATED
-        # (--> time stamp when correct state reached)
+        # 4. Validate VNFM reports the instantiation state INSTANTIATED (--> time stamp when correct state reached)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
@@ -93,7 +107,7 @@ class TC_VNF_STATE_INST_001(TestCase):
         self.time_record.END('update_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Validate the right vResources have been allocated
+        # 5. Validate the right vResources have been allocated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the right vResources have been allocated')
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
@@ -104,7 +118,7 @@ class TC_VNF_STATE_INST_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Calculate the instantiation time
+        # 6. Calculate the instantiation time
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the instantiation time')
         self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
