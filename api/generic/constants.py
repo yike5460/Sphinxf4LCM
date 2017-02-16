@@ -33,12 +33,11 @@ VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
                                                   'PENDING_DELETE': VNF_NOT_INSTANTIATED}
 
 
-# Mapping between OpenStack VNF states and ETSI VNF states
+# Mapping between OpenStack Heat stack states and ETSI VNF states
 VNF_STATE = dict()
-VNF_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_STARTED,
-                                    'ERROR': VNF_STOPPED,
-                                    'PENDING_CREATE': VNF_STOPPED,
-                                    'PENDING_DELETE': VNF_STOPPED}
+VNF_STATE['OPENSTACK_VNF_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
+                                    'RESUME_COMPLETE': VNF_STARTED,
+                                    'SUSPEND_COMPLETE': VNF_STOPPED}
 
 # Test results
 TEST_FAILED = 'FAILED'
@@ -46,8 +45,8 @@ TEST_PASSED = 'PASSED'
 
 # Wait time intervals
 COLLDOWN = 10
-INSTANTIATION_TIME = 120
+INSTANTIATION_TIME = 300
 POLL_INTERVAL = 5
-START_TIME = 120
-STOP_TIME = 120
-TERMINATE_TIME = 120
+START_TIME = 300
+STOP_TIME = 300
+TERMINATE_TIME = 300
