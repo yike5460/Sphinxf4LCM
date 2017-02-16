@@ -14,7 +14,8 @@ class TC_VNF_STATE_INST_002(TestCase):
 
     Sequence:
     1. Instantiate VNF without load (--> time stamp)
-    2. Validate VNFM reports the VNF instantiation state as INSTANTIATED (--> time stamp when correct state reached)
+    2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED 
+       (--> time stamp when correct state reached)
     3. Validate the right vResources have been allocated
     4. Calculate the instantiation time
     """
@@ -56,8 +57,8 @@ class TC_VNF_STATE_INST_002(TestCase):
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 2. Validate VNFM reports the VNF instantiation state as INSTANTIATED
-        # (--> time stamp when correct state reached)
+        # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
+        #    (--> time stamp when correct state reached)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
@@ -67,6 +68,16 @@ class TC_VNF_STATE_INST_002(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' \
                                            % constants.VNF_INSTANTIATED
+            return False
+
+        LOG.info('Validating VNF state is STARTED')
+        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+            LOG.error('TC_VNF_STATE_INST_001 execution failed')
+            LOG.debug('Unexpected VNF state')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
+                                           constants.VNF_STARTED
             return False
 
         self.time_record.END('instantiate_vnf')
