@@ -21,6 +21,15 @@ class VimOpenstackAdapter(object):
                                                             project_domain_name=project_domain_name,
                                                             user_domain_name=user_domain_name)
 
+            self.heat_client = os_client_config.make_client('orchestration',
+                                                            auth_url=auth_url,
+                                                            username=username,
+                                                            password=password,
+                                                            identity_api_version=identity_api_version,
+                                                            project_name=project_name,
+                                                            project_domain_name=project_domain_name,
+                                                            user_domain_name=user_domain_name)
+
         except:
             LOG.debug('Unable to create %s instance' % self.__class__.__name__)
             raise
@@ -51,3 +60,11 @@ class VimOpenstackAdapter(object):
         virtual_compute.virtual_disks = [virtual_storage]
 
         return virtual_compute
+
+    @log_entry_exit(LOG)
+    def get_stack(self, stack_id):
+        """
+        This function gets the metadata for the specified stack ID
+        """
+        stack_state = self.heat_client.stacks.get(stack_id)
+        return stack_state
