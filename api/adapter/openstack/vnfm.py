@@ -190,6 +190,7 @@ class VnfmOpenstackAdapter(object):
         try:
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
         except tackerclient.common.exceptions.TackerException:
+            vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
             return vnf_info
 
         # Get the Heat stack ID
