@@ -30,7 +30,9 @@ class TC_VNF_STATE_TERM_002(TestCase):
 
         # Create objects needed by the test.
         self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
-        self.traffic = Traffic()
+        self.traffic = Traffic(self.tc_input['traffic_params']['type'],
+                               **self.tc_input['traffic_params']['client_config'])
+        self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
@@ -49,9 +51,9 @@ class TC_VNF_STATE_TERM_002(TestCase):
         LOG.info('Instantiating VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
-                                                                vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                                vnf_instance_name=self.tc_input['vnf']['instance_name'],
-                                                                vnf_instance_description=None)
+            vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+            vnf_instance_name=self.tc_input['vnf']['instance_name'],
+            vnf_instance_description=None)
         if self.vnf_instance_id is None:
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
@@ -94,15 +96,15 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 3. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
-        if not self.traffic.configure(traffic_load="LOW_TRAFFIC_LOAD",
-                                      traffic_configuration_parameter=self.tc_input['traffic_config']):
+        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
             return False
 
-        if not self.traffic.start():
+        if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Traffic could not be started')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -115,7 +117,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow():
+        if not self.traffic.does_traffic_flow(delay_time=2):
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Traffic is not flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
