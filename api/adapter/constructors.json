@@ -8,5 +8,8 @@
     "vnfm"  : "api.adapter.dummy.vnfm.VnfmDummyAdapter",
     "vnf"   : "api.adapter.dummy.vnf.VnfDummyAdapter",
     "vim"   : "api.adapter.dummy.vim.VimDummyAdapter"
+  },
+  "stc": {
+    "traffic" : "api.adapter.stc.traffic.TrafficStcAdapter"
   }
 }
