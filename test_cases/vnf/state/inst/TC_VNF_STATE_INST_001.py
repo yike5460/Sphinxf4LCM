@@ -135,7 +135,7 @@ class TC_VNF_STATE_INST_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the right vResources have been allocated')
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
-            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.error('TC_VNF_STATE_INST_001 execution failed')
             LOG.debug('Could not validate allocated vResources')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Could not validate allocated vResources'

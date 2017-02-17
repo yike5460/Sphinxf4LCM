@@ -73,7 +73,7 @@ class TC_VNF_STATE_INST_002(TestCase):
         LOG.info('Validating VNF state is STARTED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
-            LOG.error('TC_VNF_STATE_INST_001 execution failed')
+            LOG.error('TC_VNF_STATE_INST_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
@@ -87,7 +87,7 @@ class TC_VNF_STATE_INST_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the right vResources have been allocated')
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
-            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.error('TC_VNF_STATE_INST_002 execution failed')
             LOG.debug('Could not validate allocated vResources')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Could not validate allocated vResources'
