@@ -71,7 +71,7 @@ class VnfmOpenstackAdapter(object):
         vim_type = vim_details['type']
 
         # TODO: get from config file
-        vim_auth_cred['password'] = 'stack'
+        vim_auth_cred['password'] = 'admin'
 
         return Vim(vendor=vim_type, **vim_auth_cred)
 
@@ -125,7 +125,7 @@ class VnfmOpenstackAdapter(object):
         :param vnf_instance_id: VNF instance identifier to be deleted.
         :return:                Nothing.
         """
-        LOG.warning('"VNF Delete ID" operation is not implemented in OpenStack!')
+        LOG.debug('"VNF Delete ID" operation is not implemented in OpenStack!')
 
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
@@ -249,5 +249,5 @@ class VnfmOpenstackAdapter(object):
         try:
             self.tacker_client.delete_vnf(vnf_instance_id)
         except tackerclient.common.exceptions.NotFound:
-            LOG.warning('VNF with instance ID %s could not be found' % vnf_instance_id)
+            LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
         return vnf_instance_id
