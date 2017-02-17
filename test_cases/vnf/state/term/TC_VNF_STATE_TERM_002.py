@@ -2,6 +2,7 @@ import logging
 
 from api.generic import constants
 from test_cases import TestCase
+from api.generic.traffic import Traffic
 from api.generic.vnfm import Vnfm
 
 # Instantiate logger
@@ -29,6 +30,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
 
         # Create objects needed by the test.
         self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
+        self.traffic = Traffic()
 
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
@@ -77,7 +79,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         LOG.info('Validating VNF state is STARTED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
-            LOG.error('TC_VNF_STATE_INST_001 execution failed')
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
@@ -92,13 +94,47 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 3. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
-        # TODO
+        if not self.traffic.configure(traffic_load="LOW_TRAFFIC_LOAD",
+                                      traffic_configuration_parameter=self.tc_input['traffic_config']):
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
+            LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
+            return False
+
+        if not self.traffic.start():
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
+            LOG.debug('Traffic could not be started')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic could not be started'
+            return False
+
+        self.register_for_cleanup(self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        # TODO
+        if not self.traffic.does_traffic_flow():
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
+            LOG.debug('Traffic is not flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic did not flow'
+            return False
+
+        if self.traffic.any_traffic_loss():
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
+            LOG.debug('Traffic is flowing with packet loss')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
+            return False
+
+        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
+            LOG.debug('Could not validate allocated vResources')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Could not validate allocated vResources'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Terminate VNF (-> time stamp)
@@ -119,13 +155,25 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 6. Validate VNF is terminated and all resources have been released
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF is terminated and all resources have been released')
-        # TODO
+        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
+            LOG.debug('Unexpected VNF instantiation state')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was terminated' \
+                                           % constants.VNF_NOT_INSTANTIATED
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Ensure that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Ensuring that no traffic flows once stop is completed')
-        # TODO
+        if self.traffic.does_traffic_flow():
+            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.debug('Traffic is flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic still flown after the VNF was stopped'
+            return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Calculate the termination time
