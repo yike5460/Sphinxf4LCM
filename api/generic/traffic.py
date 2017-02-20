@@ -1,7 +1,5 @@
 import logging
 
-from stcrestclient import stchttp
-
 from api.adapter import construct_adapter
 from utils.logging_module import log_entry_exit
 
@@ -18,14 +16,13 @@ class Traffic(object):
         self.vendor = vendor
         self.traffic_adapter = construct_adapter(vendor, module_type='traffic', **kwargs)
 
-
     @log_entry_exit(LOG)
     def any_traffic_loss(self, delay_time=0):
         """
         This function checks if any packets are dropped.
 
-        :param delay_time:                  Time, in seconds, to wait until polling for traffic.
-        :return:                            True if traffic flows with dropped packets, False otherwise
+        :param delay_time:  Time, in seconds, to wait until polling for traffic.
+        :return:            True if traffic flows with dropped packets, False otherwise
         """
 
         return self.traffic_adapter.any_traffic_loss(delay_time)
@@ -35,7 +32,7 @@ class Traffic(object):
         """
         This function clears all traffic counters.
 
-        :return:                            True if all counters have been cleared, False otherwise.
+        :return:    True if all counters have been cleared, False otherwise.
         """
 
         return self.traffic_adapter.clear_counters()
@@ -46,11 +43,10 @@ class Traffic(object):
         This function applies the new traffic load and traffic configurations. If the traffic already flows, the
         parameters get applied at run time.
 
-        :param traffic_load:                    Possible values: "LOW_TRAFFIC_LOAD", "NORMAL_TRAFFIC_LOAD",
-                                                                 "MAX_TRAFFIC_LOAD", "INITIAL", "PERCENTAGE"
-        :param traffic_configuration_parameters: Specific information required to run the traffic.
-        :return:                                 True if traffic load and configuration parameter were applied, False
-                                                 otherwise.
+        :param traffic_load:    Possible values: "LOW_TRAFFIC_LOAD", "NORMAL_TRAFFIC_LOAD",
+                                                 "MAX_TRAFFIC_LOAD", "INITIAL", "PERCENTAGE"
+        :param traffic_config:  Specific information required to run the traffic.
+        :return:                True if traffic load and configuration parameter were applied, False otherwise.
         """
 
         return self.traffic_adapter.configure(traffic_load, traffic_config)
@@ -61,8 +57,8 @@ class Traffic(object):
         This function checks if packets are received. Dropped packets may occur, but are not considered as a negative
         outcome of the function. If all packets get dropped, the function fails.
 
-        :param delay_time:                  Time, in seconds, to wait until polling for traffic.
-        :return: True if traffic flow is detected, False otherwise
+        :param delay_time:  Time, in seconds, to wait until polling for traffic.
+        :return:            True if traffic flow is detected, False otherwise
         """
 
         return self.traffic_adapter.does_traffic_flow(delay_time)
