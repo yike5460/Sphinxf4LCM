@@ -16,9 +16,10 @@ def report_test_case(tc_input, tc_result):
     print
 
     print '*** Test case results ***'
-    t = PrettyTable()
-    t.add_row(['Overall status', tc_result['overall_status']])
-    t.add_row(['Error info', tc_result['error_info']])
+    t = PrettyTable(['Overall status', 'Error info'])
+    t.add_row([tc_result['overall_status'], tc_result['error_info']])
+    print t
+    print
 
     print '* VNF resources:'
     for vnfc_id, vnfc_resources in tc_result.get('resources', {}).items():
