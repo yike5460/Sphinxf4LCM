@@ -16,7 +16,6 @@ class TC_VNF_STATE_TERM_002(TestCase):
     Sequence:
     1. Instantiate VNF without load (--> time stamp)
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-       (--> time stamp when correct state reached)
     3. Start the low traffic load
     4. Validate the provided functionality and all traffic goes through (-> no dropped packets)
     5. Terminate VNF (-> time stamp)
@@ -64,6 +63,8 @@ class TC_VNF_STATE_TERM_002(TestCase):
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
+        self.time_record.END('instantiate_vnf')
+
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         #    (--> time stamp when correct state reached)
@@ -87,8 +88,6 @@ class TC_VNF_STATE_TERM_002(TestCase):
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
                                            constants.VNF_STARTED
             return False
-
-        self.time_record.END('instantiate_vnf')
 
         self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
 
@@ -137,6 +136,8 @@ class TC_VNF_STATE_TERM_002(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Could not validate allocated vResources'
             return False
+
+        self.tc_result['resources'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Terminate VNF (-> time stamp)
