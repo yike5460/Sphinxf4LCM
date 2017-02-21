@@ -33,7 +33,6 @@ class TC_VNF_STATE_INST_001(TestCase):
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
-        self.tc_result['resource_list'] = {}
 
         # Store the VNF config.
         with open(self.tc_input['vnf']['config'], 'r') as vnf_config_file:
