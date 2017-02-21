@@ -117,7 +117,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=2):
+        if not self.traffic.does_traffic_flow(delay_time=3):
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Traffic is not flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -143,6 +143,8 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Terminating the VNF')
         self.time_record.START('terminate_vnf')
+        # Clearing counters so calculating traffic deactivation time is correct
+        self.traffic.clear_counters()
         if self.vnfm.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful') != \
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
@@ -152,6 +154,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
             return False
 
         self.time_record.END('terminate_vnf')
+        self.tc_result['durations']['traffic_deactivation'] = self.traffic.calculate_deactivation_time()
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF is terminated and all resources have been released
