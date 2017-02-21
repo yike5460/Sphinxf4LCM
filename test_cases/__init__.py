@@ -2,6 +2,7 @@ import collections
 import importlib
 
 from utils.logging_module import configure_logger
+from utils import reporting
 from utils import timestamps
 
 
@@ -33,7 +34,7 @@ class TestCase(object):
         self.tc_input = tc_input
         self.tc_result = dict()
         self.tc_result['timestamps'] = collections.OrderedDict()
-        self.tc_result['durations'] = {}
+        self.tc_result['durations'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.vim = None
@@ -100,4 +101,9 @@ class TestCase(object):
             self.collect_timestamps()
             self.cleanup()
 
+        self.report()
+
         return self.tc_result
+
+    def report(self):
+        reporting.report_test_case(self.tc_input, self.tc_result)
