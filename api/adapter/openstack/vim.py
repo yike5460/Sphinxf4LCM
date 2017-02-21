@@ -35,7 +35,7 @@ class VimOpenstackAdapter(object):
             raise
 
     @log_entry_exit(LOG)
-    def query_virtualised_network_resource(self, filter):
+    def query_virtualised_compute_resource(self, filter):
         virtual_compute = VirtualCompute()
 
         compute_id = filter['compute_id']
