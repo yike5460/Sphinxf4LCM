@@ -59,7 +59,6 @@ class TC_VNF_STATE_INST_002(TestCase):
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-        #    (--> time stamp when correct state reached)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
@@ -91,6 +90,8 @@ class TC_VNF_STATE_INST_002(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Could not validate allocated vResources'
             return False
+
+        self.tc_result['resources'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Calculate the instantiation time
