@@ -97,7 +97,7 @@ class Vnfm(object):
             vim = self.get_vim(vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_network_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
             actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
             actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
@@ -124,6 +124,31 @@ class Vnfm(object):
                 return False
 
         return True
+
+    @log_entry_exit(LOG)
+    def get_allocated_vresources(self, vnf_instance_id):
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+
+        vresources = dict()
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim(vim_id)
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+            vresources[resource_id] = dict()
+
+            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+
+            vresources[resource_id]['num_virtual_cpu'] = actual_num_virtual_cpu
+            vresources[resource_id]['virtual_memory'] = actual_virtual_memory
+            vresources[resource_id]['size_of_storage'] = actual_size_of_storage
+
+        return vresources
 
     @log_entry_exit(LOG)
     def vnf_create_and_instantiate(self, vnfd_id, flavour_id, vnf_instance_name=None, vnf_instance_description=None,
