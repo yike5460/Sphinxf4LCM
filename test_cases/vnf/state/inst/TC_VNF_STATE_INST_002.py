@@ -14,8 +14,7 @@ class TC_VNF_STATE_INST_002(TestCase):
 
     Sequence:
     1. Instantiate VNF without load (--> time stamp)
-    2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED 
-       (--> time stamp when correct state reached)
+    2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Validate the right vResources have been allocated
     4. Calculate the instantiation time
     """
@@ -53,6 +52,8 @@ class TC_VNF_STATE_INST_002(TestCase):
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
+        self.time_record.END('instantiate_vnf')
+
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
@@ -79,8 +80,6 @@ class TC_VNF_STATE_INST_002(TestCase):
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
                                            constants.VNF_STARTED
             return False
-
-        self.time_record.END('instantiate_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate the right vResources have been allocated
