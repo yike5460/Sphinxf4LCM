@@ -100,9 +100,10 @@ class TC_VNF_STATE_INST_001(TestCase):
             self.tc_result['error_info'] = 'Could not update VNF'
             return False
 
+        self.time_record.END('update_vnf')
+
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-        #    (--> time stamp when correct state reached)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
@@ -123,8 +124,6 @@ class TC_VNF_STATE_INST_001(TestCase):
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
                                            constants.VNF_STARTED
             return False
-
-        self.time_record.END('update_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Validate the right vResources have been allocated
