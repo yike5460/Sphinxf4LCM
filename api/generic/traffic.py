@@ -64,6 +64,10 @@ class Traffic(object):
         return self.traffic_adapter.does_traffic_flow(delay_time)
 
     @log_entry_exit(LOG)
+    def calculate_deactivation_time(self):
+        return self.traffic_adapter.calculate_deactivation_time()
+
+    @log_entry_exit(LOG)
     def start(self, delay_time=0, return_when_emission_starts=False):
         """
         This function starts the traffic emission.

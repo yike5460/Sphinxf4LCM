@@ -180,14 +180,17 @@ class TrafficStcAdapter(object):
             LOG.debug('Sleeping %s seconds before polling traffic rate' % delay_time)
             time.sleep(delay_time)
 
-        tx_frame_count = int(self.stc.get(self.tx_results)['FrameCount'])
-        rx_frame_count = int(self.stc.get(self.rx_results)['FrameCount'])
+        tx_results = self.stc.get(self.tx_results)
+        rx_results = self.stc.get(self.rx_results)
 
-        tx_frame_rate = int(self.stc.get(self.tx_results)['FrameRate'])
-        rx_frame_rate = int(self.stc.get(self.rx_results)['FrameRate'])
+        tx_frame_count = int(tx_results['FrameCount'])
+        rx_frame_count = int(rx_results['FrameCount'])
 
-        rx_frames_dropped = int(self.stc.get(self.rx_results)['DroppedFrameCount'])
-        rx_dropped_frame_percent = float(self.stc.get(self.rx_results)['DroppedFramePercent'])
+        tx_frame_rate = int(tx_results['FrameRate'])
+        rx_frame_rate = int(rx_results['FrameRate'])
+
+        rx_frames_dropped = int(rx_results['DroppedFrameCount'])
+        rx_dropped_frame_percent = float(rx_results['DroppedFramePercent'])
 
         LOG.debug('TX frames - count: %s; rate: %s' % (tx_frame_count, tx_frame_rate))
         LOG.debug('RX frames - count: %s; rate: %s' % (rx_frame_count, rx_frame_rate))
@@ -222,6 +225,19 @@ class TrafficStcAdapter(object):
 
             LOG.debug('No traffic loss detected')
             return False
+
+    @log_entry_exit(LOG)
+    def calculate_deactivation_time(self):
+        LOG.debug('Deactivation time is calculated per RFC 6201 Frame-Loss Method')
+        LOG.debug('Make sure counters were cleared at the time of calling DUT termination')
+
+        tx_results = self.stc.get(self.tx_results)
+        rx_results = self.stc.get(self.rx_results)
+
+        rx_frame_count = float(rx_results['FrameCount'])
+        tx_frame_rate = float(tx_results['FrameRate'])
+
+        return rx_frame_count / tx_frame_rate
 
     @log_entry_exit(LOG)
     def clear_counters(self):
