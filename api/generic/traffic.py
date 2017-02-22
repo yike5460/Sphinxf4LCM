@@ -38,6 +38,10 @@ class Traffic(object):
         return self.traffic_adapter.clear_counters()
 
     @log_entry_exit(LOG)
+    def config_traffic_load(self, traffic_load):
+        return self.traffic_adapter.config_traffic_load(traffic_load)
+
+    @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
         """
         This function applies the new traffic load and traffic configurations. If the traffic already flows, the
