@@ -80,21 +80,38 @@ class TrafficStcAdapter(object):
         return stream_block
 
     @log_entry_exit(LOG)
+    def config_traffic_load(self, generator_port, traffic_load):
+        traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 10,
+                                        'NORMAL_TRAFFIC_LOAD': 50,
+                                        'MAX_TRAFFIC_LOAD': 100}
+
+        generator = self.stc.get(generator_port, 'children-Generator')
+        generator_config = self.stc.get(generator, 'children-GeneratorConfig')
+        self.stc.config(handle=generator_config, DurationMode='CONTINUOUS', LoadMode='FIXED',
+                        FixedLoad=traffic_load_percent_mapping[traffic_load],
+                        LoadUnit='PERCENT_LINE_RATE', SchedulingMode='PORT_BASED')
+        self.stc.apply()
+
+    @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
         l_port = self.create_port(port_location=traffic_config['left_port_location'])
 
         l_ipv4_iface = self.create_eth_ipv4_host_iface(address=traffic_config['left_traffic_addr'],
-                                                       plen=traffic_config['left_traffic_plen'], gw=traffic_config['left_traffic_gw'],
+                                                       plen=traffic_config['left_traffic_plen'],
+                                                       gw=traffic_config['left_traffic_gw'],
                                                        affiliated_port=l_port)
 
         r_port = self.create_port(port_location=traffic_config['right_port_location'])
 
         r_ipv4_iface = self.create_eth_ipv4_host_iface(address=traffic_config['right_traffic_addr'],
-                                                       plen=traffic_config['right_traffic_plen'], gw=traffic_config['right_traffic_gw'],
+                                                       plen=traffic_config['right_traffic_plen'],
+                                                       gw=traffic_config['right_traffic_gw'],
                                                        affiliated_port=r_port)
 
         stream_block = self.create_ipv4_stream(source_port=l_port, source_ipv4_iface=l_ipv4_iface,
                                                dest_ipv4_iface=r_ipv4_iface)
+
+        self.config_traffic_load(generator_port=l_port, traffic_load=traffic_load)
 
         self.stc.perform('AttachPorts')
         self.stc.perform('DevicesStartAll')
