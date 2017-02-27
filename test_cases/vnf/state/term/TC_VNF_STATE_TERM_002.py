@@ -60,10 +60,12 @@ class TC_VNF_STATE_TERM_002(TestCase):
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
+        self.time_record.END('instantiate_vnf')
+
+        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
+
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
-
-        self.time_record.END('instantiate_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
@@ -87,8 +89,6 @@ class TC_VNF_STATE_TERM_002(TestCase):
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
                                            constants.VNF_STARTED
             return False
-
-        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
