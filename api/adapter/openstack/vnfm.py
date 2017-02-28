@@ -51,7 +51,10 @@ class VnfmOpenstackAdapter(object):
         LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in OpenStack!')
         LOG.debug('Will return the state of the resource with given Id')
 
-        vnf_id = lifecycle_operation_occurrence_id
+        if lifecycle_operation_occurrence_id is None:
+            return constants.OPERATION_FAILED
+        else:
+            vnf_id = lifecycle_operation_occurrence_id
 
         try:
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
@@ -201,6 +204,7 @@ class VnfmOpenstackAdapter(object):
         vim = self.get_vim(vim_id)
         heat_stack = vim.get_stack(heat_stack_id)
 
+        # Build the vnf_info data structure
         vnf_info.vnf_instance_name = tacker_show_vnf['name'].encode()
         vnf_info.vnf_instance_description = tacker_show_vnf['description'].encode()
         vnf_info.vnfd_id = tacker_show_vnf['vnfd_id'].encode()
@@ -235,6 +239,34 @@ class VnfmOpenstackAdapter(object):
         return vnf_info
 
     @log_entry_exit(LOG)
+    def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
+        """
+        This function scales a VNF horizontally (out/in).
+
+        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
+        :param scale_type:          Defines the type of the scale operation requested. Possible values: 'in', or 'out'
+        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+                                    VNFD. Defaults to 1.
+        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
+                                    to the VNF being scaled.
+        :return:                    Identifier of the VNF lifecycle operation occurrence.
+        """
+        # Build a dict with the following structure (this is specified by the Tacker API):
+        # "scale": {
+        #   "type": "<type>",
+        #   "policy" : "<scaling-policy-name>"}
+        try:
+            body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
+            self.tacker_client.scale_vnf(vnf_instance_id, body)
+        except tackerclient.common.exceptions.NotFound:
+            LOG.debug('Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s"' %
+                      (vnf_instance_id, additional_param['scaling_policy_name']))
+            return None
+
+        return vnf_instance_id
+
+    @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
         """
         This function terminates the VNF with the given ID.
@@ -250,4 +282,5 @@ class VnfmOpenstackAdapter(object):
             self.tacker_client.delete_vnf(vnf_instance_id)
         except tackerclient.common.exceptions.NotFound:
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
+            return None
         return vnf_instance_id
