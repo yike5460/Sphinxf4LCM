@@ -150,6 +150,26 @@ class VnfmDummyAdapter(object):
         return vnf_info
 
     @log_entry_exit(LOG)
+    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+        """
+        This function scales a VNF horizontally (out/in) or vertically (up/down).
+
+        This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
+        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).
+        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+                                    VNFD. Defaults to 1.
+        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
+                                    to the VNF being scaled.
+        :return:                    Identifier of the VNF lifecycle operation occurrence.
+        """
+        lifecycle_operation_occurrence_id = 'vnf_scale_operation_id'
+
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
     def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
         """
         This function scales an instantiated VNF of a particular DF to a target size.
