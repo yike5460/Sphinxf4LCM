@@ -23,6 +23,8 @@ OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
                                            'ERROR': OPERATION_FAILED,
                                            'PENDING_CREATE': OPERATION_PENDING,
                                            'PENDING_DELETE': OPERATION_PENDING,
+                                           'PENDING_SCALE_IN': OPERATION_PENDING,
+                                           'PENDING_SCALE_OUT': OPERATION_PENDING,
                                            'PENDING_UPDATE': OPERATION_PENDING}
 
 # Mapping between OpenStack VNF states and ETSI VNF instantiation states
@@ -47,6 +49,7 @@ TEST_PASSED = 'PASSED'
 COLLDOWN = 10
 INSTANTIATION_TIME = 300
 POLL_INTERVAL = 5
+SCALE_INTERVAL = 300
 START_TIME = 300
 STOP_TIME = 300
 TERMINATE_TIME = 300
