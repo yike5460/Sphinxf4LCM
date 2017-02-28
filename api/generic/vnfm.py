@@ -258,6 +258,34 @@ class Vnfm(object):
         return operation_status
 
     @log_entry_exit(LOG)
+    def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None,
+                       max_wait_time=constants.SCALE_INTERVAL, poll_interval=constants.POLL_INTERVAL):
+        """
+        This function scales a VNF horizontally (out/in).
+
+        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
+        :param scale_type:          Defines the type of the scale operation requested. Possible values: 'in', or 'out'
+        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+                                    VNFD. Defaults to 1.
+        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
+                                    to the VNF being scaled.
+        :param max_wait_time:       Maximum interval of time in seconds to wait for the scaling operation to reach a
+                                    final state.
+        :param poll_interval:       Interval of time in seconds between consecutive polls on the scaling operation
+                                    result.
+        :return:                    Operation status.
+        """
+        lifecycle_operation_occurrence_id = self.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
+                                                           additional_param)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+
+        return operation_status
+
+    @log_entry_exit(LOG)
     def vnf_scale_to_level_sync(self, vnf_instance_id, instantiation_level_id=None, scale_info=None,
                                 additional_param=None, max_wait_time=constants.INSTANTIATION_TIME,
                                 poll_interval=constants.POLL_INTERVAL):
