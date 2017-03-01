@@ -337,7 +337,7 @@ class Vnfm(object):
                                                    max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            LOG.warning('Expected termination operation status %s, got %s' % (
+            LOG.debug('Expected termination operation status %s, got %s' % (
                 constants.OPERATION_SUCCESS, operation_status))
             return operation_status
 
