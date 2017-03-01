@@ -18,6 +18,8 @@ class TrafficStcAdapter(object):
         self.rx_results = None
         self.tx_port = None
         self.rx_port = None
+        self.stream_block = None
+        self.arp_needed = None
 
         self._attempt_to_start_traffic = False
         self._traffic_attempt_lock = Lock()
@@ -82,17 +84,45 @@ class TrafficStcAdapter(object):
         return stream_block
 
     @log_entry_exit(LOG)
+    def create_raw_stream(self, source_port, source_ipv4_addr, dest_ipv4_addr, dest_mac_addr):
+        stream_block = self.stc.create(object_type='streamBlock', under=source_port)
+        self.stc.config(handle=stream_block, frameConfig='')
+        self.stc.create(object_type='ethernet:EthernetII', under=stream_block, name='RAW_STREAM_ETH', dstMac=dest_mac_addr)
+        self.stc.create(object_type='ipv4:IPv4', under=stream_block, sourceAddr=source_ipv4_addr,
+                        destAddr=dest_ipv4_addr)
+
+        self.stc.apply()
+
+        return stream_block
+
+    @log_entry_exit(LOG)
+    def config_port_rate(self, port_name, port_rate):
+        generator = self.stc.get(port_name, 'children-Generator')
+        generator_config = self.stc.get(generator, 'children-GeneratorConfig')
+        self.stc.config(handle=generator_config, DurationMode='CONTINUOUS', LoadMode='FIXED',
+                        FixedLoad=port_rate,
+                        LoadUnit='PERCENT_LINE_RATE', SchedulingMode='PORT_BASED')
+        self.stc.apply()
+
+    @log_entry_exit(LOG)
     def config_traffic_load(self, traffic_load):
         traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 10,
                                         'NORMAL_TRAFFIC_LOAD': 50,
                                         'MAX_TRAFFIC_LOAD': 100}
+        self.config_port_rate(self.tx_port, traffic_load_percent_mapping[traffic_load])
 
-        generator = self.stc.get(self.tx_port, 'children-Generator')
-        generator_config = self.stc.get(generator, 'children-GeneratorConfig')
-        self.stc.config(handle=generator_config, DurationMode='CONTINUOUS', LoadMode='FIXED',
-                        FixedLoad=traffic_load_percent_mapping[traffic_load],
-                        LoadUnit='PERCENT_LINE_RATE', SchedulingMode='PORT_BASED')
+    @log_entry_exit(LOG)
+    def modify_stream(self, dest_mac_addr_list):
+        modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
+        self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0, OffsetReference='RAW_STREAM_ETH.dstMac')
         self.stc.apply()
+
+    @log_entry_exit(LOG)
+    def scale_traffic(self, load_balancing_model, **kwargs):
+        if load_balancing_model == 'LB_INTERNAL':
+            self.config_traffic_load('MAX_TRAFFIC_LOAD')
+        if load_balancing_model == 'LB_END_TO_END':
+            self.modify_stream(kwargs['dest_mac_addr_list'])
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
@@ -112,8 +142,16 @@ class TrafficStcAdapter(object):
                                                        gw=traffic_config['right_traffic_gw'],
                                                        affiliated_port=r_port)
 
-        stream_block = self.create_ipv4_stream(source_port=l_port, source_ipv4_iface=l_ipv4_iface,
-                                               dest_ipv4_iface=r_ipv4_iface)
+        dest_mac_addr = traffic_config.get('left_traffic_gw_mac')
+        if dest_mac_addr is None:
+            self.arp_needed = True
+            self.stream_block = self.create_ipv4_stream(source_port=l_port, source_ipv4_iface=l_ipv4_iface,
+                                                   dest_ipv4_iface=r_ipv4_iface)
+        else:
+            self.arp_needed = False
+            self.stream_block = self.create_raw_stream(source_port=l_port, source_ipv4_addr=traffic_config['left_traffic_addr'],
+                                                  dest_ipv4_addr=traffic_config['right_traffic_addr'],
+                                                  dest_mac_addr=dest_mac_addr)
 
         self.config_traffic_load(traffic_load)
 
@@ -125,8 +163,8 @@ class TrafficStcAdapter(object):
         self.stc.perform(command='ResultsSubscribe', parent=self.project, ConfigType='StreamBlock',
                          ResultType='RxStreamSummaryResults')
 
-        self.tx_results = self.stc.get(stream_block, 'children-TxStreamResults')
-        self.rx_results = self.stc.get(stream_block, 'children-RxStreamSummaryResults')
+        self.tx_results = self.stc.get(self.stream_block, 'children-TxStreamResults')
+        self.rx_results = self.stc.get(self.stream_block, 'children-RxStreamSummaryResults')
 
         return True
 
@@ -135,15 +173,16 @@ class TrafficStcAdapter(object):
         self.attempt_to_start_traffic = True
 
         def traffic_starter():
-            resolution_status = 'NOT_STARTED'
-            while resolution_status != 'SUCCESSFUL':
-                if not self.attempt_to_start_traffic:
-                    LOG.debug('Aborting attempt to start traffic')
-                    return
+            if self.arp_needed is True:
+                resolution_status = 'NOT_STARTED'
+                while resolution_status != 'SUCCESSFUL':
+                    if not self.attempt_to_start_traffic:
+                        LOG.debug('Aborting attempt to start traffic')
+                        return
 
-                LOG.debug('Address resolution status: %s. Will retry.' % resolution_status)
-                resolution_status = self.stc.perform(command='ArpNdStart')['ArpNdState']
-            LOG.debug('Address resolution status: %s' % resolution_status)
+                    LOG.debug('Address resolution status: %s. Will retry.' % resolution_status)
+                    resolution_status = self.stc.perform(command='ArpNdStart')['ArpNdState']
+                LOG.debug('Address resolution status: %s' % resolution_status)
 
             if delay_time > 0:
                 LOG.debug('Sleeping %s seconds before starting emission' % delay_time)
