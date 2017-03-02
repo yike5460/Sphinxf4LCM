@@ -80,6 +80,7 @@ class VnfmOpenstackAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnfd(self, vnfd_id):
+        # TODO: translate to ETSI VNFD
         return yaml.load(self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd'])
 
     @log_entry_exit(LOG)
