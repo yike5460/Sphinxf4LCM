@@ -244,23 +244,6 @@ class VnfmOpenstackAdapter(object):
 
                         vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-                        # Build the VnfExtCpInfo data structure
-                        vnf_info.instantiated_vnf_info.ext_cp_info = list()
-
-                        port_dict = vim.port_list(device_id=vnf_resource_id)
-                        for port_list in port_dict:
-                            for port in port_list['ports']:
-                                vnf_ext_cp_info = VnfExtCpInfo()
-                                vnf_ext_cp_info.cp_instance_id = port['id'].encode()
-                                vnf_ext_cp_info.address = [port['mac_address'].encode()]
-
-                                # Extract the CP ID from the port name
-                                match = re.search('CP\d+', port['name'])
-                                if match:
-                                    vnf_ext_cp_info.cpd_id = match.group().encode()
-
-                                vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
-
                     break
 
                 # Heat provides the resources as expected.
@@ -281,22 +264,24 @@ class VnfmOpenstackAdapter(object):
 
                         vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-                        # Build the VnfExtCpInfo data structure
-                        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+            # Build the VnfExtCpInfo data structure
+            for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
 
-                        port_dict = vim.port_list(device_id=vnf_resource_id)
-                        for port_list in port_dict:
-                            for port in port_list['ports']:
-                                vnf_ext_cp_info = VnfExtCpInfo()
-                                vnf_ext_cp_info.cp_instance_id = port['id'].encode()
-                                vnf_ext_cp_info.address = [port['mac_address'].encode()]
+                vnf_info.instantiated_vnf_info.ext_cp_info = list()
+                vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
+                port_dict = vim.port_list(device_id=vnf_resource_id)
+                for port_list in port_dict:
+                    for port in port_list['ports']:
+                        vnf_ext_cp_info = VnfExtCpInfo()
+                        vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                        vnf_ext_cp_info.address = [port['mac_address'].encode()]
 
-                                # Extract the CP ID from the port name
-                                match = re.search('CP\d+', port['name'])
-                                if match:
-                                    vnf_ext_cp_info.cpd_id = match.group().encode()
+                        # Extract the CP ID from the port name
+                        match = re.search('CP\d+', port['name'])
+                        if match:
+                            vnf_ext_cp_info.cpd_id = match.group().encode()
 
-                                vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
+                        vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
         except tackerclient.common.exceptions.TackerException:
             return vnf_info
