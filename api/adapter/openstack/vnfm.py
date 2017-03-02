@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import yaml
 
 import os_client_config
@@ -8,7 +9,7 @@ import tackerclient.common.exceptions
 
 from api.generic.vim import Vim
 from api.generic import constants
-from api.structures.objects import VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
+from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -87,8 +88,6 @@ class VnfmOpenstackAdapter(object):
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
         """
         This function enables providing configuration parameters information for a VNF instance.
-
-        This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 - v2.1.1.
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param vnf_configuration_data:  Configuration data for the VNF instance.
@@ -177,8 +176,6 @@ class VnfmOpenstackAdapter(object):
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
         filtering criteria, and the information can be restricted to selected attributes.
 
-        This function was written in accordance with section 7.2.9 of GS NFV-IFA 007 - v2.1.1.
-
         :param filter:              Filter to select the VNF instance(s) about which information is queried.
         :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
                                     for the VNF instance(s) matching the filter. If absent, the complete information is
@@ -219,20 +216,87 @@ class VnfmOpenstackAdapter(object):
         try:
             tacker_list_vnf_resources = self.tacker_client.list_vnf_resources(vnf_instance_id)['resources']
             for vnf_resource in tacker_list_vnf_resources:
-                vnf_resource_type = vnf_resource.get('type')
-                vnf_resource_id = vnf_resource.get('id')
-                vnf_resource_name = vnf_resource.get('name')
+                # When the VNFD contains scaling policies, Heat will not show the resources (VDUs, CPs, VLs, etc), but
+                # the scaling group.
+                # In this case, grab the resources from Nova and break out of the for loop.
+                if vnf_resource.get('type').__contains__('Scaling'):
 
-                if vnf_resource_type == 'OS::Nova::Server':
-                    vnfc_resource_info = VnfcResourceInfo()
-                    vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
-                    vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+                    # Get the Nova list of servers filtering the servers based on their name.
+                    # The servers' names we are looking for start with ta-...
+                    # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
+                    server_list = vim.server_list(query_filter={'name': 'ta-*'})
+                    for server in server_list:
+                        vnf_resource_id = server.id
 
-                    vnfc_resource_info.compute_resource = ResourceHandle()
-                    vnfc_resource_info.compute_resource.vim_id = vim_id
-                    vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+                        # Extract the VDU ID from the server name
+                        match = re.search('VDU\d+', server.name)
+                        if match:
+                            vnf_resource_name = match.group()
 
-                    vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+                        # Build the VnfcResourceInfo data structure
+                        vnfc_resource_info = VnfcResourceInfo()
+                        vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+                        vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+
+                        vnfc_resource_info.compute_resource = ResourceHandle()
+                        vnfc_resource_info.compute_resource.vim_id = vim_id
+                        vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+
+                        vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+                        # Build the VnfExtCpInfo data structure
+                        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+
+                        port_dict = vim.port_list(device_id=vnf_resource_id)
+                        for port_list in port_dict:
+                            for port in port_list['ports']:
+                                vnf_ext_cp_info = VnfExtCpInfo()
+                                vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                                vnf_ext_cp_info.address = [port['mac_address'].encode()]
+
+                                # Extract the CP ID from the port name
+                                match = re.search('CP\d+', port['name'])
+                                if match:
+                                    vnf_ext_cp_info.cpd_id = match.group().encode()
+
+                                vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
+
+                    break
+
+                # Heat provides the resources as expected.
+                else:
+                    vnf_resource_type = vnf_resource.get('type')
+                    vnf_resource_id = vnf_resource.get('id')
+                    vnf_resource_name = vnf_resource.get('name')
+
+                    if vnf_resource_type == 'OS::Nova::Server':
+                        # Build the VnfcResourceInfo data structure
+                        vnfc_resource_info = VnfcResourceInfo()
+                        vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+                        vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+
+                        vnfc_resource_info.compute_resource = ResourceHandle()
+                        vnfc_resource_info.compute_resource.vim_id = vim_id
+                        vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+
+                        vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+                        # Build the VnfExtCpInfo data structure
+                        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+
+                        port_dict = vim.port_list(device_id=vnf_resource_id)
+                        for port_list in port_dict:
+                            for port in port_list['ports']:
+                                vnf_ext_cp_info = VnfExtCpInfo()
+                                vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                                vnf_ext_cp_info.address = [port['mac_address'].encode()]
+
+                                # Extract the CP ID from the port name
+                                match = re.search('CP\d+', port['name'])
+                                if match:
+                                    vnf_ext_cp_info.cpd_id = match.group().encode()
+
+                                vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
         except tackerclient.common.exceptions.TackerException:
             return vnf_info
@@ -247,8 +311,9 @@ class VnfmOpenstackAdapter(object):
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
         :param scale_type:          Defines the type of the scale operation requested. Possible values: 'in', or 'out'
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
-                                    VNFD. Defaults to 1.
-        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+                                    VNFD.
+        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation. Defaults
+                                    to 1.
         :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
                                     to the VNF being scaled.
         :return:                    Identifier of the VNF lifecycle operation occurrence.
