@@ -121,9 +121,9 @@ class TrafficStcAdapter(object):
 
     @log_entry_exit(LOG)
     def config_traffic_load(self, traffic_load):
-        traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 10,
-                                        'NORMAL_TRAFFIC_LOAD': 50,
-                                        'MAX_TRAFFIC_LOAD': 100}
+        traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 5,
+                                        'NORMAL_TRAFFIC_LOAD': 7,
+                                        'MAX_TRAFFIC_LOAD': 10}
         self.config_port_rate(self.tx_port, traffic_load_percent_mapping[traffic_load])
 
     @log_entry_exit(LOG)
