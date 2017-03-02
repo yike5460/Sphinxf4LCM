@@ -127,18 +127,11 @@ class TrafficStcAdapter(object):
         self.config_port_rate(self.tx_port, traffic_load_percent_mapping[traffic_load])
 
     @log_entry_exit(LOG)
-    def modify_stream(self, dest_mac_addr_list):
+    def config_traffic_stream(self, dest_mac_addr_list):
         modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
         self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
                         OffsetReference='RAW_STREAM_ETH.dstMac')
         self.stc.apply()
-
-    @log_entry_exit(LOG)
-    def scale_traffic(self, load_balancing_model, **kwargs):
-        if load_balancing_model == 'LB_INTERNAL':
-            self.config_traffic_load('MAX_TRAFFIC_LOAD')
-        if load_balancing_model == 'LB_END_TO_END':
-            self.modify_stream(kwargs['dest_mac_addr_list'])
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):

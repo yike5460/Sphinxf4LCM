@@ -42,8 +42,8 @@ class Traffic(object):
         return self.traffic_adapter.config_traffic_load(traffic_load)
 
     @log_entry_exit(LOG)
-    def scale_traffic(self, load_balancing_model, **kwargs):
-        return self.traffic_adapter.scale_traffic(load_balancing_model, **kwargs)
+    def config_traffic_stream(self, dest_mac_addr_list):
+        return self.traffic_adapter.config_traffic_stream(dest_mac_addr_list)
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
