@@ -23,8 +23,12 @@ class TrafficStcAdapter(object):
 
         self._attempt_to_start_traffic = False
         self._traffic_attempt_lock = Lock()
+
         self._emission_started = False
         self._emission_lock = Lock()
+
+        self._service_disruption_length = None
+        self._service_disruption_lock = Lock()
 
     @property
     def attempt_to_start_traffic(self):
@@ -45,6 +49,16 @@ class TrafficStcAdapter(object):
     def emission_started(self, value):
         with self._emission_lock:
             self._emission_started = value
+
+    @property
+    def service_disruption_length(self):
+        with self._service_disruption_lock:
+            return self._service_disruption_length
+
+    @service_disruption_length.setter
+    def service_disruption_length(self, value):
+        with self._service_disruption_lock:
+            self._service_disruption_length = value
 
     @log_entry_exit(LOG)
     def create_port(self, port_location):
@@ -87,7 +101,8 @@ class TrafficStcAdapter(object):
     def create_raw_stream(self, source_port, source_ipv4_addr, dest_ipv4_addr, dest_mac_addr):
         stream_block = self.stc.create(object_type='streamBlock', under=source_port)
         self.stc.config(handle=stream_block, frameConfig='')
-        self.stc.create(object_type='ethernet:EthernetII', under=stream_block, name='RAW_STREAM_ETH', dstMac=dest_mac_addr)
+        self.stc.create(object_type='ethernet:EthernetII', under=stream_block, name='RAW_STREAM_ETH',
+                        dstMac=dest_mac_addr)
         self.stc.create(object_type='ipv4:IPv4', under=stream_block, sourceAddr=source_ipv4_addr,
                         destAddr=dest_ipv4_addr)
 
@@ -114,7 +129,8 @@ class TrafficStcAdapter(object):
     @log_entry_exit(LOG)
     def modify_stream(self, dest_mac_addr_list):
         modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
-        self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0, OffsetReference='RAW_STREAM_ETH.dstMac')
+        self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
+                        OffsetReference='RAW_STREAM_ETH.dstMac')
         self.stc.apply()
 
     @log_entry_exit(LOG)
@@ -146,12 +162,13 @@ class TrafficStcAdapter(object):
         if dest_mac_addr is None:
             self.arp_needed = True
             self.stream_block = self.create_ipv4_stream(source_port=l_port, source_ipv4_iface=l_ipv4_iface,
-                                                   dest_ipv4_iface=r_ipv4_iface)
+                                                        dest_ipv4_iface=r_ipv4_iface)
         else:
             self.arp_needed = False
-            self.stream_block = self.create_raw_stream(source_port=l_port, source_ipv4_addr=traffic_config['left_traffic_addr'],
-                                                  dest_ipv4_addr=traffic_config['right_traffic_addr'],
-                                                  dest_mac_addr=dest_mac_addr)
+            self.stream_block = self.create_raw_stream(source_port=l_port,
+                                                       source_ipv4_addr=traffic_config['left_traffic_addr'],
+                                                       dest_ipv4_addr=traffic_config['right_traffic_addr'],
+                                                       dest_mac_addr=dest_mac_addr)
 
         self.config_traffic_load(traffic_load)
 
@@ -193,8 +210,30 @@ class TrafficStcAdapter(object):
 
             LOG.debug('Emission successfully started')
 
+        def service_disruption_calculation_loop():
+            self.service_disruption_length = 0
+
+            time.sleep(2)
+            last_timestamp = time.time()
+
+            while self.attempt_to_start_traffic:
+                rx_results = self.stc.get(self.rx_results)
+                rx_frame_rate = int(rx_results['FrameRate'])
+                rx_dropped_frame_rate = int(rx_results['DroppedFrameRate'])
+
+                current_timestamp = time.time()
+
+                if rx_dropped_frame_rate > 0 or rx_frame_rate == 0:
+                    self.service_disruption_length += current_timestamp - last_timestamp
+
+                last_timestamp = current_timestamp
+                time.sleep(1)
+
         traffic_starter_thread = Thread(target=traffic_starter)
         traffic_starter_thread.start()
+
+        service_disruption_calculation_thread = Thread(target=service_disruption_calculation_loop)
+        service_disruption_calculation_thread.start()
 
         if return_when_emission_starts:
             traffic_starter_thread.join()
@@ -300,8 +339,13 @@ class TrafficStcAdapter(object):
         return rx_frame_count / tx_frame_rate
 
     @log_entry_exit(LOG)
+    def calculate_service_disruption_length(self):
+        return self.service_disruption_length
+
+    @log_entry_exit(LOG)
     def clear_counters(self):
         self.stc.perform(command='ResultsClearAll')
+        self.service_disruption_length = 0
         return True
 
     @log_entry_exit(LOG)
