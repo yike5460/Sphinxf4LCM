@@ -115,7 +115,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=3):
+        if not self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Traffic is not flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
