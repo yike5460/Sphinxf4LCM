@@ -206,7 +206,9 @@ class TrafficStcAdapter(object):
         def service_disruption_calculation_loop():
             self.service_disruption_length = 0
 
-            time.sleep(2)
+            # Sleep for 5 seconds to make sure first packets have been received.
+            time.sleep(5)
+
             last_timestamp = time.time()
 
             while self.attempt_to_start_traffic:
@@ -216,8 +218,12 @@ class TrafficStcAdapter(object):
 
                 current_timestamp = time.time()
 
+                LOG.debug('RX frame rate: %s' % rx_frame_rate)
+                LOG.debug('RX dropped frame rate: %s' % rx_dropped_frame_rate)
+
                 if rx_dropped_frame_rate > 0 or rx_frame_rate == 0:
                     self.service_disruption_length += current_timestamp - last_timestamp
+                    LOG.debug('Service disruption length: %s' % self.service_disruption_length)
 
                 last_timestamp = current_timestamp
                 time.sleep(1)
@@ -284,8 +290,8 @@ class TrafficStcAdapter(object):
         rx_frames_dropped = int(rx_results['DroppedFrameCount'])
         rx_dropped_frame_percent = float(rx_results['DroppedFramePercent'])
 
-        LOG.debug('TX frames - count: %s; rate: %s' % (tx_frame_count, tx_frame_rate))
-        LOG.debug('RX frames - count: %s; rate: %s' % (rx_frame_count, rx_frame_rate))
+        LOG.debug('TX frame - count: %s; rate: %s' % (tx_frame_count, tx_frame_rate))
+        LOG.debug('RX frame - count: %s; rate: %s' % (rx_frame_count, rx_frame_rate))
 
         if rx_frames_dropped > 0:
             LOG.debug('Dropped frames: count = %d; rate = %.2f%%' % (rx_frames_dropped, rx_dropped_frame_percent))
