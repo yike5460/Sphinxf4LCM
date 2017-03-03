@@ -265,9 +265,9 @@ class VnfmOpenstackAdapter(object):
                         vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
             # Build the VnfExtCpInfo data structure
+            vnf_info.instantiated_vnf_info.ext_cp_info = list()
             for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
 
-                vnf_info.instantiated_vnf_info.ext_cp_info = list()
                 vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
                 port_dict = vim.port_list(device_id=vnf_resource_id)
                 for port_list in port_dict:
