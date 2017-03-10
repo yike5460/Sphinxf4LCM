@@ -33,8 +33,13 @@ class TestCase(object):
     def __init__(self, tc_input):
         self.tc_input = tc_input
         self.tc_result = dict()
-        self.tc_result['timestamps'] = collections.OrderedDict()
         self.tc_result['durations'] = collections.OrderedDict()
+        self.tc_result['resources'] = collections.OrderedDict()
+        self.tc_result['scaling_out'] = dict()
+        self.tc_result['scaling_in'] = dict()
+        self.tc_result['scaling_up'] = dict()
+        self.tc_result['scaling_down'] = dict()
+        self.tc_result['timestamps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.vim = None
