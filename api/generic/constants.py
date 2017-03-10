@@ -16,7 +16,6 @@ VNF_STARTED = 'STARTED'
 VNF_STOPPED = 'STOPPED'
 VNF_FINAL_STATES = [VNF_STARTED, VNF_STOPPED]
 
-
 # Mapping between operation results and OpenStack VNF states
 OPERATION_STATUS = dict()
 OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
@@ -53,3 +52,8 @@ SCALE_INTERVAL = 300
 START_TIME = 300
 STOP_TIME = 300
 TERMINATE_TIME = 300
+
+# Traffic load percent mappings
+traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 1,
+                                'NORMAL_TRAFFIC_LOAD': 3,
+                                'MAX_TRAFFIC_LOAD': 5}
