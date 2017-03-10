@@ -145,8 +145,8 @@ class Vnfm(object):
             actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
 
             vresources[resource_id]['num_virtual_cpu'] = actual_num_virtual_cpu
-            vresources[resource_id]['virtual_memory'] = actual_virtual_memory
-            vresources[resource_id]['size_of_storage'] = actual_size_of_storage
+            vresources[resource_id]['virtual_memory'] = str(actual_virtual_memory) + ' MB'
+            vresources[resource_id]['size_of_storage'] = str(actual_size_of_storage) + ' GB'
 
         return vresources
 
