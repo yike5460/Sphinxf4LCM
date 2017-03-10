@@ -1,0 +1,407 @@
+TC_VNF_PERF_001 vCPU resource performance data notification subscription and notification
+
+Sequence:
+1. Instantiate VNF
+2. Validate VNF state is Inactive
+3. Start VNF
+4. Validate VNF state is Active
+5. Generate traffic
+6. Validate traffic flows through
+7. Issue command to the VNFM to collect vCPU performance data
+8. Validate via VNFM and VIM interface that collection command was successful
+9. Issue command to the VNFM to register for vCPU performance data notification
+10. Validate via VNFM and VIM interface that registration was successful
+11. Validate that VNFM gets the notification and updates the data
+12. Generate either higher traffic
+13. Validate traffic flows through
+14. Validate that VNFM gets the notification and updates the data with higher values
+15. Generate either lower traffic
+16. Validate traffic flows through
+17. Validate that VNFM gets the notification and updates the data with lower values
+18. Issue command to the VNFM to deregister for vCPU performance notification
+19. Validate via VNFM and VIM interface that deregistration was successful
+20. Issue command to the VNFM to remove vCPU performance collection
+21. Validate via VNFM and VIM interface that removal was successful
+22. Terminate VNF
+
+Pseudo Code:
+
+Input
+# All required input information are stored in the test case input variable tcInput and includes following information:
+    SwImageID
+    EM Config File Link -> emConfigFile
+    VNF Config File Link -> vnfConfigFile
+    VNF License File Link -> vnfLicenseFile
+    Traffic Configuration Parameter -> trafficConfigParameter
+    Performance Notification Collecting Period -> collectingPeriod
+    Performance Notification Reporting Period -> reportingPeriod
+    Performance Notification Reporting Boundary -> reportingBoundary
+
+# Test Results are stored in the test case result variable tcResult
+
+import logging_module
+import VNFRECORD
+import ElementManagement
+import VNF
+import VNFM.VNF
+import VNFM.Performance
+import VIM.Performance
+import Traffic
+
+# instantiate logger
+logger = logging_module.LoggingClass(__name__, "TC_VNF_PERF_001.txt")
+
+def TC_VNF_PERF_001(tcInput):
+
+    logger.write_info("Starting TC_VNF_PERF_001")
+
+    vnfrecord = VNFRECORD.VNFRECORDClass(logger)
+    em = ElementManagement.EMClass(logger)
+    vnf = VNF.VNFClass(logger)
+    vnfm_vnf = VNFM.VNF.VNFM_VNFClass(logger)
+    vnfm_performance = VNFM.Performance.VNFM_PerformanceClass(logger)
+    vim_performance = VIM.Performance.VIM_PerformanceClass(logger)
+    traffic = Traffic.TrafficClass(logger)
+
+    tcResult.overallStatus = SUCCESS
+
+    vnfRecord = vnfrecord.Create()
+
+    1.  Instantiate VNF
+    logger.write_info("Instantiating VNF")
+
+    if EM_VNF_SYSTEM == TRUE :
+        # Instantiate ElementManagement
+        # Set the required EM configuration so that VNF can be configured by EM
+        if ( status = em.SetEMConfiguration( vnfRecord, tcInput.emConfigFile )) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at setting the EM config file")
+            logger.close_handlers()
+            return ERROR
+        # Start the EM so that it can service the VNF
+        if ( status = em.StartEM( vnfRecord ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at starting the EM")
+            logger.close_handlers()
+            return ERROR
+    else:
+        # No Element Manager required, set VNF config and license
+        if ( status = VNF.SetVNFConfigFile( tcInput.vnfConfigFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at setting the VNF config file")
+            logger.close_handlers()
+            return ERROR
+
+        if ( status = VNF.SetVNFLicense( tcInput.vnfLicenseFile ) ) <> TRUE :
+            tcResult.overallStatus = status
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at setting the VNF license file")
+            logger.close_handlers()
+            return ERROR
+
+    status = vnfm_vnf.Instantiate( vnfRecord, tcInput.SwImageID )
+    if status <> TRUE :
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at instantiating the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    2. Validate VNF state is Inactive
+    logger.write_info("Validating VNF state is 'Inactive'")
+
+    #allow the VNF to get into the inactive state
+    wait_time = MAX_VNF_INSTANTIATION_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_INACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the VNF is in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at waiting for the VNF to be in 'Inactive' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    3. Start VNF
+    logger.write_info("Starting VNF")
+
+    status = vnfm_vnf.Start( vnfRecord )
+    if  status <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at starting the VNF")
+        logger.close_handlers()
+        return ERROR
+
+    4. Validate VNF state is Active
+    logger.write_info("Validating VNF state is 'Active'")
+
+    wait_time = MAX_VNF_ACTIVATE_TIME
+    while ( vnfState = vnfm_vnf.GetVNFState( vnfRecord ) ) <> VNF_STATE_ACTIVE :
+        if vnfState == VNF_STATE_ERROR :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = vnfState
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the VNF is in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        if wait_time-- == 0 :
+            vnfm_vnf.Terminate( vnfRecord )
+            tcResult.overallStatus = VNF_STATE_ERROR
+            logger.write_error("TC_VNF_PERF_001 execution completed with failure at waiting for the VNF to be in 'Active' state")
+            logger.close_handlers()
+            return ERROR
+        time.sleep( 1 sec )
+
+    5. Generate traffic
+    logger.write_info("Generating traffic")
+
+    if (status = traffic.ConfigTrafficLoad( NORMAL_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at configuring normal traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    if (status = traffic.StartTraffic()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at starting traffic")
+        logger.close_handlers()
+        return ERROR
+
+    6. Validate traffic flows through
+    logger.write_info("Validating traffic flows through")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    7. Issue command to the VNFM to collect vCPU performance data
+    logger.write_info("Issuing command to the VNFM to collect vCPU performance data")
+
+    TODO What function should I call for this steps ?
+
+    8. Validate via VNFM and VIM interface that collection command was successful
+    logger.write_info("Validating via VNFM and VIM interface that collection command was successful")
+
+    TODO What function should I call for this steps ?
+
+    9. Issue command to the VNFM to register for vCPU performance data notification
+    logger.write_info("Issuing command to the VNFM to register for vCPU performance data notification")
+
+    performanceID = vnfm_performance.RegisterPerformanceNotification(vnfRecord, "vCPU", tcInput.collectingPeriod, tcInput.reportingPeriod, tcInput.reportingBoundary)
+    if performanceID == FALSE :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at VNFM registering for vCPU performance notification")
+        logger.close_handlers()
+        return ERROR
+
+    10. Validate via VNFM and VIM interface that registration was successful
+    logger.write_info("Validating via VNFM and VIM interface that registration was successful")
+
+    vnfmPerfNotRegList = vnfm_performance.ListPerformanceNotificationRegistration( vnfRecord, performanceID, "vCPU" )
+    if len(vnfmPerfNotRegList) <> 1 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating VNFM list of performance notification registrations")
+        logger.write_error("Expected one performance notification registration, found %s" % len(vnfmPerfNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmPerfNotRegList[0].vnfRecord.id <> vnfRecord.id :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the VNF record in the VNFM performance notification registration")
+        logger.write_error("Expected VNF record ID %s, found %s" % (vnfRecord.id, vnfmPerfNotRegList[0].vnfRecord.id))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmPerfNotRegList[0].PerformanceID <> performanceID :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the performance ID in the VNFM performance notification registration")
+        logger.write_error("Expected performance ID %s, found %s" % (performanceID, vnfmPerfNotRegList[0].PerformanceID))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmPerfNotRegList[0].Type <> "vCPU" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the type in the VNFM performance notification registration")
+        logger.write_error("Expected performance type vCPU, found %s" % vnfmPerfNotRegList[0].Type)
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmPerfNotRegList[0].CollectingPeriod <> tcInput.collectingPeriod :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the collecting period in the VNFM performance notification registration")
+        logger.write_error("Expected collecting period %s, found %s" % (tcInput.collectingPeriod, vnfmPerfNotRegList[0].CollectingPeriod))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmPerfNotRegList[0].ReportingPeriod <> tcInput.reportingPeriod :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the reporting period in the VNFM performance notification registration")
+        logger.write_error("Expected reporting period %s, found %s" % (tcInput.reportingPeriod, vnfmPerfNotRegList[0].ReportingPeriod))
+        logger.close_handlers()
+        return ERROR
+
+    if vnfmPerfNotRegList[0].ReportingBoundary <> tcInput.reportingBoundary :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the reporting boundary in the VNFM performance notification registration")
+        logger.write_error("Expected reporting boundary %s, found %s" % (tcInput.reportingBoundary, vnfmPerfNotRegList[0].ReportingBoundary))
+        logger.close_handlers()
+        return ERROR
+
+    vimPerfNotRegList = vim_performance.ListPerformanceNotificationRegistration(performanceID, "vCPU")
+    if len(vimPerfNotRegList) <> 1 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating VIM list of performance notification registrations")
+        logger.write_error("Expected one performance notification registration, found %s" % len(vimPerfNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    if vimPerfNotRegList[0].PerformanceID <> performanceID :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the performance ID in the VIM performance notification registration")
+        logger.write_error("Expected performance ID %s, found %s" % (performanceID, vimPerfNotRegList[0].PerformanceID))
+        logger.close_handlers()
+        return ERROR
+
+    if vimPerfNotRegList[0].Type <> "vCPU" :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the type in the VIM performance notification registration")
+        logger.write_error("Expected performance type vCPU, found %s" % vimPerfNotRegList[0].Type)
+        logger.close_handlers()
+        return ERROR
+
+    if vimPerfNotRegList[0].CollectingPeriod <> tcInput.collectingPeriod :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the collecting period in the VIM performance notification registration")
+        logger.write_error("Expected collecting period %s, found %s" % (tcInput.collectingPeriod, vimPerfNotRegList[0].CollectingPeriod))
+        logger.close_handlers()
+        return ERROR
+
+    if vimPerfNotRegList[0].ReportingPeriod <> tcInput.reportingPeriod :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the reporting period in the VIM performance notification registration")
+        logger.write_error("Expected reporting period %s, found %s" % (tcInput.reportingPeriod, vimPerfNotRegList[0].ReportingPeriod))
+        logger.close_handlers()
+        return ERROR
+
+    if vimPerfNotRegList[0].ReportingBoundary <> tcInput.reportingBoundary :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating the reporting boundary in the VIM performance notification registration")
+        logger.write_error("Expected reporting boundary %s, found %s" % (tcInput.reportingBoundary, vimPerfNotRegList[0].ReportingBoundary))
+        logger.close_handlers()
+        return ERROR
+
+    11. Validate that VNFM gets the notification and updates the data
+    logger.write_info("Validating that VNFM gets the notification and updates the data")
+
+    performanceDataInfo = vnfm_performance.ListPerformanceDataInformation(vnfRecord, performanceID)
+    TODO What is the structure of the performance data information returned by function VNFM.Performance.ListPerformanceDataInformation ?
+
+    12. Generate either higher traffic
+    logger.write_info("Generating either higher traffic")
+
+    if (status = traffic.ConfigTrafficLoad( MAX_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at configuring max traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    13. Validate traffic flows through
+    logger.write_info("Validating traffic flows through")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    14. Validate that VNFM gets the notification and updates the data with higher values
+    logger.write_info("Validating that VNFM gets the notification and updates the data with higher values")
+
+    performanceDataInfo = vnfm_performance.ListPerformanceDataInformation(vnfRecord, performanceID)
+    TODO What is the structure of the performance data information returned by function VNFM.Performance.ListPerformanceDataInformation ?
+
+    15. Generate either lower traffic
+    logger.write_info("Generating either lower traffic")
+
+    if (status = traffic.ConfigTrafficLoad( NORMAL_TRAFFIC_LOAD, tcInput.trafficConfigParameter )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at configuring normal traffic load")
+        logger.close_handlers()
+        return ERROR
+
+    16. Validate traffic flows through
+    logger.write_info("Validating traffic flows through")
+
+    if (status = traffic.DoesTrafficFlow()) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating traffic flows")
+        logger.close_handlers()
+        return ERROR
+
+    17. Validate that VNFM gets the notification and updates the data with lower values
+    logger.write_info("Validating that VNFM gets the notification and updates the data with lower values")
+
+    performanceDataInfo = vnfm_performance.ListPerformanceDataInformation(vnfRecord, performanceID)
+    TODO What is the structure of the performance data information returned by function VNFM.Performance.ListPerformanceDataInformation ?
+
+    18. Issue command to the VNFM to deregister for vCPU performance notification
+    logger.write_info("Issuing command to the VNFM to deregister for vCPU performance notification")
+
+    if ( status = vnfm_performance.DeregisterPerformanceNotification( vnfRecord, performanceID )) <> TRUE :
+        vnfm_vnf.Terminate( vnfRecord )
+        tcResult.overallStatus = status
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at VNFM deregistering for vCPU performance notification")
+        logger.close_handlers()
+        return ERROR
+
+    19. Validate via VNFM and VIM interface that deregistration was successful
+    logger.write_info("Validating via VNFM and VIM interface that deregistration was successful")
+
+    vnfmPerfNotRegList = vnfm_performance.ListPerformanceNotificationRegistration( vnfRecord, performanceID, "vCPU" )
+    if len(vnfmPerfNotRegList) <> 0 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating VNFM list of performance notification registrations")
+        logger.write_error("Expected no performance notification registrations after deregistration, found %s" % len(vnfmPerfNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    vimPerfNotRegList = vim_performance.ListPerformanceNotificationRegistration(performanceID, "vCPU")
+    if len(vimPerfNotRegList) <> 0 :
+        vnfm_vnf.Terminate( vnfRecord )
+        logger.write_error("TC_VNF_PERF_001 execution completed with failure at validating VIM list of performance notification registrations")
+        logger.write_error("Expected no performance notification registrations after deregistration, found %s" % len(vimPerfNotRegList))
+        logger.close_handlers()
+        return ERROR
+
+    20. Issue command to the VNFM to remove vCPU performance collection
+    logger.write_info("Issuing command to the VNFM to remove vCPU performance collection")
+
+    TODO What function should I call for this steps ?
+
+    21. Validate via VNFM and VIM interface that removal was successful
+    logger.write_info("Validating via VNFM and VIM interface that removal was successful")
+
+    TODO What function should I call for this steps ?
+
+    22. Terminate VNF
+    logger.write_info("Terminating VNF")
+
+    vnfm_vnf.Terminate( vnfRecord )
+
+    vnfrecord.Delete()
+
+    logger.write_info("TC_VNF_PERF_001 execution completed successfully")
+
+    logger.close_handlers()
+
+    return tcResult.overallStatus
