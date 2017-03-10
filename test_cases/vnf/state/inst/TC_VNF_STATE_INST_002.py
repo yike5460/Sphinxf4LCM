@@ -91,7 +91,7 @@ class TC_VNF_STATE_INST_002(TestCase):
             self.tc_result['error_info'] = 'Could not validate allocated vResources'
             return False
 
-        self.tc_result['resources'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Calculate the instantiation time
