@@ -2,6 +2,8 @@ import time
 
 from prettytable import PrettyTable
 
+from api.generic import constants
+
 
 def report_test_case(tc_input, tc_result):
     time.sleep(1)
@@ -21,19 +23,49 @@ def report_test_case(tc_input, tc_result):
     print t
     print
 
-    print '* VNF resources:'
-    for vnfc_id, vnfc_resources in tc_result.get('resources', {}).items():
-        print 'Resources for VNFC: %s' % vnfc_id
-        t = PrettyTable(['Resource type', 'Resource size'])
-        for resource_type, resource_size in vnfc_resources.items():
-            t.add_row([resource_type, resource_size])
-        print t
+    t1 = PrettyTable(['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
+    port_speed = tc_input['traffic_params']['traffic_config']['port_speed']
+    print_scaling_results = False
+    for direction in ['out', 'in', 'up', 'down']:
+        scale_type = 'scaling_' + direction
+        if bool(tc_result[scale_type]):
+
+            # Set flag so the scaling results table will be printed
+            print_scaling_results = True
+
+            # Build the scale table row
+            status = tc_result[scale_type].get('status', None)
+            scale_level = tc_result[scale_type].get('level', None)
+            load_before_scaling = tc_result[scale_type].get('traffic_before', None)
+            load_after_scaling = tc_result[scale_type].get('traffic_after', None)
+            traffic_before_scaling = str(
+                        constants.traffic_load_percent_mapping.get(load_before_scaling, 0) * port_speed / 100) + ' Mbps'
+            traffic_after_scaling = str(
+                        constants.traffic_load_percent_mapping.get(load_after_scaling, 0) * port_speed / 100) + ' Mbps'
+
+            # Add the row to the table
+            t1.add_row([scale_type, status, scale_level, traffic_before_scaling, traffic_after_scaling])
+
+    if print_scaling_results:
+        print '* Scaling results'
+        print t1
         print
+
+    print '* VNF resources:'
+    for key in tc_result.get('resources', {}).keys():
+        print '%s:' % key
+        for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
+            print 'Resources for VNFC %s' % vnfc_id
+            t = PrettyTable(['Resource type', 'Resource size'])
+            for resource_type, resource_size in vnfc_resources.items():
+                t.add_row([resource_type, resource_size])
+            print t
+            print
 
     print '* Durations:'
     t = PrettyTable(['Event', 'Duration (sec)'])
     for event_name, event_duration in tc_result.get('durations', {}).items():
-        t.add_row([event_name, event_duration])
+        t.add_row([event_name, round(event_duration, 1)])
     print t
     print
 
