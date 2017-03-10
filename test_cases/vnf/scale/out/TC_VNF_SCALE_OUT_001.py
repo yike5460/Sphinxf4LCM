@@ -82,7 +82,6 @@ class TC_VNF_SCALE_OUT_001(TestCase):
             return False
 
         LOG.info('Validating VNF state is STARTED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             LOG.error('TC_VNF_SCALE_OUT_001 execution failed')
             LOG.debug('Unexpected VNF state')
@@ -90,6 +89,8 @@ class TC_VNF_SCALE_OUT_001(TestCase):
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
                                            constants.VNF_STARTED
             return False
+
+        self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -137,6 +138,8 @@ class TC_VNF_SCALE_OUT_001(TestCase):
             self.tc_result['error_info'] = 'Low traffic flew with packet loss'
             return False
 
+        self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
+
         if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_SCALE_OUT_001 execution failed')
             LOG.debug('Could not validate allocated vResources')
@@ -163,7 +166,9 @@ class TC_VNF_SCALE_OUT_001(TestCase):
 
         self.tc_result['durations']['scale_out_vnf'] = self.time_record.duration('scale_out_vnf')
 
-        self.tc_result['resources'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_out']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF has resized by adding VNFCs
@@ -177,6 +182,9 @@ class TC_VNF_SCALE_OUT_001(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNFCs not added after VNF scaled out'
             return False
+
+        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
+                                                 self.tc_input['scaling']['increment']
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Determine if and length of service disruption
@@ -202,6 +210,7 @@ class TC_VNF_SCALE_OUT_001(TestCase):
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
+
         self.traffic.config_traffic_stream(dest_mac_addr_list)
         self.traffic.config_traffic_load('NORMAL_TRAFFIC_LOAD')
 
@@ -230,6 +239,8 @@ class TC_VNF_SCALE_OUT_001(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Normal traffic flew with packet loss'
             return False
+
+        self.tc_result['scaling_out']['traffic_after'] = 'NORMAL_TRAFFIC_LOAD'
 
         LOG.info('TC_VNF_SCALE_OUT_001 execution completed successfully')
 
