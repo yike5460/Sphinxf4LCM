@@ -2,8 +2,9 @@ import logging
 import time
 from threading import Lock, Thread
 
-from stcrestclient import stchttp
+from stcrestclient import resthttp, stchttp
 
+from api.generic import constants
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -121,13 +122,18 @@ class TrafficStcAdapter(object):
 
     @log_entry_exit(LOG)
     def config_traffic_load(self, traffic_load):
-        traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 5,
-                                        'NORMAL_TRAFFIC_LOAD': 7,
-                                        'MAX_TRAFFIC_LOAD': 10}
-        self.config_port_rate(self.tx_port, traffic_load_percent_mapping[traffic_load])
+        self.config_port_rate(self.tx_port, constants.traffic_load_percent_mapping[traffic_load])
 
     @log_entry_exit(LOG)
     def config_traffic_stream(self, dest_mac_addr_list):
+        # Delete existing modifiers, if any.
+        try:
+            existing_modifiers = self.stc.get(self.stream_block, 'children-TableModifier')
+            self.stc.delete(existing_modifiers)
+        except resthttp.RestHttpError:
+            LOG.debug('No modifiers to delete')
+
+        # Create new modifier with the provided destination MAC address list.
         modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
         self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
                         OffsetReference='RAW_STREAM_ETH.dstMac')
@@ -288,6 +294,8 @@ class TrafficStcAdapter(object):
         rx_frame_rate = int(rx_results['FrameRate'])
 
         rx_frames_dropped = int(rx_results['DroppedFrameCount'])
+        # DroppedFramePercent shows the percent of dropped frames since the stream was started.
+        # It is not an instantaneous value.
         rx_dropped_frame_percent = float(rx_results['DroppedFramePercent'])
 
         LOG.debug('TX frame - count: %s; rate: %s' % (tx_frame_count, tx_frame_rate))
