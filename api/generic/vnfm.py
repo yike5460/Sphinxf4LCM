@@ -232,7 +232,7 @@ class Vnfm(object):
 
     @log_entry_exit(LOG)
     def vnf_operate_sync(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
-                         max_wait_time=constants.INSTANTIATION_TIME, poll_interval=constants.POLL_INTERVAL):
+                         max_wait_time=constants.OPERATE_TIME, poll_interval=constants.POLL_INTERVAL):
         """
         This function performs a synchronous change of a VNF state.
 
