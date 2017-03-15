@@ -71,14 +71,6 @@ class VimOpenstackAdapter(object):
         return virtual_compute
 
     @log_entry_exit(LOG)
-    def get_stack(self, stack_id):
-        """
-        This function gets the metadata for the specified stack ID.
-        """
-        stack_state = self.heat_client.stacks.get(stack_id)
-        return stack_state
-
-    @log_entry_exit(LOG)
     def port_list(self, **query_filter):
         """
         This function gets the list of ports.
@@ -100,3 +92,25 @@ class VimOpenstackAdapter(object):
         """
         nova_servers = self.nova_client.servers.list(search_opts=query_filter)
         return nova_servers
+
+    @log_entry_exit(LOG)
+    def stack_get(self, stack_id):
+        """
+        This function gets the metadata for the specified stack ID.
+        """
+        stack_state = self.heat_client.stacks.get(stack_id)
+        return stack_state
+
+    @log_entry_exit(LOG)
+    def stack_resume(self, stack_id):
+        """
+        This function resumes the stack with the given ID.
+        """
+        self.heat_client.actions.resume(stack_id)
+
+    @log_entry_exit(LOG)
+    def stack_suspend(self, stack_id):
+        """
+        This function suspends the stack with the given ID.
+        """
+        self.heat_client.actions.suspend(stack_id)
