@@ -16,8 +16,8 @@ VNF_STARTED = 'STARTED'
 VNF_STOPPED = 'STOPPED'
 VNF_FINAL_STATES = [VNF_STARTED, VNF_STOPPED]
 
-# Mapping between operation results and OpenStack VNF states
 OPERATION_STATUS = dict()
+# Mapping between operation results and OpenStack VNF states
 OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
                                            'ERROR': OPERATION_FAILED,
                                            'PENDING_CREATE': OPERATION_PENDING,
@@ -25,6 +25,14 @@ OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
                                            'PENDING_SCALE_IN': OPERATION_PENDING,
                                            'PENDING_SCALE_OUT': OPERATION_PENDING,
                                            'PENDING_UPDATE': OPERATION_PENDING}
+
+# Mapping between operation results and OpenStack Stack states
+OPERATION_STATUS['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': OPERATION_SUCCESS,
+                                             'CREATE_IN_PROGRESS': OPERATION_PENDING,
+                                             'RESUME_COMPLETE': OPERATION_SUCCESS,
+                                             'RESUME_IN_PROGRESS': OPERATION_PENDING,
+                                             'SUSPEND_COMPLETE': OPERATION_SUCCESS,
+                                             'SUSPEND_IN_PROGRESS': OPERATION_PENDING}
 
 # Mapping between OpenStack VNF states and ETSI VNF instantiation states
 VNF_INSTANTIATION_STATE = dict()
@@ -36,9 +44,9 @@ VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
 
 # Mapping between OpenStack Heat stack states and ETSI VNF states
 VNF_STATE = dict()
-VNF_STATE['OPENSTACK_VNF_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
-                                    'RESUME_COMPLETE': VNF_STARTED,
-                                    'SUSPEND_COMPLETE': VNF_STOPPED}
+VNF_STATE['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
+                                      'RESUME_COMPLETE': VNF_STARTED,
+                                      'SUSPEND_COMPLETE': VNF_STOPPED}
 
 # Test results
 TEST_FAILED = 'FAILED'
@@ -47,6 +55,7 @@ TEST_PASSED = 'PASSED'
 # Wait time intervals
 COLLDOWN = 10
 INSTANTIATION_TIME = 300
+OPERATE_TIME = 15
 POLL_INTERVAL = 5
 SCALE_INTERVAL = 300
 START_TIME = 300
