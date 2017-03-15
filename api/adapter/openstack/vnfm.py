@@ -55,18 +55,36 @@ class VnfmOpenstackAdapter(object):
         if lifecycle_operation_occurrence_id is None:
             return constants.OPERATION_FAILED
         else:
-            vnf_id = lifecycle_operation_occurrence_id
+            resource_type, resource_id = lifecycle_operation_occurrence_id
 
-        try:
-            tacker_show_vnf = self.tacker_client.show_vnf(vnf_id)
-        except tackerclient.common.exceptions.NotFound:
-            # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
-            # exception because the VNF can no longer be found
-            return constants.OPERATION_SUCCESS
+        if resource_type == 'vnf':
+            try:
+                tacker_show_vnf = self.tacker_client.show_vnf(resource_id)
+            except tackerclient.common.exceptions.NotFound:
+                # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
+                # exception because the VNF can no longer be found
+                return constants.OPERATION_SUCCESS
 
-        tacker_status = tacker_show_vnf['vnf']['status']
+            tacker_status = tacker_show_vnf['vnf']['status']
 
-        return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
+            return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
+
+        if resource_type == 'stack':
+            # Get VNF information from Tacker
+            tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
+
+            # Get VIM object
+            vim_id = tacker_show_vnf['vim_id']
+            vim = self.get_vim(vim_id)
+
+            # Get the Heat stack ID from Tacker information
+            stack_id = tacker_show_vnf['instance_id']
+
+            # Get the Heat stack status
+            heat_stack = vim.stack_get(stack_id)
+            stack_status = heat_stack.stack_status
+
+            return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
 
     @log_entry_exit(LOG)
     def get_vim(self, vim_id):
@@ -151,7 +169,9 @@ class VnfmOpenstackAdapter(object):
         """
         LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack!')
         LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
-        return vnf_instance_id
+
+        tup = ('vnf', vnf_instance_id)
+        return tup
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
@@ -166,9 +186,30 @@ class VnfmOpenstackAdapter(object):
                                             graceful stop, before stopping the VNF.
         :return:                            The identifier of the VNF lifecycle operation occurrence.
         """
-        LOG.debug('"VNF Operate" operation is not implemented in OpenStack!')
-        LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
-        return vnf_instance_id
+        # Get VNF information from Tacker
+        tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
+
+        # Get VIM object
+        vim_id = tacker_show_vnf['vim_id']
+        vim = self.get_vim(vim_id)
+
+        # Get the Heat stack ID from Tacker information
+        stack_id = tacker_show_vnf['instance_id']
+
+        # Get VNF state
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_state = vnf_info.instantiated_vnf_info.vnf_state
+
+        # Change VNF state
+        # Starting a VNF is translated to resuming the HEAT stack
+        if change_state_to == 'start' and vnf_state == constants.VNF_STOPPED:
+            vim.stack_resume(stack_id)
+        # Stopping a VNF is translated to suspending the HEAT stack
+        if change_state_to == 'stop' and vnf_state == constants.VNF_STARTED:
+            vim.stack_suspend(stack_id)
+
+        tup = ('stack', vnf_instance_id)
+        return tup
 
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
@@ -195,12 +236,12 @@ class VnfmOpenstackAdapter(object):
             return vnf_info
 
         # Get the Heat stack ID
-        heat_stack_id = tacker_show_vnf['instance_id'].encode()
+        stack_id = tacker_show_vnf['instance_id']
 
         # Query Heat stack
-        vim_id = tacker_show_vnf['vim_id'].encode()
+        vim_id = tacker_show_vnf['vim_id']
         vim = self.get_vim(vim_id)
-        heat_stack = vim.get_stack(heat_stack_id)
+        heat_stack = vim.stack_get(stack_id)
 
         # Build the vnf_info data structure
         vnf_info.vnf_instance_name = tacker_show_vnf['name'].encode()
@@ -210,7 +251,7 @@ class VnfmOpenstackAdapter(object):
             tacker_show_vnf['status']]
 
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_VNF_STATE'][heat_stack.stack_status]
+        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_STACK_STATE'][heat_stack.stack_status]
 
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
         try:
@@ -239,7 +280,7 @@ class VnfmOpenstackAdapter(object):
                         vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
                         vnfc_resource_info.compute_resource = ResourceHandle()
-                        vnfc_resource_info.compute_resource.vim_id = vim_id
+                        vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
                         vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
 
                         vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
@@ -259,7 +300,7 @@ class VnfmOpenstackAdapter(object):
                         vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
                         vnfc_resource_info.compute_resource = ResourceHandle()
-                        vnfc_resource_info.compute_resource.vim_id = vim_id
+                        vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
                         vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
 
                         vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
@@ -315,7 +356,8 @@ class VnfmOpenstackAdapter(object):
                       (vnf_instance_id, additional_param['scaling_policy_name']))
             return None
 
-        return vnf_instance_id
+        tup = ('vnf', vnf_instance_id)
+        return tup
 
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
@@ -334,4 +376,6 @@ class VnfmOpenstackAdapter(object):
         except tackerclient.common.exceptions.NotFound:
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
             return None
-        return vnf_instance_id
+
+        tup = ('vnf', vnf_instance_id)
+        return tup
