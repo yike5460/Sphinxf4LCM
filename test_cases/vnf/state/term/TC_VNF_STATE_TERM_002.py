@@ -174,7 +174,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Ensuring that no traffic flows once stop is completed')
         if self.traffic.does_traffic_flow():
-            LOG.error('TC_VNF_COMPLEX_002 execution failed')
+            LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Traffic is flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Traffic still flown after the VNF was stopped'
