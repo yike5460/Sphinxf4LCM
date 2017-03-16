@@ -218,20 +218,24 @@ class TrafficStcAdapter(object):
             last_timestamp = time.time()
 
             while self.attempt_to_start_traffic:
-                rx_results = self.stc.get(self.rx_results)
-                rx_frame_rate = int(rx_results['FrameRate'])
-                rx_dropped_frame_rate = int(rx_results['DroppedFrameRate'])
+                try:
+                    rx_results = self.stc.get(self.rx_results)
+                    rx_frame_rate = int(rx_results['FrameRate'])
+                    rx_dropped_frame_rate = int(rx_results['DroppedFrameRate'])
 
-                current_timestamp = time.time()
+                    current_timestamp = time.time()
 
-                LOG.debug('RX frame rate: %s' % rx_frame_rate)
-                LOG.debug('RX dropped frame rate: %s' % rx_dropped_frame_rate)
+                    LOG.debug('RX frame rate: %s' % rx_frame_rate)
+                    LOG.debug('RX dropped frame rate: %s' % rx_dropped_frame_rate)
 
-                if rx_dropped_frame_rate > 0 or rx_frame_rate == 0:
-                    self.service_disruption_length += current_timestamp - last_timestamp
-                    LOG.debug('Service disruption length: %s' % self.service_disruption_length)
+                    if rx_dropped_frame_rate > 0 or rx_frame_rate == 0:
+                        self.service_disruption_length += current_timestamp - last_timestamp
+                        LOG.debug('Service disruption length: %s' % self.service_disruption_length)
 
-                last_timestamp = current_timestamp
+                    last_timestamp = current_timestamp
+                except RuntimeError:
+                    LOG.debug('STC RX results are not ready to be subscribed to')
+
                 time.sleep(1)
 
         traffic_starter_thread = Thread(target=traffic_starter)
@@ -331,6 +335,19 @@ class TrafficStcAdapter(object):
 
             LOG.debug('No traffic loss detected')
             return False
+
+    @log_entry_exit(LOG)
+    def calculate_activation_time(self):
+        LOG.debug('Activation time is calculated per RFC 6201 Frame-Loss Method')
+
+        tx_results = self.stc.get(self.tx_results)
+        rx_results = self.stc.get(self.rx_results)
+
+        rx_frame_count = float(rx_results['FrameCount'])
+        tx_frame_count = float(tx_results['FrameCount'])
+        tx_frame_rate = float(tx_results['FrameRate'])
+
+        return (tx_frame_count - rx_frame_count) / tx_frame_rate
 
     @log_entry_exit(LOG)
     def calculate_deactivation_time(self):
