@@ -22,6 +22,8 @@ class TC_VNF_STATE_START_001(TestCase):
     6. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     7. Start the traffic load 
     8. Validate the traffic flows with the VNF provided functionality
+    9. Stop VNF
+    10. Ensure that no traffic flows once stop is completed
     """
 
     def setup(self):
@@ -81,7 +83,6 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         LOG.info('Validating VNF state is STARTED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Unexpected VNF state')
@@ -93,7 +94,7 @@ class TC_VNF_STATE_START_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Stop VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping VNF ')
+        LOG.info('Stopping VNF')
         self.time_record.START('stop_vnf')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
@@ -114,12 +115,11 @@ class TC_VNF_STATE_START_001(TestCase):
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' \
+            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was stopped' \
                                            % constants.VNF_INSTANTIATED
             return False
 
         LOG.info('Validating VNF state is STOPPED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STOPPED:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Unexpected VNF state')
@@ -131,7 +131,7 @@ class TC_VNF_STATE_START_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Start VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting VNF ')
+        LOG.info('Starting VNF')
         self.time_record.START('start_vnf')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='start') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
@@ -152,24 +152,23 @@ class TC_VNF_STATE_START_001(TestCase):
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' \
+            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was started' \
                                            % constants.VNF_INSTANTIATED
             return False
 
         LOG.info('Validating VNF state is STARTED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Unexpected VNF state')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
+            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was started' % \
                                            constants.VNF_STARTED
             return False
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Start the traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the traffic load ')
+        LOG.info('Starting the traffic load')
         if not self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
                                       traffic_config=self.tc_input['traffic_params']['traffic_config']):
             LOG.error('TC_VNF_STATE_START_001 execution failed')
@@ -214,6 +213,28 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 9. Stop VNF
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Stopping VNF')
+        if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
+            LOG.error('TC_VNF_STATE_START_001 execution failed')
+            LOG.debug('Could not stop VNF')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Could not stop VNF'
+            return False
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 10. Ensure that no traffic flows once stop is completed
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Ensuring that no traffic flows once stop is completed')
+        if self.traffic.does_traffic_flow(delay_time=5):
+            LOG.error('TC_VNF_STATE_START_001 execution failed')
+            LOG.debug('Traffic is still flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Traffic still flew after VNF was stopped'
+            return False
 
         LOG.info('TC_VNF_STATE_START_001 execution completed successfully')
 
