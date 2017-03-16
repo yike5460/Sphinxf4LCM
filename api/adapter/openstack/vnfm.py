@@ -204,9 +204,13 @@ class VnfmOpenstackAdapter(object):
         # Starting a VNF is translated to resuming the HEAT stack
         if change_state_to == 'start' and vnf_state == constants.VNF_STOPPED:
             vim.stack_resume(stack_id)
+            LOG.debug('VNF successfully started')
         # Stopping a VNF is translated to suspending the HEAT stack
-        if change_state_to == 'stop' and vnf_state == constants.VNF_STARTED:
+        elif change_state_to == 'stop' and vnf_state == constants.VNF_STARTED:
             vim.stack_suspend(stack_id)
+            LOG.debug('VNF successfully stopped')
+        else:
+            LOG.debug('VNF is already in the desired state')
 
         tup = ('stack', vnf_instance_id)
         return tup
