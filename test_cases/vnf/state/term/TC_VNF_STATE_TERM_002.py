@@ -81,7 +81,6 @@ class TC_VNF_STATE_TERM_002(TestCase):
             return False
 
         LOG.info('Validating VNF state is STARTED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Unexpected VNF state')
@@ -142,9 +141,9 @@ class TC_VNF_STATE_TERM_002(TestCase):
         # 5. Terminate VNF (-> time stamp)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Terminating the VNF')
-        self.time_record.START('terminate_vnf')
-        # Clearing counters so calculating traffic deactivation time is correct
+        # Clearing counters so traffic deactivation time is accurate
         self.traffic.clear_counters()
+        self.time_record.START('terminate_vnf')
         if self.vnfm.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful') != \
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
@@ -154,6 +153,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
             return False
 
         self.time_record.END('terminate_vnf')
+
         self.tc_result['durations']['traffic_deactivation'] = self.traffic.calculate_deactivation_time()
 
         # --------------------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
             LOG.error('TC_VNF_STATE_TERM_002 execution failed')
             LOG.debug('Traffic is flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic still flown after the VNF was stopped'
+            self.tc_result['error_info'] = 'Traffic still flew after the VNF was stopped'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
