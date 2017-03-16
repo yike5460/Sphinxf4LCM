@@ -72,6 +72,10 @@ class Traffic(object):
         return self.traffic_adapter.does_traffic_flow(delay_time)
 
     @log_entry_exit(LOG)
+    def calculate_activation_time(self):
+        return self.traffic_adapter.calculate_activation_time()
+
+    @log_entry_exit(LOG)
     def calculate_deactivation_time(self):
         return self.traffic_adapter.calculate_deactivation_time()
 
