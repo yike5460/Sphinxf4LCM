@@ -71,7 +71,6 @@ class TC_VNF_STATE_INST_002(TestCase):
             return False
 
         LOG.info('Validating VNF state is STARTED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             LOG.error('TC_VNF_STATE_INST_002 execution failed')
             LOG.debug('Unexpected VNF state')
