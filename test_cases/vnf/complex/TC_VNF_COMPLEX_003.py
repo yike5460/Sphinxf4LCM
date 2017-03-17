@@ -281,7 +281,7 @@ class TC_VNF_COMPLEX_003(TestCase):
             LOG.error('TC_VNF_COMPLEX_003 execution failed')
             LOG.debug('Traffic is still flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic still flew after VNF was stopped'
+            self.tc_result['error_info'] = 'Traffic still flew after VNF was terminated'
             return False
 
         LOG.info('TC_VNF_COMPLEX_003 execution completed successfully')
