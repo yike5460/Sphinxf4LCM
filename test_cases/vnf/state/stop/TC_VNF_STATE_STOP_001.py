@@ -18,9 +18,9 @@ class TC_VNF_STATE_STOP_001(TestCase):
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality
-    5. Stop Traffic
+    5. Stop traffic
     6. Validate no traffic flows
-    7. Stop VNF
+    7. Stop the VNF
     8. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
     9. Start the low traffic load
     10. Ensure that no traffic flows once stop is completed
@@ -162,9 +162,9 @@ class TC_VNF_STATE_STOP_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Stop VNF
+        # 7. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping VNF')
+        LOG.info('Stopping the VNF')
         self.time_record.START('stop_vnf')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_STOP_001 execution failed')

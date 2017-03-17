@@ -14,10 +14,10 @@ class TC_VNF_SCALE_OUT_001(TestCase):
     TC_VNF_SCALE_OUT_001 Scale-Out VNF instance
 
     Sequence:
-    1. Instantiate VNF without load (--> time stamp)
+    1. Instantiate the VNF without load
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
-    4. Validate the provided functionality and all traffic goes through (-> no dropped packets)
+    4. Validate the provided functionality and all traffic goes through
     5. Trigger a resize of the VNF resources
     6. Validate VNF has resized by adding VNFCs
     7. Determine if and length of service disruption
@@ -46,14 +46,14 @@ class TC_VNF_SCALE_OUT_001(TestCase):
         LOG.info('Starting TC_VNF_SCALE_OUT_001')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate VNF without load (--> time stamp)
+        # 1. Instantiate the VNF without load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating VNF')
+        LOG.info('Instantiating the VNF without load')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
-            vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-            vnf_instance_name=self.tc_input['vnf']['instance_name'],
-            vnf_instance_description=None)
+                                                                vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                                vnf_instance_name=self.tc_input['vnf']['instance_name'],
+                                                                vnf_instance_description=None)
         if self.vnf_instance_id is None:
             LOG.error('TC_VNF_SCALE_OUT_001 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')

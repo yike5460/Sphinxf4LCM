@@ -16,13 +16,13 @@ class TC_VNF_STATE_START_001(TestCase):
     Sequence:
     1. Instantiate the VNF without load
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    3. Stop VNF
+    3. Stop the VNF
     4. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
-    5. Start VNF
+    5. Start the VNF
     6. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     7. Start the traffic load 
     8. Validate the traffic flows with the VNF provided functionality
-    9. Stop VNF
+    9. Stop the VNF
     10. Ensure that no traffic flows once stop is completed
     """
 
@@ -92,9 +92,9 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Stop VNF
+        # 3. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping VNF')
+        LOG.info('Stopping the VNF')
         self.time_record.START('stop_vnf')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
@@ -129,9 +129,9 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Start VNF
+        # 5. Start the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting VNF')
+        LOG.info('Starting the VNF')
         self.time_record.START('start_vnf')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='start') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
@@ -215,9 +215,9 @@ class TC_VNF_STATE_START_001(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 9. Stop VNF
+        # 9. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping VNF')
+        LOG.info('Stopping the VNF')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Could not stop VNF')

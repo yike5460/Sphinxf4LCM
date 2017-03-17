@@ -14,14 +14,13 @@ class TC_VNF_STATE_TERM_002(TestCase):
     TC_VNF_STATE_TERM_002 VNF terminate from state STARTED with low traffic load
 
     Sequence:
-    1. Instantiate VNF without load (--> time stamp)
+    1. Instantiate the VNF without load
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
-    4. Validate the provided functionality and all traffic goes through (-> no dropped packets)
-    5. Terminate VNF (-> time stamp)
+    4. Validate the provided functionality and all traffic goes through
+    5. Terminate the VNF
     6. Validate VNF is terminated and all resources have been released
     7. Ensure that no traffic flows once stop is completed
-    8. Calculate the termination time (-> last time stamp arrival)
     """
 
     def setup(self):
@@ -45,9 +44,9 @@ class TC_VNF_STATE_TERM_002(TestCase):
         LOG.info('Starting TC_VNF_STATE_TERM_002')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate VNF without load (--> time stamp)
+        # 1. Instantiate the VNF without load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating VNF')
+        LOG.info('Instantiating the VNF without load')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -138,7 +137,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Terminate VNF (-> time stamp)
+        # 5. Terminate the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Terminating the VNF')
         # Clearing counters so traffic deactivation time is accurate
@@ -153,6 +152,8 @@ class TC_VNF_STATE_TERM_002(TestCase):
             return False
 
         self.time_record.END('terminate_vnf')
+
+        self.tc_result['durations']['terminate_vnf'] = self.time_record.duration('terminate_vnf')
 
         self.tc_result['durations']['traffic_deactivation'] = self.traffic.calculate_deactivation_time()
 
@@ -179,12 +180,6 @@ class TC_VNF_STATE_TERM_002(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Traffic still flew after the VNF was stopped'
             return False
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 8. Calculate the termination time
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Calculating the termination time')
-        self.tc_result['durations']['terminate_vnf'] = self.time_record.duration('terminate_vnf')
 
         LOG.info('TC_VNF_STATE_TERM_002 execution completed successfully')
 

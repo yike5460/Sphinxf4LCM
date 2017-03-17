@@ -14,9 +14,9 @@ class TC_VNF_STATE_INST_001(TestCase):
     TC_VNF_STATE_INST_001 VNF Instantiation without Element Management with configuration file without traffic
 
     Sequence:
-    1. Instantiate VNF without load (--> time stamp)
+    1. Instantiate the VNF without load
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    3. Update VNF (--> time stamp)
+    3. Update the VNF
     4. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     5. Validate the right vResources have been allocated
     6. Calculate the instantiation time
@@ -44,9 +44,9 @@ class TC_VNF_STATE_INST_001(TestCase):
         LOG.info('Starting TC_VNF_STATE_INST_001')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate VNF without load (--> time stamp)
+        # 1. Instantiate the VNF without load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating VNF')
+        LOG.info('Instantiating the VNF without load')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -87,9 +87,9 @@ class TC_VNF_STATE_INST_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Update VNF (--> time stamp)
+        # 3. Update the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Updating VNF')
+        LOG.info('Updating the VNF')
         self.time_record.START('update_vnf')
         if self.vnfm.modify_vnf_configuration_sync(self.vnf_instance_id, self.vnf_config,
                                                    cooldown=constants.COLLDOWN) != constants.OPERATION_SUCCESS:

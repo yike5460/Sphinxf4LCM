@@ -14,10 +14,10 @@ class TC_VNF_SCALE_OUT_003(TestCase):
     TC_VNF_SCALE_OUT_003 Scale-Out VNF instance
 
     Sequence:
-    1. Instantiate VNF without load (--> time stamp)
+    1. Instantiate the VNF without load
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
-    4. Validate the provided functionality and all traffic goes through (-> no dropped packets)
+    4. Validate the provided functionality and all traffic goes through
     5. Trigger a resize of the VNF resources to the maximum
     6. Validate VNF has resized to the max
     7. Determine if and length of service disruption
@@ -27,7 +27,7 @@ class TC_VNF_SCALE_OUT_003(TestCase):
     11. Validate VNF has released the resources and decreased the VNFCs
     12. Validate traffic drop occurs
     13. Reduce traffic load to level that the downsized VNF should process
-    14. Validate traffic flows through without issues (-> no dropped packets)
+    14. Validate traffic flows through without issues
     """
 
     def setup(self):
@@ -51,9 +51,9 @@ class TC_VNF_SCALE_OUT_003(TestCase):
         LOG.info('Starting TC_VNF_SCALE_OUT_003')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate VNF without load (--> time stamp)
+        # 1. Instantiate the VNF without load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating VNF')
+        LOG.info('Instantiate the VNF without load')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -326,9 +326,9 @@ class TC_VNF_SCALE_OUT_003(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 14. Validate traffic flows through without issues (-> no dropped packets)
+        # 14. Validate traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating traffic flows through without issues (-> no dropped packets)')
+        LOG.info('Validating traffic flows through without issues')
         if not self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_SCALE_OUT_003 execution failed')
             LOG.debug('Traffic is not flowing')

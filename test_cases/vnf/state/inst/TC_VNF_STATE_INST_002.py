@@ -13,7 +13,7 @@ class TC_VNF_STATE_INST_002(TestCase):
     TC_VNF_STATE_INST_002 Instantiation without Element Management without traffic without configuration file
 
     Sequence:
-    1. Instantiate VNF without load (--> time stamp)
+    1. Instantiate the VNF without load
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Validate the right vResources have been allocated
     4. Calculate the instantiation time
@@ -37,9 +37,9 @@ class TC_VNF_STATE_INST_002(TestCase):
         LOG.info('Starting TC_VNF_STATE_INST_002')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate VNF without load (--> time stamp)
+        # 1. Instantiate the VNF without load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating VNF')
+        LOG.info('Instantiating the VNF without load')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
