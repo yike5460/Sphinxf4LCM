@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 class TC_VNF_SCALE_OUT_003(TestCase):
     """
-    TC_VNF_SCALE_OUT_003 Scale-Out VNF instance
+    TC_VNF_SCALE_OUT_003 Scale-in VNF instance
 
     Sequence:
     1. Instantiate the VNF without load
