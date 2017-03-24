@@ -11,5 +11,11 @@
   },
   "stc": {
     "traffic" : "api.adapter.stc.traffic.TrafficStcAdapter"
+  },
+  "openwrt": {
+    "vnf" : "api.adapter.vnf.openwrt.OpenWrtVnfAdapter"
+  },
+  "ubuntu" : {
+    "vnf" : "api.adapter.vnf.ubuntu.UbuntuVnfAdapter"
   }
 }
