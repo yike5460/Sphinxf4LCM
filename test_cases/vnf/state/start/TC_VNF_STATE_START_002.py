@@ -14,18 +14,21 @@ class TC_VNF_STATE_START_002(TestCase):
     TC_VNF_STATE_START_002 VNF Start under low traffic load and measure start time
 
     Sequence:
-    1. Instantiate the VNF without load
+    1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    3. Stop the VNF
-    4. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
-    5. Start the low traffic load
-    6. Validate no traffic goes through
-    7. Start the VNF
-    8. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED 
-    9. Calculate the time for the activation
-    10. Validate the provided functionality
-    11. Stop the VNF
-    12. Ensure that no traffic flows once stop is completed
+    3. Start the low traffic load
+    4. Validate traffic goes through
+    5. Stop traffic
+    6. Stop the VNF
+    7. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
+    8. Start the low traffic load
+    9. Validate no traffic goes through
+    10. Start the VNF
+    11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED 
+    12. Calculate the time for activation
+    13. Validate traffic goes through
+    14. Stop the VNF
+    15. Ensure that no traffic flows once stop is completed
     """
 
     def setup(self):
@@ -49,9 +52,9 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Starting TC_VNF_STATE_START_002')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate the VNF without load
+        # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating the VNF without load')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -94,7 +97,66 @@ class TC_VNF_STATE_START_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Stop the VNF
+        # 3. Start the low traffic load
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Starting the low traffic load')
+        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
+            LOG.error('TC_VNF_STATE_START_002 execution failed')
+            LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
+            return False
+
+        if not self.traffic.start(return_when_emission_starts=True):
+            LOG.error('TC_VNF_STATE_START_002 execution failed')
+            LOG.debug('Traffic could not be started')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic could not be started'
+            return False
+
+        self.register_for_cleanup(self.traffic.stop)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 4. Validate traffic goes through
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating traffic goes through')
+        if not self.traffic.does_traffic_flow(delay_time=5):
+            LOG.error('TC_VNF_STATE_START_002 execution failed')
+            LOG.debug('Traffic is not flowing')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic did not flow'
+            return False
+
+        if self.traffic.any_traffic_loss():
+            LOG.error('TC_VNF_STATE_START_002 execution failed')
+            LOG.debug('Traffic is flowing with packet loss')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
+            return False
+
+        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+            LOG.error('TC_VNF_STATE_START_002 execution failed')
+            LOG.debug('Could not validate allocated vResources')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Could not validate allocated vResources'
+            return False
+
+        self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 5. Stop traffic
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Stopping traffic')
+        if not self.traffic.stop():
+            LOG.error('TC_VNF_STATE_START_002 execution failed')
+            LOG.debug('Traffic could not be stopped')
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = 'Low traffic could not be stopped'
+            return False
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 6. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the VNF')
         self.time_record.START('stop_vnf')
@@ -109,7 +171,7 @@ class TC_VNF_STATE_START_002(TestCase):
         self.tc_result['durations']['stop_vnf'] = self.time_record.duration('stop_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
+        # 7. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
@@ -131,17 +193,9 @@ class TC_VNF_STATE_START_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Start the low traffic load
+        # 8. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Start the low traffic load')
-        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
-            return False
-
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_STATE_START_002 execution failed')
             LOG.debug('Traffic could not be started')
@@ -149,10 +203,8 @@ class TC_VNF_STATE_START_002(TestCase):
             self.tc_result['error_info'] = 'Low traffic could not be started'
             return False
 
-        self.register_for_cleanup(self.traffic.stop)
-
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Validate no traffic goes through
+        # 9. Validate no traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic goes through')
         if self.traffic.does_traffic_flow(delay_time=5):
@@ -163,7 +215,7 @@ class TC_VNF_STATE_START_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Start the VNF
+        # 10. Start the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the VNF')
         self.time_record.START('start_vnf')
@@ -178,7 +230,7 @@ class TC_VNF_STATE_START_002(TestCase):
         self.tc_result['durations']['start_vnf'] = self.time_record.duration('start_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
+        # 11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
@@ -200,43 +252,35 @@ class TC_VNF_STATE_START_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 9. Calculate the time for activation
+        # 12. Calculate the time for activation
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the time for traffic activation')
         self.tc_result['durations']['traffic_activation'] = self.traffic.calculate_activation_time()
 
-        # Clearing counters before checking traffic flows correctly
+        # --------------------------------------------------------------------------------------------------------------
+        # 13. Validate traffic goes through
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating traffic goes through')
+
+        # Clearing counters as the traffic lost so far influences the results
         self.traffic.clear_counters()
 
-        # --------------------------------------------------------------------------------------------------------------
-        # 10. Validate the provided functionality
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating the provided functionality')
         if not self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_STATE_START_002 execution failed')
             LOG.debug('Traffic is not flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Normal traffic did not flow'
+            self.tc_result['error_info'] = 'Low traffic did not flow'
             return False
 
         if self.traffic.any_traffic_loss():
             LOG.error('TC_VNF_STATE_START_002 execution failed')
             LOG.debug('Traffic is flowing with packet loss')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Normal traffic flew with packet loss'
+            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
             return False
-
-        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Could not validate allocated vResources')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not validate allocated vResources'
-            return False
-
-        self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 11. Stop the VNF
+        # 14. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the VNF')
         if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
@@ -247,7 +291,7 @@ class TC_VNF_STATE_START_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 12. Ensure that no traffic flows once stop is completed
+        # 15. Ensure that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Ensuring that no traffic flows once stop is completed')
         if self.traffic.does_traffic_flow(delay_time=5):
