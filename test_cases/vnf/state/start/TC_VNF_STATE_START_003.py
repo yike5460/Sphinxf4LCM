@@ -18,7 +18,7 @@ class TC_VNF_STATE_START_003(TestCase):
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the normal traffic load
     4. Validate traffic goes through
-    5. Stop traffic
+    5. Stop the normal traffic load
     6. Stop the VNF
     7. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
     8. Start the normal traffic load
@@ -147,9 +147,9 @@ class TC_VNF_STATE_START_003(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Stop traffic
+        # 5. Stop the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic')
+        LOG.info('Stopping the normal traffic load')
         if not self.traffic.stop():
             LOG.error('TC_VNF_STATE_START_003 execution failed')
             LOG.debug('Traffic could not be stopped')

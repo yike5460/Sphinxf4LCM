@@ -14,11 +14,11 @@ class TC_VNF_STATE_TERM_001(TestCase):
     TC_VNF_STATE_TERM_001 VNF terminate from VNF state STARTED without traffic load
 
     Sequence:
-    1. Instantiate the VNF without load
+    1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality
-    5. Stop traffic load
+    5. Stop the low traffic load
     6. Ensure that no traffic flows once stop is completed
     7. Terminate the VNF
     8. Validate VNF is terminated and all resources have been released
@@ -45,9 +45,9 @@ class TC_VNF_STATE_TERM_001(TestCase):
         LOG.info('Starting TC_VNF_STATE_TERM_001')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate the VNF without load
+        # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating the VNF without load')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -138,9 +138,9 @@ class TC_VNF_STATE_TERM_001(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Stop traffic load
+        # 5. Stop the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic load')
+        LOG.info('Stopping the low traffic load')
         if not self.traffic.stop():
             LOG.error('TC_VNF_STATE_TERM_001 execution failed')
             LOG.debug('Traffic could not be stopped')

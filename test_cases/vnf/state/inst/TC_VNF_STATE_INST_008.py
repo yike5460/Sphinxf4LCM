@@ -15,11 +15,11 @@ class TC_VNF_STATE_INST_008(TestCase):
     TC_VNF_STATE_INST_008 VNF Instantiation including active Element Management with traffic
 
     Sequence:
-    1. Start the traffic load
-    2. Instantiate the VNF with load
+    1. Start the normal traffic load
+    2. Instantiate the VNF
     3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     4. Validate the provided functionality and all traffic is dropped
-    5. Update the VNF
+    5. Update the VNF configuration
     6. Validate traffic flows without issues
     """
 
@@ -48,9 +48,9 @@ class TC_VNF_STATE_INST_008(TestCase):
         LOG.info('Starting TC_VNF_STATE_INST_008')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Start the traffic load
+        # 1. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the traffic load')
+        LOG.info('Starting the normal traffic load')
         if not self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
                                       traffic_config=self.tc_input['traffic_params']['traffic_config']):
             LOG.error('TC_VNF_STATE_INST_008 execution failed')
@@ -70,9 +70,9 @@ class TC_VNF_STATE_INST_008(TestCase):
         self.register_for_cleanup(self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 2. Instantiate the VNF with load
+        # 2. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating the VNF with load')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
             vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -133,7 +133,7 @@ class TC_VNF_STATE_INST_008(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Update the VNF
+        # 5. Update the VNF configuration
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Updating the VNF')
         self.time_record.START('update_vnf')
@@ -148,13 +148,14 @@ class TC_VNF_STATE_INST_008(TestCase):
 
         self.tc_result['durations']['traffic_activation'] = self.traffic.calculate_activation_time()
 
-        # Clearing counters before checking traffic flows correctly
-        self.traffic.clear_counters()
-
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic flows through without issues')
+
+        # Clearing counters as the traffic lost so far influences the results
+        self.traffic.clear_counters()
+
         if not self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_STATE_INST_008 execution failed')
             LOG.debug('Traffic is not flowing')

@@ -14,7 +14,7 @@ class TC_VNF_SCALE_OUT_002(TestCase):
     TC_VNF_SCALE_OUT_002 Scale-Out VNF instance
 
     Sequence:
-    1. Instantiate the VNF without load
+    1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality and all traffic goes through
@@ -46,9 +46,9 @@ class TC_VNF_SCALE_OUT_002(TestCase):
         LOG.info('Starting TC_VNF_SCALE_OUT_002')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate the VNF without load
+        # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiate the VNF without load')
+        LOG.info('Instantiate the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -195,7 +195,7 @@ class TC_VNF_SCALE_OUT_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Generating max traffic load')
 
-        # Stop traffic.
+        # Stop the low traffic load.
         if not self.traffic.stop():
             LOG.error('TC_VNF_SCALE_OUT_002 execution failed')
             LOG.debug('Traffic could not be stopped')
@@ -213,7 +213,7 @@ class TC_VNF_SCALE_OUT_002(TestCase):
         self.traffic.config_traffic_stream(dest_mac_addr_list)
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
-        # Start traffic.
+        # Start the low traffic load.
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_SCALE_OUT_002 execution failed')
             LOG.debug('Traffic could not be started')

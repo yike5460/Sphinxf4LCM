@@ -16,17 +16,17 @@ class TC_VNF_STATE_START_001(TestCase):
     Sequence:
     1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    3. Start the traffic load
+    3. Start the normal traffic load
     4. Validate traffic flows with the VNF provided functionality
-    5. Stop traffic
+    5. Stop the normal traffic load
     6. Stop the VNF
     7. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
-    8. Start the traffic load
+    8. Start the normal traffic load
     9. Validate no traffic flows with the VNF provided functionality
-    10. Stop traffic
+    10. Stop the normal traffic load
     11. Start the VNF
     12. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    13. Start the traffic load
+    13. Start the normal traffic load
     14. Validate traffic flows with the VNF provided functionality
     15. Stop the VNF
     16. Ensure that no traffic flows once stop is completed
@@ -98,9 +98,9 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Start the traffic load
+        # 3. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the traffic load')
+        LOG.info('Starting the normal traffic load')
         if not self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
                                       traffic_config=self.tc_input['traffic_params']['traffic_config']):
             LOG.error('TC_VNF_STATE_START_001 execution failed')
@@ -147,9 +147,9 @@ class TC_VNF_STATE_START_001(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Stop traffic
+        # 5. Stop the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic')
+        LOG.info('Stopping the normal traffic load')
         if not self.traffic.stop():
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Traffic could not be stopped')
@@ -195,9 +195,9 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Start the traffic load
+        # 8. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the traffic load')
+        LOG.info('Starting the normal traffic load')
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Traffic could not be started')
@@ -217,9 +217,9 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 10. Stop traffic
+        # 10. Stop the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic')
+        LOG.info('Stopping the normal traffic load')
         if not self.traffic.stop():
             LOG.error('TC_VNF_STATE_START_001 execution failed')
             LOG.debug('Traffic could not be stopped')
@@ -265,9 +265,9 @@ class TC_VNF_STATE_START_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 13. Start the traffic load
+        # 13. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the traffic load')
+        LOG.info('Starting the normal traffic load')
 
         # Clearing counters as the traffic lost so far influences the results
         self.traffic.clear_counters()

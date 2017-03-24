@@ -11,10 +11,10 @@ LOG = logging.getLogger(__name__)
 
 class TC_VNF_STATE_TERM_005(TestCase):
     """
-    TC_VNF_STATE_TERM_005 VNF terminate from VNF state STOPPED with load
+    TC_VNF_STATE_TERM_005 VNF terminate from VNF state STOPPED
 
     Sequence:
-    1. Instantiate the VNF without load
+    1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality
@@ -47,9 +47,9 @@ class TC_VNF_STATE_TERM_005(TestCase):
         LOG.info('Starting TC_VNF_STATE_TERM_005')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate the VNF without load
+        # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating the VNF without load')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -176,13 +176,14 @@ class TC_VNF_STATE_TERM_005(TestCase):
                                            constants.VNF_STOPPED
             return False
 
-        # Clearing counters before checking traffic is no longer flowing
-        self.traffic.clear_counters()
-
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate no traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic goes through')
+
+        # Clearing counters as the traffic lost so far influences the results
+        self.traffic.clear_counters()
+
         if self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Traffic is still flowing')

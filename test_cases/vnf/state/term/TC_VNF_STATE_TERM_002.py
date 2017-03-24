@@ -14,7 +14,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
     TC_VNF_STATE_TERM_002 VNF terminate from state STARTED with low traffic load
 
     Sequence:
-    1. Instantiate the VNF without load
+    1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality and all traffic goes through
@@ -44,9 +44,9 @@ class TC_VNF_STATE_TERM_002(TestCase):
         LOG.info('Starting TC_VNF_STATE_TERM_002')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate the VNF without load
+        # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating the VNF without load')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,

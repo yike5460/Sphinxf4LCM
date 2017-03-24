@@ -16,4 +16,5 @@ class UbuntuVnfAdapter(object):
 
     @log_entry_exit(LOG)
     def license_applied(self, **credentials):
+
         return True

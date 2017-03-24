@@ -14,11 +14,11 @@ class TC_VNF_STATE_STOP_001(TestCase):
     TC_VNF_STATE_STOP_001 VNF Stop without traffic load and measure stop time
 
     Sequence:
-    1. Instantiate the VNF without load
+    1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality
-    5. Stop traffic
+    5. Stop the low traffic load
     6. Validate no traffic flows
     7. Stop the VNF
     8. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
@@ -47,9 +47,9 @@ class TC_VNF_STATE_STOP_001(TestCase):
         LOG.info('Starting TC_VNF_STATE_STOP_001')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Instantiate the VNF without load
+        # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiating the VNF without load')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -140,9 +140,9 @@ class TC_VNF_STATE_STOP_001(TestCase):
         self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Stop traffic
+        # 5. Stop the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Stopping traffic')
+        LOG.info('Stopping the low traffic load')
         if not self.traffic.stop():
             LOG.error('TC_VNF_STATE_STOP_001 execution failed')
             LOG.debug('Traffic could not be stopped')
