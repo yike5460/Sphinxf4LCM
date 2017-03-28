@@ -39,6 +39,8 @@ VNF_INSTANTIATION_STATE = dict()
 VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
                                                   'ERROR': VNF_NOT_INSTANTIATED,
                                                   'PENDING_CREATE': VNF_NOT_INSTANTIATED,
+                                                  'PENDING_SCALE_OUT': VNF_INSTANTIATED,
+                                                  'PENDING_SCALE_IN': VNF_INSTANTIATED,
                                                   'PENDING_DELETE': VNF_NOT_INSTANTIATED}
 
 
