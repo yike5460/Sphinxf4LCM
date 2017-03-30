@@ -1,9 +1,9 @@
 import logging
 
 from api.generic import constants
-from test_cases import TestCase
 from api.generic.traffic import Traffic
 from api.generic.vnfm import Vnfm
+from test_cases import TestCase
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -37,6 +37,9 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+        self.tc_result['events']['instantiate_vnf'] = dict()
+        self.tc_result['events']['scale_out_vnf'] = dict()
+        self.tc_result['events']['service_disruption'] = dict()
 
         LOG.info('Finished setup for TC_VNF_SCALE_OUT_001_5')
 
@@ -63,7 +66,7 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
 
         self.time_record.END('instantiate_vnf')
 
-        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
+        self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
@@ -164,7 +167,7 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
 
         self.time_record.END('scale_out_vnf')
 
-        self.tc_result['durations']['scale_out_vnf'] = self.time_record.duration('scale_out_vnf')
+        self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
         self.tc_result['resources']['After scale out'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
@@ -176,7 +179,7 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
         LOG.info('Validating VNF has resized by adding VNFCs')
         vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances'] + \
-                                                                     self.tc_input['scaling']['increment']:
+                self.tc_input['scaling']['increment']:
             LOG.error('TC_VNF_SCALE_OUT_001_5 execution failed')
             LOG.debug('VNFCs not added after VNF scaled out')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -190,7 +193,7 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
         # 7. Determine if and length of service disruption
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Determining if and length of service disruption')
-        self.tc_result['durations']['service_disruption'] = self.traffic.calculate_service_disruption_length()
+        self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Generate more traffic to validate the higher capacity

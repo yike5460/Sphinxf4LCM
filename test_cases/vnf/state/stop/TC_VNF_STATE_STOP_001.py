@@ -38,6 +38,8 @@ class TC_VNF_STATE_STOP_001(TestCase):
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+        self.tc_result['events']['instantiate_vnf'] = dict()
+        self.tc_result['events']['stop_vnf'] = dict()
 
         LOG.info('Finished setup for TC_VNF_STATE_STOP_001')
 
@@ -64,7 +66,7 @@ class TC_VNF_STATE_STOP_001(TestCase):
 
         self.time_record.END('instantiate_vnf')
 
-        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
+        self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
@@ -174,7 +176,7 @@ class TC_VNF_STATE_STOP_001(TestCase):
             return False
         self.time_record.END('stop_vnf')
 
-        self.tc_result['durations']['stop_vnf'] = self.time_record.duration('stop_vnf')
+        self.tc_result['events']['stop_vnf']['duration'] = self.time_record.duration('stop_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED

@@ -39,6 +39,11 @@ class TC_VNF_COMPLEX_002(TestCase):
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+        self.tc_result['events']['instantiate_vnf'] = dict()
+        self.tc_result['events']['scale_out_vnf'] = dict()
+        self.tc_result['events']['service_disruption'] = dict()
+        self.tc_result['events']['stop_vnf'] = dict()
+        self.tc_result['events']['traffic_deactivation'] = dict()
 
         LOG.info('Finished setup for TC_VNF_COMPLEX_002')
 
@@ -65,7 +70,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.time_record.END('instantiate_vnf')
 
-        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
+        self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
         self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
@@ -167,7 +172,7 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.time_record.END('scale_out_vnf')
 
-        self.tc_result['durations']['scale_out_vnf'] = self.time_record.duration('scale_out_vnf')
+        self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
         self.tc_result['resources']['After scale out'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
 
@@ -186,7 +191,7 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
         self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['max_instances']
 
-        self.tc_result['durations']['service_disruption'] = self.traffic.calculate_service_disruption_length()
+        self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Generate max traffic load to load all VNF instances
@@ -254,9 +259,9 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
         self.time_record.END('stop_vnf')
 
-        self.tc_result['durations']['stop_vnf'] = self.time_record.duration('stop_vnf')
+        self.tc_result['events']['stop_vnf']['duration'] = self.time_record.duration('stop_vnf')
 
-        self.tc_result['durations']['traffic_deactivation'] = self.traffic.calculate_deactivation_time()
+        self.tc_result['events']['traffic_deactivation']['duration'] = self.traffic.calculate_deactivation_time()
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED

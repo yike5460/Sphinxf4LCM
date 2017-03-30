@@ -20,7 +20,7 @@ class TC_VNF_STATE_INST_004(TestCase):
     2. Start the low traffic load
     3. Instantiate the VNF
     4. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    5. Update the VNF configuration
+    5. Modify the VNF configuration
     6. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     7. Validate the right vResources have been allocated
     8. Validate configuration has been applied by the EM to the VNF
@@ -42,6 +42,9 @@ class TC_VNF_STATE_INST_004(TestCase):
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
+        self.tc_result['events']['instantiate_vnf'] = dict()
+        self.tc_result['events']['update_vnf'] = dict()
+        self.tc_result['events']['instantiate_update_vnf'] = dict()
 
         # Store the VNF config.
         with open(self.tc_input['vnf']['config'], 'r') as vnf_config_file:
@@ -126,9 +129,9 @@ class TC_VNF_STATE_INST_004(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Update the VNF configuration
+        # 5. Modify the VNF configuration
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Updating the VNF configuration')
+        LOG.info('Modifying the VNF configuration')
         self.time_record.START('update_vnf')
         if self.vnfm.modify_vnf_configuration(self.vnf_instance_id, self.vnf_config) != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_INST_004 execution failed')
@@ -222,10 +225,10 @@ class TC_VNF_STATE_INST_004(TestCase):
         # 11. Calculate the instantiation time
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Calculating the instantiation time')
-        self.tc_result['durations']['instantiate_vnf'] = self.time_record.duration('instantiate_vnf')
-        self.tc_result['durations']['update_vnf'] = self.time_record.duration('update_vnf')
-        self.tc_result['durations']['instantiate_update_vnf'] = self.time_record.delta('instantiate_vnf.START',
-                                                                                       'update_vnf.END')
+        self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
+        self.tc_result['events']['update_vnf']['duration'] = self.time_record.duration('update_vnf')
+        self.tc_result['events']['instantiate_update_vnf']['duration'] = self.time_record.delta('instantiate_vnf.START',
+                                                                                                'update_vnf.END')
 
         LOG.info('TC_VNF_STATE_INST_004 execution completed successfully')
 
