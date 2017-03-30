@@ -157,7 +157,7 @@ class VnfmOpenstackAdapter(object):
 
         try:
             vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
-            LOG.debug("Response from vnfm:\n%s" % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
+            LOG.debug('Response from vnfm:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
         except tackerclient.common.exceptions.TackerException:
             return None
         return vnf_instance['vnf']['id']
@@ -277,83 +277,87 @@ class VnfmOpenstackAdapter(object):
         vnf_info.vnfd_id = tacker_show_vnf['vnfd_id'].encode()
         vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][
             tacker_show_vnf['status']]
+        vnf_info.metadata = {'error_reason': str(tacker_show_vnf['error_reason'])}
 
-        vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_STACK_STATE'][heat_stack.stack_status]
+        # Build the InstantiatedVnfInfo information element only if the VNF is in INSTANTIATED state
+        if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
+            vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
+            vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_STACK_STATE'][
+                heat_stack.stack_status]
 
-        vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
-        try:
-            tacker_list_vnf_resources = self.tacker_client.list_vnf_resources(vnf_instance_id)['resources']
-            for vnf_resource in tacker_list_vnf_resources:
-                # When the VNFD contains scaling policies, Heat will not show the resources (VDUs, CPs, VLs, etc), but
-                # the scaling group.
-                # In this case, grab the resources from Nova and break out of the for loop.
-                if vnf_resource.get('type').__contains__('Scaling'):
+            vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+            try:
+                tacker_list_vnf_resources = self.tacker_client.list_vnf_resources(vnf_instance_id)['resources']
+                for vnf_resource in tacker_list_vnf_resources:
+                    # When the VNFD contains scaling policies, Heat will not show the resources (VDUs, CPs, VLs, etc),
+                    # but the scaling group.
+                    # In this case, grab the resources from Nova and break out of the for loop.
+                    if vnf_resource.get('type').__contains__('Scaling'):
 
-                    # Get the Nova list of servers filtering the servers based on their name.
-                    # The servers' names we are looking for start with ta-...
-                    # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
-                    server_list = vim.server_list(query_filter={'name': 'ta-*'})
-                    for server in server_list:
-                        vnf_resource_id = server.id
+                        # Get the Nova list of servers filtering the servers based on their name.
+                        # The servers' names we are looking for start with ta-...
+                        # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
+                        server_list = vim.server_list(query_filter={'name': 'ta-*'})
+                        for server in server_list:
+                            vnf_resource_id = server.id
 
-                        # Extract the VDU ID from the server name
-                        match = re.search('VDU\d+', server.name)
-                        if match:
-                            vnf_resource_name = match.group()
+                            # Extract the VDU ID from the server name
+                            match = re.search('VDU\d+', server.name)
+                            if match:
+                                vnf_resource_name = match.group()
 
-                        # Build the VnfcResourceInfo data structure
-                        vnfc_resource_info = VnfcResourceInfo()
-                        vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
-                        vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+                            # Build the VnfcResourceInfo data structure
+                            vnfc_resource_info = VnfcResourceInfo()
+                            vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+                            vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
-                        vnfc_resource_info.compute_resource = ResourceHandle()
-                        vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
-                        vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+                            vnfc_resource_info.compute_resource = ResourceHandle()
+                            vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
+                            vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
 
-                        vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+                            vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-                    break
+                        break
 
-                # Heat provides the resources as expected.
-                else:
-                    vnf_resource_type = vnf_resource.get('type')
-                    vnf_resource_id = vnf_resource.get('id')
-                    vnf_resource_name = vnf_resource.get('name')
+                    # Heat provides the resources as expected.
+                    else:
+                        vnf_resource_type = vnf_resource.get('type')
+                        vnf_resource_id = vnf_resource.get('id')
+                        vnf_resource_name = vnf_resource.get('name')
 
-                    if vnf_resource_type == 'OS::Nova::Server':
-                        # Build the VnfcResourceInfo data structure
-                        vnfc_resource_info = VnfcResourceInfo()
-                        vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
-                        vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+                        if vnf_resource_type == 'OS::Nova::Server':
+                            # Build the VnfcResourceInfo data structure
+                            vnfc_resource_info = VnfcResourceInfo()
+                            vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+                            vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
-                        vnfc_resource_info.compute_resource = ResourceHandle()
-                        vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
-                        vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+                            vnfc_resource_info.compute_resource = ResourceHandle()
+                            vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
+                            vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
 
-                        vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+                            vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-            # Build the VnfExtCpInfo data structure
-            vnf_info.instantiated_vnf_info.ext_cp_info = list()
-            for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+                # Build the VnfExtCpInfo data structure
+                vnf_info.instantiated_vnf_info.ext_cp_info = list()
+                for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
 
-                vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
-                port_dict = vim.port_list(device_id=vnf_resource_id)
-                for port_list in port_dict:
-                    for port in port_list['ports']:
-                        vnf_ext_cp_info = VnfExtCpInfo()
-                        vnf_ext_cp_info.cp_instance_id = port['id'].encode()
-                        vnf_ext_cp_info.address = [port['mac_address'].encode()]
+                    vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
+                    port_dict = vim.port_list(device_id=vnf_resource_id)
+                    for port_list in port_dict:
+                        for port in port_list['ports']:
+                            vnf_ext_cp_info = VnfExtCpInfo()
+                            vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                            vnf_ext_cp_info.address = [port['mac_address'].encode()]
 
-                        # Extract the CP ID from the port name
-                        match = re.search('CP\d+', port['name'])
-                        if match:
-                            vnf_ext_cp_info.cpd_id = match.group().encode()
+                            # Extract the CP ID from the port name
+                            match = re.search('CP\d+', port['name'])
+                            if match:
+                                vnf_ext_cp_info.cpd_id = match.group().encode()
 
-                        vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
+                            vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
-        except tackerclient.common.exceptions.TackerException:
-            return vnf_info
+            except tackerclient.common.exceptions.TackerException:
+                return vnf_info
 
         return vnf_info
 
