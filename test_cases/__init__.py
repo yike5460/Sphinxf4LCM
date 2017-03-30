@@ -32,8 +32,9 @@ class TestCase(object):
 
     def __init__(self, tc_input):
         self.tc_input = tc_input
+        self.tc_name = type(self).__name__
         self.tc_result = dict()
-        self.tc_result['durations'] = collections.OrderedDict()
+        self.tc_result['events'] = collections.OrderedDict()
         self.tc_result['resources'] = collections.OrderedDict()
         self.tc_result['scaling_out'] = dict()
         self.tc_result['scaling_in'] = dict()
