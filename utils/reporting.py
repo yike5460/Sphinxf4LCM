@@ -62,10 +62,15 @@ def report_test_case(tc_input, tc_result):
             print t
             print
 
-    print '* Durations:'
-    t = PrettyTable(['Event', 'Duration (sec)'])
-    for event_name, event_duration in tc_result.get('durations', {}).items():
-        t.add_row([event_name, round(event_duration, 1)])
+    print '* Events:'
+    t = PrettyTable(['Event', 'Duration (sec)', 'Details'])
+    for event_name in tc_result.get('events', {}).keys():
+        try:
+            event_duration = round(tc_result['events'][event_name].get('duration', None), 1)
+        except TypeError:
+            event_duration = 'N/A'
+        event_details = tc_result['events'][event_name].get('details', '')
+        t.add_row([event_name, event_duration, event_details])
     print t
     print
 
