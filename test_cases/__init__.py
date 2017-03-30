@@ -1,10 +1,9 @@
 import collections
 import importlib
 
-from utils.logging_module import configure_logger
 from utils import reporting
 from utils import timestamps
-
+from utils.logging_module import configure_logger
 
 Function = collections.namedtuple('Function', 'function_reference function_args function_kwargs')
 

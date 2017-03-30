@@ -1,8 +1,7 @@
 import logging
 
-from utils.logging_module import log_entry_exit
-
 from api.structures.objects import VirtualCompute, VirtualNetwork, VirtualStorage
+from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)

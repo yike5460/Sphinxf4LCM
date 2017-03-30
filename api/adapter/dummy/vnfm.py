@@ -1,9 +1,8 @@
 import logging
 
 from api.generic import constants
-from utils.logging_module import log_entry_exit
-
 from api.structures.objects import InstantiatedVnfInfo, VnfInfo
+from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)

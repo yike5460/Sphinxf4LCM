@@ -1,8 +1,8 @@
 import json
 import logging
-import requests
 import uuid
 
+import requests
 from requests.auth import HTTPBasicAuth
 
 from utils.logging_module import log_entry_exit

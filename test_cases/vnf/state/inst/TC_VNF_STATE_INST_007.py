@@ -1,8 +1,8 @@
 import logging
 
 from api.generic import constants
-from test_cases import TestCase
 from api.generic.vnfm import Vnfm
+from test_cases import TestCase
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)

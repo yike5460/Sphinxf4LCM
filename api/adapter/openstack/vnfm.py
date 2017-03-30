@@ -2,14 +2,14 @@ import json
 import logging
 import re
 import time
-import yaml
 
 import os_client_config
-from tackerclient.tacker.client import Client as TackerClient
 import tackerclient.common.exceptions
+import yaml
+from tackerclient.tacker.client import Client as TackerClient
 
-from api.generic.vim import Vim
 from api.generic import constants
+from api.generic.vim import Vim
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
 

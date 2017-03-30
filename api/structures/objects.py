@@ -1,10 +1,10 @@
 import json
 import os
 import sys
-import yaml
 from collections import MutableSequence
 from weakref import WeakKeyDictionary
 
+import yaml
 
 this_module = sys.modules[__name__]
 
