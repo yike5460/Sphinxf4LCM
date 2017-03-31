@@ -11,7 +11,8 @@ LOG = logging.getLogger(__name__)
 
 class Vnfm(object):
     """
-    Generic VNFM class.
+    Class of generic functions representing operations exposed by the VNFM towards the NFVO as defined by 
+    GS NFV-IFA 007.
     """
     def __init__(self, vendor=None, **kwargs):
         """
@@ -20,8 +21,18 @@ class Vnfm(object):
         self.vendor = vendor
         self.vnfm_adapter = construct_adapter(vendor, module_type='vnfm', **kwargs)
 
-    def __getattr__(self, attr):
-        return getattr(self.vnfm_adapter, attr)
+    @log_entry_exit(LOG)
+    def get_operation_status(self, lifecycle_operation_occurrence_id):
+        """
+        This function provides the status of a VNF lifecycle management operation.
+
+        This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
+        :return:                                    The status of the operation ex. 'Processing', 'Failed'.
+        """
+
+        return self.vnfm_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
     def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
@@ -57,66 +68,59 @@ class Vnfm(object):
 
     @log_entry_exit(LOG)
     def validate_allocated_vresources(self, vnfd_id, vnf_instance_id):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
-        vnfd = self.get_vnfd(vnfd_id)
+        """
+        This function checks that the virtual resources allocated to the VNF match the ones in the VNFD.
 
-        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vim_id = vnfc_resource_info.compute_resource.vim_id
-            vim = self.get_vim(vim_id)
+        :param vnfd_id:         Identifier of the VNFD.
+        :param vnf_instance_id: Identifier of the VNF instance.
+        :return:                True if the allocated resources are as expected, False otherwise.
+        """
 
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-
-            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
-
-            expected_num_virtual_cpu = \
-                vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities']['nfv_compute'][
-                    'properties']['num_cpus']
-            expected_virtual_memory = \
-                int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute']['properties']['mem_size'].split(' ')[0])
-            expected_size_of_storage = \
-                int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute']['properties']['disk_size'].split(' ')[0])
-
-            if actual_num_virtual_cpu != expected_num_virtual_cpu or \
-                            actual_virtual_memory != expected_virtual_memory or \
-                            actual_size_of_storage != expected_size_of_storage:
-                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_virtual_cpu,
-                                                                                 actual_num_virtual_cpu))
-                LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_virtual_memory, actual_virtual_memory))
-                LOG.debug('Expected %s vStorage, actual vStorage: %s' % (expected_size_of_storage,
-                                                                         actual_size_of_storage))
-                return False
-
-        return True
+        return self.vnfm_adapter.validate_allocated_vresources(vnfd_id, vnf_instance_id)
 
     @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        """
+        This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
 
-        vresources = dict()
+        :param vnf_instance_id: Identifier of the VNF instance.
+        :return:                Dictionary with the resources for each VNFC.
+        """
 
-        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vim_id = vnfc_resource_info.compute_resource.vim_id
-            vim = self.get_vim(vim_id)
+        return self.vnfm_adapter.get_allocated_vresources(vnf_instance_id)
 
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+    @log_entry_exit(LOG)
+    def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
+        """
+        This function enables providing configuration parameters information for a VNF instance.
 
-            vresources[resource_id] = dict()
+        This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 - v2.1.1.
 
-            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+        :param vnf_instance_id:         Identifier of the VNF instance.
+        :param vnf_configuration_data:  Configuration data for the VNF instance.
+        :param ext_virtual_link:        Information about external VLs to connect the VNF to.
+        :return:                        Nothing.
+        """
 
-            vresources[resource_id]['num_virtual_cpu'] = actual_num_virtual_cpu
-            vresources[resource_id]['virtual_memory'] = str(actual_virtual_memory) + ' MB'
-            vresources[resource_id]['size_of_storage'] = str(actual_size_of_storage) + ' GB'
+        return self.vnfm_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link)
 
-        return vresources
+    @log_entry_exit(LOG)
+    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
+        """
+        This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified
+        by that identifier, in the NOT_INSTANTIATED state without instantiating the VNF or doing any additional
+        lifecycle operation(s).
+
+        This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnfd_id:                     Identifier that identifies the VNFD which defines the VNF instance to be
+                                            created.
+        :param vnf_instance_name:           Human-readable name of the VNF instance to be created.
+        :param vnf_instance_description:    Human-readable description of the VNF instance to be created.
+        :return:                            VNF instance identifier just created.
+        """
+
+        return self.vnfm_adapter.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
 
     @log_entry_exit(LOG)
     def vnf_create_and_instantiate(self, vnfd_id, flavour_id, vnf_instance_name=None, vnf_instance_description=None,
@@ -162,6 +166,44 @@ class Vnfm(object):
         return vnf_instance_id
 
     @log_entry_exit(LOG)
+    def vnf_delete_id(self, vnf_instance_id):
+        """
+        This function deletes a VNF instance ID and the associated instance of a VnfInfo information element.
+
+        This function was written in accordance with section 7.2.8 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id: VNF instance identifier to be deleted.
+        :return:                Nothing.
+        """
+
+        return self.vnfm_adapter.vnf_delete_id(vnf_instance_id)
+
+    @log_entry_exit(LOG)
+    def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                        ext_managed_virtual_link=None, localization_language=None, additional_param=None):
+        """
+        This function instantiates a particular deployment flavour of a VNF based on the definition in the VNFD.
+
+        This function was written in accordance with section 7.2.3 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:             Identifier of the VNF instance.
+        :param flavour_id:                  Identifier of the VNF DF to be instantiated.
+        :param instantiation_level_id:      Identifier of the instantiation level of the DF to be instantiated. If not
+                                            present, the default instantiation level as declared in the VNFD shall be
+                                            instantiated.
+        :param ext_virtual_link:            Information about external VLs to connect the VNF to.
+        :param ext_managed_virtual_link:    Information about internal VLs that are managed by other entities than the
+                                            VNFM.
+        :param localization_language:       Localization language of the VNF to be instantiated.
+        :param additional_param:            Additional parameters passed as input to the instantiation process, specific
+                                            to the VNF being instantiated.
+        :return:                            Identifier of the VNF lifecycle operation occurrence.
+        """
+
+        return self.vnfm_adapter.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id, ext_virtual_link,
+                                                 ext_managed_virtual_link, localization_language, additional_param)
+
+    @log_entry_exit(LOG)
     def vnf_instantiate_sync(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                              ext_managed_virtual_link=None, localization_language=None, additional_param=None,
                              max_wait_time=constants.INSTANTIATION_TIME, poll_interval=constants.POLL_INTERVAL):
@@ -199,6 +241,24 @@ class Vnfm(object):
         return operation_status
 
     @log_entry_exit(LOG)
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+        """
+        This function changes the state of a VNF instance.
+
+        This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:         Identifier of the VNF instance.
+        :param change_state_to:         Desired state to change the VNF to. Permitted values are: start, stop.
+        :param stop_type:               It signals whether forceful or graceful stop is requested. Allowed values are: 
+                                        forceful and graceful.
+        :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during graceful 
+                                        stop, before stopping the VNF.
+        :return:                        The identifier of the VNF lifecycle operation occurrence.
+        """
+
+        return self.vnfm_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout)
+
+    @log_entry_exit(LOG)
     def vnf_operate_sync(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
                          max_wait_time=constants.OPERATE_TIME, poll_interval=constants.POLL_INTERVAL):
         """
@@ -224,6 +284,66 @@ class Vnfm(object):
                                                               max_wait_time=max_wait_time, poll_interval=poll_interval)
 
         return operation_status
+
+    @log_entry_exit(LOG)
+    def vnf_query(self, filter, attribute_selector=None):
+        """
+        This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
+        filtering criteria, and the information can be restricted to selected attributes.
+
+        This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param filter:              Filter to select the VNF instance(s) about which information is queried.
+        :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
+                                    for the VNF instance(s) matching the filter. If absent, the complete information is
+                                    returned for the VNF instance(s) matching the filter.
+        :return:                    The information items about the selected VNF instance(s) that are returned. If
+                                    attribute_selector is present, only the attributes listed in attribute_selector are
+                                    returned for the selected VNF instance(s).
+        """
+
+        return self.vnfm_adapter.vnf_query(filter, attribute_selector)
+
+    @log_entry_exit(LOG)
+    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+        """
+        This function scales a VNF horizontally (out/in) or vertically (up/down).
+
+        This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
+        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).
+        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+                                    VNFD. Defaults to 1.
+        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
+                                    to the VNF being scaled.
+        :return:                    Identifier of the VNF lifecycle operation occurrence.
+        """
+
+        return self.vnfm_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
+
+    @log_entry_exit(LOG)
+    def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
+        """
+        This function scales an instantiated VNF of a particular DF to a target size.
+
+        This function was written in accordance with section 7.2.5 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
+        :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
+                                        VNF is requested to be scaled. Either instantiationLevelId or scaleInfo
+                                        but not both shall be present.
+        :param scale_info:              For each scaling aspect of the current DF, defines the target scale level to
+                                        which the VNF is to be scaled. Either instantiationLevelId or scaleInfo
+                                        but not both shall be present.
+        :param additional_param:        Additional parameters passed as input to the scaling process, specific to the
+                                        VNF being scaled.
+        :return:                        Identifier of the VNF lifecycle operation occurrence.
+        """
+
+        return self.vnfm_adapter.vnf_scale_to_level(vnf_instance_id, instantiation_level_id, scale_info,
+                                                    additional_param)
 
     @log_entry_exit(LOG)
     def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None,
@@ -252,6 +372,23 @@ class Vnfm(object):
                                                               max_wait_time=max_wait_time, poll_interval=poll_interval)
 
         return operation_status
+
+    @log_entry_exit(LOG)
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
+        """
+        This function terminates a VNF.
+
+        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 - v2.1.1.
+
+        :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
+        :param termination_type:            Signals whether forceful or graceful termination is requested.
+        :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
+                                            graceful termination, before shutting down the VNF and releasing the
+                                            resources.
+        :return:                            Identifier of the VNF lifecycle operation occurrence.
+        """
+
+        return self.vnfm_adapter.vnf_terminate(vnf_instance_id, termination_type, graceful_termination_type)
 
     @log_entry_exit(LOG)
     def vnf_terminate_and_delete(self, vnf_instance_id, termination_type, graceful_termination_type=None,

@@ -1,21 +1,23 @@
 {
-  "openstack": {
-    "vnfm"  : "api.adapter.openstack.vnfm.VnfmOpenstackAdapter",
-    "vnf"   : "api.adapter.openstack.vnf.VnfmOpenstackAdapter",
-    "vim"   : "api.adapter.openstack.vim.VimOpenstackAdapter"
+  "mano"  :{
+    "rift"  : "api.adapter.mano.rift.RiftManoAdapter"
   },
-  "dummy" : {
-    "vnfm"  : "api.adapter.dummy.vnfm.VnfmDummyAdapter",
-    "vnf"   : "api.adapter.dummy.vnf.VnfDummyAdapter",
-    "vim"   : "api.adapter.dummy.vim.VimDummyAdapter"
+  "vnfm" : {
+    "tacker"  : "api.adapter.vnfm.tacker.TackerVnfmAdapter",
+    "rift"    : "api.adapter.vnfm.rift.RiftVimAdapter",
+    "dummy"   : "api.adapter.vnfm.dummy.DummyVnfmAdapter"
   },
-  "stc": {
-    "traffic" : "api.adapter.stc.traffic.TrafficStcAdapter"
+  "vnf": {
+    "openwrt" : "api.adapter.vnf.openwrt.OpenwrtVnfAdapter",
+    "ubuntu"  : "api.adapter.vnf.ubuntu.UbuntuVnfAdapter",
+    "dummy"   : "api.adapter.vnf.dummy.DummyVnfAdapter"
   },
-  "openwrt": {
-    "vnf" : "api.adapter.vnf.openwrt.OpenWrtVnfAdapter"
+  "vim": {
+    "openstack" : "api.adapter.vim.openstack.OpenstackVimAdapter",
+    "windriver" : "api.adapter.vim.windriver.WindriverVimAdapter",
+    "dummy"     : "api.adapter.vim.dummy.DummyVimAdapter"
   },
-  "ubuntu" : {
-    "vnf" : "api.adapter.vnf.ubuntu.UbuntuVnfAdapter"
+  "traffic": {
+    "stc" : "api.adapter.traffic.stc.StcTrafficAdapter"
   }
 }

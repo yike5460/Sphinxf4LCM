@@ -5,7 +5,7 @@ from utils.logging_module import log_entry_exit
 LOG = logging.getLogger(__name__)
 
 
-class OpenWrtVnfAdapter(object):
+class OpenwrtVnfAdapter(object):
     def __init__(self):
         pass
 

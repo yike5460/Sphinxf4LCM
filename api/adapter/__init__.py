@@ -13,13 +13,13 @@ def construct_adapter(vendor, module_type, **kwargs):
     :return:            The constructor for the specified vendor and module type.
     """
     vendor_constructor_mapping = get_vendor_constructor_mapping()
-    if vendor not in vendor_constructor_mapping:
-        raise Exception('Unable to find constructor for vendor "%s"' % vendor)
-
-    if module_type not in vendor_constructor_mapping[vendor]:
+    if module_type not in vendor_constructor_mapping:
         raise Exception('Unable to find module %s for vendor "%s"' % (module_type, vendor))
 
-    module_name, constructor_name = vendor_constructor_mapping[vendor][module_type].rsplit('.', 1)
+    if vendor not in vendor_constructor_mapping[module_type]:
+        raise Exception('Unable to find constructor for vendor "%s"' % vendor)
+
+    module_name, constructor_name = vendor_constructor_mapping[module_type][vendor].rsplit('.', 1)
 
     try:
         module = importlib.import_module(module_name)
