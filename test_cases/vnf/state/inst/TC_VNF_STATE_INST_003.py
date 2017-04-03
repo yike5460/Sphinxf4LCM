@@ -3,6 +3,7 @@ import logging
 import yaml
 
 from api.generic import constants
+from api.generic.em import Em
 from api.generic.traffic import Traffic
 from api.generic.vnf import Vnf
 from api.generic.vnfm import Vnfm
@@ -34,6 +35,7 @@ class TC_VNF_STATE_INST_003(TestCase):
         LOG.info('Starting setup for TC_VNF_STATE_INST_003')
 
         # Create objects needed by the test.
+        self.em = Em(vendor=self.tc_input['em_params']['type'], **self.tc_input['em_params']['client_config'])
         self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
         self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic_params']['type'],
@@ -112,7 +114,7 @@ class TC_VNF_STATE_INST_003(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Modifying the VNF configuration')
         self.time_record.START('update_vnf')
-        if self.vnfm.modify_vnf_configuration(self.vnf_instance_id, self.vnf_config) != constants.OPERATION_SUCCESS:
+        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.vnf_config) != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_INST_003 execution failed')
             LOG.debug('Could not update VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
