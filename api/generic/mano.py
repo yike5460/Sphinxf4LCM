@@ -9,17 +9,16 @@ from utils.logging_module import log_entry_exit
 LOG = logging.getLogger(__name__)
 
 
-class Vnfm(object):
+class Mano(object):
     """
-    Class of generic functions representing operations exposed by the VNFM towards the NFVO as defined by 
-    ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
+    Class of generic functions representing operations exposed by the MANO.
     """
     def __init__(self, vendor=None, **kwargs):
         """
-        Construct the VNFM object corresponding to the specified vendor.
+        Construct the Mano object corresponding to the specified vendor.
         """
         self.vendor = vendor
-        self.vnfm_adapter = construct_adapter(vendor, module_type='vnfm', **kwargs)
+        self.mano_adapter = construct_adapter(vendor, module_type='mano', **kwargs)
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -32,7 +31,7 @@ class Vnfm(object):
         :return:                                    The status of the operation ex. 'Processing', 'Failed'.
         """
 
-        return self.vnfm_adapter.get_operation_status(lifecycle_operation_occurrence_id)
+        return self.mano_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
     def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
@@ -76,7 +75,7 @@ class Vnfm(object):
         :return:                True if the allocated resources are as expected, False otherwise.
         """
 
-        return self.vnfm_adapter.validate_allocated_vresources(vnfd_id, vnf_instance_id)
+        return self.mano_adapter.validate_allocated_vresources(vnfd_id, vnf_instance_id)
 
     @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id):
@@ -87,7 +86,7 @@ class Vnfm(object):
         :return:                Dictionary with the resources for each VNFC.
         """
 
-        return self.vnfm_adapter.get_allocated_vresources(vnf_instance_id)
+        return self.mano_adapter.get_allocated_vresources(vnf_instance_id)
 
     @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
@@ -102,7 +101,7 @@ class Vnfm(object):
         :return:                        Nothing.
         """
 
-        return self.vnfm_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link)
+        return self.mano_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link)
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
@@ -120,7 +119,7 @@ class Vnfm(object):
         :return:                            VNF instance identifier just created.
         """
 
-        return self.vnfm_adapter.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
+        return self.mano_adapter.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
 
     @log_entry_exit(LOG)
     def vnf_create_and_instantiate(self, vnfd_id, flavour_id, vnf_instance_name=None, vnf_instance_description=None,
@@ -176,7 +175,7 @@ class Vnfm(object):
         :return:                Nothing.
         """
 
-        return self.vnfm_adapter.vnf_delete_id(vnf_instance_id)
+        return self.mano_adapter.vnf_delete_id(vnf_instance_id)
 
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
@@ -200,7 +199,7 @@ class Vnfm(object):
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.vnfm_adapter.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id, ext_virtual_link,
+        return self.mano_adapter.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id, ext_virtual_link,
                                                  ext_managed_virtual_link, localization_language, additional_param)
 
     @log_entry_exit(LOG)
@@ -256,7 +255,7 @@ class Vnfm(object):
         :return:                        The identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.vnfm_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout)
+        return self.mano_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout)
 
     @log_entry_exit(LOG)
     def vnf_operate_sync(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
@@ -302,7 +301,7 @@ class Vnfm(object):
                                     returned for the selected VNF instance(s).
         """
 
-        return self.vnfm_adapter.vnf_query(filter, attribute_selector)
+        return self.mano_adapter.vnf_query(filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
@@ -321,7 +320,7 @@ class Vnfm(object):
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.vnfm_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
+        return self.mano_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)
     def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
@@ -342,7 +341,7 @@ class Vnfm(object):
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.vnfm_adapter.vnf_scale_to_level(vnf_instance_id, instantiation_level_id, scale_info,
+        return self.mano_adapter.vnf_scale_to_level(vnf_instance_id, instantiation_level_id, scale_info,
                                                     additional_param)
 
     @log_entry_exit(LOG)
@@ -388,7 +387,7 @@ class Vnfm(object):
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.vnfm_adapter.vnf_terminate(vnf_instance_id, termination_type, graceful_termination_type)
+        return self.mano_adapter.vnf_terminate(vnf_instance_id, termination_type, graceful_termination_type)
 
     @log_entry_exit(LOG)
     def vnf_terminate_and_delete(self, vnf_instance_id, termination_type, graceful_termination_type=None,

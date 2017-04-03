@@ -17,9 +17,9 @@ from utils.logging_module import log_entry_exit
 LOG = logging.getLogger(__name__)
 
 
-class TackerVnfmAdapter(object):
+class TackerManoAdapter(object):
     """
-    Class of functions that map the ETSI standard operations exposed by the VNFM to the operations exposed by the
+    Class of functions that map the generic operations exposed by the MANO to the operations exposed by the
     OpenStack Tacker client.
     """
 

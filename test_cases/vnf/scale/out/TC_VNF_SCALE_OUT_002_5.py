@@ -1,8 +1,8 @@
 import logging
 
 from api.generic import constants
+from api.generic.mano import Mano
 from api.generic.traffic import Traffic
-from api.generic.vnfm import Vnfm
 from test_cases import TestCase
 
 # Instantiate logger
@@ -29,7 +29,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_002_5')
 
         # Create objects needed by the test.
-        self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic_params']['type'],
                                **self.tc_input['traffic_params']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
@@ -53,7 +53,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiate the VNF')
         self.time_record.START('instantiate_vnf')
-        self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
+        self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                                 vnf_instance_name=self.tc_input['vnf']['instance_name'],
                                                                 vnf_instance_description=None)
@@ -68,14 +68,14 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
+        self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             LOG.error('TC_VNF_SCALE_OUT_002_5 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
@@ -93,7 +93,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
                                            constants.VNF_STARTED
             return False
 
-        self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -143,7 +143,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
 
-        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_SCALE_OUT_002_5 execution failed')
             LOG.debug('Could not validate allocated vResources')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -155,7 +155,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering a resize of the VNF resources to the maximum')
         self.time_record.START('scale_out_vnf')
-        if self.vnfm.vnf_scale_sync(self.vnf_instance_id, scale_type='out',
+        if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='out',
                                     aspect_id=self.tc_input['scaling']['aspect'],
                                     additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
                 != constants.OPERATION_SUCCESS:
@@ -170,7 +170,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
 
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
-        self.tc_result['resources']['After scale out'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
 
         self.tc_result['scaling_out']['status'] = 'Success'
 
@@ -178,7 +178,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
         # 6. Validate VNF has resized to the max
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['max_instances']:
             LOG.error('TC_VNF_SCALE_OUT_002_5 execution failed')
             LOG.debug('VNF did not scale to the max')
@@ -207,7 +207,7 @@ class TC_VNF_SCALE_OUT_002_5(TestCase):
             return False
 
         # Configure stream destination MAC address(es).
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:

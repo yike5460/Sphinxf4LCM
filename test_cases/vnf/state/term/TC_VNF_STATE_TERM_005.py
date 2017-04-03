@@ -1,8 +1,8 @@
 import logging
 
 from api.generic import constants
+from api.generic.mano import Mano
 from api.generic.traffic import Traffic
-from api.generic.vnfm import Vnfm
 from test_cases import TestCase
 
 # Instantiate logger
@@ -30,7 +30,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         LOG.info('Starting setup for TC_VNF_STATE_TERM_005')
 
         # Create objects needed by the test.
-        self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic_params']['type'],
                                **self.tc_input['traffic_params']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
@@ -54,7 +54,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
-        self.vnf_instance_id = self.vnfm.vnf_create_and_instantiate(
+        self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                                 vnf_instance_name=self.tc_input['vnf']['instance_name'],
                                                                 vnf_instance_description=None)
@@ -69,14 +69,14 @@ class TC_VNF_STATE_TERM_005(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
+        self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
@@ -133,21 +133,21 @@ class TC_VNF_STATE_TERM_005(TestCase):
             self.tc_result['error_info'] = 'Low traffic flew with packet loss'
             return False
 
-        if not self.vnfm.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Could not validate allocated vResources')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Could not validate allocated vResources'
             return False
 
-        self.tc_result['resources']['Initial'] = self.vnfm.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the VNF')
         self.time_record.START('stop_vnf')
-        if self.vnfm.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
+        if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Could not stop VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
@@ -161,7 +161,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # 6. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Unexpected VNF instantiation state')
@@ -199,7 +199,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Terminating the VNF')
         self.time_record.START('terminate_vnf')
-        if self.vnfm.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful') != \
+        if self.mano.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful') != \
                 constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Unexpected status for terminating VNF operation')
@@ -215,7 +215,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # 9. Validate VNF is terminated and all resources have been released
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF is terminated and all resources have been released')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
             LOG.debug('Unexpected VNF instantiation state')

@@ -43,6 +43,7 @@ class TestCase(object):
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.em = None
+        self.mano = None
         self.vim = None
         self.vnf = None
         self.vnf_config = None

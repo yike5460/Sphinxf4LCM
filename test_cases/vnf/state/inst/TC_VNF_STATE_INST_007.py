@@ -1,7 +1,7 @@
 import logging
 
 from api.generic import constants
-from api.generic.vnfm import Vnfm
+from api.generic.mano import Mano
 from test_cases import TestCase
 
 # Instantiate logger
@@ -22,7 +22,7 @@ class TC_VNF_STATE_INST_007(TestCase):
         LOG.info('Starting setup for %s' % self.tc_name)
 
         # Create objects needed by the test.
-        self.vnfm = Vnfm(vendor=self.tc_input['vnfm_params']['type'], **self.tc_input['vnfm_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
 
         # Initialize test case result.
         self.tc_result['overall_status'] = constants.TEST_PASSED
@@ -41,7 +41,7 @@ class TC_VNF_STATE_INST_007(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
-        self.vnf_instance_id = self.vnfm.vnf_create_id(vnfd_id=self.tc_input['vnfd_id'],
+        self.vnf_instance_id = self.mano.vnf_create_id(vnfd_id=self.tc_input['vnfd_id'],
                                                        vnf_instance_name=self.tc_input['vnf']['instance_name'],
                                                        vnf_instance_description=None)
         if self.vnf_instance_id is None:
@@ -51,7 +51,7 @@ class TC_VNF_STATE_INST_007(TestCase):
             self.tc_result['error_info'] = 'VNF instantiation operation failed'
             return False
 
-        if self.vnfm.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
+        if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
                                           flavour_id=None) != constants.OPERATION_FAILED:
             LOG.error('%s execution failed' % self.tc_name)
             LOG.debug('VNF instantiation operation succeeded')
@@ -63,14 +63,14 @@ class TC_VNF_STATE_INST_007(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(self.vnfm.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
+        self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate MANO reports no VNF instance and the error
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating MANO reports no VNF instance and the error')
-        vnf_info = self.vnfm.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
             LOG.error('%s execution failed' % self.tc_name)
             LOG.debug('Unexpected VNF instantiation state')
