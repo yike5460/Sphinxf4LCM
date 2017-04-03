@@ -9,7 +9,8 @@ LOG = logging.getLogger(__name__)
 
 class Em(object):
     """
-    Class of generic functions representing operations exposed by the EM towards the NFVO as defined by GS NFV-IFA 007.
+    Class of generic functions representing operations exposed by the EM towards the Test Interface as defined by
+    ETSI GS NFV-TST 002 v1.1.1 (2016-10).
     """
     def __init__(self, vendor=None, **kwargs):
         """
@@ -26,7 +27,7 @@ class Em(object):
         ModifyConfiguration on the VNF from the EM.
 
         This function is a re-exposure of the VNF Configuration Management interface offered by the VNF/VNFM over the 
-        Ve-Vnfm reference points. See ETSI GS NFV-IFA 008. 
+        Ve-Vnfm reference points. See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.6.2.
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param vnf_configuration_data:  Configuration data for the VNF instance.

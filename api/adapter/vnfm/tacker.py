@@ -20,13 +20,13 @@ LOG = logging.getLogger(__name__)
 class TackerVnfmAdapter(object):
     """
     Class of functions that map the ETSI standard operations exposed by the VNFM to the operations exposed by the
-    OpenStack Tacker Client.
+    OpenStack Tacker client.
     """
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
         """
-        Create the Tacker Client.
+        Create the Tacker client.
         """
         try:
             self.keystone_client = os_client_config.make_client('identity',
@@ -47,10 +47,10 @@ class TackerVnfmAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
-        This function does not have a direct mapping in OpenStack so it will just return the status of the VNF with
-        given ID.
+        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
+        VNF with given ID.
         """
-        LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in OpenStack!')
+        LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in OpenStack Tacker client!')
         LOG.debug('Will return the state of the resource with given Id')
 
         if lifecycle_operation_occurrence_id is None:
@@ -167,14 +167,6 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
-        """
-        This function enables providing configuration parameters information for a VNF instance.
-
-        :param vnf_instance_id:         Identifier of the VNF instance.
-        :param vnf_configuration_data:  Configuration data for the VNF instance.
-        :param ext_virtual_link:        Information about external VLs to connect the VNF to.
-        :return:                        True.
-        """
         # Build a dict with the following structure (this is specified by the Tacker API):
         # "vnf": {
         #     "attributes": {
@@ -211,9 +203,6 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
-        """
-        This function creates a VNF with the specified ID and name.
-        """
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
 
@@ -226,34 +215,12 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_delete_id(self, vnf_instance_id):
-        """
-        This function does not have a direct mapping in OpenStack so it will just return the VNF instance ID.
-
-        :param vnf_instance_id: VNF instance identifier to be deleted.
-        :return:                Nothing.
-        """
-        LOG.debug('"VNF Delete ID" operation is not implemented in OpenStack!')
+        LOG.debug('"VNF Delete ID" operation is not implemented in OpenStack Tacker client!')
 
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
-        """
-        This function does not have a direct mapping in OpenStack so it will just return the VNF instance ID.
-
-        :param vnf_instance_id:             Identifier of the VNF instance.
-        :param flavour_id:                  Identifier of the VNF DF to be instantiated.
-        :param instantiation_level_id:      Identifier of the instantiation level of the DF to be instantiated. If not
-                                            present, the default instantiation level as declared in the VNFD shall be
-                                            instantiated.
-        :param ext_virtual_link:            Information about external VLs to connect the VNF to.
-        :param ext_managed_virtual_link:    Information about internal VLs that are managed by other entities than the
-                                            VNFM.
-        :param localization_language:       Localization language of the VNF to be instantiated.
-        :param additional_param:            Additional parameters passed as input to the instantiation process, specific
-                                            to the VNF being instantiated.
-        :return:                            VNF instance ID.
-        """
-        LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack!')
+        LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack Tacker client!')
         LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
 
         tup = ('vnf', vnf_instance_id)
@@ -261,17 +228,6 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
-        """
-        This function changes the state of a VNF instance.
-
-        :param vnf_instance_id:             Identifier of the VNF instance.
-        :param change_state_to:             Desired state to change the VNF to. Permitted values are: start, stop.
-        :param stop_type:                   It signals whether forceful or graceful stop is requested. Allowed values
-                                            are: forceful and graceful.
-        :param graceful_stop_timeout:       Time interval to wait for the VNF to be taken out of service during
-                                            graceful stop, before stopping the VNF.
-        :return:                            The identifier of the VNF lifecycle operation occurrence.
-        """
         # Get VNF information from Tacker
         tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
 
@@ -303,18 +259,6 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
-        """
-        This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
-        filtering criteria, and the information can be restricted to selected attributes.
-
-        :param filter:              Filter to select the VNF instance(s) about which information is queried.
-        :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
-                                    for the VNF instance(s) matching the filter. If absent, the complete information is
-                                    returned for the VNF instance(s) matching the filter.
-        :return:                    The information items about the selected VNF instance(s) that are returned. If
-                                    attribute_selector is present, only the attributes listed in attribute_selector are
-                                    returned for the selected VNF instance(s).
-        """
         vnf_instance_id = filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id.encode()
@@ -426,19 +370,6 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
-        """
-        This function scales a VNF horizontally (out/in).
-
-        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
-        :param scale_type:          Defines the type of the scale operation requested. Possible values: 'in', or 'out'
-        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
-                                    VNFD.
-        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation. Defaults
-                                    to 1.
-        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
-                                    to the VNF being scaled.
-        :return:                    Identifier of the VNF lifecycle operation occurrence.
-        """
         # Build a dict with the following structure (this is specified by the Tacker API):
         # "scale": {
         #   "type": "<type>",
@@ -456,16 +387,6 @@ class TackerVnfmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
-        """
-        This function terminates the VNF with the given ID.
-
-        :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
-        :param termination_type:            Signals whether forceful or graceful termination is requested.
-        :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
-                                            graceful termination, before shutting down the VNF and releasing the
-                                            resources.
-        :return:                            VNF instance ID.
-        """
         try:
             self.tacker_client.delete_vnf(vnf_instance_id)
         except tackerclient.common.exceptions.NotFound:

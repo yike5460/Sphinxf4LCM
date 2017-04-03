@@ -9,8 +9,15 @@ LOG = logging.getLogger(__name__)
 
 
 class OpenstackVimAdapter(object):
+    """
+    Class of functions that map the ETSI standard operations exposed by the VIM to the operations exposed by the
+    OpenStack Heat, Neutron and Nova clients.
+    """
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None, **kwargs):
+        """
+        Create the Heat, Neutron and Nova clients.
+        """
         try:
             self.heat_client = os_client_config.make_client('orchestration',
                                                             auth_url=auth_url,

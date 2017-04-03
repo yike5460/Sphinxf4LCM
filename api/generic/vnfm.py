@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 class Vnfm(object):
     """
     Class of generic functions representing operations exposed by the VNFM towards the NFVO as defined by 
-    GS NFV-IFA 007.
+    ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
     """
     def __init__(self, vendor=None, **kwargs):
         """
@@ -26,7 +26,7 @@ class Vnfm(object):
         """
         This function provides the status of a VNF lifecycle management operation.
 
-        This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    The status of the operation ex. 'Processing', 'Failed'.
@@ -94,7 +94,7 @@ class Vnfm(object):
         """
         This function enables providing configuration parameters information for a VNF instance.
 
-        This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param vnf_configuration_data:  Configuration data for the VNF instance.
@@ -111,7 +111,7 @@ class Vnfm(object):
         by that identifier, in the NOT_INSTANTIATED state without instantiating the VNF or doing any additional
         lifecycle operation(s).
 
-        This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnfd_id:                     Identifier that identifies the VNFD which defines the VNF instance to be
                                             created.
@@ -170,7 +170,7 @@ class Vnfm(object):
         """
         This function deletes a VNF instance ID and the associated instance of a VnfInfo information element.
 
-        This function was written in accordance with section 7.2.8 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.8 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id: VNF instance identifier to be deleted.
         :return:                Nothing.
@@ -184,7 +184,7 @@ class Vnfm(object):
         """
         This function instantiates a particular deployment flavour of a VNF based on the definition in the VNFD.
 
-        This function was written in accordance with section 7.2.3 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.3 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:             Identifier of the VNF instance.
         :param flavour_id:                  Identifier of the VNF DF to be instantiated.
@@ -245,7 +245,7 @@ class Vnfm(object):
         """
         This function changes the state of a VNF instance.
 
-        This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param change_state_to:         Desired state to change the VNF to. Permitted values are: start, stop.
@@ -291,7 +291,7 @@ class Vnfm(object):
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
         filtering criteria, and the information can be restricted to selected attributes.
 
-        This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param filter:              Filter to select the VNF instance(s) about which information is queried.
         :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
@@ -309,10 +309,10 @@ class Vnfm(object):
         """
         This function scales a VNF horizontally (out/in) or vertically (up/down).
 
-        This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
-        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).
+        :param type:                Defines the type of the scale operation requested (scale out, scale in).
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
                                     VNFD. Defaults to 1.
         :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
@@ -328,7 +328,7 @@ class Vnfm(object):
         """
         This function scales an instantiated VNF of a particular DF to a target size.
 
-        This function was written in accordance with section 7.2.5 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.5 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
         :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
@@ -378,7 +378,7 @@ class Vnfm(object):
         """
         This function terminates a VNF.
 
-        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 - v2.1.1.
+        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
         :param termination_type:            Signals whether forceful or graceful termination is requested.
