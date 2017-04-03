@@ -7,6 +7,9 @@
     "rift"    : "api.adapter.vnfm.rift.RiftVimAdapter",
     "dummy"   : "api.adapter.vnfm.dummy.DummyVnfmAdapter"
   },
+  "em" : {
+    "tacker"  : "api.adapter.em.tacker.TackerEmAdapter"
+  },
   "vnf": {
     "openwrt" : "api.adapter.vnf.openwrt.OpenwrtVnfAdapter",
     "ubuntu"  : "api.adapter.vnf.ubuntu.UbuntuVnfAdapter",
