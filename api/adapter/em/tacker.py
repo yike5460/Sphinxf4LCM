@@ -2,8 +2,10 @@ import logging
 import time
 
 import os_client_config
+import tackerclient.common.exceptions
 from tackerclient.tacker.client import Client as TackerClient
 
+from api.adapter import construct_adapter
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
@@ -14,7 +16,7 @@ LOG = logging.getLogger(__name__)
 class TackerEmAdapter(object):
     """
     Class of functions that map the ETSI standard operations exposed by the EM to the operations exposed by the
-    OpenStack Tacker Client.
+    OpenStack Tacker client management driver.
     """
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
@@ -39,7 +41,47 @@ class TackerEmAdapter(object):
             raise
 
     @log_entry_exit(LOG)
-    def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
+    def get_operation_status(self, lifecycle_operation_occurrence_id):
+        LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in OpenStack!')
+        LOG.debug('Will return the state of the resource with given Id')
+
+        if lifecycle_operation_occurrence_id is None:
+            return constants.OPERATION_FAILED
+        else:
+            resource_type, resource_id = lifecycle_operation_occurrence_id
+
+        if resource_type == 'vnf':
+            try:
+                tacker_show_vnf = self.tacker_client.show_vnf(resource_id)
+            except tackerclient.common.exceptions.NotFound:
+                # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
+                # exception because the VNF can no longer be found
+                return constants.OPERATION_SUCCESS
+
+            tacker_status = tacker_show_vnf['vnf']['status']
+
+            return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
+
+        if resource_type == 'stack':
+            # Get VNF information from Tacker
+            tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
+
+            # Get VIM object
+            vim_id = tacker_show_vnf['vim_id']
+            vim = self.get_vim_helper(vim_id)
+
+            # Get the Heat stack ID from Tacker information
+            stack_id = tacker_show_vnf['instance_id']
+
+            # Get the Heat stack status
+            heat_stack = vim.stack_get(stack_id)
+            stack_status = heat_stack.stack_status
+
+            return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
+
+    @log_entry_exit(LOG)
+    def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None,
+                                 vnfc_configuration_data=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
         # "vnf": {
         #     "attributes": {
@@ -73,3 +115,14 @@ class TackerEmAdapter(object):
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
         return operation_status
+
+    @log_entry_exit(LOG)
+    def get_vim_helper(self, vim_id):
+        vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        vim_auth_cred = vim_details['auth_cred']
+        vim_type = vim_details['type']
+
+        # TODO: get from config file
+        vim_auth_cred['password'] = 'stack'
+
+        return construct_adapter(vim_type, module_type='vim', **vim_auth_cred)
