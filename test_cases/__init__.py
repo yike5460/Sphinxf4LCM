@@ -42,6 +42,7 @@ class TestCase(object):
         self.tc_result['timestamps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
+        self.em = None
         self.vim = None
         self.vnf = None
         self.vnf_config = None
