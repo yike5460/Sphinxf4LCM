@@ -306,7 +306,7 @@ class Mano(object):
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
         """
-        This function scales a VNF horizontally (out/in) or vertically (up/down).
+        This function scales a VNF horizontally (out/in).
 
         This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
@@ -348,7 +348,7 @@ class Mano(object):
     def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None,
                        max_wait_time=constants.SCALE_INTERVAL, poll_interval=constants.POLL_INTERVAL):
         """
-        This function scales a VNF horizontally (out/in).
+        This function synchronously scales a VNF horizontally (out/in).
 
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
         :param scale_type:          Defines the type of the scale operation requested. Possible values: 'in', or 'out'
