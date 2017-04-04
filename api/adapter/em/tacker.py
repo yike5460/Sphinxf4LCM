@@ -48,11 +48,8 @@ class TackerEmAdapter(object):
         if lifecycle_operation_occurrence_id is None:
             return constants.OPERATION_FAILED
         else:
-            resource_type, resource_id = lifecycle_operation_occurrence_id
-
-        if resource_type == 'vnf':
             try:
-                tacker_show_vnf = self.tacker_client.show_vnf(resource_id)
+                tacker_show_vnf = self.tacker_client.show_vnf(lifecycle_operation_occurrence_id)
             except tackerclient.common.exceptions.NotFound:
                 # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
                 # exception because the VNF can no longer be found
@@ -61,23 +58,6 @@ class TackerEmAdapter(object):
             tacker_status = tacker_show_vnf['vnf']['status']
 
             return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
-
-        if resource_type == 'stack':
-            # Get VNF information from Tacker
-            tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
-
-            # Get VIM object
-            vim_id = tacker_show_vnf['vim_id']
-            vim = self.get_vim_helper(vim_id)
-
-            # Get the Heat stack ID from Tacker information
-            stack_id = tacker_show_vnf['instance_id']
-
-            # Get the Heat stack status
-            heat_stack = vim.stack_get(stack_id)
-            stack_status = heat_stack.stack_status
-
-            return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
 
     @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None,
@@ -126,3 +106,7 @@ class TackerEmAdapter(object):
         vim_auth_cred['password'] = 'stack'
 
         return construct_adapter(vim_type, module_type='vim', **vim_auth_cred)
+
+    @log_entry_exit(LOG)
+    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+        return None
