@@ -55,7 +55,7 @@ class TC_VNF_COMPLEX_003(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiate the VNF')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,

@@ -51,7 +51,7 @@ class TC_VNFC_SCALE_OUT_002_5(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Instantiate the VNF')
+        LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
                                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
@@ -151,9 +151,9 @@ class TC_VNFC_SCALE_OUT_002_5(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Trigger a resize of the VNF resources to the maximum
+        # 5. Trigger a resize of the VNF resources to the maximum by instructing the MANO to scale out the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering a resize of the VNF resources to the maximum')
+        LOG.info('Triggering a resize of the VNF resources to the maximum by instructing the MANO to scale out the VNF')
         self.time_record.START('scale_out_vnf')
         if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='out',
                                     aspect_id=self.tc_input['scaling']['aspect'],
