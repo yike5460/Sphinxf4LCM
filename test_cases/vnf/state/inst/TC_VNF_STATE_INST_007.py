@@ -15,7 +15,6 @@ class TC_VNF_STATE_INST_007(TestCase):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
     def setup(self):
@@ -82,12 +81,6 @@ class TC_VNF_STATE_INST_007(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['details'] = vnf_info.metadata['error_reason']
 
-        # --------------------------------------------------------------------------------------------------------------
-        # 3. Validate VIM reports no VNF instance and the error
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating VIM reports no VNF instance and the error')
-        # TODO
-
         LOG.info('%s execution completed successfully' % self.tc_name)
 
         return True
@@ -100,7 +93,6 @@ class TC_VNF_STATE_INST_007_001(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
 
     """
 
@@ -111,7 +103,6 @@ class TC_VNF_STATE_INST_007_002(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
 
@@ -122,7 +113,6 @@ class TC_VNF_STATE_INST_007_003(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
 
@@ -134,7 +124,6 @@ class TC_VNF_STATE_INST_007_004(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
 
@@ -145,7 +134,6 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
 
@@ -156,7 +144,6 @@ class TC_VNF_STATE_INST_007_006(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
 
@@ -167,7 +154,6 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
 
 
@@ -178,5 +164,4 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-    3. Validate VIM reports no VNF instance and the error
     """
