@@ -2,7 +2,7 @@ import logging
 
 import os_client_config
 
-from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage
+from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -74,6 +74,19 @@ class OpenstackVimAdapter(object):
         virtual_storage = VirtualStorage()
         virtual_storage.size_of_storage = server_flavor.disk
         virtual_compute.virtual_disks = [virtual_storage]
+
+        virtual_compute.virtual_network_interface = list()
+        port_dict = self.port_list(device_id=compute_id)
+        for port_list in port_dict:
+            for port in port_list['ports']:
+                virtual_network_interface = VirtualNetworkInterface()
+                virtual_network_interface.resource_id = port['id'].encode()
+                virtual_network_interface.owner_id = port['device_id'].encode()
+                virtual_network_interface.network_id = port['network_id'].encode()
+                virtual_network_interface.type_virtual_nic = port['binding:vnic_type'].encode()
+                virtual_network_interface.mac_address = port['mac_address'].encode()
+                virtual_network_interface.acceleration_capability = list()
+                virtual_compute.virtual_network_interface.append(virtual_network_interface)
 
         return virtual_compute
 
