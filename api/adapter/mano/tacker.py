@@ -114,10 +114,6 @@ class TackerManoAdapter(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
-
             expected_num_virtual_cpu = \
                 vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities']['nfv_compute'][
                     'properties']['num_cpus']
@@ -128,6 +124,16 @@ class TackerManoAdapter(object):
                 int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
                         'nfv_compute']['properties']['disk_size'].split(' ')[0])
 
+            expected_vnic_type = dict()
+            for node in vnfd['topology_template']['node_templates'].keys():
+                if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
+                    expected_vnic_type[node] = vnfd['topology_template']['node_templates'][node]['properties'].get(
+                        'type', 'normal')
+
+            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+
             if actual_num_virtual_cpu != expected_num_virtual_cpu or \
                             actual_virtual_memory != expected_virtual_memory or \
                             actual_size_of_storage != expected_size_of_storage:
@@ -137,6 +143,18 @@ class TackerManoAdapter(object):
                 LOG.debug('Expected %s vStorage, actual vStorage: %s' % (expected_size_of_storage,
                                                                          actual_size_of_storage))
                 return False
+
+            for vnic in virtual_compute.virtual_network_interface:
+                actual_vnic_type = vnic.type_virtual_nic
+
+                # Find the name of the CP that has a cp_instance_id that matches the resource_id of this vnic
+                for ext_cp in vnf_info.instantiated_vnf_info.ext_cp_info:
+                    if ext_cp.cp_instance_id == vnic.resource_id:
+                        cp_name = ext_cp.cpd_id
+                        break
+
+                if expected_vnic_type.get(cp_name, '') != actual_vnic_type:
+                    return False
 
         return True
 
@@ -155,13 +173,15 @@ class TackerManoAdapter(object):
 
             vresources[resource_id] = dict()
 
-            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+            num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+            virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+            size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+            num_vnics = len(virtual_compute.virtual_network_interface)
 
-            vresources[resource_id]['num_virtual_cpu'] = actual_num_virtual_cpu
-            vresources[resource_id]['virtual_memory'] = str(actual_virtual_memory) + ' MB'
-            vresources[resource_id]['size_of_storage'] = str(actual_size_of_storage) + ' GB'
+            vresources[resource_id]['vCPU'] = num_virtual_cpu
+            vresources[resource_id]['vMemory'] = str(virtual_memory) + ' MB'
+            vresources[resource_id]['vStorage'] = str(size_of_storage) + ' GB'
+            vresources[resource_id]['vNIC'] = str(num_vnics)
 
         return vresources
 
