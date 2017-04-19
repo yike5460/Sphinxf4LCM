@@ -23,7 +23,7 @@ class TC_VNFC_SCALE_OUT_002_7(TestCase):
        VNF
     6. Validate VNF has resized to the max
     7. Determine if and length of service disruption
-    8. Generate max traffic load
+    8. Start the max traffic load
     9. Validate max capacity without traffic loss
     """
 
@@ -198,9 +198,9 @@ class TC_VNFC_SCALE_OUT_002_7(TestCase):
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Generate max traffic load
+        # 8. Start the max traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Generating max traffic load')
+        LOG.info('Starting the max traffic load')
 
         # Stop the low traffic load.
         if not self.traffic.stop():
@@ -220,12 +220,12 @@ class TC_VNFC_SCALE_OUT_002_7(TestCase):
         self.traffic.config_traffic_stream(dest_mac_addr_list)
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
-        # Start the low traffic load.
+        # Start the max traffic load.
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNFC_SCALE_OUT_002_7 execution failed')
             LOG.debug('Traffic could not be started')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be started'
+            self.tc_result['error_info'] = 'Max traffic could not be started'
             return False
 
         # --------------------------------------------------------------------------------------------------------------

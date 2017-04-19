@@ -16,11 +16,11 @@ class TC_VNF_COMPLEX_003(TestCase):
     Sequence:
     1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
-    3. Generate low traffic load
+    3. Start the low traffic load
     4. Validate that traffic flows through without issues
     5. Trigger a resize of the VNF resources to reach the maximum
     6. Validate VNF has resized to the max and has max capacity
-    7. Generate max traffic load to load all VNF instances
+    7. Start the max traffic load
     8. Validate all traffic flows through and has reached max capacity
     9. Terminate the VNF
     10. Validate VNF is terminated and all resources have been released
@@ -100,9 +100,9 @@ class TC_VNF_COMPLEX_003(TestCase):
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Generate low traffic load
+        # 3. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Generating low traffic load')
+        LOG.info('Starting the low traffic load')
         if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                       traffic_config=self.tc_input['traffic_params']['traffic_config']):
             LOG.error('TC_VNF_COMPLEX_003 execution failed')
@@ -194,9 +194,9 @@ class TC_VNF_COMPLEX_003(TestCase):
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Generate max traffic load to load all VNF instances
+        # 7. Start the max traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Generating max traffic load to load all VNF instances')
+        LOG.info('Starting the max traffic load')
 
         # Stop the low traffic load.
         if not self.traffic.stop():
@@ -216,12 +216,12 @@ class TC_VNF_COMPLEX_003(TestCase):
         self.traffic.config_traffic_stream(dest_mac_addr_list)
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
-        # Start the low traffic load.
+        # Start the max traffic load.
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_COMPLEX_003 execution failed')
             LOG.debug('Traffic could not be started')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be started'
+            self.tc_result['error_info'] = 'Max traffic could not be started'
             return False
 
         # --------------------------------------------------------------------------------------------------------------

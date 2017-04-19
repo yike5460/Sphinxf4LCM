@@ -17,7 +17,7 @@ class TC_VNF_STATE_TERM_001(TestCase):
     1. Instantiate the VNF
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
-    4. Validate the provided functionality
+    4. Validate the provided functionality and all traffic goes through
     5. Stop the low traffic load
     6. Ensure that no traffic flows once stop is completed
     7. Terminate the VNF
@@ -113,7 +113,7 @@ class TC_VNF_STATE_TERM_001(TestCase):
         self.register_for_cleanup(self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Validate the provided functionality
+        # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
         if not self.traffic.does_traffic_flow(delay_time=5):

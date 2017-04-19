@@ -199,7 +199,7 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Start the low traffic load')
+        LOG.info('Starting the low traffic load')
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_STATE_START_002 execution failed')
             LOG.debug('Traffic could not be started')

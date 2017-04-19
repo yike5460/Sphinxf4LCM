@@ -201,7 +201,7 @@ class TC_VNF_STATE_START_003(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Start the normal traffic load')
+        LOG.info('Starting the normal traffic load')
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNF_STATE_START_003 execution failed')
             LOG.debug('Traffic could not be started')
