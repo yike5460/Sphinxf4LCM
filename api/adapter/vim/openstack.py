@@ -134,3 +134,27 @@ class OpenstackVimAdapter(object):
         This function suspends the stack with the given ID.
         """
         self.heat_client.actions.suspend(stack_id)
+
+    @log_entry_exit(LOG)
+    def _get_nova_limits(self):
+        limits = dict()
+        resource_types = ['vcpu', 'mem', 'instances']
+
+        for resource_type in resource_types:
+            limits[resource_type] = dict()
+
+        for nova_limit in self.nova_client.limits.get().absolute:
+            if nova_limit.name == 'totalCoresUsed':
+                limits['vcpu']['used'] = nova_limit.value
+            elif nova_limit.name == 'maxTotalCores':
+                limits['vcpu']['max'] = nova_limit.value
+            elif nova_limit.name == 'totalRAMUsed':
+                limits['mem']['used'] = nova_limit.value
+            elif nova_limit.name == 'maxTotalRAMSize':
+                limits['mem']['max'] = nova_limit.value
+            elif nova_limit.name == 'totalInstancesUsed':
+                limits['instances']['used'] = nova_limit.value
+            elif nova_limit.name == 'maxTotalInstances':
+                limits['instances']['max'] = nova_limit.value
+
+        return limits
