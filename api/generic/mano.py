@@ -98,10 +98,318 @@ class Mano(object):
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param vnf_configuration_data:  Configuration data for the VNF instance.
         :param ext_virtual_link:        Information about external VLs to connect the VNF to.
-        :return:                        Nothing.
+        :return:                        None.
         """
 
         return self.mano_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link)
+
+    @log_entry_exit(LOG)
+    def ns_create_id(self, nsd_id, ns_name, ns_description):
+        """
+        This function creates an NS instance ID and an associated instance of a NsInfo information element, identified
+        by that identifier, in the NOT_INSTANTIATED state without instantiating the NS or doing any additional lifecycle
+        operation(s).
+
+        This function was written in accordance with section 7.3.2 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param nsd_id:          Reference to the NSD used to create this NS instance.
+        :param ns_name:         Human readable name of the NS instance.
+        :param ns_description:  Human readable description of the NS instance.
+        :return:                Identifier of the instance of an NS that has been created.
+        """
+
+        return self.mano_adapter.ns_create_id(nsd_id, ns_name, ns_description)
+
+    @log_entry_exit
+    def ns_create_and_instantiate(self, nsd_id, ns_name, ns_description, flavour_id, sap_data=None, pnf_info=None,
+                                  vnf_instance_data=None, nested_ns_instance_data=None, location_constraints=None,
+                                  additional_param_for_ns=None, additional_param_for_vnf=None, start_time=None,
+                                  ns_instantiation_level_id=None, additional_affinity_or_anti_affinity_rule=None,
+                                  max_wait_time=constants.INSTANTIATION_TIME, poll_interval=constants.POLL_INTERVAL):
+        """
+        This function creates an NS instance ID and synchronously instantiates an NS.
+
+        :param nsd_id:                                      Reference to the NSD used to create this NS instance.
+        :param ns_name:                                     Human readable name of the NS instance.
+        :param ns_description:                              Human readable description of the NS instance.
+        :param flavour_id:                                  Flavour of the NSD used to instantiate this NS.
+        :param sap_data:                                    Create data concerning the SAPs of this NS.
+        :param pnf_info:                                    Information on the PNF(s) that are part of this NS.
+        :param vnf_instance_data:                           Specify an existing VNF instance to be used in the NS.
+        :param nested_ns_instance_data:                     Specify an existing NS instance to be used as a nested NS
+                                                            within the NS.
+        :param location_constraints:                        Defines the location constraints for the VNF to be
+                                                            instantiated as part of the NS instantiation.
+        :param additional_param_for_ns:                     Allows the OSS/BSS to provide additional parameter(s) at the
+                                                            NS level.
+        :param additional_param_for_vnf:                    Allows the OSS/BSS to provide additional parameter(s) per
+                                                            VNF instance.
+        :param start_time:                                  Timestamp indicating the earliest time to instantiate the
+                                                            NS.
+        :param ns_instantiation_level_id:                   Identifies one of the NS instantiation levels declared in
+                                                            the DF applicable to this NS instance.
+        :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
+                                                            for the VNF instances to be instantiated as part of the NS
+                                                            instantiation.
+        :param max_wait_time:                               Maximum interval of time in seconds to wait for the
+                                                            instantiation operation to reach a final state.
+        :param poll_interval:                               Interval of time in seconds between consecutive polls on the
+                                                            instantiation operation status.
+        :return:                                            NS instantiation operation status.
+        """
+        ns_instance_id = self.ns_create_id(nsd_id, ns_name, ns_description)
+        LOG.debug('NS instance ID: %s' % ns_instance_id)
+
+        if ns_instance_id is None:
+            return None
+
+        operation_status = self.ns_instantiate_sync(ns_instance_id, flavour_id, sap_data, pnf_info, vnf_instance_data,
+                                                    nested_ns_instance_data, location_constraints,
+                                                    additional_param_for_ns, additional_param_for_vnf, start_time,
+                                                    ns_instantiation_level_id,
+                                                    additional_affinity_or_anti_affinity_rule, max_wait_time,
+                                                    poll_interval)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            return None
+        return ns_instance_id
+
+    @log_entry_exit
+    def ns_delete_id(self, ns_instance_id):
+        """
+        This function an NS instance identifier and the associated NsInfo information element.
+
+        This function was written in accordance with section 7.3.8 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param ns_instance_id:  NS instance identifier to be deleted.
+        :return:                None
+        """
+
+        return self.mano_adapter.ns_delete_id(ns_instance_id)
+
+    @log_entry_exit
+    def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
+                       nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
+                       additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
+                       additional_affinity_or_anti_affinity_rule=None):
+        """
+        This operation will instantiate an NS.
+
+        This function was written in accordance with section 7.3.3 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param ns_instance_id:                              Identifier of the instance of the NS.
+        :param flavour_id:                                  Flavour of the NSD used to instantiate this NS.
+        :param sap_data:                                    Create data concerning the SAPs of this NS.
+        :param pnf_info:                                    Information on the PNF(s) that are part of this NS.
+        :param vnf_instance_data:                           Specify an existing VNF instance to be used in the NS.
+        :param nested_ns_instance_data:                     Specify an existing NS instance to be used as a nested NS
+                                                            within the NS.
+        :param location_constraints:                        Defines the location constraints for the VNF to be
+                                                            instantiated as part of the NS instantiation.
+        :param additional_param_for_ns:                     Allows the OSS/BSS to provide additional parameter(s) at the
+                                                            NS level.
+        :param additional_param_for_vnf:                    Allows the OSS/BSS to provide additional parameter(s) per
+                                                            VNF instance.
+        :param start_time:                                  Timestamp indicating the earliest time to instantiate the
+                                                            NS.
+        :param ns_instantiation_level_id:                   Identifies one of the NS instantiation levels declared in
+                                                            the DF applicable to this NS instance.
+        :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
+                                                            for the VNF instances to be instantiated as part of the NS
+                                                            instantiation.
+
+        :return:                                            Identifier of the NS lifecycle operation occurrence.
+
+        """
+
+        return self.mano_adapter.ns_instantiate(ns_instance_id, flavour_id, sap_data, pnf_info, vnf_instance_data,
+                                                nested_ns_instance_data, location_constraints, additional_param_for_ns,
+                                                additional_param_for_vnf, start_time, ns_instantiation_level_id,
+                                                additional_affinity_or_anti_affinity_rule)
+
+    @log_entry_exit
+    def ns_instantiate_sync(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
+                            nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
+                            additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
+                            additional_affinity_or_anti_affinity_rule=None, max_wait_time=constants.INSTANTIATION_TIME,
+                            poll_interval=constants.POLL_INTERVAL):
+        """
+        This function performs a synchronous NS instantiation, i.e. instantiates an NS and then polls the operation
+        status until the operation reaches a final state.
+
+        :param ns_instance_id:                              Identifier of the instance of the NS.
+        :param flavour_id:                                  Flavour of the NSD used to instantiate this NS.
+        :param sap_data:                                    Create data concerning the SAPs of this NS.
+        :param pnf_info:                                    Information on the PNF(s) that are part of this NS.
+        :param vnf_instance_data:                           Specify an existing VNF instance to be used in the NS.
+        :param nested_ns_instance_data:                     Specify an existing NS instance to be used as a nested NS
+                                                            within the NS.
+        :param location_constraints:                        Defines the location constraints for the VNF to be
+                                                            instantiated as part of the NS instantiation.
+        :param additional_param_for_ns:                     Allows the OSS/BSS to provide additional parameter(s) at the
+                                                            NS level.
+        :param additional_param_for_vnf:                    Allows the OSS/BSS to provide additional parameter(s) per
+                                                            VNF instance.
+        :param start_time:                                  Timestamp indicating the earliest time to instantiate the
+                                                            NS.
+        :param ns_instantiation_level_id:                   Identifies one of the NS instantiation levels declared in
+                                                            the DF applicable to this NS instance.
+        :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
+                                                            for the VNF instances to be instantiated as part of the NS
+                                                            instantiation.
+
+        :param max_wait_time:                               Maximum interval of time in seconds to wait for the
+                                                            instantiation operation to reach a final state.
+        :param poll_interval:                               Interval of time in seconds between consecutive polls on the
+                                                            instantiation operation status.
+        :return:                                            Operation status.
+        """
+
+        lifecycle_operation_occurrence_id = self.ns_instantiate(ns_instance_id, flavour_id, sap_data, pnf_info,
+                                                                vnf_instance_data, nested_ns_instance_data,
+                                                                location_constraints, additional_param_for_ns,
+                                                                additional_param_for_vnf, start_time,
+                                                                ns_instantiation_level_id,
+                                                                additional_affinity_or_anti_affinity_rule)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+
+        return operation_status
+
+    @log_entry_exit
+    def ns_query(self, filter, attribute_selector=None):
+        """
+        This function enables the OSS/BSS to query from the NFVO information on one or more NS(s). The operation also
+        supports querying information about VNF instance(s) that is (are) part of an NS.
+
+        This function was written in accordance with section 7.3.6 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param filter:              Filter defining the NSs on which the query applies, based on attributes of the
+                                    Network Service.
+        :param attribute_selector:  Provides a list of attribute names of NS. If present, only these attributes are
+                                    returned for the instances of NS matching the filter. If absent, the complete
+                                    instances of NS(s) are returned.
+        :return:                    Information on the NS and VNF instances part of the NS matching the input filter.
+                                    If attributeSelector is present, only the attributes listed in attributeSelector are
+                                    returned for the selected NSs and VNF instances.
+        """
+
+        return self.mano_adapter.ns_query(filter, attribute_selector)
+
+    @log_entry_exit
+    def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
+        """
+        This function scales an NS instance.
+
+        This function was written in accordance with section 7.3.4 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param ns_instance_id:  Identifier of the instance of the NS.
+        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'scale_ns, 'scale_vnf'.
+        :param scale_ns_data:   Provides the necessary information to scale the referenced NS instance. It shall be
+                                present when scale_type = 'scale_ns'.
+        :param scale_vnf_data:  Provides the information to scale a given VNF instance that is part of the referenced
+                                NS instance. Shall be present when scale_type = 'scale_vnf'.
+        :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
+                                timestamp.
+        :return:                Identifier of the NS lifecycle operation occurrence.
+
+        """
+
+        return self.mano_adapter.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data, scale_time)
+
+    @log_entry_exit
+    def ns_scale_sync(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None,
+                      max_wait_time=constants.SCALE_INTERVAL, poll_interval=constants.POLL_INTERVAL):
+        """
+        This function synchronously scales an NS instance.
+
+        :param ns_instance_id:  Identifier of the instance of the NS.
+        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'scale_ns, 'scale_vnf'.
+        :param scale_ns_data:   Provides the necessary information to scale the referenced NS instance. It shall be
+                                present when scale_type = 'scale_ns'.
+        :param scale_vnf_data:  Provides the information to scale a given VNF instance that is part of the referenced
+                                NS instance. Shall be present when scale_type = 'scale_vnf'.
+        :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
+                                timestamp.
+        :param max_wait_time:   Maximum interval of time in seconds to wait for the scaling operation to reach a final
+                                state.
+        :param poll_interval:   Interval of time in seconds between consecutive polls on the scaling operation result.
+        :return:                Operation status.
+        """
+
+        lifecycle_operation_occurrence_id = self.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data,
+                                                          scale_time)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+
+        return operation_status
+
+    @log_entry_exit
+    def ns_terminate(self, ns_instance_id, terminate_time=None):
+        """
+        This function terminates an NS.
+
+        This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param ns_instance_id:  Identifier of the NS instance to terminate.
+        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                automatically at this timestamp.
+        :return:                Identifier of the NS lifecycle operation occurrence.
+
+        """
+
+        return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time)
+
+    @log_entry_exit
+    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None, max_wait_time=constants.INSTANTIATION_TIME,
+                                poll_interval=constants.POLL_INTERVAL):
+        """
+        This function synchronously terminates an NS and deletes its instance ID.
+
+        :param ns_instance_id:  Identifier of the NS instance to terminate.
+        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                automatically at this timestamp.
+        :param max_wait_time:   Maximum interval of time in seconds to wait for the termination operation to reach a
+                                final state.
+        :param poll_interval:   Interval of time in seconds between consecutive polls on the terminate operation status.
+        :return:                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
+        """
+
+        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, max_wait_time, poll_interval)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            LOG.debug('Expected termination operation status %s, got %s' % (
+                constants.OPERATION_SUCCESS, operation_status))
+            return operation_status
+
+        self.ns_delete_id(ns_instance_id)
+
+    @log_entry_exit
+    def ns_terminate_sync(self, ns_instance_id, terminate_time=None, max_wait_time=constants.INSTANTIATION_TIME,
+                          poll_interval=constants.POLL_INTERVAL):
+        """
+        This function synchronously terminates an NS.
+
+        :param ns_instance_id:  Identifier of the NS instance to terminate.
+        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                automatically at this timestamp.
+        :param max_wait_time:   Maximum interval of time in seconds to wait for the termination operation to reach a
+                                final state.
+        :param poll_interval:   Interval of time in seconds between consecutive polls on the terminate operation status.
+        :return:                Operation status.
+        """
+
+        lifecycle_operation_occurrence_id = self.ns_terminate(ns_instance_id, terminate_time)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+
+        return operation_status
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
@@ -143,9 +451,9 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :param max_wait_time:               Maximum interval of time in seconds to wait for the instantiation operation 
+        :param max_wait_time:               Maximum interval of time in seconds to wait for the instantiation operation
                                             to reach a final state.
-        :param poll_interval:               Interval of time in seconds between consecutive polls on the instantiation 
+        :param poll_interval:               Interval of time in seconds between consecutive polls on the instantiation
                                             operation status.
         :return:                            VNF instantiation operation status.
         """
@@ -156,9 +464,8 @@ class Mano(object):
             return None
 
         operation_status = self.vnf_instantiate_sync(vnf_instance_id, flavour_id, instantiation_level_id,
-                                                     ext_managed_virtual_link, ext_managed_virtual_link,
-                                                     localization_language, additional_param, max_wait_time,
-                                                     poll_interval)
+                                                     ext_virtual_link, ext_managed_virtual_link, localization_language,
+                                                     additional_param, max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
             return None
@@ -172,7 +479,7 @@ class Mano(object):
         This function was written in accordance with section 7.2.8 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id: VNF instance identifier to be deleted.
-        :return:                Nothing.
+        :return:                None.
         """
 
         return self.mano_adapter.vnf_delete_id(vnf_instance_id)
@@ -221,12 +528,10 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :param max_wait_time:               Maximum interval of time in seconds to wait for the instantiation operation 
+        :param max_wait_time:               Maximum interval of time in seconds to wait for the instantiation operation
                                             to reach a final state.
         :param poll_interval:               Interval of time in seconds between consecutive polls on the instantiation
                                             operation status.
-                                            seconds.
-
         :return:                            Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id,
@@ -248,11 +553,11 @@ class Mano(object):
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param change_state_to:         Desired state to change the VNF to. Permitted values are: start, stop.
-        :param stop_type:               It signals whether forceful or graceful stop is requested. Allowed values are: 
-                                        forceful and graceful.
-        :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during graceful 
+        :param stop_type:               It signals whether forceful or graceful stop is requested. Possible values:
+                                        'forceful' and 'graceful'.
+        :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during graceful
                                         stop, before stopping the VNF.
-        :return:                        The identifier of the VNF lifecycle operation occurrence.
+        :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
 
         return self.mano_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout)
@@ -265,13 +570,13 @@ class Mano(object):
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param change_state_to:         Desired state to change the VNF to. Permitted values are: start, stop.
-        :param stop_type:               It signals whether forceful or graceful stop is requested. Allowed values
-                                        are: forceful and graceful.
+        :param stop_type:               It signals whether forceful or graceful stop is requested. Possible values:
+                                        'forceful' and 'graceful'.
         :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during
                                         graceful stop, before stopping the VNF.
         :param max_wait_time:           Maximum interval of time in seconds to wait for the operate operation to reach a
                                         final state.
-        :param poll_interval:           Interval of time in seconds between consecutive polls on the operate operation 
+        :param poll_interval:           Interval of time in seconds between consecutive polls on the operate operation
                                         result.
         :return:                        Operation status.
         """
@@ -400,11 +705,11 @@ class Mano(object):
         :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
                                             graceful termination, before shutting down the VNF and releasing the
                                             resources.
-        :param max_wait_time:               Maximum interval of time in seconds to wait for the termination operation to 
+        :param max_wait_time:               Maximum interval of time in seconds to wait for the termination operation to
                                             reach a final state.
-        :param poll_interval:               Interval of time in seconds between consecutive polls on the terminate 
-                                            operation status. 
-        :return:                            'SUCCESS' if both operations were successful, 'FAILED' otherwise
+        :param poll_interval:               Interval of time in seconds between consecutive polls on the terminate
+                                            operation status.
+        :return:                            'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
         operation_status = self.vnf_terminate_sync(vnf_instance_id, termination_type, graceful_termination_type,
                                                    max_wait_time, poll_interval)
@@ -420,17 +725,17 @@ class Mano(object):
     def vnf_terminate_sync(self, vnf_instance_id, termination_type, graceful_termination_type=None,
                            max_wait_time=constants.INSTANTIATION_TIME, poll_interval=constants.POLL_INTERVAL):
         """
-        This function terminates synchronously a VNF.
+        This function synchronously terminates a VNF.
 
         :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
         :param termination_type:            Signals whether forceful or graceful termination is requested.
         :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
                                             graceful termination, before shutting down the VNF and releasing the
                                             resources.
-        :param max_wait_time:               Maximum interval of time in seconds to wait for the terminate operation to 
+        :param max_wait_time:               Maximum interval of time in seconds to wait for the terminate operation to
                                             reach a final state.
-        :param poll_interval:               Interval of time in seconds between consecutive polls on the terminate 
-                                            operation status. 
+        :param poll_interval:               Interval of time in seconds between consecutive polls on the terminate
+                                            operation status.
         :return:                            Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_terminate(vnf_instance_id, termination_type,
