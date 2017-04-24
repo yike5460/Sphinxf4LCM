@@ -1,0 +1,49 @@
+# This structure was written in accordance with section 8.3.3.13 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+VnffgInfo:
+  description: This information element contains information about a VNFFG instance
+  attributes:
+    vnffg_id:
+      description: Identifier of the Vnffg information element
+      type: Identifier
+      required: true
+
+    vnffgd_id:
+      description: Identifier of the VNFFGD used to instantiate this VNFFG
+      type: Identifier
+      required: true
+
+    vnf_id:
+      description: Identifier(s) of the constituent VNF instance(s) of the VNFFG
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    pnf_id:
+      description: Identifier(s) of the constituent PNF instance(s) of the VNFFG
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    virtual_link_id:
+      description: Identifier(s) of the constituent VL instance(s) of the VNFFG
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    cp_id:
+      description: Identifiers of the CP instances attached to the constituent VNFs and PNFs or the sap instances of the VNFFG
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    nfp:
+      description: Information on the NFPs of this VNFFG
+      type: List
+      required: true
+      constraints:
+        entry_type: Nfp

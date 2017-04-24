@@ -1,0 +1,93 @@
+# This structure was written in accordance with section 8.3.3.2 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+NsInfo:
+  description: The clauses below define information elements related to NsInfo
+  attributes:
+    ns_instance_id:
+      description: Identifier of this NsInfo information element, identifying the NS instance
+      type: Identifier
+      required: true
+
+    ns_name:
+      description: Human readable name of the NS instance
+      type: String
+      required: true
+
+    description:
+      description: Human readable description of the NS instance
+      type: String
+      required: true
+
+    nsd_id:
+      description: Reference to the NSD used to instantiate this NS
+      type: Identifier
+      required: true
+
+    flavor_id:
+      description: Reference to the flavour of the NSD used to instantiate this NS
+      type: Identifier
+      required: false
+
+    vnf_info_id:
+      description: Reference to information on constituent VNFs of this NS
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    pnf_info:
+      description: Information on the PNF(s) that are part of this NS
+      type: List
+      required: false
+      constraints:
+        entry_type: PnfInfo
+
+    virtual_link_info:
+      description: Information on the VLs of this NS
+      type: List
+      required: false
+      constraints:
+        entry_type: NsVirtualLinkInfo
+
+    vnffg_info:
+      description: Information on the VNFFGs of this NS
+      type: List
+      required: false
+      constraints:
+        entry_type: VnffgInfo
+
+    sap_info:
+      description: Information on the SAPs of this NS
+      type: List
+      required: false
+      constraints:
+        entry_type: SapInfo
+
+    nested_ns_info_id:
+      description: Reference to information on nested NSs of this NS
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    ns_state:
+      description: The state of the NS. Possible values - NOT_INSTANTIATED (i.e. the NS instance is not instantiated or terminated), INSTANTIATED (i.e. the NS instance is instantiated)
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ INSTANTIATED, NOT_INSTANTIATED ]
+
+    ns_scale_status:
+      description: Represents for each NS scaling aspect declared in the applicable DF, how "big" the NS instance has been scaled w.r.t. that aspect
+      type: List
+      required: false
+      constraints:
+        entry_type: NsScaleInfo
+
+    additional_affinity_or_anti_affinity_rule:
+      description: Information on the additional affinity or anti-affinity rule from NS instantiation operation. Shall not conflict with rules already specified in the NSD
+      type: List
+      required: false
+      constraints:
+        entry_type: AffinityOrAntiAffinityRule

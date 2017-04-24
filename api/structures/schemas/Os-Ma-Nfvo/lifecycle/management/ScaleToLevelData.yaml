@@ -1,0 +1,23 @@
+# This structure was written in accordance with section 8.3.4.10 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ScaleToLevelData:
+  description: The ScaleToLevelData information element describes the information needed to scale a VNF instance to a target size
+  attributes:
+    instantiation_level_id:
+      description: Identifier of (reference to) the target instantiation level of the current DF to which the VNF instance is requested to be scaled
+      type: Identifier
+      required: false
+
+    scale_info:
+      description: For each scaling aspect of the current DF, defines the target scale level to which the VNF instance is to be scaled
+      type: List
+      required: false
+      constraints:
+        entry_type: ScaleInfo
+
+    additional_param:
+      description: Additional parameters passed by the NFVO as input to the scaling process, specific to the VNF instance being scaled
+      type: List
+      required: false
+      constraints:
+        entry_type: Mapping

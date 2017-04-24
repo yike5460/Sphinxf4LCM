@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 8.3.3.11 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+NsLinkPort:
+  description: This information element provides information about a port of an NS VL
+  attributes:
+    resource_handle:
+      description: Identifier(s) of the virtualised network resource(s) realizing this link port
+      type: ResourceHandle
+      required: true
+
+    cp_id:
+      description: CP connected to this link port
+      type: Identifier
+      required: false

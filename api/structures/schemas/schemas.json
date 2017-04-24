@@ -20,5 +20,15 @@
   "VnfExtCpInfo"                : "schemas/Or-Vnfm/lifecycle/management/VnfExtCpInfo.yaml",
   "VnfInfo"                     : "schemas/Or-Vnfm/lifecycle/management/VnfInfo.yaml",
   "VnfLinkPort"                 : "schemas/Or-Vnfm/lifecycle/management/VnfLinkPort.yaml",
-  "VimInfo"                     : "schemas/common/VimInfo.yaml"
+  "VimInfo"                     : "schemas/common/VimInfo.yaml",
+  "NsLinkPort"                  : "schemas/Os-Ma-Nfvo/lifecycle/management/NsLinkPort.yaml",
+  "NsVirtualLinkInfo"           : "schemas/Os-Ma-Nfvo/lifecycle/management/NsVirtualLinkInfo.yaml",
+  "AffinityOrAntiAffinityRule"  : "schemas/Os-Ma-Nfvo/lifecycle/management/AffinityOrAntiAffinityRule.yaml",
+  "Nfp"                         : "schemas/Os-Ma-Nfvo/lifecycle/management/Nfp.yaml",
+  "VnffgInfo"                   : "schemas/Os-Ma-Nfvo/lifecycle/management/VnffgInfo.yaml",
+  "SapInfo"                     : "schemas/Os-Ma-Nfvo/lifecycle/management/SapInfo.yaml",
+  "PnfExtCpInfo"                : "schemas/Os-Ma-Nfvo/lifecycle/management/PnfExtCpInfo.yaml",
+  "PnfInfo"                     : "schemas/Os-Ma-Nfvo/lifecycle/management/PnfInfo.yaml",
+  "NsScaleInfo"                 : "schemas/Os-Ma-Nfvo/lifecycle/management/NsScaleInfo.yaml",
+  "NsInfo"                      : "schemas/Os-Ma-Nfvo/lifecycle/management/NsInfo.yaml"
 }

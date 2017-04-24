@@ -1,0 +1,23 @@
+# This structure was written in accordance with section 8.3.3.10 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+NsVirtualLinkInfo:
+  description: This information element provides run-time information about an NS VL instance
+  attributes:
+    ns_virtual_link_desc_id:
+      description: Identifier of the VLD in the NSD for this VL
+      type: Identifier
+      required: true
+
+    resource_handle:
+      description: Identifier(s) of the virtualised network resource(s) realizing this VL
+      type: List
+      required: true
+      constraints:
+        entry_type: ResourceHandle
+
+    link_port:
+      description: Link ports of this VL. Cardinality of zero indicates that no port have yet been created for this VL
+      type: List
+      required: false
+      constraints:
+        entry_type: NsLinkPort

@@ -1,0 +1,31 @@
+# This structure was written in accordance with section 8.3.3.16 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+NsScaleInfo:
+  description:
+  attributes:
+    ns_scaling_aspect_id:
+      description: Identifier of the NS scaling aspect
+      type: Identifier
+      required: true
+
+    ns_scale_level_id:
+      description: Identifier of the NS scale level
+      type: Identifier
+      required: true
+
+    cp_instance_id:
+      description: Identifier of this VnfExtCpInfo information element
+      type: Identifier
+      required: true
+
+    cpd_id:
+      description: Identifier of the external CPD, vnfExtCpd in the VNFD
+      type: Identifier
+      required: true
+
+    address:
+      description: List of network addresses that have been configured (statically or dynamically) on the CP
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified

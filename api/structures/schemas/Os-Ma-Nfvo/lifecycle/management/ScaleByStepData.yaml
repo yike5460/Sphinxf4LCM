@@ -1,0 +1,29 @@
+# This structure was written in accordance with section 8.3.4.11 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ScaleByStepData:
+  description: The ScaleByStepData information element describes the information needed to scale a VNF instance by steps
+  attributes:
+    type:
+      description: Defines the type of the scale operation requested (scale out, scale in). The set of types actually supported depends on the capabilities of the VNF being managed, as declared in the VNFD
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ scale_out, scale_in, scale_up, scale_down ]
+
+    aspect_id:
+      description: Identifier of (reference to) the aspect of the VNF that is requested to be scaled, as declared in the VNFD
+      type: Identifier
+      required: true
+
+    number_of_steps:
+      description: Number of scaling steps. It shall be a positive number. Defaults to 1
+      type: Integer
+      required: false
+
+    additional_param:
+      description: Additional parameters passed by the NFVO as input to the scaling process, specific to the VNF instance being scaled
+      type: List
+      required: false
+      constraints:
+        entry_type: Mapping

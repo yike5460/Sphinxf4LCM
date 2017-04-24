@@ -1,0 +1,27 @@
+# This structure was written in accordance with section 8.3.4.9 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ScaleVnfData:
+  description: This information element describes the information needed, either to scale a VNF instance to a given level, or to scale a VNF instance by steps
+  attributes:
+    vnf_instance_id:
+      description: Identifier of the VNF instance being scaled
+      type: Identifier
+      required: true
+
+    type:
+      description: Defines the type of the scale VNF operation requested (scale out, scale in, scale up, scale down, scale to instantiation level, scale to scale level(s)). The set of types actually supported depends on the capabilities of the VNF being managed
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ scale_out, scale_in, scale_up, scale_down, scale_to_instantiation_level, scale_to_level ]
+
+    scale_to_level_data:
+      description: Provides the information needed when scaling to a given level
+      type: ScaleToLevelData
+      required: false
+
+    scale_by_step_data:
+      description: Provides the information needed when scaling by steps
+      type: ScaleByStepData
+      required: false

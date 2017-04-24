@@ -200,6 +200,10 @@ class IpAddress(StaticTypeAttribute):
     TYPE = str
 
 
+class Rule(String):
+    TYPE = str
+
+
 class SchemaLoader(type):
     def __new__(meta, name, bases, class_dict):
         if bases != (InformationElement,):
@@ -345,4 +349,44 @@ class NetworkQoS(InformationElementWithExternalSchema):
 
 
 class VirtualNetwork(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLinkPort(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class AffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
+    pass
+
+
+class Nfp(InformationElementWithExternalSchema):
+    pass
+
+
+class VnffgInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class SapInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class PnfExtCpInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class PnfInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class NsScaleInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class NsInfo(InformationElementWithExternalSchema):
     pass

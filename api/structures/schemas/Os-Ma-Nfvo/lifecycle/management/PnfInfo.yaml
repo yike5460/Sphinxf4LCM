@@ -1,0 +1,21 @@
+# This structure was written in accordance with section 8.3.3.9 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+PnfInfo:
+  description: This information element provides information about a PNF that is part of an NS instance
+  attributes:
+    pnf_name:
+      description: Name of the PNF
+      type: String
+      required: true
+
+    pnfd_info_id:
+      description: Identifier of (reference to) the PNFD information related to this PNF
+      type: Identifier
+      required: true
+
+    cp_info:
+      description: Information on the external CP of the PNF
+      type: List
+      required: true
+      constraints:
+        entry_type: PnfExtCpInfo

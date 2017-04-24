@@ -1,0 +1,30 @@
+# This structure was written in accordance with section 8.3.4.26 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+AffinityOrAntiAffinityRule:
+  description: The AffinityOrAntiAffinityRule describes the additional affinity or anti-affinity rule applicable between the VNF instances to be instantiated in the NS instantiation operation request or between the VNF instances to be instantiated in the NS instantiation operation request and the existing VNF instances
+  attributes:
+    descriptor_id:
+      description: Reference to a VNFD or vnfProfile defined in the NSD
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    vnf_instance_id:
+      description: Reference to the existing VNF instance as the subject of the affinity or anti-affinity rule
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    affinity_or_anti_affinity:
+      description: Specifies whether the rule is an affinity rule (TRUE) or an anti-affinity rule (FALSE)
+      type: Boolean
+      required: true
+
+    scope:
+      description: Specifies whether the scope of the rule is a node, a PoP, etc
+      type: Enum
+      required: true
+      constraints:
+        entry_type: NotSpecified

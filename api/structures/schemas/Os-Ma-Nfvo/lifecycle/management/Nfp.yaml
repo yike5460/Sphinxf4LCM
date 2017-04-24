@@ -1,0 +1,35 @@
+# This structure was written in accordance with section 8.3.3.15 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+Nfp:
+  description: The Nfp information element defines the information related to the NFP
+  attributes:
+    nfp_id:
+      description: Identifier of this Nfp information element
+      type: Identifier
+      required: true
+
+    cp_id:
+      description: Identifier(s) of the CPs and/or SAPs which the NFP passes by
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    total_cp:
+      description: Total number of CPs in this NFP
+      type: List
+      required: false
+      constraints:
+        entry_type: Integer
+
+    nfp_rule:
+      description: NFP classification and selection rule
+      type: Rule
+      required: true
+
+    nfp_state:
+      description: An indication of whether the NFP is enabled or disabled
+      type: Enum
+      required: true
+      constraints:
+        entry_type: NotSpecified

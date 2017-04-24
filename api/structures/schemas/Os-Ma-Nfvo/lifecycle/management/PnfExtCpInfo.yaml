@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 8.3.3.14 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+PnfExtCpInfo:
+  description: This information element provides information about the external CP of the PNF
+  attributes:
+    cpd_id:
+      description: Identifier of (reference to) the Connection Point Descriptor (CPD) for this CP
+      type: Identifier
+      required: true
+
+    address:
+      description: Address for this CP
+      type: NotSpecified
+      required: true

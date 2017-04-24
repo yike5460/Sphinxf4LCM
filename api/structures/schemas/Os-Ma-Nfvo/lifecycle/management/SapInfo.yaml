@@ -1,0 +1,29 @@
+# This structure was written in accordance with section 8.3.3.12 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+SapInfo:
+  description: This information element provides information about an SAP of an NS instance
+  attributes:
+    sap_instance_id:
+      description: Identifier of this SapInfo information element, identifying the SAP instance
+      type: Identifier
+      required: true
+
+    sapd_id:
+      description: Reference to the SAPD for this SAP
+      type: Identifier
+      required: true
+
+    sap_name:
+      description: Human readable name for the SAP
+      type: String
+      required: true
+
+    description:
+      description: Human readable description for the SAP
+      type: String
+      required: true
+
+    address:
+      description: Address for this SAP. In some cases, the NFVO provides the address
+      type: NotSpecified
+      required: true
