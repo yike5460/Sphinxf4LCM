@@ -1,4 +1,4 @@
-# This structure was written in accordance with section 8.5.4 of ETSI GS NFV-IFA 007 - v2.1.1.
+# This structure was written in accordance with section 8.5.4 of ETSI GS NFV-IFA 007 - v2.1.1 (2016-10).
 
 VnfcResourceInfo:
   description: VnfcResourceInfo provides information on virtualised compute and storage resources used by a VNFC

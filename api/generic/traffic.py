@@ -51,8 +51,8 @@ class Traffic(object):
         This function applies the new traffic load and traffic configurations. If the traffic already flows, the
         parameters get applied at run time.
 
-        :param traffic_load:    Possible values: "LOW_TRAFFIC_LOAD", "NORMAL_TRAFFIC_LOAD",
-                                                 "MAX_TRAFFIC_LOAD", "INITIAL", "PERCENTAGE"
+        :param traffic_load:    Possible values: 'LOW_TRAFFIC_LOAD', 'NORMAL_TRAFFIC_LOAD', 'MAX_TRAFFIC_LOAD',
+                                                 'INITIAL', 'PERCENTAGE'
         :param traffic_config:  Specific information required to run the traffic.
         :return:                True if traffic load and configuration parameter were applied, False otherwise.
         """

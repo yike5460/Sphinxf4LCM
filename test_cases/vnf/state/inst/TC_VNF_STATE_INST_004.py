@@ -75,8 +75,7 @@ class TC_VNF_STATE_INST_004(TestCase):
             LOG.error('TC_VNF_STATE_INST_004 execution failed')
             LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result[
-                'error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
+            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
             return False
 
         if not self.traffic.start(return_when_emission_starts=True):

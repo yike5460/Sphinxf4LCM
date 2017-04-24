@@ -18,7 +18,7 @@ class TC_VNF_COMPLEX_003(TestCase):
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate that traffic flows through without issues
-    5. Trigger a resize of the VNF resources to reach the maximum
+    5. Trigger a resize of the VNF resources to reach the maximum by instructing the MANO to scale out the VNF
     6. Validate VNF has resized to the max and has max capacity
     7. Start the max traffic load
     8. Validate all traffic flows through and has reached max capacity
@@ -155,18 +155,19 @@ class TC_VNF_COMPLEX_003(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Trigger a resize of the VNF resources to reach the maximum
+        # 5. Trigger a resize of the VNF resources to reach the maximum by instructing the MANO to scale out the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering a resize of the VNF resources to reach the maximum')
+        LOG.info('Triggering a resize of the VNF resources to reach the maximum by instructing the MANO to scale out '
+                 'the VNF')
         self.time_record.START('scale_out_vnf')
         if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='out',
                                     aspect_id=self.tc_input['scaling']['aspect'],
                                     additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
                 != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_COMPLEX_003 execution failed')
-            LOG.debug('Could not scale out VNF')
+            LOG.debug('MANO could not scale out the VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not scale out VNF'
+            self.tc_result['error_info'] = 'MANO could not scale out the VNF'
             self.tc_result['scaling_out']['status'] = 'Fail'
             return False
 
@@ -189,6 +190,7 @@ class TC_VNF_COMPLEX_003(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF did not scale to the max'
             return False
+
         self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['max_instances']
 
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()

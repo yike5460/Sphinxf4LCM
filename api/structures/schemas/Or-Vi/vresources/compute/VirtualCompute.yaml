@@ -1,4 +1,4 @@
-# This structure was written in accordance with section 8.4.3.2 of ETSI GS NFV-IFA 005 - v2.1.1.
+# This structure was written in accordance with section 8.4.3.2 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
 
 VirtualCompute:
   description: This clause describes the attributes for the VirtualCompute information element.

@@ -1,4 +1,4 @@
-# This structure was written in accordance with section 8.5.8 of ETSI GS NFV-IFA 007 - v2.1.1.
+# This structure was written in accordance with section 8.5.8 of ETSI GS NFV-IFA 007 - v2.1.1 (2016-10).
 
 ScaleInfo:
   description:  ScaleInfo information element provides information about the scale level of a VNF instance w.r.t. one scaling aspect

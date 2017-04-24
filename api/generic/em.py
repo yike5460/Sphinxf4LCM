@@ -80,7 +80,7 @@ class Em(object):
         :param vnf_configuration_data:  Configuration data for the VNF instance.
         :param ext_virtual_link:        Information about external VLs to connect the VNF to.
         :param vnfc_configuration_data: Configuration data related to VNFC instance(s). 
-        :return:                        Nothing.
+        :return:                        None.
         """
 
         return self.em_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link,

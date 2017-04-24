@@ -149,9 +149,9 @@ class TC_VNF_STATE_TERM_005(TestCase):
         self.time_record.START('stop_vnf')
         if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_TERM_005 execution failed')
-            LOG.debug('Could not stop VNF')
+            LOG.debug('Could not stop the VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not stop VNF'
+            self.tc_result['error_info'] = 'Could not stop the VNF'
             return False
         self.time_record.END('stop_vnf')
 

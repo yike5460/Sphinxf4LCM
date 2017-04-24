@@ -20,7 +20,7 @@ class TC_VNF_STATE_STOP_002(TestCase):
     4. Validate the provided functionality
     5. Stop the VNF
     6. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
-    7. Ensure that no traffic flows once stop is completed
+    7. Validate that no traffic flows once stop is completed
     """
 
     def setup(self):
@@ -148,9 +148,9 @@ class TC_VNF_STATE_STOP_002(TestCase):
         self.time_record.START('stop_vnf')
         if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_STOP_002 execution failed')
-            LOG.debug('Could not stop VNF')
+            LOG.debug('Could not stop the VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not stop VNF'
+            self.tc_result['error_info'] = 'Could not stop the VNF'
             return False
         self.time_record.END('stop_vnf')
 
@@ -181,9 +181,9 @@ class TC_VNF_STATE_STOP_002(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Ensure that no traffic flows once stop is completed
+        # 7. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Ensuring that no traffic flows once stop is completed')
+        LOG.info('Validating that no traffic flows once stop is completed')
         if self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_STATE_STOP_002 execution failed')
             LOG.debug('Traffic is still flowing')

@@ -1,4 +1,4 @@
-# This structure was written in accordance with section 8.4.5.3 of ETSI GS NFV-IFA 005 - v2.1.1.
+# This structure was written in accordance with section 8.4.5.3 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
 
 NetworkSubnet:
   description: The NetworkSubnet information element encapsulates information of an instantiated virtualised sub-network.

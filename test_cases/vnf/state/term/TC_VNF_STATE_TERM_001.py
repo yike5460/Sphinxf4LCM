@@ -19,7 +19,7 @@ class TC_VNF_STATE_TERM_001(TestCase):
     3. Start the low traffic load
     4. Validate the provided functionality and all traffic goes through
     5. Stop the low traffic load
-    6. Ensure that no traffic flows once stop is completed
+    6. Validate that no traffic flows once stop is completed
     7. Terminate the VNF
     8. Validate VNF is terminated and all resources have been released
     """
@@ -151,9 +151,9 @@ class TC_VNF_STATE_TERM_001(TestCase):
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Ensure that no traffic flows once stop is completed
+        # 6. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Ensuring that no traffic flows once stop is completed')
+        LOG.info('Validating that no traffic flows once stop is completed')
         if self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNF_STATE_TERM_001 execution failed')
             LOG.debug('Traffic is still flowing')
