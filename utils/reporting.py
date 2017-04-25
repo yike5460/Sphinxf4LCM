@@ -10,7 +10,7 @@ def report_test_case(tc_input, tc_result):
     print
     print '*** Test case environment ***'
     t = PrettyTable(['Module', 'Type'])
-    t.add_row(['VNFM', tc_input.get('vnfm_params', {}).get('type')])
+    t.add_row(['MANO', tc_input.get('mano_params', {}).get('type')])
     t.add_row(['VIM', tc_input.get('vim_params', {}).get('type')])
     t.add_row(['VNF', tc_input.get('vnf', {}).get('type')])
     t.add_row(['Traffic', tc_input.get('traffic_params', {}).get('type')])
