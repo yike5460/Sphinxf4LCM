@@ -30,5 +30,8 @@
   "PnfExtCpInfo"                : "schemas/Os-Ma-Nfvo/lifecycle/management/PnfExtCpInfo.yaml",
   "PnfInfo"                     : "schemas/Os-Ma-Nfvo/lifecycle/management/PnfInfo.yaml",
   "NsScaleInfo"                 : "schemas/Os-Ma-Nfvo/lifecycle/management/NsScaleInfo.yaml",
-  "NsInfo"                      : "schemas/Os-Ma-Nfvo/lifecycle/management/NsInfo.yaml"
+  "NsInfo"                      : "schemas/Os-Ma-Nfvo/lifecycle/management/NsInfo.yaml",
+  "ScaleByStepData"             : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleByStepData.yaml",
+  "ScaleToLevelData"            : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleToLevelData.yaml",
+  "ScaleVnfData"                : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleVnfData.yaml"
 }
