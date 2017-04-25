@@ -6,8 +6,9 @@ from utils.logging_module import configure_logger
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_001 import TC_VNF_STATE_INST_001
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_002 import TC_VNF_STATE_INST_002
 from test_cases.vnf.state.term.TC_VNF_STATE_TERM_002 import TC_VNF_STATE_TERM_002
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001_5 import TC_VNFC_SCALE_OUT_001_5
 from test_cases.vnf.scale.out.TC_VNF_SCALE_OUT_001_5 import TC_VNF_SCALE_OUT_001_5
-from test_cases.vnf.scale.out.TC_VNF_SCALE_OUT_003_5 import TC_VNF_SCALE_OUT_003_5
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_003_5 import TC_VNFC_SCALE_OUT_003_5
 from test_cases.vnf.state.start.TC_VNF_STATE_START_001 import TC_VNF_STATE_START_001
 from test_cases.vnf.state.start.TC_VNF_STATE_START_002 import TC_VNF_STATE_START_002
 from test_cases.vnf.state.start.TC_VNF_STATE_START_003 import TC_VNF_STATE_START_003
@@ -20,7 +21,7 @@ from test_cases.vnf.state.term.TC_VNF_STATE_TERM_004 import TC_VNF_STATE_TERM_00
 from test_cases.vnf.state.term.TC_VNF_STATE_TERM_005 import TC_VNF_STATE_TERM_005
 from test_cases.vnf.complex.TC_VNF_COMPLEX_002 import TC_VNF_COMPLEX_002
 from test_cases.vnf.complex.TC_VNF_COMPLEX_003 import TC_VNF_COMPLEX_003
-from test_cases.vnf.scale.out.TC_VNF_SCALE_OUT_002_5 import TC_VNF_SCALE_OUT_002_5
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_002_5 import TC_VNFC_SCALE_OUT_002_5
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_003 import TC_VNF_STATE_INST_003
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_004 import TC_VNF_STATE_INST_004
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_005 import TC_VNF_STATE_INST_005
@@ -28,7 +29,7 @@ from test_cases.vnf.state.inst.TC_VNF_STATE_INST_006 import TC_VNF_STATE_INST_00
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_007 import TC_VNF_STATE_INST_007_001, TC_VNF_STATE_INST_007_002, \
     TC_VNF_STATE_INST_007_003, TC_VNF_STATE_INST_007_004, TC_VNF_STATE_INST_007_005, TC_VNF_STATE_INST_007_006, \
     TC_VNF_STATE_INST_007_007, TC_VNF_STATE_INST_007_008
-from test_cases.vnf.scale.out.TC_VNF_SCALE_OUT_001_1 import TC_VNF_SCALE_OUT_001_1
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001_1 import TC_VNFC_SCALE_OUT_001_1
 
 # Getting and configuring the RootLogger.
 root_logger = logging.getLogger()
@@ -57,6 +58,8 @@ if __name__ == '__main__':
                                                  'project_name': 'admin',
                                                  'project_domain_name': 'default',
                                                  'user_domain_name': 'default'}},
+                 'nsd_id': 'c0870bda-e5f3-477c-be22-0d791f8bb828',
+                 'ns': {'name': 'test_ns'},
                  # VNFD with IP and MAC
                  'vnfd_id': 'c849dc0f-c5b2-4164-b883-b630a0d0812b',
                  # VNFD with SP
@@ -102,7 +105,7 @@ if __name__ == '__main__':
                                                        'right_traffic_gw': '0.0.0.0',
                                                        'port_speed': 100}},
                  'scaling': {'policies': ['SP1'],
-                             'aspect': None,
+                             'aspect': 'VDU1',
                              'increment': 1,
                              'max_instances': 3,
                              'default_instances': 1},
@@ -197,6 +200,10 @@ if __name__ == '__main__':
     # TC_VNF_SCALE_OUT_002_5(tc_input=openstack).execute()
     # LOG.info('Calling test case TC_VNF_SCALE_OUT_003_5')
     # TC_VNF_SCALE_OUT_003_5(tc_input=openstack).execute()
+
+    # Use VNFD with SP
+    LOG.info('Calling test case TC_VNF_SCALE_OUT_001_5')
+    TC_VNF_SCALE_OUT_001_5(tc_input=openstack).execute()
 
     # Use VNFD with max SP
     # LOG.info('Calling test case TC_VNF_COMPLEX_002')
