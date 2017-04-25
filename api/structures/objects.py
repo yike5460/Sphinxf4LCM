@@ -390,3 +390,15 @@ class NsScaleInfo(InformationElementWithExternalSchema):
 
 class NsInfo(InformationElementWithExternalSchema):
     pass
+
+
+class ScaleByStepData(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleToLevelData(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleVnfData(InformationElementWithExternalSchema):
+    pass
