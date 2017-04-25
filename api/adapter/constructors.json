@@ -1,7 +1,8 @@
 {
   "mano"  :{
     "rift"    : "api.adapter.mano.rift.RiftManoAdapter",
-    "tacker"  : "api.adapter.mano.tacker.TackerManoAdapter"
+    "tacker"  : "api.adapter.mano.tacker.TackerManoAdapter",
+    "dummy"   : "api.adapter.mano.dummy.DummyManoAdapter"
   },
   "vnfm" : {
     "tacker"  : "api.adapter.vnfm.tacker.TackerVnfmAdapter",
