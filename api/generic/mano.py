@@ -120,7 +120,7 @@ class Mano(object):
 
         return self.mano_adapter.ns_create_id(nsd_id, ns_name, ns_description)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_create_and_instantiate(self, nsd_id, ns_name, ns_description, flavour_id, sap_data=None, pnf_info=None,
                                   vnf_instance_data=None, nested_ns_instance_data=None, location_constraints=None,
                                   additional_param_for_ns=None, additional_param_for_vnf=None, start_time=None,
@@ -174,7 +174,7 @@ class Mano(object):
             return None
         return ns_instance_id
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_delete_id(self, ns_instance_id):
         """
         This function an NS instance identifier and the associated NsInfo information element.
@@ -187,7 +187,7 @@ class Mano(object):
 
         return self.mano_adapter.ns_delete_id(ns_instance_id)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
                        nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
@@ -227,7 +227,7 @@ class Mano(object):
                                                 additional_param_for_vnf, start_time, ns_instantiation_level_id,
                                                 additional_affinity_or_anti_affinity_rule)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_instantiate_sync(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
                             nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                             additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
@@ -278,7 +278,7 @@ class Mano(object):
 
         return operation_status
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):
         """
         This function enables the OSS/BSS to query from the NFVO information on one or more NS(s). The operation also
@@ -298,7 +298,7 @@ class Mano(object):
 
         return self.mano_adapter.ns_query(filter, attribute_selector)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
         """
         This function scales an NS instance.
@@ -319,7 +319,7 @@ class Mano(object):
 
         return self.mano_adapter.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data, scale_time)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_scale_sync(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None,
                       max_wait_time=constants.SCALE_INTERVAL, poll_interval=constants.POLL_INTERVAL):
         """
@@ -348,7 +348,7 @@ class Mano(object):
 
         return operation_status
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None):
         """
         This function terminates an NS.
@@ -364,7 +364,7 @@ class Mano(object):
 
         return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None, max_wait_time=constants.INSTANTIATION_TIME,
                                 poll_interval=constants.POLL_INTERVAL):
         """
@@ -388,7 +388,7 @@ class Mano(object):
 
         self.ns_delete_id(ns_instance_id)
 
-    @log_entry_exit
+    @log_entry_exit(LOG)
     def ns_terminate_sync(self, ns_instance_id, terminate_time=None, max_wait_time=constants.INSTANTIATION_TIME,
                           poll_interval=constants.POLL_INTERVAL):
         """
