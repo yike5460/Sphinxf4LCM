@@ -17,12 +17,6 @@ def report_test_case(tc_input, tc_result):
     print t
     print
 
-    print '*** Test case results ***'
-    t = PrettyTable(['Overall status', 'Error info'])
-    t.add_row([tc_result['overall_status'], tc_result['error_info']])
-    print t
-    print
-
     t1 = PrettyTable(['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
     port_speed = tc_input['traffic_params']['traffic_config']['port_speed']
     print_scaling_results = False
@@ -78,5 +72,11 @@ def report_test_case(tc_input, tc_result):
     t = PrettyTable(['Event', 'Timestamp (epoch time)'])
     for event_name, timestamp in tc_result.get('timestamps', {}).items():
         t.add_row([event_name, timestamp])
+    print t
+    print
+
+    print '*** Test case results ***'
+    t = PrettyTable(['Overall status', 'Error info'])
+    t.add_row([tc_result['overall_status'], tc_result['error_info']])
     print t
     print
