@@ -402,3 +402,27 @@ class ScaleToLevelData(InformationElementWithExternalSchema):
 
 class ScaleVnfData(InformationElementWithExternalSchema):
     pass
+
+
+class VnfLocationConstraint(InformationElementWithExternalSchema):
+    pass
+
+
+class ParamsForVnf(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleNsToLevelData(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleNsByStepsData(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfInstanceData(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleNsData(InformationElementWithExternalSchema):
+    pass
