@@ -33,5 +33,11 @@
   "NsInfo"                      : "schemas/Os-Ma-Nfvo/lifecycle/management/NsInfo.yaml",
   "ScaleByStepData"             : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleByStepData.yaml",
   "ScaleToLevelData"            : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleToLevelData.yaml",
-  "ScaleVnfData"                : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleVnfData.yaml"
+  "ScaleVnfData"                : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleVnfData.yaml",
+  "VnfLocationConstraint"       : "schemas/Os-Ma-Nfvo/lifecycle/management/VnfLocationConstraint.yaml",
+  "ParamsForVnf"                : "schemas/Os-Ma-Nfvo/lifecycle/management/ParamsForVnf.yaml",
+  "ScaleNsToLevelData"          : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleNsToLevelData.yaml",
+  "ScaleNsByStepsData"          : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleNsByStepsData.yaml",
+  "VnfInstanceData"             : "schemas/Os-Ma-Nfvo/lifecycle/management/VnfInstanceData.yaml",
+  "ScaleNsData"                 : "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleNsData.yaml"
 }
