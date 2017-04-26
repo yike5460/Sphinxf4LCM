@@ -5,6 +5,7 @@ from api.generic.mano import Mano
 from api.generic.traffic import Traffic
 from api.structures.objects import ScaleNsData, ScaleNsByStepsData
 from test_cases import TestCase
+from utils.misc import generate_name
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -56,7 +57,7 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
         LOG.info('Instantiating the NS')
         self.time_record.START('instantiate_ns')
         self.ns_instance_id = self.mano.ns_create_and_instantiate(nsd_id=self.tc_input['nsd_id'],
-                                                                  ns_name=self.tc_input['ns']['name'],
+                                                                  ns_name=generate_name(self.tc_input['ns']['name']),
                                                                   ns_description=None, flavour_id=None)
         if self.ns_instance_id is None:
             LOG.error('TC_VNF_SCALE_OUT_001_5 execution failed')

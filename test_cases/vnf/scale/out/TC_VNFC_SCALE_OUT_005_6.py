@@ -5,6 +5,7 @@ from api.generic.mano import Mano
 from api.generic.traffic import Traffic
 from api.generic.vnf import Vnf
 from test_cases import TestCase
+from utils.misc import generate_name
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -69,9 +70,9 @@ class TC_VNFC_SCALE_OUT_005_6(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                                vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                                vnf_instance_name=self.tc_input['vnf']['instance_name'],
-                                                                vnf_instance_description=None)
+                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
+                                                 vnf_instance_description=None)
         if self.vnf_instance_id is None:
             LOG.error('TC_VNFC_SCALE_OUT_005_6 execution failed')
             LOG.debug('Unexpected VNF instantiation ID')
