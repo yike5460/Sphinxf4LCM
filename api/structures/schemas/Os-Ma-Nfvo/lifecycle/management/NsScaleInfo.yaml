@@ -12,20 +12,3 @@ NsScaleInfo:
       description: Identifier of the NS scale level
       type: Identifier
       required: true
-
-    cp_instance_id:
-      description: Identifier of this VnfExtCpInfo information element
-      type: Identifier
-      required: true
-
-    cpd_id:
-      description: Identifier of the external CPD, vnfExtCpd in the VNFD
-      type: Identifier
-      required: true
-
-    address:
-      description: List of network addresses that have been configured (statically or dynamically) on the CP
-      type: List
-      required: false
-      constraints:
-        entry_type: NotSpecified
