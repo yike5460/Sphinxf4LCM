@@ -1,0 +1,49 @@
+# This structure was written in accordance with section 8.3.4.6 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ScaleNsData:
+  description: The ScaleNsData information element describes the information needed to scale an NS instance either by explicitly adding/removing existing VNF instances or by leveraging on the abstraction mechanism provided by the NS scaling aspects and NS levels information elements declared in the NSD
+  attributes:
+    vnf_instance_to_be_added:
+      description: Specifies an existing VNF instance to be added to the NS instance as part of the scaling operation. If needed, the VNF Profile to be used for this VNF instance is also provided
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfInstanceData
+
+    vnf_instance_to_be _removed:
+      description: Specifies a VNF instance to be removed from the NS instance as part of the scaling operation
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    scale_ns_by_steps_data:
+      description: Specifies the information needed to scale an NS instance by one or more scaling steps
+      type: ScaleNsByStepsData
+      required: false
+
+    scale_ns_to_level_data:
+      description: Specifies the information needed to scale an NS instance to a target size
+      type: ScaleNsToLevelData
+      required: false
+
+    additional_param_for_ns:
+      description: Allows the OSS/BSS to provide additional parameter(s) at the NS level necessary for the NS scaling
+      type: List
+      required: false
+      constraints:
+        entry_type: Mapping
+
+    additional_param_for_vnf:
+      description: Allows the OSS/BSS to provide additional parameter(s) per VNF instance
+      type: List
+      required: false
+      constraints:
+        entry_type: ParamsForVnf
+
+    location_constraints:
+      description: Defines the location constraints for the VNF to be instantiated as part of the NS scaling
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfLocationConstraint

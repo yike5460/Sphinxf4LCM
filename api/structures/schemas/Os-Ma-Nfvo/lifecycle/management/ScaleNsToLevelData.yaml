@@ -1,0 +1,16 @@
+# This structure was written in accordance with section 8.3.4.8 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ScaleNsToLevelData:
+  description: The ScaleNsToLevelData information element describes the information needed to scale an NS instance to a target size
+  attributes:
+    ns_instantiation_level:
+      description: Identifier of the target NS instantiation level of the current DF to which the NS instance is requested to be scaled
+      type: Identifier
+      required: false
+
+    ns_scale_info:
+      description: For each NS scaling aspect of the current DF, defines the target NS scale level to which the NS instance is to be scaled
+      type: List
+      required: false
+      constraints:
+        entry_type: NsScaleInfo

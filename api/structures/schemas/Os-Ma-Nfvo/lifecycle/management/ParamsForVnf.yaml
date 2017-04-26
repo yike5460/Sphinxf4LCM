@@ -1,0 +1,16 @@
+# This structure was written in accordance with section 8.3.4.5 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ParamsForVnf:
+  description: The ParamsForVnf specifies additional parameters for an NS instance on a per VNF instance basis
+  attributes:
+    vnf_profile_id:
+      description: Identifier of (reference to) a vnfProfile to which the additional parameters apply
+      type: Identifier
+      required: true
+
+    additional_param:
+      description: Additional parameters that are to be applied per VNF instance
+      type: List
+      required: false
+      constraints:
+        entry_type: Mapping

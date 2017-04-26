@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 8.3.4.3 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+VnfInstanceData:
+  description: The VnfInstanceData specifies an existing VNF instances to be used in the NS instance and if needed, the VNF Profile to use for this VNF instance
+  attributes:
+    vnf_instance_id:
+      description: Identifier of the existing VNF instance to be used in the NS
+      type: Identifier
+      required: true
+
+    vnf_profile_id:
+      description: Identifier of (Reference to) a vnfProfile defined in the NSD which the existing VNF instance shall be matched with. If not presents, the NFVO will select the VnfProfile matching the information in the VNF instance
+      type: Identifier
+      required: false

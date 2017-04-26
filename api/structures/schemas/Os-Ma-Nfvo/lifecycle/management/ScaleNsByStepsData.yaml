@@ -1,0 +1,22 @@
+# This structure was written in accordance with section 8.3.4.7 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+ScaleNsByStepsData:
+  description: The ScaleNsByStepsData information element describes the information needed to scale an NS instance by one or more scaling steps, with respect to a particular NS scaling aspect
+  attributes:
+    scaling_direction:
+      description: Specifies the scaling direction. Possible values - scale_out, scale_in
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ scale_out, scale_in ]
+
+    aspect_id:
+      description: Provides the aspect of the NS that is requested to be scaled, as declared in the NSD
+      type: Identifier
+      required: true
+
+    number_of_steps:
+      description: Specifies the number of scaling steps to be performed. Defaults to 1
+      type: Integer
+      required: false

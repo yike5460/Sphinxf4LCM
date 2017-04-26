@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 8.3.4.4 of ETSI GS NFV-IFA 013 - v2.1.1 (2016-10).
+
+VnfLocationConstraint:
+  description: The VnfLocationConstraint information element defines the location constraints for the VNF to be instantiated
+  attributes:
+    vnf_profile_id:
+      description: Identifier (reference to) of a VnfProfile in the NSD used to manage the lifecycle of the VNF instance
+      type: Identifier
+      required: true
+
+    location_constraints:
+      description: Defines the location constraints for the VNF instance to be created
+      type: NotSpecified
+      required: true
