@@ -108,7 +108,7 @@ class DummyManoAdapter(object):
         ns_info.description = 'ns_description'
         ns_info.nsd_id = 'nsd_id'
         ns_info.ns_state = 'INSTANTIATED'
-        ns_info.vnf_info_id = ['vnf_info_id']
+        ns_info.vnf_info_id = ['vnf_info_id1', 'vnf_info_id2']
 
         return ns_info
 
