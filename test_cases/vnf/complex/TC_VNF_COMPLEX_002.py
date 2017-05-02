@@ -210,7 +210,6 @@ class TC_VNF_COMPLEX_002(TestCase):
             return False
 
         # Configure stream destination MAC address(es).
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:

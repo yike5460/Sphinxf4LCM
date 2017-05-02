@@ -25,7 +25,7 @@ class TC_VNFC_SCALE_OUT_005_1(TestCase):
        maximum
     6. Validate VNF has resized
     7. Validate increased capacity without traffic loss
-    8. Validate that MANO has allocated more specialized hardware resources and added new VNFCs
+    8. Validate that MANO has allocated more specialized hardware resources
     9. Trigger a resize of the VNF resources to use less specialized hardware by decreasing the traffic load to the 
        minimum
     10. Validate VNF has resized and has decreased its capacity and removed VNFCs
@@ -257,9 +257,9 @@ class TC_VNFC_SCALE_OUT_005_1(TestCase):
         self.tc_result['scaling_in']['traffic_before'] = 'MAX_TRAFFIC_LOAD'
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Validate that MANO has allocated more specialized hardware resources and added new VNFCs
+        # 8. Validate that MANO has allocated more specialized hardware resources
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validate that MANO has allocated more specialized hardware resources and added new VNFCs')
+        LOG.info('Validate that MANO has allocated more specialized hardware resources')
         if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNFC_SCALE_OUT_005_1 execution failed')
             LOG.debug('Could not validate allocated vResources')
@@ -343,7 +343,6 @@ class TC_VNFC_SCALE_OUT_005_1(TestCase):
             return False
 
         # Configure stream destination MAC address(es).
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:

@@ -24,11 +24,11 @@ class TC_VNFC_SCALE_OUT_003_7(TestCase):
        the VNF
     6. Validate VNF has resized to the next level
     7. Determine if and length of service disruption
-    8. Start the max traffic load
-    9. Validate max capacity without traffic loss
+    8. Start the normal traffic load
+    9. Validate increased capacity without traffic loss
     10. Trigger the downsize of the VNF by instructing the EM to instruct the MANO to scale in the VNF
     11. Validate VNF has released the resources and decreased the VNFCs
-    12. Validate traffic drop occurs
+    12. Validate traffic drop occurred
     13. Reduce traffic load to level that the downsized VNF should process
     14. Validate traffic flows through without issues
     """
@@ -207,9 +207,9 @@ class TC_VNFC_SCALE_OUT_003_7(TestCase):
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Start the max traffic load
+        # 8. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the max traffic load')
+        LOG.info('Starting the normal traffic load')
 
         # Stop the low traffic load.
         if not self.traffic.stop():
@@ -220,43 +220,42 @@ class TC_VNFC_SCALE_OUT_003_7(TestCase):
             return False
 
         # Configure stream destination MAC address(es).
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
 
         self.traffic.config_traffic_stream(dest_mac_addr_list)
-        self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
+        self.traffic.config_traffic_load('NORMAL_TRAFFIC_LOAD')
 
-        # Start the max traffic load.
+        # Start the normal traffic load.
         if not self.traffic.start(return_when_emission_starts=True):
             LOG.error('TC_VNFC_SCALE_OUT_003_7 execution failed')
             LOG.debug('Traffic could not be started')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Max traffic could not be started'
+            self.tc_result['error_info'] = 'Normal traffic could not be started'
             return False
 
         # --------------------------------------------------------------------------------------------------------------
-        # 9. Validate max capacity without traffic loss
+        # 9. Validate increased capacity without traffic loss
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating max capacity without traffic loss')
+        LOG.info('Validating increased capacity without traffic loss')
         if not self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNFC_SCALE_OUT_003_7 execution failed')
             LOG.debug('Traffic is not flowing')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Max traffic did not flow'
+            self.tc_result['error_info'] = 'Normal traffic did not flow'
             return False
 
         if self.traffic.any_traffic_loss():
             LOG.error('TC_VNFC_SCALE_OUT_003_7 execution failed')
             LOG.debug('Traffic is flowing with packet loss')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Max traffic flew with packet loss'
+            self.tc_result['error_info'] = 'Normal traffic flew with packet loss'
             return False
 
-        self.tc_result['scaling_out']['traffic_after'] = 'MAX_TRAFFIC_LOAD'
-        self.tc_result['scaling_in']['traffic_before'] = 'MAX_TRAFFIC_LOAD'
+        self.tc_result['scaling_out']['traffic_after'] = 'NORMAL_TRAFFIC_LOAD'
+        self.tc_result['scaling_in']['traffic_before'] = 'NORMAL_TRAFFIC_LOAD'
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Trigger the downsize of the VNF by instructing the EM to instruct the MANO to scale in the VNF
@@ -295,9 +294,9 @@ class TC_VNFC_SCALE_OUT_003_7(TestCase):
         self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['default_instances']
 
         # --------------------------------------------------------------------------------------------------------------
-        # 12. Validate traffic drop occurs
+        # 12. Validate traffic drop occurred
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating traffic drop occurs')
+        LOG.info('Validating traffic drop occurred')
         if not self.traffic.any_traffic_loss():
             LOG.error('TC_VNFC_SCALE_OUT_003_7 execution failed')
             LOG.debug('Max traffic flew without packet loss')
@@ -310,16 +309,15 @@ class TC_VNFC_SCALE_OUT_003_7(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Reducing traffic load to level that the downsized VNF should process')
 
-        # Stop the low traffic load.
+        # Stop the normal traffic load.
         if not self.traffic.stop():
             LOG.error('TC_VNFC_SCALE_OUT_003_7 execution failed')
             LOG.debug('Traffic could not be stopped')
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be stopped'
+            self.tc_result['error_info'] = 'Normal traffic could not be stopped'
             return False
 
         # Configure stream destination MAC address(es)
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:

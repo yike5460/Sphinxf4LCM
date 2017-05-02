@@ -164,6 +164,7 @@ class TC_VNFC_SCALE_OUT_001_5(TestCase):
             LOG.debug('MANO could not scale out the VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'MANO could not scale out the VNF'
+            self.tc_result['scaling_out']['status'] = 'Fail'
             return False
 
         self.time_record.END('scale_out_vnf')

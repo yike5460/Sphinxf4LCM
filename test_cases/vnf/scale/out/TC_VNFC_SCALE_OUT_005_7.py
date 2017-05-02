@@ -26,7 +26,7 @@ class TC_VNFC_SCALE_OUT_005_7(TestCase):
     6. Validate VNF has resized
     7. Start the normal traffic load
     8. Validate increased capacity without traffic loss
-    9. Validate that MANO has allocated more specialized hardware resources and added new VNFCs
+    9. Validate that MANO has allocated more specialized hardware resources
     10. Start the low traffic load
     11. Trigger a resize of the VNF resources to use less specialized hardware by instructing the EM to instruct the 
         MANO to scale in the VNF
@@ -221,7 +221,6 @@ class TC_VNFC_SCALE_OUT_005_7(TestCase):
             return False
 
         # Configure stream destination MAC address(es).
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
@@ -260,9 +259,9 @@ class TC_VNFC_SCALE_OUT_005_7(TestCase):
         self.tc_result['scaling_in']['traffic_before'] = 'NORMAL_TRAFFIC_LOAD'
 
         # --------------------------------------------------------------------------------------------------------------
-        # 9. Validate that MANO has allocated more specialized hardware resources and added new VNFCs
+        # 9. Validate that MANO has allocated more specialized hardware resources
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validate that MANO has allocated more specialized hardware resources and added new VNFCs')
+        LOG.info('Validate that MANO has allocated more specialized hardware resources')
         if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
             LOG.error('TC_VNFC_SCALE_OUT_005_7 execution failed')
             LOG.debug('Could not validate allocated vResources')
@@ -366,7 +365,6 @@ class TC_VNFC_SCALE_OUT_005_7(TestCase):
             return False
 
         # Configure stream destination MAC address(es).
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:

@@ -23,7 +23,7 @@ class TC_VNFC_SCALE_OUT_003_4(TestCase):
     5. Trigger a resize of the VNF resources to the next level by increasing the traffic load to the maximum
     6. Validate VNF has resized to the next level
     7. Determine if and length of service disruption
-    8. Validate max capacity without traffic loss
+    8. Validate increased capacity without traffic loss
     9. Trigger the downsize of the VNF by decreasing the traffic load to the minimum
     10. Validate VNF has released the resources and decreased the VNFCs
     11. Validate traffic drop occurred
@@ -207,9 +207,9 @@ class TC_VNFC_SCALE_OUT_003_4(TestCase):
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Validate max capacity without traffic loss
+        # 8. Validate increased capacity without traffic loss
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating max capacity without traffic loss')
+        LOG.info('Validating increased capacity without traffic loss')
         # Because the VNF scaled out, we need to reconfigure traffic so that it passes through all VNFCs.
 
         # Stop the max traffic load.

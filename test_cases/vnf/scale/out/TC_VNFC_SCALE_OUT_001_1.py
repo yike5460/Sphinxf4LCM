@@ -20,7 +20,7 @@ class TC_VNFC_SCALE_OUT_001_1(TestCase):
     2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     3. Start the low traffic load
     4. Validate the provided functionality and all traffic goes through
-    5. Trigger a resize of the VNF resources by increasing the traffic load to the maximum 
+    5. Trigger a resize of the VNF resources by increasing the traffic load to the maximum
     6. Validate VNF has resized by adding VNFCs
     7. Determine if and length of service disruption
     8. Validate increased capacity without loss
