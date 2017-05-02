@@ -187,13 +187,16 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
             LOG.debug('MANO could not scale out the NS')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'MANO could not scale out the NS'
+            self.tc_result['scaling_out']['status'] = 'Fail'
             return False
 
         self.time_record.END('scale_out_ns')
 
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = dict()
+        for vnf_instance_id in ns_info.vnf_info_id:
+            self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
 
         self.tc_result['scaling_out']['status'] = 'Success'
 
@@ -234,16 +237,8 @@ class TC_VNF_SCALE_OUT_001_5(TestCase):
 
         # Configure stream destination MAC address(es).
         dest_mac_addr_list = ''
-
-        for index in range(0, len(ns_info.vnf_info_id)):
-
-            # Get the instance ID of the VNF inside the NS for the current index
-            vnf_instance_id = ns_info.vnf_info_id[index]
-            print vnf_instance_id
-
-            # Get the VnfInfo information element for the VNF with the current vnf_instance_id
+        for vnf_instance_id in ns_info.vnf_info_id:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
-
             for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
                 if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
                     dest_mac_addr_list += ext_cp_info.address[0] + ' '
