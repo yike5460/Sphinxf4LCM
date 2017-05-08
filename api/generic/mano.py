@@ -19,6 +19,7 @@ class Mano(object):
         """
         self.vendor = vendor
         self.mano_adapter = construct_adapter(vendor, module_type='mano', **kwargs)
+        self.notification_queues = dict()
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -746,3 +747,16 @@ class Mano(object):
                                                               max_wait_time=max_wait_time, poll_interval=poll_interval)
 
         return operation_status
+
+    @log_entry_exit(LOG)
+    def vnf_lifecycle_change_notification_subscribe(self, filter=None):
+        subscription_id, notification_queue = self.mano_adapter.vnf_lifecycle_change_notification_subscribe(self, filter)
+        self.notification_queues[subscription_id] = notification_queue
+        return subscription_id
+
+    @log_entry_exit(LOG)
+    def wait_for_notification(self, subscription_id, notification_pattern):
+        notification_queue = self.notification_queues[subscription_id]
+        #TODO: check for events in queue (via coroutine mechanism)
+        return
+    
