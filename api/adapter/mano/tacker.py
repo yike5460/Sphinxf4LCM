@@ -415,3 +415,22 @@ class TackerManoAdapter(object):
 
         tup = ('vnf', vnf_instance_id)
         return tup
+
+    @log_entry_exit(LOG)
+    def vnf_lifecycle_change_notification_subscribe(self, filter):
+        #TODO: create thread for polling events and push them in a queue (via coroutine mechanism)
+        return None
+
+    @log_entry_exit(LOG)
+    def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
+        params = dict()
+        if resource_id is not None:
+            params['resource_id'] = resource_id
+        if event_type is not None:
+            params['event_type'] = event_type
+
+        vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
+        if starting_from is not None:
+            vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] >= starting_from)
+        return vnf_events
+    
