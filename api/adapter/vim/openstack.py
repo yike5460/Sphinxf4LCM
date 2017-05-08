@@ -2,7 +2,8 @@ import logging
 
 import os_client_config
 
-from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface
+from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
+    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ class OpenstackVimAdapter(object):
     Class of functions that map the ETSI standard operations exposed by the VIM to the operations exposed by the
     OpenStack Heat, Neutron and Nova clients.
     """
+
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None, **kwargs):
         """
@@ -45,6 +47,16 @@ class OpenstackVimAdapter(object):
                                                             project_name=project_name,
                                                             project_domain_name=project_domain_name,
                                                             user_domain_name=user_domain_name)
+
+            self.cinder_client = os_client_config.make_client('volume',
+                                                            auth_url=auth_url,
+                                                            username=username,
+                                                            password=password,
+                                                            identity_api_version=identity_api_version,
+                                                            project_name=project_name,
+                                                            project_domain_name=project_domain_name,
+                                                            user_domain_name=user_domain_name)
+
 
         except:
             LOG.debug('Unable to create %s instance' % self.__class__.__name__)
@@ -158,3 +170,52 @@ class OpenstackVimAdapter(object):
                 limits['instances']['max'] = nova_limit.value
 
         return limits
+
+    @log_entry_exit(LOG)
+    def query_compute_resource_quota(self, filter):
+        """
+        This function gets quota information for resources specified in the filter for project_id retrieved from nova.
+        """
+        project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
+        quotas = self.nova_client.quotas.get(tenant_id=project_id)
+        virtual_compute_quota = VirtualComputeQuota()
+        virtual_compute_quota.resource_group_id = quotas._info['id'].encode()
+        resources = {'num_vcpus': quotas.cores, 'num_vc_instances': quotas.instances, 'virtual_mem_size': quotas.ram}
+        for item, value in resources.items():
+            if value != -1:
+                setattr(virtual_compute_quota, item, value)
+        return virtual_compute_quota
+
+    @log_entry_exit(LOG)
+    def query_network_resource_quota(self, filter):
+        """
+        This function gets quota information for resources specified in the filter for project_id retrieved from 
+        neutron.
+        """
+        project_id = self.neutron_client.httpclient.session.auth.auth_ref._data['token']['project']['id']
+        quotas = self.neutron_client.show_quota(project_id)
+        virtual_network_quota = VirtualNetworkQuota()
+        virtual_network_quota.resource_group_id = project_id.encode()
+        resources = {'num_public_ips': quotas['quota']['floatingip'], 'num_ports': quotas['quota']['port'],
+                     'num_subnets': quotas['quota']['subnet']}
+        for item, value in resources.items():
+            if value != -1:
+                setattr(virtual_network_quota, item, value)
+        return virtual_network_quota
+
+    @log_entry_exit(LOG)
+    def query_storage_resource_quota(self, filter):
+        """
+        This function gets quota information for resources specified in the filter for project_id retrieved from 
+        neutron.
+        """
+        project_id = self.cinder_client.client.session.auth.auth_ref._data['token']['project']['id']
+        quotas = self.cinder_client.quotas.get(project_id)
+        virtual_storage_quota = VirtualStorageQuota()
+        virtual_storage_quota.resource_group_id = project_id.encode()
+        resources = {'storage_size': quotas.gigabytes, 'num_snapshots': quotas.snapshots,
+                     'num_volumes': quotas.volumes}
+        for item, value in resources.items():
+            if value != -1:
+                setattr(virtual_storage_quota, item, value)
+        return virtual_storage_quota
