@@ -1,0 +1,25 @@
+# This structure was written in accordance with section 8.11.3.3 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+VirtualNetworkQuota:
+  description: This clause describes the attributes for the VirtualComputeQuota information element.
+  attributes:
+    resource_group_id:
+      description: Unique identifier of the "infrastructure resource group", logical grouping of virtual resources assigned to a tenant within an Infrastructure Domain.
+      type: Identifier
+      required: true
+
+    num_public_ips:
+      description: Number of public IP addresses that have been restricted by the quota. The cardinality can be 0 if no specific number of public IP addresses has been requested to be restricted by the quota.
+      type: Integer
+      required: false
+
+    num_ports:
+      description: Number of ports that have been restricted by the quota. The cardinality can be 0 if no specific number of ports has been requested to be restricted by the quota.
+      type: Integer
+      required: false
+
+    num_subnets:
+      description: Number of subnets that have been restricted by the quota. The cardinality can be 0 if no specific number of subnets has been requested to be restricted by the quota.
+      type: Integer
+      required: false
+
