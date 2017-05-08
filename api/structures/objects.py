@@ -426,3 +426,15 @@ class VnfInstanceData(InformationElementWithExternalSchema):
 
 class ScaleNsData(InformationElementWithExternalSchema):
     pass
+
+
+class VirtualComputeQuota(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkQuota(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualStorageQuota(InformationElementWithExternalSchema):
+    pass
