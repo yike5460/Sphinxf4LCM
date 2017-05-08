@@ -1,5 +1,6 @@
 {
   "VirtualCompute"              : "schemas/Or-Vi/vresources/compute/VirtualCompute.yaml",
+  "VirtualComputeQuota"         : "schemas/Or-Vi/vresources/compute/VirtualComputeQuota.yaml",
   "VirtualCpu"                  : "schemas/Or-Vi/vresources/compute/VirtualCpu.yaml",
   "VirtualCpuPinning"           : "schemas/Or-Vi/vresources/compute/VirtualCpuPinning.yaml",
   "VirtualMemory"               : "schemas/Or-Vi/vresources/compute/VirtualMemory.yaml",
@@ -8,7 +9,9 @@
   "VirtualNetwork"              : "schemas/Or-Vi/vresources/network/VirtualNetwork.yaml",
   "VirtualNetworkPort"          : "schemas/Or-Vi/vresources/network/VirtualNetworkPort.yaml",
   "NetworkQoS"                  : "schemas/Or-Vi/vresources/network_data/NetworkQoS.yaml",
+  "VirtualNetworkQuota"         : "schemas/Or-Vi/vresources/network/VirtualNetworkQuota.yaml",
   "VirtualStorage"              : "schemas/Or-Vi/vresources/storage/VirtualStorage.yaml",
+  "VirtualStorageQuota"         : "schemas/Or-Vi/vresources/storage/VirtualStorageQuota.yaml",
   "ExtManagedVirtualLinkInfo"   : "schemas/Or-Vnfm/lifecycle/management/ExtManagedVirtualLinkInfo.yaml",
   "ExtVirtualLinkInfo"          : "schemas/Or-Vnfm/lifecycle/management/ExtVirtualLinkInfo.yaml",
   "InstantiatedVnfInfo"         : "schemas/Or-Vnfm/lifecycle/management/InstantiatedVnfInfo.yaml",
