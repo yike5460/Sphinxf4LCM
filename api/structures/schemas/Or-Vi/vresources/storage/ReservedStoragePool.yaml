@@ -1,0 +1,24 @@
+# This structure was written in accordance with section 8.8.6.4 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+ReservedStoragePool:
+  description: This clause describes the attributes for the ReservedStoragePool information element.
+  attributes:
+    storage_size:
+      description: Identifier of the resource reservation.
+      type: Number
+      required: true
+
+    num_snapshots:
+      description: Information about storage resources that have been reserved, e.g. {"gigabytes": 1000, "snapshots": 10, "volumes": 10}.
+      type: Integer
+      required: true
+
+    num_volumes:
+      description: Status of the storage resource reservation, e.g. to indicate if a reservation is being used.
+      type: Integer
+      required: true
+
+    zone_id:
+      description: Timestamp to start the consumption of the resources. If the time value is 0, resources are reserved for immediate use.
+      type: Identifer
+      required: false

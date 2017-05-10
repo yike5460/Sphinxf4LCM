@@ -1,0 +1,15 @@
+# This structure was written in accordance with section 8.8.5.2 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+VirtualisationContainerReservation:
+  description: This clause describes the attributes for the VirtualisationContainerReservation information element.
+
+  attributes:
+    container_id :
+      description: The identifier of the virtualisation container to be reserved.
+      type: Identifier
+      required: true
+
+    container_flavour:
+      description: The containerFlavour encapsulates information of the virtualisation container to be reserved.
+      type: VirtualComputeFlavour
+      required: true

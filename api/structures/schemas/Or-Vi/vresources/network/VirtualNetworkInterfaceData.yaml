@@ -1,0 +1,53 @@
+# This structure was written in accordance with section 8.4.2.6 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+VirtualNetworkInterfaceData:
+  description: A virtual network interface is a communication endpoint under a compute resource.
+  attributes:
+    network_id:
+      description: In the case when the virtual network interface is attached to the network, it identifies such a network. The cardinality can be 0 in the case that a network interface is created without being attached to any specific network.
+      type: Identifier
+      required: false
+
+    network_port_id:
+      description: If the virtual network interface is attached to a specific network port, it identifies such a network port. The cardinality can be 0 in the case that a network interface is created without any specific network port attachment.
+      type: Identifier
+      required: false
+
+    ip_address:
+      description: The virtual network interface can be configured with specific IP address(es) associated to the network to be attached to. The cardinality can be 0 in the case that a network interface is created without being attached to any specific network, or when an IP address can be automatically configured, e.g. by DHCP.
+      type: IpAddress
+      required: false
+
+    type_virtual_nic:
+      description: Type of network interface. The type allows for defining how such interface is to be realized, e.g. normal virtual NIC, with direct PCI passthrough, etc.
+      type: String
+      required: true
+
+    type_configuration:
+      description: Extra configuration that the virtual network interface supports based on the type of virtual network interface, including support for SR-IOV with configuration of virtual functions (VF).
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    mac_address:
+      description: The MAC address desired for the virtual network interface. The cardinality can be 0 to allow for network interface without specific MAC address configuration.
+      type: MacAddress
+      required: false
+
+    bandwidth:
+      description: The bandwidth of the virtual network interface (in Mbps).
+      type: Number
+      required: false
+
+    acceleration_capability:
+      description: It specifies if the virtual network interface requires certain acceleration capabilities (e.g. RDMA, packet dispatch, TCP Chimney).
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false

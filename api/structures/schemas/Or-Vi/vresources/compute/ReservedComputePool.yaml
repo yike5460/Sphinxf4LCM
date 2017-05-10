@@ -1,0 +1,30 @@
+# This structure was written in accordance with section 8.8.3.3 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+ReservedComputePool:
+  description: This clause describes the attributes for the ReservedComputePool information element.
+
+  attributes:
+    num_cpu_cores:
+      description: Number of CPU cores that have been reserved.
+      type: Integer
+      required: true
+
+    num_vc_instances:
+      description: Number of virtual container instances that have been reserved.
+      type: Interger
+      required: true
+
+    virtual_mem_size:
+      description: Size of virtual memory that has been reserved.
+      type: Number
+      required: true
+
+    compute_attributes:
+      description: Information specifying additional attributes of the virtual compute resource that have been reserved.
+      type: ReservedVirtualComputeAttributes
+      required: false
+
+    zone_id:
+      description: References the resource zone where the virtual compute resources have been reserved. Cardinality can be 0 to cover the case where reserved compute resources are not bound to a specific resource zone.
+      type: Identifier
+      required: false

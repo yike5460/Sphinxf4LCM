@@ -1,0 +1,31 @@
+# This structure was written in accordance with section 8.8.4.5 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+VirtualNetworkPortReservationData:
+  description: This clause describes the attributes for the VirtualNetworkPortReservationData information element.
+  attributes:
+    port_id:
+      description: Identifier of the network port to reserve.
+      type: Identifier
+      required: true
+
+    port_type:
+      description: Type of network port. Examples of types are access ports, or trunk ports (layer 1) that become transport for multiple layer 2 or layer 3 networks.
+      type: Enum
+      required: true
+      constraints:
+        valid_values: [ ACCESS, TRUNK ]
+
+    segment_id:
+      description: The isolated segment the network port belongs to. For instance, for a "vlan", it corresponds to the vlan identifier; and for a "gre", this corresponds to a gre key. The cardinality can be 0 to allow for flat networks without any specific segmentation.
+      type: String
+      required: false
+
+    bandwidth:
+      description: The bitrate of the virtual network port (in Mbps).
+      type: Number
+      required: false
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false

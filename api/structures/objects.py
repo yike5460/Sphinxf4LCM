@@ -204,6 +204,10 @@ class Rule(String):
     TYPE = str
 
 
+class TimeStamp(String):
+    TYPE = str
+
+
 class SchemaLoader(type):
     def __new__(meta, name, bases, class_dict):
         if bases != (InformationElement,):
@@ -437,4 +441,88 @@ class VirtualNetworkQuota(InformationElementWithExternalSchema):
 
 
 class VirtualStorageQuota(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualStorageData(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkInterfaceData(InformationElementWithExternalSchema):
+    pass
+
+
+class AffinityOrAntiAffinityResourceList(InformationElementWithExternalSchema):
+    pass
+
+
+class AffinityOrAntiAffinityConstraint(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkAttributesReservationData(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkPortReservationData(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualComputeAttributesReservationData(InformationElementWithExternalSchema):
+    pass
+
+
+class ComputePoolReservation(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualComputeFlavour(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkReservation(InformationElementWithExternalSchema):
+    pass
+
+
+class StoragePoolReservation(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualizationContainerReservation(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualComputeAttributes(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedComputePool(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualisationContainer(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualNetworkPort(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualNetworkAttributes(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualCompute(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualNetwork(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedStoragePool(InformationElementWithExternalSchema):
+    pass
+
+
+class ReservedVirtualStorage(InformationElementWithExternalSchema):
     pass

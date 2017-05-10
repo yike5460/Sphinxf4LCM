@@ -1,0 +1,51 @@
+# This structure was written in accordance with section 8.8.5.3 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+ReservedVirtualisationContainer:
+  description: This clause describes the attributes for the ReservedVirtualisationContainer information element.
+
+  attributes:
+    container_id:
+      description: The identifier of the virtualisation container that has been reserved.
+      type: Identifier
+      required: true
+
+    flavour_id:
+      description: Identifier of the given compute flavour used to reserve the virtualisation container.
+      type: Identifier
+      required: true
+
+    acceleration_capability:
+      description: Selected acceleration capabilities (e.g. crypto, GPU) from the set of capabilities offered by the compute node acceleration resources. The cardinality can be 0, if no particular acceleration capability is provided.
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    virtual_memory:
+      description: The virtual memory of the reserved virtualisation container.
+      type: VirtualMemory
+      required: true
+
+    virtual_cpu:
+      description: The virtual CPU(s) of the reserved virtualisation container.
+      type: VirtualCpu
+      required: true
+
+    virtual_disks:
+      description: Element with information of the virtualised storage resources attached to the reserved virtualisation container.
+      type: List
+      required: true
+      constraints:
+        entry_type: VirtualStorage
+
+    virtual_network_interface:
+      description: Element with information of the virtual network interfaces of the reserved virtualisation container.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualNetworkInterface
+
+    zone_id:
+      description: References the resource zone where the virtualisation container has been reserved. Cardinality can be 0 to cover the case where reserved network resources are not bound to a specific resource zone.
+      type: Identifier
+      required: false

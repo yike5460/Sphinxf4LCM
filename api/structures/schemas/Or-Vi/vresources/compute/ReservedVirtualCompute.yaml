@@ -1,0 +1,42 @@
+# This structure was written in accordance with section 8.8.2 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+ReservedVirtualCompute:
+  description: The compute resource reservation information element encapsulate information about a reservation for virtualised compute resources. It includes information about virtual compute resource pool and virtualisation container reservations.
+
+  attributes:
+    reservation_id :
+      description: Identifier of the resource reservation.
+      type: Identifier
+      required: true
+
+    compute_pool_reserved:
+      description: Information about compute resources that have been reserved,e.g. {"cpu_cores": 90, "vm_instances": 10, "ram": 10000}.
+      type: ReservedComputePool
+      required: false
+
+    virtualisation_container_reserved:
+      description: Information about the virtualisation container(s) that have been reserved.
+      type: List
+      required: false
+      constraints:
+        entry_type: ReservedVirtualisationContainer
+
+    reservation_status:
+      description: Status of the compute resource reservation, e.g. to indicate if a reservation is being used.
+      type: Enum
+      required: true
+
+    start_time:
+      description: Timestamp to start the consumption of the resources. If the time value is 0, resources are reserved for immediate use.
+      type: TimeStamp
+      required: false
+
+    end_time:
+      description: Timestamp indicating the end time of the reservation (when it is expected that the resources will no longer be needed) and used by the VIM to schedule the reservation. If not present, resources are reserved for unlimited usage time.
+      type: TimeStamp
+      required: false
+
+    expiry_time:
+      description: Timestamp indicating the time the VIM can release the reservation in case no allocation request against this reservation was made.
+      type: TimeStamp
+      required: false

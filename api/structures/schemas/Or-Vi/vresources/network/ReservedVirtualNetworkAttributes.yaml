@@ -1,0 +1,29 @@
+# This structure was written in accordance with section 8.8.4.6 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+ReservedVirtualNetworkAttributes:
+  description: This clause describes the attributes for the ReservedVirtualNetworkAttributes information element.
+  attributes:
+    bandwidth:
+      description: Minimum network bitrate (in Mbps).
+      type: Number
+      required: true
+
+    network_type:
+      description: The type of network that maps to the virtualised network that has been reserved. Examples are: "local", "vlan", "vxlan", "gre", etc.
+      type: String
+      required: true
+
+    segment_type:
+      description: The isolated segment for the virtualised network that has been reserved. For instance, for a "vlan" networkType, it corresponds to the vlan identifier; and for a "gre" networkType, this corresponds to a gre key.
+      type: String
+      required: true
+
+    is_shared:
+      description: It defines whether the virtualised network that has been reserved is shared among consumers.
+      type: Boolean
+      required: true
+
+    metadata:
+      description: List of metadata key-value pairs used by the consumer to associate meaningful metadata to the related virtualised resource.
+      type: Mapping
+      required: false

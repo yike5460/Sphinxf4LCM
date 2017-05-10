@@ -1,0 +1,20 @@
+# This structure was written in accordance with section 8.4.8.2 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+AffinityOrAntiAffinityConstraint:
+  description: This clause describes the attributes for the AffinityOrAntiAffinityConstraint information element.
+  attributes:
+
+    type:
+      description: Indicates whether this is an affinity or anti-affinity constraint.
+      type: Enum
+      required: true
+
+    affinity_anti_affinity_resource_list:
+      description: Consumer-managed list of identifiers of virtualised resources with which the actual resource is requested to be affine or anti-affine. Either affinityAntiAffinityResourceList or affinityAntiAffinityResourceGroup but not both shall be present.
+      type: Integer
+      required: false
+
+    affinity_anti_affinity_resource_group:
+      description: Identifier of the producer-managed group of virtualised resources with which the actual resource is requested to be affine or anti-affine. Either affinityAntiAffinityResourceList or affinityAntiAffinityResourceGroup but not both shall be present.
+      type: Identifier
+      required: false

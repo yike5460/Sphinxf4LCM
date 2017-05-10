@@ -1,0 +1,37 @@
+# This structure was written in accordance with section 8.4.2.2 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+VirtualComputeFlavour:
+  description: The VirtualComputeFlavour information element encapsulates information for compute flavours. A compute flavour includes information about number of virtual CPUs, size of virtual memory, size of virtual storage, and virtual network interfaces. The NetworkInterfaceType information element encapsulates information of a virtual network interface for a compute resource.
+
+  attributes:
+    flavour_id:
+      description: Identifier given to the compute flavour.
+      type: Identifier
+      required: true
+
+    acceleration_capability :
+      description: Selected acceleration capabilities (e.g. crypto, GPU) from the set of capabilities offered by the compute node acceleration resources. The cardinality can be 0, if no particular acceleration capability is requested.
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    virtual_memory:
+      description: The virtual memory of the virtualised compute.
+      type: VirtualMemory
+      required: true
+
+    virtual_cpu:
+      description: The virtual CPU(s) of the virtualised compute.
+      type: VirtualCpu
+      required: true
+
+    storage_attributes:
+      description: Element containing information about the size of virtualised storage resource (e.g. size of volume, in GB), the type of storage (e.g. volume, object), and support for RDMA.
+      type: VirtualStorageData
+      required: false
+
+    virtual_network_interface:
+      description: The virtual network interfaces of the virtualised compute.
+      type: VirtualNetworkInterfaceData
+      required: false

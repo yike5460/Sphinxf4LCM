@@ -1,0 +1,19 @@
+# This structure was written in accordance with section 8.4.6.3 of ETSI GS NFV-IFA 005 - v2.1.1 (2016-04).
+
+VirtualStorageData:
+  description: This clause describes the attributes for the VirtualStorageData information element.
+  attributes:
+    type_of_storage:
+      description: Type of virtualised storage resource (e.g. volume, object).
+      type: String
+      required: true
+
+    size_of_storage:
+      description: Size of virtualised storage resource (e.g. size of volume, in GB).
+      type: Number
+      required: true
+
+    rdma_enabled:
+      description: Indicates if the storage supports RDMA.
+      type: Boolean
+      required: false
