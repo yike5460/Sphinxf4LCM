@@ -117,7 +117,7 @@ class Vim(object):
         return self.vim_adapter.query_virtualised_storage_resource(query_storage_filter)
 
     @log_entry_exit(LOG)
-    def create_compute_resource_reservation(resource_group_id, self, compute_pool_reservation=None,
+    def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
                                             virtualisation_container_reservation=None, affinity_constraint=None,
                                             anti_affinity_constraint=None, start_time=None, end_time=None,
                                             expiry_time=None, location_constraints=None):
@@ -127,42 +127,45 @@ class Vim(object):
 
         This function was written in accordance with section 7.8.1.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).
 
-        :param compute_pool_reservation:    Amount of compute resources that need to be reserved, e.g. {"cpu_cores": 90,
-                                            "vm_instances": 10, "ram": 10000}.
-        :param virtualisation_container_reservation Virtualisation containers that need to be reserved (e.g. following a
-                                                    specific compute "flavour").
-        :param affinity_constraint          Element with affinity information of the virtualised compute resources to
-                                            reserve. For the resource reservation at resource pool granularity level, it
-                                            defines the affinity information of the virtual compute pool resources to
-                                            reserve. For the resource reservation at virtual container granularity
-                                            level, it defines the affinity information of the virtualisation
-                                            container(s) to reserve.
-        :param anti_affinity_constraint     Element with anti-affinity information of the virtualised compute resources
-                                            to reserve. For the resource reservation at resource pool granularity level,
-                                            it defines the anti-affinity information of the virtual compute pool
-                                            resources to reserve. For the resource reservation at virtual container
-                                            granularity level, it defines the anti-affinity inforamtion of the
-                                            virtualisation container(s) to reserve.
-        :param start_time                   Timestamp indicating the earliest time to start the consumption of the
-                                            resources. If the time value is 0, resources are reserved for immediate use.
-        :param end_time                     Timestamp indicating the end time of the reservation (when the issuer of the
-                                            request expects that the resources will no longer be needed) and used by the
-                                            VIM to schedule the reservation. If not present, resources are reserved for
-                                            unlimited usage time.
-        :param expiry_time                  Timestamp indicating the time the VIM can release the reservation in case no
-                                            allocation request against this reservation was made.
-        :param location_constraints         If present, it defines location constraints for the resource(s) is (are)
-                                            requested to be reserved, e.g. in what particular Resource Zone.
-        :param resource_group_id            Unique identifier of the "infrastructure resource group", logical grouping
-                                            of virtual resources assigned to a tenant within an Infrastructure Domain.
-        :return: reservation_data           Element containing information about the reserved resource.
+        :param compute_pool_reservation:            Amount of compute resources that need to be reserved, e.g.
+                                                    {"cpu_cores": 90, "vm_instances": 10, "ram": 10000}.
+        :param virtualisation_container_reservation Virtualisation containers that need to be reserved (e.g. following
+                                                    a specific compute "flavour").
+        :param affinity_constraint                  Element with affinity information of the virtualised compute
+                                                    resources to reserve. For the resource reservation at resource pool
+                                                    granularity level, itdefines the affinity information of the
+                                                    virtual compute pool resources to reserve. For the resource
+                                                    reservation at virtual container granularity level, it defines the
+                                                    affinity information of the virtualisation container(s) to reserve.
+        :param anti_affinity_constraint             Element with anti-affinity information of the virtualised compute
+                                                    resources to reserve. For the resource reservation at resource pool
+                                                    granularity level, it defines the anti-affinity information of the
+                                                    virtual compute pool resources to reserve. For the resource
+                                                    reservation at virtual container granularity level, it defines the
+                                                    anti-affinity inforamtion of the virtualisation container(s) to
+                                                    reserve.
+        :param start_time                           Timestamp indicating the earliest time to start the consumption of
+                                                    the resources. If the time value is 0, resources are reserved for
+                                                    immediate use.
+        :param end_time                             Timestamp indicating the end time of the reservation (when the
+                                                    issuer of the request expects that the resources will no longer be
+                                                    needed) and used by theVIM to schedule the reservation. If not
+                                                    present, resources are reserved for unlimited usage time.
+        :param expiry_time                          Timestamp indicating the time the VIM can release the reservation
+                                                    in case no allocation request against this reservation was made.
+        :param location_constraints                 If present, it defines location constraints for the resource(s) is
+                                                    (are) requested to be reserved, e.g. in what particular Resource
+                                                    Zone.
+        :param resource_group_id                    Unique identifier of the "infrastructure resource group", logical
+                                                    grouping of virtual resources assigned to a tenant within an
+                                                    Infrastructure Domain.
+        :return: reservation_data                   Element containing information about the reserved resource.
         """
-        return self.vim_adapter.create_compute_resource_reservation(resource_group_id, compute_pool_reservation=None,
-                                                                    virtualisation_container_reservation=None,
-                                                                    affinity_constraint=None,
-                                                                    anti_affinity_constraint=None, start_time=None,
-                                                                    end_time=None,
-                                                                    expiry_time=None, location_constraints=None)
+        return self.vim_adapter.create_compute_resource_reservation(resource_group_id, compute_pool_reservation,
+                                                                    virtualisation_container_reservation,
+                                                                    affinity_constraint, anti_affinity_constraint,
+                                                                    start_time, end_time, expiry_time,
+                                                                    location_constraints)
 
     @log_entry_exit(LOG)
     def terminate_compute_resource_reservation(self, reservation_id):
@@ -211,14 +214,12 @@ class Vim(object):
         """
 
         return self.vim_adapter.create_network_resource_reservation(self, network_reservation, resource_group_id,
-                                                                    start_time=None,
-                                                                    end_time=None, expiry_time=None,
-                                                                    affinity_constraint=None,
-                                                                    anti_affinity_constraint=None,
-                                                                    location_constraints=None)
+                                                                    start_time, end_time, expiry_time,
+                                                                    affinity_constraint, anti_affinity_constraint,
+                                                                    location_constraints)
 
     @log_entry_exit(LOG)
-    def terminate_network_resource_reservation(reservation_id):
+    def terminate_network_resource_reservation(self, reservation_id):
         """
         This operation allows terminating one or more issued network resource reservation(s). When the operation is done
         on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail for the
@@ -265,10 +266,9 @@ class Vim(object):
         :return: reservation_data:          Element containing information about the reserved resource.
         """
 
-        return self.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id,
-                                                        start_time=None,
-                                                        end_time=None, expiry_time=None, affinity_constraint=None,
-                                                        anti_affinity_constraint=None, location_constraints=None)
+        return self.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id, start_time,
+                                                        end_time, expiry_time, affinity_constraint,
+                                                        anti_affinity_constraint, location_constraints)
 
     @log_entry_exit(LOG)
     def terminate_storage_resource_reservation(self, reservation_id):
