@@ -156,8 +156,8 @@ class TC_VNFC_SCALE_OUT_001_6(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Trigger a resize of the VNF resources by instructing the VNF to instruct the MANO to scale out the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info(
-            'Triggering a resize of the VNF resources by instructing the VNF to instruct the MANO to scale out the VNF')
+        LOG.info('Triggering a resize of the VNF resources by instructing the VNF to instruct the MANO to scale out the'
+                 ' VNF')
         self.time_record.START('scale_out_vnf')
         if self.vnf.scale_sync(self.vnf_instance_id, scale_type='out', aspect_id=self.tc_input['scaling']['aspect'],
                                additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
@@ -166,6 +166,7 @@ class TC_VNFC_SCALE_OUT_001_6(TestCase):
             LOG.debug('VNF could not instruct the MANO to scale out the VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF could not instruct the MANO to scale out the VNF'
+            self.tc_result['scaling_out']['status'] = 'Fail'
             return False
 
         self.time_record.END('scale_out_vnf')

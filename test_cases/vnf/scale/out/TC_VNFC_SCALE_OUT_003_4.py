@@ -159,8 +159,8 @@ class TC_VNFC_SCALE_OUT_003_4(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Trigger a resize of the VNF resources to the next level by increasing the traffic load to the maximum
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info(
-            'Triggering a resize of the VNF resources to the next level by increasing the traffic load to the maximum')
+        LOG.info('Triggering a resize of the VNF resources to the next level by increasing the traffic load to the '
+                 'maximum')
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
         # --------------------------------------------------------------------------------------------------------------
