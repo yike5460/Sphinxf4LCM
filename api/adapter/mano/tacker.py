@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import time
+import uuid
 
 import os_client_config
 import tackerclient.common.exceptions
@@ -417,9 +418,21 @@ class TackerManoAdapter(object):
         return tup
 
     @log_entry_exit(LOG)
-    def vnf_lifecycle_change_notification_subscribe(self, filter):
-        #TODO: create thread for polling events and push them in a queue (via coroutine mechanism)
-        return None
+    def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
+        def notification_generator():
+            last_vnf_event_id = self._get_vnf_events()[-1]['id']
+
+            while True:
+                vnf_events = self._get_vnf_events(starting_from=last_vnf_event_id)
+                for vnf_event in vnf_events:
+                    yield vnf_event
+                    last_vnf_event_id = vnf_event['id']
+
+                time.sleep(10)
+
+        subscription_id = uuid.uuid4()
+        return subscription_id, notification_generator()
+
 
     @log_entry_exit(LOG)
     def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
@@ -431,6 +444,6 @@ class TackerManoAdapter(object):
 
         vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
         if starting_from is not None:
-            vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] >= starting_from)
+            vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
         return vnf_events
     

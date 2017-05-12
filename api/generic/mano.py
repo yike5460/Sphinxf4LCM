@@ -1,6 +1,8 @@
 import logging
 import time
 
+from threading import Thread
+
 from api.adapter import construct_adapter
 from api.generic import constants
 from utils.logging_module import log_entry_exit
@@ -749,14 +751,26 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_lifecycle_change_notification_subscribe(self, filter=None):
-        subscription_id, notification_queue = self.mano_adapter.vnf_lifecycle_change_notification_subscribe(self, filter)
+    def vnf_lifecycle_change_notification_subscribe(self, notification_filter=None):
+        subscription_id, notification_queue = self.mano_adapter.vnf_lifecycle_change_notification_subscribe(notification_filter)
         self.notification_queues[subscription_id] = notification_queue
         return subscription_id
 
     @log_entry_exit(LOG)
     def wait_for_notification(self, subscription_id, notification_pattern):
         notification_queue = self.notification_queues[subscription_id]
-        #TODO: check for events in queue (via coroutine mechanism)
-        return
-    
+
+        timeout = False
+
+        def notification_loop():
+            for notification in notification_queue:
+                print notification
+                if timeout:
+                    break
+
+        notification_thread = Thread(target=notification_loop)
+        notification_thread.start()
+        notification_thread.join(15)
+
+        timeout = True
+        return None
