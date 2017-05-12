@@ -73,6 +73,7 @@ class RiftManoAdapter(object):
         ns_list = list()
 
         try:
+            print json.dumps(headers)
             response = requests.get(url=self.url + resource, headers=headers,
                                     auth=HTTPBasicAuth(username=self.username, password=self.password), verify=False)
 

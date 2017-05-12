@@ -1,0 +1,53 @@
+# This structure was written in accordance with section 8.6.2 of ETSI GS NFV-IFA 007 - v2.1.1 (2016-10).
+
+VnfLifecycleChangeNotification:
+  description: This notification informs the receiver of changes in the VNF lifecycle. The support of the notification is mandatory.
+  attributes:
+    status:
+      description: Indicates whether this notification reports about the start of a lifecycle operation or the result of a lifecycle operation.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ STARTED, SUCCESS, FAILED ]
+
+    vnf_instance_id:
+      description: The identifier of the VNF instance affected.
+      type: Identifier
+      required: true
+
+    operation:
+      description: The lifecycle operation.
+      type: String
+      required: true
+
+    lifecycle_operation_occurence_id:
+      description: The identifier of the VNF lifecycle operation occurrence associated to the notification.
+      type: Identifier
+      required: true
+
+    affected_vnfc:
+      description: Information about VNFC instances that were affected during the lifecycle operation, if this notification represents the result of a lifecycle operation.
+      type: List
+      required: false
+      constraints:
+        entry_type: AffectedVnfc
+
+    affected_virtual_link:
+      description: Information about VL instances that were affected during the lifecycle operation, if this notification represents the result of a lifecycle operation.
+      type: List
+      required: false
+      constraints:
+        entry_type: AffectedVirtualLink
+
+    affected_virtual_storage:
+      description: Information about virtualised storage instances that were affected during the lifecycle operation, if this notification represents the result of a lifecycle operation.
+      type: List
+      required: false
+      constraints:
+        entry_type: AffectedVirtualStorage
+
+
+
+
+

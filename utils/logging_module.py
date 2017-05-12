@@ -1,8 +1,17 @@
 import functools
 import logging
 import os
+import time
 
 LOG_DIR = '/tmp/nfv'
+
+
+class CustomLogFilter(logging.Filter):
+    unmuted_modules = ['test_cases', 'api', 'utils']
+    def filter(self, record):
+        if record.name.split('.', 1)[0] in self.unmuted_modules:
+            return True
+        return False
 
 
 def configure_logger(logger, file_level=None, console_level=None, propagate=False, override_parent=False):
@@ -56,6 +65,8 @@ def configure_logger(logger, file_level=None, console_level=None, propagate=Fals
         # create formatter and add it to the handlers
         ch_formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s - %(message)s')
         ch.setFormatter(ch_formatter)
+        ch.addFilter(CustomLogFilter())
+
 
         # add the file handler to the logger
         logger.addHandler(ch)
@@ -74,8 +85,10 @@ def log_entry_exit(LOG):
         @functools.wraps(func)
         def logger_wrapper(*args, **kwargs):
             LOG.debug("Entering function %s" % func.__name__)
+            time.sleep(0.5)
             func_result = func(*args, **kwargs)
             LOG.debug("Exiting function %s" % func.__name__)
+            time.sleep(0.25)
             return func_result
         return logger_wrapper
     return func_wrapper
