@@ -488,7 +488,7 @@ class StoragePoolReservation(InformationElementWithExternalSchema):
     pass
 
 
-class VirtualizationContainerReservation(InformationElementWithExternalSchema):
+class VirtualisationContainerReservation(InformationElementWithExternalSchema):
     pass
 
 
