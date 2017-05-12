@@ -9,6 +9,7 @@ AffinityOrAntiAffinityResourceList:
       type: Enum
       required: false
       constraints:
+        entry_type: String
         valid_values: [ NFVI_POP, NFVI_NODE ]
 
     resource:

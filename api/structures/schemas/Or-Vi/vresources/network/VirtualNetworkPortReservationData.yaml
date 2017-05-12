@@ -13,6 +13,7 @@ VirtualNetworkPortReservationData:
       type: Enum
       required: true
       constraints:
+        entry_type: String
         valid_values: [ ACCESS, TRUNK ]
 
     segment_id:

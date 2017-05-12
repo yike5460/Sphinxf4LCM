@@ -11,7 +11,7 @@ ReservedComputePool:
 
     num_vc_instances:
       description: Number of virtual container instances that have been reserved.
-      type: Interger
+      type: Integer
       required: true
 
     virtual_mem_size:

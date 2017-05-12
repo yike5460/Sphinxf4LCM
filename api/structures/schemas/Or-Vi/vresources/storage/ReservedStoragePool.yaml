@@ -9,7 +9,7 @@ ReservedStoragePool:
       required: true
 
     num_snapshots:
-      description: Information about storage resources that have been reserved, e.g. {"gigabytes": 1000, "snapshots": 10, "volumes": 10}.
+      description: Information about storage resources that have been reserved, e.g. {"gigabytes" 1000, "snapshots" 10, "volumes" 10}.
       type: Integer
       required: true
 
@@ -20,5 +20,5 @@ ReservedStoragePool:
 
     zone_id:
       description: Timestamp to start the consumption of the resources. If the time value is 0, resources are reserved for immediate use.
-      type: Identifer
+      type: Identifier
       required: false

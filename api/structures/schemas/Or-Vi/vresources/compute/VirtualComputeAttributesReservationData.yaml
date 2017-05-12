@@ -4,7 +4,7 @@ VirtualComputeAttributesReservationData:
   description: This clause describes the attributes for the VirtualComputeAttributesReservationData information element.
 
   attributes:
-    acceleration_capability :
+    acceleration_capability:
       description: Selected acceleration capabilities (e.g. crypto, GPU) from the set of capabibilities offered by the compute node acceleration resources. The cardinality can be 0, if no particular acceleration capability is requested.
       type: List
       required: false

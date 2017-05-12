@@ -31,6 +31,8 @@ ReservedVirtualNetwork:
       description: Status of the network resource reservation, e.g. to indicate if a reservation is being used.
       type: Enum
       required: true
+      constraints:
+        entry_type: NotSpecified
 
     start_time:
       description: Timestamp to start the consumption of the resources. If the time value is 0, resources are reserved for immediate use.

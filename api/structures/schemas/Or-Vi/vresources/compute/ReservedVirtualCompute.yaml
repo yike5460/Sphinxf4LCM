@@ -10,7 +10,7 @@ ReservedVirtualCompute:
       required: true
 
     compute_pool_reserved:
-      description: Information about compute resources that have been reserved,e.g. {"cpu_cores": 90, "vm_instances": 10, "ram": 10000}.
+      description: Information about compute resources that have been reserved,e.g. {"cpu_cores" 90, "vm_instances" 10, "ram" 10000}.
       type: ReservedComputePool
       required: false
 
@@ -25,6 +25,8 @@ ReservedVirtualCompute:
       description: Status of the compute resource reservation, e.g. to indicate if a reservation is being used.
       type: Enum
       required: true
+      constraints:
+        entry_type: NotSpecified
 
     start_time:
       description: Timestamp to start the consumption of the resources. If the time value is 0, resources are reserved for immediate use.

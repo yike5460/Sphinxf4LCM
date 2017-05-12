@@ -9,7 +9,7 @@ VirtualNetworkAttributesReservationData:
       required: true
 
     network_type:
-      description: The type of network that maps to the virtualised network to be reserved. Examples are: "local", "vlan", "vxlan", "gre", etc.
+      description: The type of network that maps to the virtualised network to be reserved. Examples are "local", "vlan", "vxlan", "gre", etc.
       type: String
       required: false
 
