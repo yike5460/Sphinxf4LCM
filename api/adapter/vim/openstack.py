@@ -3,7 +3,7 @@ import logging
 import os_client_config
 
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
-    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota
+    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, ReservedVirtualCompute
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -49,18 +49,26 @@ class OpenstackVimAdapter(object):
                                                             user_domain_name=user_domain_name)
 
             self.cinder_client = os_client_config.make_client('volume',
-                                                            auth_url=auth_url,
-                                                            username=username,
-                                                            password=password,
-                                                            identity_api_version=identity_api_version,
-                                                            project_name=project_name,
-                                                            project_domain_name=project_domain_name,
-                                                            user_domain_name=user_domain_name)
-
+                                                              auth_url=auth_url,
+                                                              username=username,
+                                                              password=password,
+                                                              identity_api_version=identity_api_version,
+                                                              project_name=project_name,
+                                                              project_domain_name=project_domain_name,
+                                                              user_domain_name=user_domain_name)
 
         except:
             LOG.debug('Unable to create %s instance' % self.__class__.__name__)
             raise
+
+    @log_entry_exit(LOG)
+    def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
+                                            virtualisation_container_reservation=None, affinity_constraint=None,
+                                            anti_affinity_constraint=None, start_time=None, end_time=None,
+                                            expiry_time=None, location_constraints=None):
+        LOG.debug('Reservations are not implemented in Openstack yet')
+        reserved_virtual_compute = ReservedVirtualCompute()
+        return reserved_virtual_compute
 
     @log_entry_exit(LOG)
     def query_virtualised_compute_resource(self, filter):
@@ -148,9 +156,10 @@ class OpenstackVimAdapter(object):
         self.heat_client.actions.suspend(stack_id)
 
     @log_entry_exit(LOG)
-    def _get_nova_limits(self):
+    def query_compute_capacity(self, zone_id, compute_resource_type_id, resource_criteria, attribute_selector,
+                               time_period):
         limits = dict()
-        resource_types = ['vcpu', 'mem', 'instances']
+        resource_types = ['vcpu', 'vmem', 'instances']
 
         for resource_type in resource_types:
             limits[resource_type] = dict()
@@ -161,13 +170,30 @@ class OpenstackVimAdapter(object):
             elif nova_limit.name == 'maxTotalCores':
                 limits['vcpu']['max'] = nova_limit.value
             elif nova_limit.name == 'totalRAMUsed':
-                limits['mem']['used'] = nova_limit.value
+                limits['vmem']['used'] = nova_limit.value
             elif nova_limit.name == 'maxTotalRAMSize':
-                limits['mem']['max'] = nova_limit.value
+                limits['vmem']['max'] = nova_limit.value
             elif nova_limit.name == 'totalInstancesUsed':
                 limits['instances']['used'] = nova_limit.value
             elif nova_limit.name == 'maxTotalInstances':
                 limits['instances']['max'] = nova_limit.value
+
+        return limits
+
+    @log_entry_exit(LOG)
+    def query_storage_capacity(self, zone_id, storage_resource_type_id, resource_criteria, attribute_selector,
+                               time_period):
+        limits = dict()
+        resource_types = ['vstorage']
+
+        for resource_type in resource_types:
+            limits[resource_type] = dict()
+
+        for cinder_limit in self.cinder_client.limits.get().absolute:
+            if cinder_limit.name == 'totalGigabytesUsed':
+                limits['vstorage']['used'] = cinder_limit.value
+            elif cinder_limit.name == 'maxTotalVolumeGigabytes':
+                limits['vstorage']['max'] = cinder_limit.value
 
         return limits
 
