@@ -11,7 +11,8 @@ from tackerclient.tacker.client import Client as TackerClient
 
 from api.adapter import construct_adapter
 from api.generic import constants
-from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle
+from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
+    ComputePoolReservation, VirtualNetworkReservation
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -87,6 +88,86 @@ class TackerManoAdapter(object):
             stack_status = heat_stack.stack_status
 
             return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
+
+    @log_entry_exit(LOG)
+    def limit_compute_resources(self, vnfd_id, default_instances, scale_out_steps, scaling_step, generic_vim_object):
+        vnfd = self.get_vnfd(vnfd_id)
+
+        # Get the resources required by one instance of the VNF
+        vcpus_req_one_inst = 0
+        vmem_req_one_inst = 0
+        vc_instances_req_one_inst = 0
+        for node in vnfd['topology_template']['node_templates'].keys():
+            if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.VDU.Tacker':
+                vcpus_req_one_inst += int(
+                    vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
+                        'num_cpus', 0))
+                vmem_req_one_inst += int(
+                    vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
+                        'mem_size', 0).split(' ')[0])
+                vc_instances_req_one_inst += 1
+
+        # Total required compute resources
+        required_vcpus = (scale_out_steps * scaling_step + default_instances) * vcpus_req_one_inst
+        required_vmem = (scale_out_steps * scaling_step + default_instances) * vmem_req_one_inst
+        required_vc_instances = (scale_out_steps * scaling_step + default_instances) * vc_instances_req_one_inst
+
+        # Get the available compute resources from the VIM. Use the provided VIM object
+        virtual_compute_quota = generic_vim_object.query_compute_resource_quota()
+        if virtual_compute_quota.num_vcpus is not None:
+            vcpu_limit = int(virtual_compute_quota.num_vcpus)
+        else:
+            LOG.debug('No quota set for the number of vCPUs')
+            return
+        if virtual_compute_quota.virtual_mem_size is not None:
+            vmem_limit = int(virtual_compute_quota.virtual_mem_size)
+        else:
+            LOG.debug('No quota set for the size of vMemory')
+            return
+        if virtual_compute_quota.num_vc_instances is not None:
+            instance_limit = int(virtual_compute_quota.num_vc_instances)
+        else:
+            LOG.debug('No quota set for the number of virtualised container instances')
+            return
+
+        nova_limits = generic_vim_object.query_compute_capacity()
+        used_vcpus = nova_limits['vcpu']['used']
+        used_vmem = nova_limits['vmem']['used']
+        used_instances = nova_limits['instances']['used']
+
+        available_vcpus = vcpu_limit - used_vcpus
+        available_vmem = vmem_limit - used_vmem
+        available_instances = instance_limit - used_instances
+
+        # Compute resources to be reserved
+        vcpus_to_be_reserved = available_vcpus - required_vcpus
+        vmem_to_be_reserved = available_vmem - required_vmem
+        vc_instances_to_be_reserved = available_instances - required_vc_instances
+
+        # Make compute reservations so that only the required compute resources remain
+        compute_pool_reservation = ComputePoolReservation
+        compute_pool_reservation.num_cpu_cores = vcpus_to_be_reserved
+        compute_pool_reservation.num_vc_instances = vc_instances_to_be_reserved
+        compute_pool_reservation.virtual_mem_size = vmem_to_be_reserved
+
+        # Get resource group ID (tenant ID)
+        # If Tacker has more than one VIM registered, get the default VIM (assuming one of the VIMs is the default VIM)
+        resource_group_id = None
+        vim_list = self.tacker_client.list_vims()
+        for vim in vim_list['vims']:
+            vim_id = vim['id']
+            vim_info = self.tacker_client.show_vim(vim_id)
+            if vim_info['vim']['is_default']:
+                resource_group_id = vim_info['vim']['tenant_id']
+                break
+
+        # Assuming the reservation function returns the reservationData information element if the reservation was
+        # successful, None otherwise.
+        reservation_data = generic_vim_object.create_compute_resource_reservation(
+                                                                      resource_group_id=resource_group_id,
+                                                                      compute_pool_reservation=compute_pool_reservation)
+
+        return reservation_data.reservation_id
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
@@ -433,7 +514,6 @@ class TackerManoAdapter(object):
         subscription_id = uuid.uuid4()
         return subscription_id, notification_generator()
 
-
     @log_entry_exit(LOG)
     def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
         params = dict()
@@ -446,4 +526,3 @@ class TackerManoAdapter(object):
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
         return vnf_events
-    

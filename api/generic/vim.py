@@ -21,6 +21,54 @@ class Vim(object):
         self.vim_adapter = construct_adapter(vendor, module_type='vim', **kwargs)
 
     @log_entry_exit(LOG)
+    def query_compute_capacity(self, zone_id=None, compute_resource_type_id=None, resource_criteria=None,
+                               attribute_selector=None, time_period=None):
+        """
+        This function retrieves capacity information for the various types of consumable virtualised compute resources
+        available in the Virtualised Compute Resources Information Management Interface.
+
+        This function was written in accordance with section 7.3.4.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).
+
+        :param zone_id:                     When specified this parameter identifies the resource zone for which the
+                                            capacity is requested.
+        :param compute_resource_type_id:    Identifier of the resource type for which the issuer wants to know the
+                                            available, total, reserved and/or allocated capacity.
+        :param resource_criteria:           Input capacity computation parameter for selecting the virtual memory,
+                                            virtual CPU and acceleration capabilities for which the issuer wants to know
+                                            the available, total, reserved and/or allocated capacity.
+        :param attribute_selector:          Input parameter for selecting which capacity information (i.e. available,
+                                            total, reserved and/or allocated capacity) is queried.
+        :param time_period:                 The time interval for which capacity is queried.
+        :return:                            Element containing the capacity during the requested time period.
+        """
+        return self.vim_adapter.query_compute_capacity(zone_id, compute_resource_type_id, resource_criteria,
+                                                       attribute_selector, time_period)
+
+    @log_entry_exit(LOG)
+    def query_storage_capacity(self, zone_id=None, storage_resource_type_id=None, resource_criteria=None,
+                               attribute_selector=None, time_period=None):
+        """
+        This function retrieves capacity information for the various types of consumable virtualised storage resources
+        available in the Virtualised Storage Resources Information Management Interface.
+
+        This function was written in accordance with section 7.5.4.2 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).
+
+        :param zone_id:                     When specified this parameter identifies the resource zone for which the
+                                            capacity is requested.
+        :param storage_resource_type_id:    Identifier of the resource type for which the issuer wants to know the
+                                            available, total, reserved and/or allocated capacity.
+        :param resource_criteria:           Input capacity computation parameter for selecting the characteristics of
+                                            the virtual storage for which the issuer wants to know the available, total,
+                                            reserved and/or allocated capacity.
+        :param attribute_selector:          Input parameter for selecting which capacity information (i.e. available,
+                                            total, reserved and/or allocated capacity) is queried.
+        :param time_period:                 The time interval for which capacity is queried.
+        :return:                            Element containing the capacity during the requested time period.
+        """
+        return self.vim_adapter.query_storage_capacity(zone_id, storage_resource_type_id, resource_criteria,
+                                                       attribute_selector, time_period)
+
+    @log_entry_exit(LOG)
     def query_compute_resource_quota(self, query_compute_quota_filter=None):
         """
         This function queries the VIM to get information about compute resources that the consumer has access to.
@@ -31,7 +79,6 @@ class Vim(object):
                                             information, expressing the type of information to be retrieved. It can also
                                             be used to specify one or more resources to be queried by providing their
                                             identifiers.
-
         :return:                            Element containing information about the quota resource. The cardinality can
                                             be 0 if no matching quota exists.
         """
@@ -48,7 +95,6 @@ class Vim(object):
                                             information, expressing the type of information to be retrieved. It can also
                                             be used to specify one or more resources to be queried by providing their
                                             identifiers.
-
         :return:                            Element containing information about the quota resource. The cardinality can
                                             be 0 if no matching quota exists.
         """
@@ -65,7 +111,6 @@ class Vim(object):
                                             information, expressing the type of information to be retrieved. It can also
                                             be used to specify one or more resources to be queried by providing their
                                             identifiers.
-
         :return:                            Element containing information about the quota resource. The cardinality can
                                             be 0 if no matching quota exists.
         """
