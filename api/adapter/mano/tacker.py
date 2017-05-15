@@ -12,7 +12,7 @@ from tackerclient.tacker.client import Client as TackerClient
 from api.adapter import construct_adapter
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
-    ComputePoolReservation, VirtualNetworkReservation
+    ComputePoolReservation, VirtualNetworkReservation, VnfLifecycleChangeNotification
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -516,6 +516,23 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
+        operations_mapping = {
+            ('CREATE', 'PENDING_CREATE'): ('VNF_INSTANTIATE', 'STARTED'),
+            ('CREATE', 'ACTIVE'): ('VNF_INSTANTIATE', 'SUCCESS'),
+            ('CREATE', 'ERROR'): ('VNF_INSTANTIATE', 'FAILED'),
+            ('SCALE', 'PENDING_SCALE_OUT'): ('VNF_SCALE_OUT', 'STARTED'),
+            ('SCALE', 'ACTIVE'): ('VNF_SCALE', 'SUCCESS'),
+            ('SCALE', 'PENDING_SCALE_IN'): ('VNF_SCALE_IN', 'STARTED'),
+            ('DELETE', 'PENDING_DELETE'): {
+                'VNF delete initiated': ('VNF_TERMINATE', 'STARTED'),
+                'VNF Delete Complete': ('VNF_TERMINATE', 'SUCCESS')
+            },
+            ('UPDATE', 'PENDING_UPDATE'): ('VNF_MODIFY_CONFIG', 'STARTED'),
+            ('UPDATE', 'ACTIVE'): ('VNF_MODIFY_CONFIG', 'SUCCESS'),
+            ('MONITOR', 'PENDING_CREATE'): None,
+            ('MONITOR', 'ACTIVE'): None
+        }
+
         params = dict()
         if resource_id is not None:
             params['resource_id'] = resource_id
@@ -525,4 +542,27 @@ class TackerManoAdapter(object):
         vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
-        return vnf_events
+
+        for vnf_event in vnf_events:
+            notification = VnfLifecycleChangeNotification()
+            notification.vnf_instance_id = vnf_event['resource_id'].encode()
+
+            vnf_event_type = vnf_event['event_type'].encode()
+            vnf_resource_state = vnf_event['resource_state'].encode()
+
+            notification_attributes = operations_mapping[(vnf_event_type, vnf_resource_state)]
+            if isinstance(notification_attributes, tuple):
+                # we are able to determine mapping unambigously
+                notification_operation, notification_status = notification_attributes
+            if isinstance(notification_attributes, dict):
+                # ambiguity; must resolve based on event_details
+                vnf_event_details = vnf_event['event_details'].encode()
+                notification_operation, notification_status = notification_attributes[vnf_event_details]
+            if notification_attributes is None:
+                # internal event; no ETSI mapping, ignoring
+                continue
+
+            notification.operation = notification_operation
+            notification.status = notification_status
+
+            yield notification
