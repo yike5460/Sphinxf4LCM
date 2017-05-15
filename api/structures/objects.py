@@ -526,3 +526,21 @@ class ReservedStoragePool(InformationElementWithExternalSchema):
 
 class ReservedVirtualStorage(InformationElementWithExternalSchema):
     pass
+
+
+class AffectedVnfc(InformationElementWithExternalSchema):
+    pass
+
+
+class AffectedVirtualStorage(InformationElementWithExternalSchema):
+    pass
+
+
+class AffectedVirtualLink(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfLifecycleChangeNotification(InformationElementWithExternalSchema):
+    pass
+
+

@@ -1,0 +1,27 @@
+# This structure was written in accordance with section 8.6.5 of ETSI GS NFV-IFA 007 - v2.1.1 (2016-10).
+
+AffectedVirtualStorage:
+  description: This information element provides information about added, deleted and modified virtual storage resources.
+  attributes:
+    virtual_storage_instance_id:
+      description: Identifier of the virtual storage VirtualStorageResourceInfo instance.
+      type: Identifier
+      required: true
+
+    virtual_storage_desc_id:
+      description: Identifier of the VirtualStorageDesc in the VNFD.
+      type: Identifier
+      required: true
+
+    change_type:
+      description: Signals the type of change (added, removed, modified).
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ADDED, REMOVED, MODIFIED ]
+
+    storage_resource:
+      description: Reference to the VirtualStorage resource. It shall be provided for the added, removed or modified storage resource. Detailed information is (for new and modified resources) or has been (for removed resources) available from the Virtualised Storage Resource Management interface.
+      type: ResourceHandle
+      required: true

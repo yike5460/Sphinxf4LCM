@@ -1,0 +1,34 @@
+# This structure was written in accordance with section 8.6.3 of ETSI GS NFV-IFA 007 - v2.1.1 (2016-10).
+
+AffectedVnfc:
+  description: This information element provides information about added, deleted and modified VNFCs.
+  attributes:
+    vnfc_instance_id:
+      description: Identifier of the VNFC instance.
+      type: Identifier
+      required: true
+
+    vdu_id:
+      description: Identifier of the VDU in the VNFD.
+      type: Identifier
+      required: true
+
+    change_type:
+      description: Signals the type of change (added, removed, modified).
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ADDED, REMOVED, MODIFIED ]
+
+    compute_resource:
+      description: Reference to the VirtualCompute resource. It shall be provided for the added, removed or modified compute resources. Detailed information is (for new and modified resources) or has been (for removed resources) available from the Virtualised Compute Resource Management interface.
+      type: ResourceHandle
+      required: false
+
+    storage_resource:
+      description: Reference to the VirtualStorage resource. It shall be provided for the added, removed or modified storage resource. Detailed information is (for new and modified resources) or has been (for removed resources) available from the Virtualised Storage Resource Management interface.
+      type: List
+      required: false
+      constraints:
+        entry_type: ResourceHandle
