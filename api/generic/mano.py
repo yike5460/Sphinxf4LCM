@@ -37,7 +37,8 @@ class Mano(object):
         return self.mano_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
-    def limit_compute_resources(self, vnfd_id, default_instances, scale_out_steps, scaling_step, generic_vim_object):
+    def limit_compute_resources_for_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
+                                            generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
         VNF defined by the provided vnfd_id, with the provided number of default instances and scaling the VNF
@@ -46,14 +47,14 @@ class Mano(object):
         :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
         :param default_instances:       Default number of instances required by the VNF, as stated in the scaling policy
                                         in the VNFD.
-        :param scale_out_steps:         Desired number of steps the VNF should be scaled out.
+        :param desired_scale_out_steps: Desired number of steps the VNF should be scaled out.
         :param scaling_step:            Number of VNF instances added after each scaling step, as stated in the scaling
                                         policy in the VNFD.
         :param generic_vim_object:      Generic VIM object.
         :return:                        The reservation ID if the reservation was successful, None otherwise.
         """
-        return self.mano_adapter.limit_compute_resources(vnfd_id, default_instances, scale_out_steps, scaling_step,
-                                                         generic_vim_object)
+        return self.mano_adapter.limit_compute_resources(vnfd_id, default_instances, desired_scale_out_steps,
+                                                         scaling_step, generic_vim_object)
 
     @log_entry_exit(LOG)
     def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
