@@ -12,7 +12,7 @@ from tackerclient.tacker.client import Client as TackerClient
 from api.adapter import construct_adapter
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
-    ComputePoolReservation, VirtualNetworkReservation, VnfLifecycleChangeNotification
+    VnfLifecycleChangeNotification
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -90,7 +90,8 @@ class TackerManoAdapter(object):
             return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
 
     @log_entry_exit(LOG)
-    def limit_compute_resources(self, vnfd_id, default_instances, scale_out_steps, scaling_step, generic_vim_object):
+    def limit_compute_resources_for_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
+                                            generic_vim_object):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the resources required by one instance of the VNF
@@ -108,47 +109,9 @@ class TackerManoAdapter(object):
                 vc_instances_req_one_inst += 1
 
         # Total required compute resources
-        required_vcpus = (scale_out_steps * scaling_step + default_instances) * vcpus_req_one_inst
-        required_vmem = (scale_out_steps * scaling_step + default_instances) * vmem_req_one_inst
-        required_vc_instances = (scale_out_steps * scaling_step + default_instances) * vc_instances_req_one_inst
-
-        # Get the available compute resources from the VIM. Use the provided VIM object
-        virtual_compute_quota = generic_vim_object.query_compute_resource_quota()
-        if virtual_compute_quota.num_vcpus is not None:
-            vcpu_limit = int(virtual_compute_quota.num_vcpus)
-        else:
-            LOG.debug('No quota set for the number of vCPUs')
-            return
-        if virtual_compute_quota.virtual_mem_size is not None:
-            vmem_limit = int(virtual_compute_quota.virtual_mem_size)
-        else:
-            LOG.debug('No quota set for the size of vMemory')
-            return
-        if virtual_compute_quota.num_vc_instances is not None:
-            instance_limit = int(virtual_compute_quota.num_vc_instances)
-        else:
-            LOG.debug('No quota set for the number of virtualised container instances')
-            return
-
-        nova_limits = generic_vim_object.query_compute_capacity()
-        used_vcpus = nova_limits['vcpu']['used']
-        used_vmem = nova_limits['vmem']['used']
-        used_instances = nova_limits['instances']['used']
-
-        available_vcpus = vcpu_limit - used_vcpus
-        available_vmem = vmem_limit - used_vmem
-        available_instances = instance_limit - used_instances
-
-        # Compute resources to be reserved
-        vcpus_to_be_reserved = available_vcpus - required_vcpus
-        vmem_to_be_reserved = available_vmem - required_vmem
-        vc_instances_to_be_reserved = available_instances - required_vc_instances
-
-        # Make compute reservations so that only the required compute resources remain
-        compute_pool_reservation = ComputePoolReservation
-        compute_pool_reservation.num_cpu_cores = vcpus_to_be_reserved
-        compute_pool_reservation.num_vc_instances = vc_instances_to_be_reserved
-        compute_pool_reservation.virtual_mem_size = vmem_to_be_reserved
+        required_vcpus = (desired_scale_out_steps * scaling_step + default_instances) * vcpus_req_one_inst
+        required_vmem = (desired_scale_out_steps * scaling_step + default_instances) * vmem_req_one_inst
+        required_vc_instances = (desired_scale_out_steps * scaling_step + default_instances) * vc_instances_req_one_inst
 
         # Get resource group ID (tenant ID)
         # If Tacker has more than one VIM registered, get the default VIM (assuming one of the VIMs is the default VIM)
@@ -161,11 +124,8 @@ class TackerManoAdapter(object):
                 resource_group_id = vim_info['vim']['tenant_id']
                 break
 
-        # Assuming the reservation function returns the reservationData information element if the reservation was
-        # successful, None otherwise.
-        reservation_data = generic_vim_object.create_compute_resource_reservation(
-                                                                      resource_group_id=resource_group_id,
-                                                                      compute_pool_reservation=compute_pool_reservation)
+        reservation_data = generic_vim_object.limit_compute_resources(resource_group_id, required_vcpus, required_vmem,
+                                                                      required_vc_instances)
 
         return reservation_data.reservation_id
 
