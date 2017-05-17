@@ -1,6 +1,7 @@
 import logging
 
 from api.adapter import construct_adapter
+from api.structures.objects import ComputePoolReservation
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -19,6 +20,63 @@ class Vim(object):
         """
         self.vendor = vendor
         self.vim_adapter = construct_adapter(vendor, module_type='vim', **kwargs)
+
+    @log_entry_exit(LOG)
+    def limit_compute_resources(self, resource_group_id, vcpus, vmem, vc_instances):
+        """
+        This function limits the compute resources to the provided number of vCPU, vMemory size and number of
+        virtualised container instances by reserving all other compute resources.
+
+        :param resource_group_id:   Unique identifier of the "infrastructure resource group", logical grouping of
+                                    virtual resources assigned to a tenant within an Infrastructure Domain.
+        :param vcpus:               Desired number of vCPUs to be available after limiting the compute resources
+        :param vmem:                Desired size of vMemory to be available after limiting the compute resources
+        :param vc_instances:        Desired number of VC instances be available after limiting the compute resources
+        :return:                    The reservation ID if the reservation was successful, None otherwise.
+        """
+
+        # Get the available compute resources from the VIM.
+        virtual_compute_quota = self.query_compute_resource_quota()
+        if virtual_compute_quota.num_vcpus is not None:
+            vcpu_limit = int(virtual_compute_quota.num_vcpus)
+        else:
+            LOG.debug('No quota set for the number of vCPUs')
+            return
+        if virtual_compute_quota.virtual_mem_size is not None:
+            vmem_limit = int(virtual_compute_quota.virtual_mem_size)
+        else:
+            LOG.debug('No quota set for the size of vMemory')
+            return
+        if virtual_compute_quota.num_vc_instances is not None:
+            instance_limit = int(virtual_compute_quota.num_vc_instances)
+        else:
+            LOG.debug('No quota set for the number of virtualised container instances')
+            return
+
+        nova_limits = self.query_compute_capacity()
+        used_vcpus = nova_limits['vcpu']['used']
+        used_vmem = nova_limits['vmem']['used']
+        used_instances = nova_limits['instances']['used']
+
+        available_vcpus = vcpu_limit - used_vcpus
+        available_vmem = vmem_limit - used_vmem
+        available_instances = instance_limit - used_instances
+
+        # Compute resources to be reserved
+        vcpus_to_be_reserved = available_vcpus - vcpus
+        vmem_to_be_reserved = available_vmem - vmem
+        vc_instances_to_be_reserved = available_instances - vc_instances
+
+        # Make compute reservations so that only the required compute resources remain
+        compute_pool_reservation = ComputePoolReservation
+        compute_pool_reservation.num_cpu_cores = vcpus_to_be_reserved
+        compute_pool_reservation.num_vc_instances = vc_instances_to_be_reserved
+        compute_pool_reservation.virtual_mem_size = vmem_to_be_reserved
+
+        reservation_data = self.create_compute_resource_reservation(resource_group_id=resource_group_id,
+                                                                    compute_pool_reservation=compute_pool_reservation)
+
+        return reservation_data.reservation_id
 
     @log_entry_exit(LOG)
     def query_compute_capacity(self, zone_id=None, compute_resource_type_id=None, resource_criteria=None,
