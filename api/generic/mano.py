@@ -1,7 +1,8 @@
 import logging
 import time
 
-from threading import Thread
+from itertools import tee
+from threading import Thread, Event, Lock
 
 from api.adapter import construct_adapter
 from api.generic import constants
@@ -775,21 +776,34 @@ class Mano(object):
         self.notification_queues[subscription_id] = notification_queue
         return subscription_id
 
+    def get_notification_queue(self, subscription_id):
+        self.notification_queues[subscription_id], notification_queue_copy = tee(self.notification_queues[subscription_id])
+        return notification_queue_copy
+
     @log_entry_exit(LOG)
     def wait_for_notification(self, subscription_id, notification_pattern):
-        notification_queue = self.notification_queues[subscription_id]
-        timeout = False
+        notification_queue = self.get_notification_queue(subscription_id)
+
+        timeout = Event()
+
+        notification_list = [ None ]
+        lock = Lock()
 
         def notification_loop():
             for notification in notification_queue:
                 print notification
-                if timeout:
-                    break
+                if notification is not None:
+                    with lock:
+                        notification_list[0] = notification
+                    return
+                if timeout.is_set():
+                    print 'Exiting loop'
+                    return
 
         notification_thread = Thread(target=notification_loop)
         notification_thread.start()
-        notification_thread.join(15)
+        notification_thread.join(25)
+        timeout.set()
 
-        timeout = True
-        return None
-
+        with lock:
+            return notification_list[0]

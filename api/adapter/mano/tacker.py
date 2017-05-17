@@ -5,6 +5,9 @@ import time
 import uuid
 
 import os_client_config
+from itertools import tee #TODO: remove after testing
+from threading import Timer
+
 import tackerclient.common.exceptions
 import yaml
 from tackerclient.tacker.client import Client as TackerClient
@@ -500,22 +503,34 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
-        def notification_generator():
-            last_vnf_event_id = self._get_vnf_events()[-1]['id']
+        last_vnf_event_id = list(self._get_vnf_events())[-1]['id']
+        print 'Got last event id: %d' % last_vnf_event_id
+
+        def notification_generator(last_vnf_event_id):
+            i = 1
 
             while True:
                 vnf_events = self._get_vnf_events(starting_from=last_vnf_event_id)
-                for vnf_event in vnf_events:
-                    yield vnf_event
-                    last_vnf_event_id = vnf_event['id']
+                timer = Timer(10, lambda: None)
+                timer.start()
 
-                time.sleep(10)
+                for vnf_event in vnf_events:
+                    last_vnf_event_id = vnf_event['id']
+                    notification = self.translate_vnf_event(vnf_event)
+                    if notification is not None:
+                        yield notification
+                        print 'YIELDED %d' % i
+                        i += 1
+
+                yield None
+
+                timer.join()
 
         subscription_id = uuid.uuid4()
-        return subscription_id, notification_generator()
+        return subscription_id, notification_generator(last_vnf_event_id)
 
     @log_entry_exit(LOG)
-    def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
+    def translate_vnf_event(self, vnf_event):
         operations_mapping = {
             ('CREATE', 'PENDING_CREATE'): ('VNF_INSTANTIATE', 'STARTED'),
             ('CREATE', 'ACTIVE'): ('VNF_INSTANTIATE', 'SUCCESS'),
@@ -533,6 +548,31 @@ class TackerManoAdapter(object):
             ('MONITOR', 'ACTIVE'): None
         }
 
+        notification = VnfLifecycleChangeNotification()
+        notification.vnf_instance_id = str(vnf_event['id']).encode() # TODO: Modify to show vnf instance id
+
+        vnf_event_type = vnf_event['event_type'].encode()
+        vnf_resource_state = vnf_event['resource_state'].encode()
+
+        notification_attributes = operations_mapping[(vnf_event_type, vnf_resource_state)]
+        if isinstance(notification_attributes, tuple):
+            # we are able to determine mapping unambigously
+            notification_operation, notification_status = notification_attributes
+        if isinstance(notification_attributes, dict):
+            # ambiguity; must resolve based on event_details
+            vnf_event_details = vnf_event['event_details'].encode()
+            notification_operation, notification_status = notification_attributes[vnf_event_details]
+        if notification_attributes is None:
+            # internal event; no ETSI mapping, ignoring
+            return None
+
+        notification.operation = notification_operation
+        notification.status = notification_status
+
+        return notification
+
+    @log_entry_exit(LOG)
+    def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
         params = dict()
         if resource_id is not None:
             params['resource_id'] = resource_id
@@ -540,29 +580,15 @@ class TackerManoAdapter(object):
             params['event_type'] = event_type
 
         vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
+
+        unfiltered_len = len(vnf_events)
+
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
 
-        for vnf_event in vnf_events:
-            notification = VnfLifecycleChangeNotification()
-            notification.vnf_instance_id = vnf_event['resource_id'].encode()
+        vnf_events, vnf_events_copy = tee(vnf_events)
+        filtered_len = len(list(vnf_events_copy))
 
-            vnf_event_type = vnf_event['event_type'].encode()
-            vnf_resource_state = vnf_event['resource_state'].encode()
+        print 'Got %d events from Tacker, returned %d events' % (unfiltered_len, filtered_len)
 
-            notification_attributes = operations_mapping[(vnf_event_type, vnf_resource_state)]
-            if isinstance(notification_attributes, tuple):
-                # we are able to determine mapping unambigously
-                notification_operation, notification_status = notification_attributes
-            if isinstance(notification_attributes, dict):
-                # ambiguity; must resolve based on event_details
-                vnf_event_details = vnf_event['event_details'].encode()
-                notification_operation, notification_status = notification_attributes[vnf_event_details]
-            if notification_attributes is None:
-                # internal event; no ETSI mapping, ignoring
-                continue
-
-            notification.operation = notification_operation
-            notification.status = notification_status
-
-            yield notification
+        return vnf_events
