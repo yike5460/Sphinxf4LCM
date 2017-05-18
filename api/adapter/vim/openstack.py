@@ -71,6 +71,15 @@ class OpenstackVimAdapter(object):
         return reserved_virtual_compute
 
     @log_entry_exit(LOG)
+    def terminate_compute_resource_reservation(self, reservation_id):
+        LOG.debug('Reservations are not implemented in Openstack yet')
+        return
+
+    def get_resource_group_id(self):
+        project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
+        return project_id.encode()
+
+    @log_entry_exit(LOG)
     def query_virtualised_compute_resource(self, filter):
         virtual_compute = VirtualCompute()
 
@@ -202,7 +211,7 @@ class OpenstackVimAdapter(object):
         """
         This function gets quota information for resources specified in the filter for project_id retrieved from nova.
         """
-        project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
+        project_id = self.get_resource_group_id()
         quotas = self.nova_client.quotas.get(tenant_id=project_id)
         virtual_compute_quota = VirtualComputeQuota()
         virtual_compute_quota.resource_group_id = quotas._info['id'].encode()
@@ -218,7 +227,7 @@ class OpenstackVimAdapter(object):
         This function gets quota information for resources specified in the filter for project_id retrieved from 
         neutron.
         """
-        project_id = self.neutron_client.httpclient.session.auth.auth_ref._data['token']['project']['id']
+        project_id = self.get_resource_group_id()
         quotas = self.neutron_client.show_quota(project_id)
         virtual_network_quota = VirtualNetworkQuota()
         virtual_network_quota.resource_group_id = project_id.encode()
@@ -235,7 +244,7 @@ class OpenstackVimAdapter(object):
         This function gets quota information for resources specified in the filter for project_id retrieved from 
         neutron.
         """
-        project_id = self.cinder_client.client.session.auth.auth_ref._data['token']['project']['id']
+        project_id = self.get_resource_group_id()
         quotas = self.cinder_client.quotas.get(project_id)
         virtual_storage_quota = VirtualStorageQuota()
         virtual_storage_quota.resource_group_id = project_id.encode()
