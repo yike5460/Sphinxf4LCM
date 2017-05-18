@@ -4,7 +4,7 @@ VirtualisationContainerReservation:
   description: This clause describes the attributes for the VirtualisationContainerReservation information element.
 
   attributes:
-    container_id :
+    container_id:
       description: The identifier of the virtualisation container to be reserved.
       type: Identifier
       required: true

@@ -4,7 +4,7 @@ ReservedVirtualCompute:
   description: The compute resource reservation information element encapsulate information about a reservation for virtualised compute resources. It includes information about virtual compute resource pool and virtualisation container reservations.
 
   attributes:
-    reservation_id :
+    reservation_id:
       description: Identifier of the resource reservation.
       type: Identifier
       required: true
