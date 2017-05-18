@@ -211,31 +211,47 @@ class TimeStamp(String):
 class SchemaLoader(type):
     def __new__(meta, name, bases, class_dict):
         if bases != (InformationElement,):
-            class_schema = get_schema(name)
+            information_element_names = [name]
+            class_schemas = list()
 
-            for class_attribute_name, class_attribute_schema in class_schema.get('attributes').items():
-                class_attribute_type = class_attribute_schema.get('type')
+            for information_element_name in information_element_names:
+                class_schema = get_schema(information_element_name)
+                class_schemas.append(class_schema)
 
-                class_attribute_constraints = class_attribute_schema.get('constraints')
+                for inherited_information_element in class_schema.get('inherits', []):
+                    if inherited_information_element in information_element_names:
+                        raise TypeError('Cyclic inheritance detected for %s: %s' % (name, information_element_names + [inherited_information_element]))
+                    information_element_names.append(inherited_information_element)
 
-                constructor = getattr(this_module, class_attribute_type)
-                if not issubclass(constructor, Attribute):
-                    if issubclass(constructor, InformationElement):
-                        class_attribute = Attribute(constructor)
+            class_schemas.reverse()
+
+            for class_schema in class_schemas:
+                for class_attribute_name, class_attribute_schema in class_schema.get('attributes', {}).items():
+                    if class_attribute_name in class_dict:
+                        raise TypeError('attribute %s already inherited by %s' % (class_attribute_name, name))
+
+                    class_attribute_type = class_attribute_schema.get('type')
+
+                    class_attribute_constraints = class_attribute_schema.get('constraints')
+
+                    constructor = getattr(this_module, class_attribute_type)
+                    if not issubclass(constructor, Attribute):
+                        if issubclass(constructor, InformationElement):
+                            class_attribute = Attribute(constructor)
+                        else:
+                            raise TypeError('%s attribute type should be an Attribute subtype' % repr(class_attribute_type))
                     else:
-                        raise TypeError('%s attribute type should be an Attribute subtype' % repr(class_attribute_type))
-                else:
-                    if class_attribute_constraints is not None:
-                        class_attribute = constructor(
-                            entry_type=getattr(this_module, class_attribute_constraints.get('entry_type')),
-                            valid_values=class_attribute_constraints.get('valid_values'))
-                    else:
-                        try:
-                            class_attribute = constructor()
-                        except TypeError:
-                            raise TypeError('unable to call __init__ for %s' % class_attribute_type)
+                        if class_attribute_constraints is not None:
+                            class_attribute = constructor(
+                                entry_type=getattr(this_module, class_attribute_constraints.get('entry_type')),
+                                valid_values=class_attribute_constraints.get('valid_values'))
+                        else:
+                            try:
+                                class_attribute = constructor()
+                            except TypeError:
+                                raise TypeError('unable to call __init__ for %s' % class_attribute_type)
 
-                class_dict[class_attribute_name] = class_attribute
+                    class_dict[class_attribute_name] = class_attribute
         return type.__new__(meta, name, bases, class_dict)
 
 
@@ -542,5 +558,3 @@ class AffectedVirtualLink(InformationElementWithExternalSchema):
 
 class VnfLifecycleChangeNotification(InformationElementWithExternalSchema):
     pass
-
-
