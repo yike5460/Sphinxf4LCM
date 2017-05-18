@@ -5,7 +5,6 @@ import time
 import uuid
 
 import os_client_config
-from itertools import tee #TODO: remove after testing
 from threading import Timer
 
 import tackerclient.common.exceptions
@@ -453,14 +452,12 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
         last_vnf_event_id = list(self._get_vnf_events())[-1]['id']
-        print 'Got last event id: %d' % last_vnf_event_id
+        print 'Got last event id: %d' % last_vnf_event_id  # TODO: use logger instead of print
 
         def notification_generator(last_vnf_event_id):
-            i = 1
-
             while True:
                 vnf_events = self._get_vnf_events(starting_from=last_vnf_event_id)
-                timer = Timer(10, lambda: None)
+                timer = Timer(10, lambda: None)  # TODO: define polling interval as parameter
                 timer.start()
 
                 for vnf_event in vnf_events:
@@ -468,11 +465,8 @@ class TackerManoAdapter(object):
                     notification = self.translate_vnf_event(vnf_event)
                     if notification is not None:
                         yield notification
-                        print 'YIELDED %d' % i
-                        i += 1
 
                 yield None
-
                 timer.join()
 
         subscription_id = uuid.uuid4()
@@ -498,7 +492,7 @@ class TackerManoAdapter(object):
         }
 
         notification = VnfLifecycleChangeNotification()
-        notification.vnf_instance_id = str(vnf_event['id']).encode() # TODO: Modify to show vnf instance id
+        notification.vnf_instance_id = str(vnf_event['id']).encode()  # TODO: Modify to show vnf instance id
 
         vnf_event_type = vnf_event['event_type'].encode()
         vnf_resource_state = vnf_event['resource_state'].encode()
@@ -529,15 +523,7 @@ class TackerManoAdapter(object):
             params['event_type'] = event_type
 
         vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
-
-        unfiltered_len = len(vnf_events)
-
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
-
-        vnf_events, vnf_events_copy = tee(vnf_events)
-        filtered_len = len(list(vnf_events_copy))
-
-        print 'Got %d events from Tacker, returned %d events' % (unfiltered_len, filtered_len)
 
         return vnf_events

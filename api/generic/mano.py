@@ -1,12 +1,12 @@
 import logging
 import time
 
-from itertools import tee
 from threading import Thread, Event, Lock
 
 from api.adapter import construct_adapter
 from api.generic import constants
 from utils.logging_module import log_entry_exit
+from utils.misc import tee
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -783,29 +783,26 @@ class Mano(object):
         return notification_queue_copy
 
     @log_entry_exit(LOG)
-    def wait_for_notification(self, subscription_id, notification_pattern):
+    def wait_for_notification(self, subscription_id, notification_type, notification_pattern, timeout):
         notification_queue = self.get_notification_queue(subscription_id)
 
-        timeout = Event()
-
-        notification_list = [ None ]
+        timeout_occurred = Event()
+        result = dict()
         lock = Lock()
 
         def notification_loop():
             for notification in notification_queue:
-                print notification
-                if notification is not None:
+                if isinstance(notification, notification_type):
                     with lock:
-                        notification_list[0] = notification
-                    return
-                if timeout.is_set():
-                    print 'Exiting loop'
-                    return
+                        result['found'] = notification
+                    break
+                if timeout_occurred.is_set():
+                    break
 
         notification_thread = Thread(target=notification_loop)
         notification_thread.start()
-        notification_thread.join(25)
-        timeout.set()
+        notification_thread.join(timeout)
+        timeout_occurred.set()
 
         with lock:
-            return notification_list[0]
+            return result.get('found')
