@@ -38,8 +38,8 @@ class Mano(object):
         return self.mano_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
-                                            generic_vim_object):
+    def limit_compute_resources_for_vnf_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
+                                                generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
         VNF defined by the provided vnfd_id, with the provided number of default instances and scaling the VNF
@@ -54,9 +54,9 @@ class Mano(object):
         :param generic_vim_object:      Generic VIM object.
         :return:                        The reservation ID if the reservation was successful, None otherwise.
         """
-        return self.mano_adapter.limit_compute_resources_for_scaling(vnfd_id, default_instances,
-                                                                     desired_scale_out_steps, scaling_step,
-                                                                     generic_vim_object)
+        return self.mano_adapter.limit_compute_resources_for_vnf_scaling(vnfd_id, default_instances,
+                                                                         desired_scale_out_steps, scaling_step,
+                                                                         generic_vim_object)
 
     @log_entry_exit(LOG)
     def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,

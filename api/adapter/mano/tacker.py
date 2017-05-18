@@ -93,8 +93,8 @@ class TackerManoAdapter(object):
             return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
-                                            generic_vim_object):
+    def limit_compute_resources_for_vnf_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
+                                                generic_vim_object):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the resources required by one instance of the VNF
