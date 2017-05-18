@@ -116,21 +116,10 @@ class TackerManoAdapter(object):
         required_vmem = (desired_scale_out_steps * scaling_step + default_instances) * vmem_req_one_inst
         required_vc_instances = (desired_scale_out_steps * scaling_step + default_instances) * vc_instances_req_one_inst
 
-        # Get resource group ID (tenant ID)
-        # If Tacker has more than one VIM registered, get the default VIM (assuming one of the VIMs is the default VIM)
-        resource_group_id = None
-        vim_list = self.tacker_client.list_vims()
-        for vim in vim_list['vims']:
-            vim_id = vim['id']
-            vim_info = self.tacker_client.show_vim(vim_id)
-            if vim_info['vim']['is_default']:
-                resource_group_id = vim_info['vim']['tenant_id']
-                break
+        reservation_id = generic_vim_object.limit_compute_resources(required_vcpus, required_vmem,
+                                                                    required_vc_instances)
 
-        reservation_data = generic_vim_object.limit_compute_resources(resource_group_id, required_vcpus, required_vmem,
-                                                                      required_vc_instances)
-
-        return reservation_data.reservation_id
+        return reservation_id
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
