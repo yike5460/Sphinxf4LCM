@@ -4,35 +4,35 @@ import logging
 
 from utils.logging_module import configure_logger
 from api.structures.objects import ScalingAspect, VduCpd
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_001 import TC_VNF_STATE_INST_001
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_002 import TC_VNF_STATE_INST_002
-# from test_cases.vnf.state.term.TC_VNF_STATE_TERM_002 import TC_VNF_STATE_TERM_002
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001__MANO_MANUAL import TC_VNFC_SCALE_OUT_001__MANO_MANUAL
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001__MANO_MANUAL import TC_VNFC_SCALE_OUT_001__MANO_MANUAL
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_003__MANO_MANUAL import TC_VNFC_SCALE_OUT_003__MANO_MANUAL
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004_5_1 import TC_VNFC_SCALE_OUT_004_5_1
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004_5_2 import TC_VNFC_SCALE_OUT_004_5_2
-# from test_cases.vnf.state.start.TC_VNF_STATE_START_001 import TC_VNF_STATE_START_001
-# from test_cases.vnf.state.start.TC_VNF_STATE_START_002 import TC_VNF_STATE_START_002
-# from test_cases.vnf.state.start.TC_VNF_STATE_START_003 import TC_VNF_STATE_START_003
-# from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_001 import TC_VNF_STATE_STOP_001
-# from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_002 import TC_VNF_STATE_STOP_002
-# from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_003 import TC_VNF_STATE_STOP_003
-# from test_cases.vnf.state.term.TC_VNF_STATE_TERM_001 import TC_VNF_STATE_TERM_001
-# from test_cases.vnf.state.term.TC_VNF_STATE_TERM_003 import TC_VNF_STATE_TERM_003
-# from test_cases.vnf.state.term.TC_VNF_STATE_TERM_004 import TC_VNF_STATE_TERM_004
-# from test_cases.vnf.state.term.TC_VNF_STATE_TERM_005 import TC_VNF_STATE_TERM_005
-# from test_cases.vnf.complex.TC_VNF_COMPLEX_002 import TC_VNF_COMPLEX_002
-# from test_cases.vnf.complex.TC_VNF_COMPLEX_003 import TC_VNF_COMPLEX_003
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_002__MANO_MANUAL import TC_VNFC_SCALE_OUT_002__MANO_MANUAL
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_003 import TC_VNF_STATE_INST_003
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_004 import TC_VNF_STATE_INST_004
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_005 import TC_VNF_STATE_INST_005
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_006 import TC_VNF_STATE_INST_006
-# from test_cases.vnf.state.inst.TC_VNF_STATE_INST_007 import TC_VNF_STATE_INST_007_001, TC_VNF_STATE_INST_007_002, \
-#     TC_VNF_STATE_INST_007_003, TC_VNF_STATE_INST_007_004, TC_VNF_STATE_INST_007_005, TC_VNF_STATE_INST_007_006, \
-#     TC_VNF_STATE_INST_007_007, TC_VNF_STATE_INST_007_008
-# from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001_1 import TC_VNFC_SCALE_OUT_001_1
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_001 import TC_VNF_STATE_INST_001
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_002 import TC_VNF_STATE_INST_002
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_002 import TC_VNF_STATE_TERM_002
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001__MANO_ONDEMAND__EM_IND import TC_VNFC_SCALE_OUT_001__MANO_ONDEMAND__EM_IND
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_001__MANO_MANUAL import TC_VNFC_SCALE_OUT_001__MANO_MANUAL
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_002__MANO_MANUAL import TC_VNFC_SCALE_OUT_002__MANO_MANUAL
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_003__MANO_MANUAL import TC_VNFC_SCALE_OUT_003__MANO_MANUAL
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1 import TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX import TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND_STEP_MAX_mine import TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__STEP_MAX
+from test_cases.vnf.state.start.TC_VNF_STATE_START_001 import TC_VNF_STATE_START_001
+from test_cases.vnf.state.start.TC_VNF_STATE_START_002 import TC_VNF_STATE_START_002
+from test_cases.vnf.state.start.TC_VNF_STATE_START_003 import TC_VNF_STATE_START_003
+from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_001 import TC_VNF_STATE_STOP_001
+from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_002 import TC_VNF_STATE_STOP_002
+from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_003 import TC_VNF_STATE_STOP_003
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_001 import TC_VNF_STATE_TERM_001
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_003 import TC_VNF_STATE_TERM_003
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_004 import TC_VNF_STATE_TERM_004
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_005 import TC_VNF_STATE_TERM_005
+from test_cases.vnf.complex.TC_VNF_COMPLEX_002 import TC_VNF_COMPLEX_002
+from test_cases.vnf.complex.TC_VNF_COMPLEX_003 import TC_VNF_COMPLEX_003
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_003 import TC_VNF_STATE_INST_003
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_004 import TC_VNF_STATE_INST_004
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_005 import TC_VNF_STATE_INST_005
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_006 import TC_VNF_STATE_INST_006
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_007 import TC_VNF_STATE_INST_007_001, TC_VNF_STATE_INST_007_002, \
+    TC_VNF_STATE_INST_007_003, TC_VNF_STATE_INST_007_004, TC_VNF_STATE_INST_007_005, TC_VNF_STATE_INST_007_006, \
+    TC_VNF_STATE_INST_007_007, TC_VNF_STATE_INST_007_008
 
 # Getting and configuring the RootLogger.
 root_logger = logging.getLogger()
@@ -92,9 +92,9 @@ if __name__ == '__main__':
                  # VNFD with SP & alarm scaling
                  # 'vnfd_id': '8e451832-349e-4589-893f-7339f5c05fbb',
                  # VNFD with exceeding SP step 1
-                 'vnfd_id': '3f7a41e6-d0d3-4afe-9f14-d7d619a89e6a',
+                 # 'vnfd_id': '3f7a41e6-d0d3-4afe-9f14-d7d619a89e6a',
                  # VNFD with exceeding SP step max
-                 # 'vnfd_id': '3404c2de-3a31-434b-bacf-62c913a6322f',
+                 'vnfd_id': '3404c2de-3a31-434b-bacf-62c913a6322f',
                  'vnf': {'type': 'ubuntu',
                          'instance_name': 'test_vnf',
                          'credentials': {'mgmt_ip_addr': '172.31.203.111',
@@ -123,12 +123,7 @@ if __name__ == '__main__':
                              'cooldown': 3,
                              'max_instances': 3,
                              'default_instances': 1},
-                 'imposed_nfvi_limits': {'compute_limits': {'vcpus': 3,
-                                                            'vmem': 192,
-                                                            'instances': 3},
-                                         'storage_limits': {'volume': 3},
-                                         'network_limits': {'vnics': 3},
-                                         'scale_out_steps': 2},
+                 'max_scale_out_steps': 2,
                  'process_type': 'update',
                  'performance': {'metric': 'vCPU',
                                  'collecting_period': 60,
@@ -225,9 +220,13 @@ if __name__ == '__main__':
     # LOG.info('Calling test case TC_VNFC_SCALE_OUT_001__MANO_MANUAL')
     # TC_VNFC_SCALE_OUT_001__MANO_MANUAL(tc_input=openstack).execute()
 
-    # Use VNFD with exceeding max SP
-    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004_5_1')
-    # TC_VNFC_SCALE_OUT_004_5_1(tc_input=openstack).execute()
+    # Use VNFD with exceeding SP step max
+    LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
+    TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(tc_input=openstack).execute()
+
+    # Use VNFD with exceeding SP step 1
+    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1')
+    # TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(tc_input=openstack).execute()
 
     # Use VNFD with max SP
     # LOG.info('Calling test case TC_VNF_COMPLEX_002')
