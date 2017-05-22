@@ -19,6 +19,11 @@ class RiftManoAdapter(object):
         self.ns_vnf_mapping = dict()
 
     @log_entry_exit(LOG)
+    def limit_compute_resources_for_ns_scaling(self, nsd_id, default_instances, desired_scale_out_steps, scaling_step,
+                                               generic_vim_object):
+        raise NotImplementedError
+
+    @log_entry_exit(LOG)
     def vnf_instantiate(self, vnfd_id):
         resource = '/api/config/ns-instance-config/nsr'
 
