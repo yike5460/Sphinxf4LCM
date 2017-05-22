@@ -3,6 +3,8 @@ import time
 
 from threading import Thread, Event, Lock
 
+import re
+
 from api.adapter import construct_adapter
 from api.generic import constants
 from utils.logging_module import log_entry_exit
@@ -814,9 +816,17 @@ class Mano(object):
         def notification_loop():
             for notification in notification_queue:
                 if isinstance(notification, notification_type):
-                    with lock:
-                        result['found'] = notification
-                    break
+                    all_matched = True
+                    for attr, regex in notification_pattern.items():
+                        attr_value = getattr(notification, attr, None)
+                        if re.match(regex, str(attr_value)) is None:
+                            all_matched = False
+                            break
+
+                    if all_matched:
+                        with lock:
+                            result['found'] = notification
+                        break
                 if timeout_occurred.is_set():
                     break
 
