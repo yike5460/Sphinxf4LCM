@@ -1,0 +1,34 @@
+# This structure was written in accordance with section 7.1.5.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfLcmOperationsConfiguration:
+  description: This information element is a container for all attributes that affect the invocation of the VNF Lifecycle Management operations, structured by operation.
+  attributes:
+    instantiate_vnf_op_config:
+      description: Configuration parameters for the InstantiateVnf operation.
+      type: InstantiateVnfOpConfig
+      required: false
+
+    scale_vnf_op_config:
+      description: Configuration parameters for the ScaleVnf operation.
+      type: ScaleVnfOpConfig
+      required: false
+
+    scale_vnf_to_level_op_config:
+      description: Configuration parameters for the ScaleVnfToLevel operation.
+      type: ScaleVnfToLevelOpConfig
+      required: false
+
+    heal_vnf_op_config:
+      description: Configuration parameters for the HealVnf operation.
+      type: HealVnfOpConfig
+      required: false
+
+    terminate_vnf_op_config:
+      description: Configuration parameters for the TerminateVnf operation.
+      type: TerminateVnfOpConfig
+      required: false
+
+    operate_vnf_op_config:
+      description: Configuration parameters for the OperateVnf operation.
+      type: OperateVnfOpConfig
+      required: false

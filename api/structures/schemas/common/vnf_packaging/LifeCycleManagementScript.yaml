@@ -1,0 +1,16 @@
+# This structure was written in accordance with section 7.1.13 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+LifeCycleManagementScript:
+  description: This clause defines the information elements related to the lifecycle management script for the VNF.
+  attributes:
+    event:
+      description: Describes VNF lifecycle event(s) or an external stimulus detected on a VNFM reference point.
+      type: List
+      required: true
+      constraints:
+        entry_type: String
+
+    script:
+      description: Includes a VNF LCM script (e.g. written in a DSL as specified in requirement VNF_PACK.LCM.001) triggered to react to one of the events listed in the event attribute.
+      type: NotSpecified
+      required: true

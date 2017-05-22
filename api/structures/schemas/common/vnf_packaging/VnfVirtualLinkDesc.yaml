@@ -1,0 +1,40 @@
+# This structure was written in accordance with section 7.1.7.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfVirtualLinkDesc:
+  description: The VnfVirtualLinkDesc information element supports providing information about an internal VNF VL.
+  attributes:
+    virtual_link_desc_id:
+      description: Unique identifier of this internal VLD in VNFD.
+      type: Identifier
+      required: true
+
+    virtual_link_desc_flavour:
+      description: Describes a specific flavour of the VL with specific bitrate requirements
+      type: List
+      required: true
+      constraints:
+        entry_type: VirtualLinkDescFlavour
+
+    connectivity_type:
+      description: See ConnectivityType
+      type: ConnectivityType
+      required: true
+
+    test_access:
+      description: Specifies test access facilities expected on the VL (e.g. none, passive monitoring, or active (intrusive) loopbacks at endpoints.
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    description:
+      description: Provides human-readable information on the purpose of the VL (e.g. control plane traffic).
+      type: String
+      required: false
+
+    monitoring_parameter:
+      description: Defines the virtualised resources monitoring parameters on VLD level.
+      type: List
+      required: false
+      constraints:
+        entry_type: MonitoringParameter

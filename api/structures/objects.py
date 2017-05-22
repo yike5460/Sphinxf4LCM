@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import sys
@@ -184,6 +185,13 @@ class Integer(StaticTypeAttribute):
     TYPE = int
 
 
+class PositiveInteger(Integer):
+    def _validate(self, value):
+        super(PositiveInteger, self)._validate(value)
+        if value <= 0:
+            raise ValueError('Value %s should be a positive integer' % repr(value))
+
+
 class Mapping(StaticTypeAttribute):
     TYPE = dict
 
@@ -201,7 +209,7 @@ class IpAddress(StaticTypeAttribute):
 
 
 class Rule(String):
-    TYPE = str
+    pass
 
 
 class TimeStamp(String):
@@ -557,4 +565,172 @@ class AffectedVirtualLink(InformationElementWithExternalSchema):
 
 
 class VnfLifecycleChangeNotification(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingAspect(InformationElementWithExternalSchema):
+    pass
+
+
+class L3AddressData(InformationElementWithExternalSchema):
+    pass
+
+
+class AddressData(InformationElementWithExternalSchema):
+    pass
+
+
+class Cpd(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualNetworkInterfaceRequirements(InformationElementWithExternalSchema):
+    pass
+
+
+class VduCpd(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualCpuPinningData(InformationElementWithExternalSchema):
+    pass
+
+
+class LinkBitrateRequirements(InformationElementWithExternalSchema):
+    pass
+
+
+class QoS(InformationElementWithExternalSchema):
+    pass
+
+
+class LocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
+    pass
+
+
+class VduLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class InstantiateVnfOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleVnfOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class ScaleVnfToLevelOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class HealVnfOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class TerminateVnfOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class OperateVnfOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class SwImageDesc(InformationElementWithExternalSchema):
+    pass
+
+
+class MonitoringParameter(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfcConfigurableProperties(InformationElementWithExternalSchema):
+    pass
+
+
+class RequestedAdditionalCapabilityData(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualMemoryData(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualCpuData(InformationElementWithExternalSchema):
+    pass
+
+
+class ConnectivityType(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkDescFlavour(InformationElementWithExternalSchema):
+    pass
+
+
+class VduProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class InstantiationLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfLcmOperationsConfiguration(InformationElementWithExternalSchema):
+    pass
+
+
+class AffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
+    pass
+
+
+class Vdu(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualComputeDesc(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualStorageDesc(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfVirtualLinkDesc(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfExtCpd(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfDf(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfConfigurableProperties(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfInfoModifiableAttributes(InformationElementWithExternalSchema):
+    pass
+
+
+class LifeCycleManagementScript(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfdElementGroup(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfIndicator(InformationElementWithExternalSchema):
+    pass
+
+
+class vnfd(InformationElementWithExternalSchema):
     pass

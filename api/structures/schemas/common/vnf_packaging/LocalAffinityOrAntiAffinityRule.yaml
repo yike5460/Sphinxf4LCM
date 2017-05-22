@@ -1,0 +1,19 @@
+# This structure was written in accordance with section 7.1.8.11 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+LocalAffinityOrAntiAffinityRule:
+  description: The LocalAffinityOrAntiAffinityRule describes the affinity or anti-affinity rule applicable between the virtualization containers to be created based on a particular VDU, or be tween internal VLs to be created based on a particular VnfVirtualLinkDesc. Per VNF, the affinity/anti-affinity rules defined using this information element, using the AffinityOrAntiAffinityGroup information element, and using the placement constraints in the GrantLifecycleOperation as defined in ETSI GS NFV-IFA 007 [i.3] should be conflict-free. In case of conflicts, the placement constraints in the GrantLifecycleOperation shall take precedence.
+  attributes:
+    type:
+      description: Specifies whether the rule is an affinity rule or an anti-affinity rule.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+
+    scope:
+      description: Specifies the scope of the rule, possible values are "NFVI-PoP", "Zone", "ZoneGroup", "NFVI-node".
+      type: Enum
+      required: true
+      constraints:
+        valid_values: [ NFVI-PoP, Zone, ZoneGroup, NFVI-node ]
+        entry_type: String

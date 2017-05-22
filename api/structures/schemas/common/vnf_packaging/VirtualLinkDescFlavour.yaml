@@ -1,0 +1,19 @@
+# This structure was written in accordance with section 7.1.8.5 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VirtualLinkDescFlavour:
+  description: The VirtualLinkDescFlavour describes additional instantiation data for a given internal VL used in a DF.
+  attributes:
+    flavour_id:
+      description: Identifies a flavour within a VnfVirtualLinkDesc.
+      type: Identifier
+      required: true
+
+    bitrate_requirements:
+      description: Bitrate requirements for a VL created from this VirtualLinkDescFlavour.
+      type: LinkBitrateRequirements
+      required: false
+
+    qos:
+      description: QoS of the VL.
+      type: QoS
+      required: false

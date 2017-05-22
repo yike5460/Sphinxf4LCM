@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 7.1.8.9 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VduLevel:
+  description: The VduLevel information element indicates for a given VDU in a given level the number of instances to deploy.
+  attributes:
+    vdu_id:
+      description: Uniquely identifies a VDU.
+      type: Identifier
+      required: true
+
+    number_of_instances:
+      description: Number of instances of VNFC based on this VDU to deploy for this level.
+      type: Integer
+      required: true

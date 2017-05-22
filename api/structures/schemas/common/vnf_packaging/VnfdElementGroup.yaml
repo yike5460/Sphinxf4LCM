@@ -1,0 +1,28 @@
+# This structure was written in accordance with section 7.1.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfdElementGroup:
+  description: A VNFD Element Group is a mechanism for associating elements of a VNFD (Vdus and VnfVirtualLinkDesc(s)) for a certain purpose, for example, scaling aspects.
+  attributes:
+    vnfd_element_group_id:
+      description: Unique identifier of this group in the VNFD.
+      type: Identifier
+      required: true
+
+    description:
+      description: Human readable description of the group.
+      type: String
+      required: true
+
+    vdu:
+      description: References to Vdus that are part of this group.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    virtual_link_desc:
+      description: References to VnfVirtualLinkDesc that are part of this group.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier

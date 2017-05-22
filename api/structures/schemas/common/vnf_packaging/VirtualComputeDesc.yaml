@@ -1,0 +1,26 @@
+# This structure was written in accordance with section 7.1.9.2.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VirtualComputeDesc:
+  description: The VirtualComputeDesc information element supports the specification of requirements related to virtual compute resources.
+  attributes:
+    virtual_compute_desc_id:
+      description: CPU architecture type. Examples are x86, ARM. The cardinality can be 0 during the allocation request, if no particular CPU architecture type is requested.
+      type: Identifier
+      required: true
+
+    request_additional_capabilities:
+      description: Number of virtual CPUs.
+      type: List
+      required: false
+      constraints:
+        entry_type: RequestedAdditionalCapabilityData
+
+    virtual_memory:
+      description: Minimum virtual CPU clock rate (e.g. in MHz). The cardinality can be 0 during the allocation request, if no particular value is requested.
+      type: VirtualMemoryData
+      required: true
+
+    virtual_cpu:
+      description: The CPU core oversubscription policy e.g. the relation of virtual CPU cores to physical CPU cores/threads. The cardinality can be 0 during the allocation request, if no particular value is requested.
+      type: VirtualCpuData
+      required: true

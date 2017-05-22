@@ -1,0 +1,31 @@
+# This structure was written in accordance with section 7.1.9.5 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+RequestedAdditionalCapabilityData:
+  description: This information element describes requested additional capability for a particular VDU. Such a capability may be for acceleration or specific tasks.
+  attributes:
+    requested_additional_capability_name:
+      description: Identifies a requested additional capability for the VDU. ETSI GS NFV-IFA 002 [i.1] describes acceleration capabilities.
+      type: String
+      required: true
+
+    support_mandatory:
+      description: Indicates whether the requested additional capability is mandatory for successful operation.
+      type: Boolean
+      required: true
+
+    min_requested_additional_capability_version:
+      description: Identifies the minimum version of the requested additional capability.
+      type: String
+      required: false
+
+    preferred_requested_additional_capability_version:
+      description: Identifies the preferred version of the requested additional capability.
+      type: String
+      required: false
+
+    target_performance_parameters:
+      description: Identifies specific attributes, dependent on the requested additional capability type.
+      type: List
+      required: true
+      constraints:
+        entry_type: Metadata

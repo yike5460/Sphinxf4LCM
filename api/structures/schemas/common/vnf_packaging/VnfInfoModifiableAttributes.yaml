@@ -1,0 +1,18 @@
+# This structure was written in accordance with section 7.1.14 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfInfoModifiableAttributes:
+  description: This information element defines the VNF-specific extension and metadata attributes of the VnfInfo that are writeable via the ModifyVnfInfo operation.
+  attributes:
+    extension:
+      description: Extension attributes of VnfInfo that are writeable.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    metadata:
+      description: Metadata attributes of VnfInfo that are writeable.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified

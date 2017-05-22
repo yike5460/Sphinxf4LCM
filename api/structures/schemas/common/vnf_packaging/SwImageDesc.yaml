@@ -1,0 +1,66 @@
+# This structure was written in accordance with section 7.1.6.5 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+SwImageDesc:
+  description: This information element describes requested additional capability for a particular VDU. Such a capability may be for acceleration or specific tasks.
+  attributes:
+    id:
+      description: The identifier of this software image.
+      type: Identifier
+      required: true
+
+    name:
+      description: The name of this software image.
+      type: String
+      required: true
+
+    version:
+      description: The version of this software image.
+      type: String
+      required: true
+
+    checksum:
+      description: The checksum of the software image file.
+      type: String
+      required: true
+
+    container_format:
+      description: The container format describes the container file format in which software image is provided.
+      type: String
+      required: true
+
+    disk_format:
+      description: The disk format of a software image is the format of the underlying disk image.
+      type: String
+      required: true
+
+    min_disk:
+      description: The minimal disk size requirement for this software image. The value of the "size of storage" attribute of the VirtualStorageDesc referencing this SwImageDesc shall not be smaller than the value of minDisk.
+      type: Number
+      required: true
+
+    min_ram:
+      description: The minimal RAM requirement for this software image. The value of the "size" attribute of VirtualMemoryData of the Vdu referencing this SwImageDesc shall not be smaller than the value of minRam.
+      type: Number
+      required: false
+
+    size:
+      description: The size of this software image.
+      type: Number
+      required: true
+
+    sw_image:
+      description: This is a reference to the actual software image. The reference can be relative to the root of the VNF Package or can be a URL.
+      type: Identifer
+      required: true
+
+    operating_system:
+      description: Identifies the operating system used in the software image. This attribute may also identify if a 32 bit or 64 bit software image is used.
+      type: String
+      required: false
+
+    supported_virtualisation_environment:
+      description: Identifies the virtualisation environments (e.g. hypervisor) compatible with this software image.
+      type: List
+      required: false
+      constraints:
+        entry_type: String

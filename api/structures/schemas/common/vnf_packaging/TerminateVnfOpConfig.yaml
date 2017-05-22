@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 7.1.5.7 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+TerminateVnfOpConfig:
+  description: This information element defines attributes that affect the invocation of the TerminateVnf operation.
+  attributes:
+    min_graceful_termination_timeout:
+      description: Minimum timeout value for graceful termination of a VNF instance.
+      type: Number
+      required: true
+
+    max_recommended_graceful_termination_timeout :
+      description: Maximum recommended timeout value that can be needed to gracefully terminate a VNF instance of a particular type under certain conditions, such as maximum load condition. This is provided by VNF provider as information for the operator facilitating the selection of optimal timeout value. This value is not used as constraint.
+      type: Number
+      required: false

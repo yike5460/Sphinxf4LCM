@@ -1,0 +1,19 @@
+# This structure was written in accordance with section 7.1.11.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+MonitoringParameter:
+  description: This information element specifies the virtualised resource related performance metrics to be monitored.
+  attributes:
+    id:
+      description: Unique identifier of the monitoring parameter.
+      type: Identifier
+      required: true
+
+    name:
+      description: Human readable name of the monitoring parameter.
+      type: String
+      required: false
+
+    performance_metric:
+      description: Defines the virtualised resource performance metric. The VNFM collects the performance metrics defined in this attribute from the VIM using one or more PM Jobs.
+      type: String
+      required: true

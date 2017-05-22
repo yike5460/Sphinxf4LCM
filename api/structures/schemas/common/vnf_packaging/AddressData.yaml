@@ -1,0 +1,22 @@
+# This structure was written in accordance with section 7.1.3.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+AddressData:
+  description: The AddressData information element supports providing information about the addressing scheme and parameters applicable to a CP.
+  attributes:
+    address_type:
+      description: Describes the type of the address to be assigned to the CP instantiated from the parent CPD. Value MAC address, IP address. The content type shall be aligned with the address type supported by the layerProtocol attribute of the parent CPD.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ MAC_address, IP_address ]
+
+    l2_address_data:
+      description: Provides the information on the MAC addresses to be assigned to the CP(s) instantiated from the parent CPD. Shall be present when the addressType is MAC address.
+      type: NotSpecified
+      required: false
+
+    l3_address_data:
+      description: Provides the information on the IP addresses to be assigned to the CP instantiated from the parent CPD. Shall be present when the addressType is IP address.
+      type: L3AddressData
+      required: false

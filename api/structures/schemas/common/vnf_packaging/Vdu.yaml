@@ -1,0 +1,69 @@
+# This structure was written in accordance with section 7.1.6.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+Vdu:
+  description: The Virtualisation Deployment Unit (VDU) is a construct supporting the description of the deployment and operational behaviour of a VNFC.
+  attributes:
+    vdu_id:
+      description: Unique identifier of this Vdu in VNFD.
+      type: Identifier
+      required: true
+
+    name:
+      description: Human readable name of the Vdu.
+      type: String
+      required: true
+
+    description:
+      description: Human readable description of the Vdu.
+      type: String
+      required: true
+
+    int_cpd:
+      description: Describes network connectivity between a VNFC instance (based on this Vdu) and an internal Virtual Link (VL).
+      type: List
+      required: true
+      constraints:
+        entry_type: VduCpd
+
+    virtual_compute_desc:
+      description: Describes CPU, Memory and acceleration requirements of the Virtualisation Container realizing this Vdu.
+      type: Identifier
+      required: true
+
+    virtual_storage_desc:
+      description: Describes storage requirements for a VirtualStorage instance attached to the virtualisation container created from virtualComputeDesc defined for this Vdu.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    boot_order:
+      description: The key indicates the boot index (lowest index defines highest boot priority). The Value references a descriptor from which a valid boot device is created e.g. VirtualStorageDesc from which a VirtualStorage instance is created.
+      type: List
+      required: false
+      constraints:
+        entry_type: Mapping
+
+    sw_image_desc:
+      description: Describes the software image which is directly loaded on the virtualisation container realizing this Vdu.
+      type: SwImageDesc
+      required: false
+
+    nfvi_constraint:
+      description: Describes constraints on the NFVI for the VNFC instance(s) created from this Vdu. For example, aspects of a secure hosting environment for the VNFC instance that involve additional entities or processes.
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    monitoring_parameter:
+      description: Defines the virtualised resources monitoring parameters on VDU level.
+      type: List
+      required: false
+      constraints:
+        entry_type: MonitoringParameter
+
+    configurable_properties:
+      description: Describes the configurable properties of all VNFC instances based on this VDU.
+      type: VnfcConfigurableProperties
+      required: true

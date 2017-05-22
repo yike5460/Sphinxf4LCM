@@ -1,0 +1,73 @@
+# This structure was written in accordance with section 7.1.8.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfDf:
+  description: The VnfDf describes a specific deployment version of a VNF.
+  attributes:
+    flavour_id:
+      description: Identifier of this DF within the VNFD.
+      type: Identifier
+      required: true
+
+    description:
+      description: Human readable description of the DF.
+      type: String
+      required: true
+
+    vdu_profile:
+      description: Describes additional instantiation data for the VDUs used in this flavour.
+      type: List
+      required: true
+      constraints:
+        entry_type: VduProfile
+
+    virtual_link_profile:
+      description: Defines the internal VLD along with additional data which is used in this DF.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualLinkProfile
+
+    instantiation_level:
+      description: Describes the various levels of resources that can be used to instantiate the VNF using this flavour. Examples - Small, Medium, Large. If there is only one instantiationLevel entry, it shall be treated as the default instantiation level for this DF.
+      type: List
+      required: true
+      constraints:
+        entry_type: InstantiationLevel
+
+    default_instantiation_level_id:
+      description: This attribute references the instantiationLevel entry which defines the default instantiation level for this DF. It shall be present if there are multiple instantiationLevel entries.
+      type: Identifier
+      required: false
+
+    supported_operation:
+      description: Indicates which operations are available for this DF via the VNF LCM interface. Instantiate VNF, Query VNF and Terminate VNF are supported in all DF and therefore need not be included in this list.
+      type: Enum
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    vnf_lcm_operations_configuration:
+      description: Configuration parameters for the VNF Lifecycle Management operations.
+      type: VnfLcmOperationsConfiguration
+      required: true
+
+    affinity_or_anti_affinity_group:
+      description: Specifies affinity or anti-affinity relationship applicable between the virtualisation containers (e.g. virtual machines) to be created using different VDUs or internal VLs to be created using different VnfVirtualLinkDesc(s) in the same affinity or anti-affinity group.
+      type: List
+      required: false
+      constraints:
+        entry_type: AffinityOrAntiAffinityGroup
+
+    monitoring_parameter:
+      description: Defines the virtualised resources monitoring parameters on VNF level.
+      type: List
+      required: false
+      constraints:
+        entry_type: MonitoringParameter
+
+    scaling_aspect:
+      description: The scaling aspects supported by this DF of the VNF. scalingAspect shall be present if the VNF supports scaling.
+      type: List
+      required: false
+      constraints:
+        entry_type: ScalingAspect

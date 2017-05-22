@@ -1,0 +1,14 @@
+# This structure was written in accordance with section 7.1.8.6 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+LinkBitrateRequirements:
+  description: The LinkBitrateRequirements information element describes the requirements in terms of bitrate for a VL.
+  attributes:
+    root:
+      description: Throughput requirement of the link (e.g. bitrate of E-Line, root bitrate of E-Tree, aggregate capacity of E-LAN).
+      type: Number
+      required: true
+
+    leaf:
+      description: Throughput requirement of leaf connections to the link when applicable to the connectivity type (e.g. for E-Tree and E-LAN branches).
+      type: Number
+      required: false

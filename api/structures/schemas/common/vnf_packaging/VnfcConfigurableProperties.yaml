@@ -1,0 +1,11 @@
+# This structure was written in accordance with section 7.1.6.7 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfcConfigurableProperties:
+  description: This information element defines the configurable properties of a VNFC. For a VNFC instance, the value of these properties can be modified through the VNFM.
+  attributes:
+    additional_vnfc_configurable_property:
+      description: It provides VNFC configurable properties.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified

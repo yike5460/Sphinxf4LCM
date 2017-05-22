@@ -1,0 +1,28 @@
+# This structure was written in accordance with section 7.1.11.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfIndicator:
+  description: The VnfIndicator information element defines the indicator the VNF supports.
+  attributes:
+    id:
+      description: Unique identifier.
+      type: Identifier
+      required: true
+
+    name:
+      description: The human readable name of the VnfIndicator.
+      type: String
+      required: false
+
+    indicator_value:
+      description: Defines the allowed values or value ranges of this indicator.
+      type: List
+      required: true
+      constraints:
+        entry_type: String
+
+    source:
+      description: Describe the source of the indicator. The possible values are: VNF, EM, Both. This tells the consumer where to send the subscription request.
+      type: Enum
+      required: true
+      constraints:
+        valid_values: [ VNF, EM, Both ]

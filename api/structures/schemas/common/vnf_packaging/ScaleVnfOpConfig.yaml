@@ -1,0 +1,16 @@
+# This structure was written in accordance with section 7.1.5.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+ScaleVnfOpConfig:
+  description: This information element defines attributes that affect the invocation of the ScaleVnf operation.
+  attributes:
+    parameter:
+      description: VNF-specific parameter to be passed when invoking the ScaleVnf operation.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    scaling_by_more_than_one_step_supported:
+      description: Signals whether passing a value larger than one in the numScalingSteps parameter of the ScaleVnf operation is supported by this VNF. Default is FALSE, i.e. "not supported".
+      type: Boolean
+      required: false

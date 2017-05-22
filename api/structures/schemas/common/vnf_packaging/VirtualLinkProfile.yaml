@@ -1,0 +1,28 @@
+# This structure was written in accordance with section 7.1.8.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VirtualLinkProfile:
+  description: The VirtualLinkProfile describes additional instantiation data for a given VL used in a DF.
+  attributes:
+    vnf_virtual_link_desc_id:
+      description: Uniquely identifies a Vnf VLD.
+      type: Identifier
+      required: true
+
+    flavour_id:
+      description: Identifies a flavour within the VnfVirtualLinkDesc.
+      type: Identifier
+      required: true
+
+    local_affinity_or_anti_affinity_rule:
+      description: Specifies affinity or anti-affinity rules applicable between the VLs based on this VnfVirtualLinkDesc. When the cardinality is greater than 1, both affinity rule(s) and anti-affinity rule(s) with different scopes are applicable to the VLs based on this VnfVirtualLinkDesc.
+      type: List
+      required: false
+      constraints:
+        entry_type: LocalAffinityOrAntiAffinityRule
+
+    affinity_or_anti_affinity_group_id:
+      description: Identifier(s) of the affinity or anti-affinity group(s) the VnfVirtualLinkDesc belongs to.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier

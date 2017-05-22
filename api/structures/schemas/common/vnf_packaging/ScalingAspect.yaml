@@ -1,0 +1,29 @@
+# This structure was written in accordance with section 7.1.10.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+ScalingAspect:
+  description: The ScalingAspect information element describes the details of an aspect used for horizontal scaling.
+  attributes:
+    id:
+      description: Unique identifier of this aspect in the VNFD.
+      type: Identifier
+      required: true
+
+    name:
+      description: Human readable name of the aspect.
+      type: String
+      required: true
+
+    description:
+      description: Human readable description of the aspect.
+      type: String
+      required: true
+
+    associated_group:
+      description: Reference to the group of Vnfd elements defining this aspect. If present, scaling for this aspect is limited to the elements of the group, but there is no assumption that all the elements of the groups will be increased at each step.
+      type: Identifier
+      required: false
+
+    max_scale_level:
+      description: The maximum scaleLevel for total number of scaling steps that can be applied w.r.t. this aspect. The value of this attribute corresponds to the number of scaling steps can be applied to this aspect when scaling it from the minimum scale level (i.e. 0) to the maximum scale level defined by this attribute.
+      type: PositiveInteger
+      required: true

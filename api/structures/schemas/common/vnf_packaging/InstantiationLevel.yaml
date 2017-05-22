@@ -1,0 +1,28 @@
+# This structure was written in accordance with section 7.1.8.7 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+InstantiationLevel:
+  description: The InstantiationLevel information element describes a given level of resources to be instantiated within a DF in term of the number of VNFC instances to be created from each VDU. All the VDUs referenced in the level shall be part of the corresponding DF and their number shall be within the range (min/max) for this DF.
+  attributes:
+    level_id:
+      description: Identifies an affinity or anti-affinity group to which the affinity or anti-affinity rule applies.
+      type: Identifier
+      required: true
+
+    description:
+      description: Specifies whether the rule is an affinity rule or an anti-affinity rule.
+      type: String
+      required: true
+
+    vdu_level:
+      description: Specifies the scope of the rule, possible values are NFVI-PoP, Zone, ZoneGroup, NFVI-node.
+      type: List
+      required: true
+      constraints:
+        entry_type: VduLevel
+
+    scale_info:
+      description:
+      type: List
+      required: false
+      constraints:
+        entry_type: ScaleInfo

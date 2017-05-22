@@ -1,0 +1,138 @@
+# This structure was written in accordance with section 7.1.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+Vnfd:
+  description: A VNFD is a deployment template which describes a VNF in terms of deployment and operational behaviour requirements. It also contains connectivity, interface and virtualised resource requirements.
+  attributes:
+    vnfd_id:
+      description: Identifier of this VNFD information element. This attribute shall be globally unique. The format will be defined in the data model specification phase.
+      type: Identifier
+      required: true
+
+    vnf_provider:
+      description: Provider of the VNF and of the VNFD.
+      type: String
+      required: true
+
+    vnf_product_name:
+      description: Name to identify the VNF Product. Invariant for the VNF Product lifetime.
+      type: String
+      required: true
+
+    vnf_software_version:
+      description: Software version of the VNF. This is changed when there is any change to the software that is included in the VNF Package.
+      type: Version
+      required: true
+
+    vnfd_version:
+      description: Identifies the version of the VNFD.
+      type: Version
+      required: true
+
+    vnf_product_info_name:
+      description: Human readable name for the VNF Product. Can change during the VNF Product lifetime.
+      type: String
+      required: false
+
+    vnf_product_info_description:
+      description: Human readable description of the VNF Product. Can change during the VNF Product lifetime.
+      type: String
+      required: false
+
+    vnfm_info:
+      description: Identifies VNFM(s) compatible with the VNF described in this version of the VNFD.
+      type: List
+      required: true
+      constraints:
+        entry_type: String
+
+    localization_language:
+      description: Information about localization languages of the VNF (includes e.g. strings in the VNFD).
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
+
+    default_localization_language:
+      description: Default localization language that is instantiated if no information about selected localization language is available. Shall be present if "localizationLanguage" is present and shall be absent otherwise.
+      type: NotSpecified
+      required: false
+
+    vdu:
+      description: Virtualisation Deployment Unit.
+      type: List
+      required: true
+      constraints:
+        entry_type: Vdu
+
+    virtual_compute_desc:
+      description: Defines descriptors of virtual compute resources to be used by the VNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualComputeDesc
+
+    virtual_storage_desc:
+      description: Defines descriptors of virtual storage resources to be used by the VNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualStorageDesc
+
+    int_virtual_link_desc:
+      description: Represents the type of network connectivity mandated by the VNF provider between two or more CPs which includes at least one internal CP.
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfVirtualLinkDesc
+
+    vnf_ext_cpd:
+      description: Describes external interface(s) exposed by this VNF enabling connection with a VL.
+      type: List
+      required: true
+      constraints:
+        entry_type: VnfExtCpd
+
+    deployment_flavour:
+      description: Describes specific DF(s) of a VNF with specific requirements for capacity and performance.
+      type: List
+      required: true
+      constraints:
+        entry_type: VnfDf
+
+    configurable_properties:
+      description: Describes the configurable properties of the VNF (e.g. related to auto scaling and auto healing).
+      type: VnfConfigurableProperties
+      required: false
+
+    modifiable_attributes:
+      description: Describes the modifiable attributes of the VNF.
+      type: VnfInfoModifiableAttributes
+      required: true
+
+    life_cycle_management_script:
+      description: Includes a list of events and corresponding management scripts performed for the VNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: LifeCycleManagementScript
+
+    element_group:
+      description: Describes the associated elements of a VNFD for a certain purpose during VNF lifecycle management.
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfdElementGroup
+
+    vnf_indicator:
+      description: Declares the VNF indicators that are supported by this VNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfIndicator
+
+    auto_scale:
+      description: Rule that determines when a scaling action needs to be triggered on a VNF instance e.g. based on certain VNF indicator values or VNF indicator value changes or a combination of VNF indicator value(s) and monitoring parameter(s).
+      type: List
+      required: false
+      constraints:
+        entry_type: Rule

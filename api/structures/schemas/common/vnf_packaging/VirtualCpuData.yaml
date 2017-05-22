@@ -1,0 +1,29 @@
+# This structure was written in accordance with section 7.1.9.2.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VirtualCpuData:
+  description: The VirtualCpuData information element supports the specification of requirements related to virtual CPU(s) of a virtual compute resource.
+  attributes:
+    cpu_architecture:
+      description: CPU architecture type. Examples are x86, ARM. The cardinality can be 0 during the allocation request, if no particular CPU architecture type is requested.
+      type: String
+      required: false
+
+    num_virtual_cpu:
+      description: Number of virtual CPUs.
+      type: Integer
+      required: true
+
+    virtual_cpu_clock:
+      description: Minimum virtual CPU clock rate (e.g. in MHz). The cardinality can be 0 during the allocation request, if no particular value is requested.
+      type: Number
+      required: false
+
+    virtual_cpu_oversubscription_policy:
+      description: The CPU core oversubscription policy e.g. the relation of virtual CPU cores to physical CPU cores/threads. The cardinality can be 0 during the allocation request, if no particular value is requested.
+      type: NotSpecified
+      required: false
+
+    virtual_cpu_pinning:
+      description: The virtual CPU pinning configuration for the virtualised compute resource.
+      type: VirtualCpuPinningData
+      required: false

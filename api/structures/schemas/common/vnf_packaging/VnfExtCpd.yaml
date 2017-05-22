@@ -1,0 +1,22 @@
+# This structure was written in accordance with section 7.1.3.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VnfExtCpd:
+  description: A VnfExtCpd is a type of Cpd and describes an external interface, a.k.a external CP, exposed by this VNF enabling connection with a VL. A VnfExtCpd inherits from the Cpd Class . All attributes of the Cpd are also attributes of the VnfExtCpd. When the VnfExtCpd is mapped to a VduCpd, the values for the attributes type, subType and description shall be identical for both elements.
+  inherits: [ Cpd ]
+  attributes:
+    int_virtual_link_desc:
+      description: Reference to the internal Virtual Link Descriptor (VLD) to which CPs instantiated from this external CP Descriptor (CPD) connect. Either intVirtualLinkDesc or intCpd shall be present.
+      type: Identifier
+      required: false
+
+    int_cpd:
+      description: Reference to the internal VDU CPD which is used to instantiate internal CPs. These internal CPs are, in turn, exposed as external CPs defined by this external CPD. Either intVirtualLinkDesc or intCpd shall be present.
+      type: Identifier
+      required: false
+
+    virtual_network_interface_requirements:
+      description: Specifies requirements on a virtual network interface realising the CPs instantiated from this CPD.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualNetworkInterfaceRequirements

@@ -1,0 +1,17 @@
+# This structure was written in accordance with section 7.1.9.2.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+
+VirtualCpuPinningData:
+  description: The VirtualCpuPinningData information element supports the specification of requirements related to the virtual CPU pinning configuration of a virtual compute resource.
+  attributes:
+    cpu_pinning_policy:
+      description: Indicates the policy for CPU pinning. The policy can take values of "static" or "dynamic". The cardinality can be 0 during the allocation request, if no particular value is requested.
+      type: Enum
+      required: false
+      constraints:
+        entry_type: String
+        valid_values: [ static, dynamic ]
+
+    cpu_pinning_map:
+      description: If cpuPinningPolicy is defined as "static", the cpuPinningMap provides the map of pinning virtual CPU cores to physical CPU cores/threads. Cardinality is 0 if cpuPinningPolicy has a different value than "static".
+      type: NotSpecified
+      required: false
