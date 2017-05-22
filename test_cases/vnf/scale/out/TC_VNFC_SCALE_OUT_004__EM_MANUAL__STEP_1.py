@@ -187,7 +187,7 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_1(TestCase):
                  'scale out the VNF')
         self.time_record.START('scale_out_vnf')
         scale_out_level = 1
-        # We are scaling the VNF (scale_out_steps + 1) times and check at the next step that the VNF scaled out only
+        # We are scaling the VNF (max_scale_out_steps + 1) times and check at the next step that the VNF scaled out only
         # scale_out_steps times
         while scale_out_level <= self.tc_input['max_scale_out_steps'] + 1:
             if self.em.vnf_scale_sync(
