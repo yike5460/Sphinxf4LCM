@@ -167,8 +167,8 @@ class TC_VNFC_SCALE_OUT_005__VNF_ONDEMAND(TestCase):
         # 5. Trigger a resize of the VNF resources to use more specialized hardware by increasing the traffic load to
         #    the maximum
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Trigger a resize of the VNF resources to use more specialized hardware by increasing the traffic load'
-                 ' to the maximum')
+        LOG.info('Triggering a resize of the VNF resources to use more specialized hardware by increasing the traffic '
+                 'load to the maximum')
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -271,8 +271,8 @@ class TC_VNFC_SCALE_OUT_005__VNF_ONDEMAND(TestCase):
         # 9. Trigger a resize of the VNF resources to use less specialized hardware by decreasing the traffic load to
         #    the minimum
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Trigger a resize of the VNF resources to use less specialized hardware by decreasing the traffic load'
-                 ' to the minimum')
+        LOG.info('Triggering a resize of the VNF resources to use less specialized hardware by decreasing the traffic '
+                 'load to the minimum')
         self.traffic.config_traffic_load('LOW_TRAFFIC_LOAD')
 
         # --------------------------------------------------------------------------------------------------------------

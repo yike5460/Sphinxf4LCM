@@ -168,8 +168,8 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
         # 5. Trigger a resize of the VNF resources to use more specialized hardware by altering the VNF indicators
         # produced by the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Trigger a resize of the VNF resources to use more specialized hardware by increasing the traffic load'
-                 ' to the maximum')
+        LOG.info('Triggering a resize of the VNF resources to use more specialized hardware by increasing the traffic '
+                 'load to the maximum')
 
         # The scale out is triggered by a VNF related indicator value change.
         # The EM exposed interface of Ve-Vnfm-Vnf will enable the MANO to trigger a scale out based on VNF Indicator
@@ -283,8 +283,8 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
         # 9. Trigger a resize of the VNF resources to use less specialized hardware by altering the VNF indicators
         # produced by the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Trigger a resize of the VNF resources to use less specialized hardware by decreasing the traffic load'
-                 ' to the minimum')
+        LOG.info('Triggering a resize of the VNF resources to use less specialized hardware by decreasing the traffic '
+                 'load to the minimum')
 
         # The scale in is triggered by a VNF related indicator value change.
         # The EM exposed interface of Ve-Vnfm-Vnf will enable the MANO to trigger a scale out based on VNF Indicator

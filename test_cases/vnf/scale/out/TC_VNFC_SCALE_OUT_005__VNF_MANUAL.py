@@ -170,7 +170,7 @@ class TC_VNFC_SCALE_OUT_005__VNF_MANUAL(TestCase):
         # 5. Trigger a resize of the VNF resources to use more specialized hardware by instructing the VNF to instruct
         #    the MANO to scale out the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Trigger a resize of the VNF resources to use more specialized hardware by instructing the VNF to '
+        LOG.info('Triggering a resize of the VNF resources to use more specialized hardware by instructing the VNF to '
                  'instruct the MANO to scale out the VNF')
         self.time_record.START('scale_out_vnf')
         if self.vnf.scale_sync(self.vnf_instance_id, scale_type='out',aspect_id=self.tc_input['scaling']['aspect'],
@@ -297,7 +297,7 @@ class TC_VNFC_SCALE_OUT_005__VNF_MANUAL(TestCase):
         # 11. Trigger a resize of the VNF resources to use less specialized hardware by instructing the VNF to instruct
         #     the MANO to scale in the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Trigger a resize of the VNF resources to use less specialized hardware by instructing the VNF to '
+        LOG.info('Triggering a resize of the VNF resources to use less specialized hardware by instructing the VNF to '
                  'instruct the MANO to scale in the VNF')
         self.time_record.START('scale_in_vnf')
         if self.vnf.scale_sync(self.vnf_instance_id, scale_type='in', aspect_id=self.tc_input['scaling']['aspect'],
