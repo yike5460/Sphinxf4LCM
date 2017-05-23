@@ -213,7 +213,7 @@ class TC_VNFC_SCALE_OUT_004__VNF_MANUAL__STEP_MAX(TestCase):
         self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances']
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Determine is and length of service disruption
+        # 8. Determine if and length of service disruption
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Determining if and length of service disruption')
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
