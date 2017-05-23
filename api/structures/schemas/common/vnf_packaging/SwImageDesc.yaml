@@ -50,7 +50,7 @@ SwImageDesc:
 
     sw_image:
       description: This is a reference to the actual software image. The reference can be relative to the root of the VNF Package or can be a URL.
-      type: Identifer
+      type: Identifier
       required: true
 
     operating_system:

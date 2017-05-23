@@ -21,8 +21,9 @@ VnfIndicator:
         entry_type: String
 
     source:
-      description: Describe the source of the indicator. The possible values are: VNF, EM, Both. This tells the consumer where to send the subscription request.
+      description: Describe the source of the indicator. The possible values are VNF, EM, Both. This tells the consumer where to send the subscription request.
       type: Enum
       required: true
       constraints:
         valid_values: [ VNF, EM, Both ]
+        entry_type: String

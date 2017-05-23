@@ -732,5 +732,5 @@ class VnfIndicator(InformationElementWithExternalSchema):
     pass
 
 
-class vnfd(InformationElementWithExternalSchema):
+class Vnfd(InformationElementWithExternalSchema):
     pass

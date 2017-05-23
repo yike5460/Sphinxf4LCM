@@ -28,4 +28,4 @@ RequestedAdditionalCapabilityData:
       type: List
       required: true
       constraints:
-        entry_type: Metadata
+        entry_type: Mapping
