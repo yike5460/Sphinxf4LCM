@@ -181,7 +181,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Subscribing for VNF lifecycle change notifications')
         subscription_id = self.mano.vnf_lifecycle_change_notification_subscribe(
-                                                                       filter={'vnf_instance_id': self.vnf_instance_id})
+            notification_filter={'vnf_instance_id': self.vnf_instance_id})
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Trigger a resize of the VNF resources to the maximum by altering the VNF indicator produced by EM
@@ -192,6 +192,11 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
         # The EM exposed interface of Ve-Vnfm-Em will enable the MANO to trigger a scale out based on VNF Indicator
         # value changes. VNF related indicators are declared in the VNFD.
         # Insert here code alters the VNF related indicators so that MANO can trigger scale out.
+
+        # TODO: Insert here code to:
+        # 1. alter the VNF related indicators so that MANO can trigger a VNF scale out.
+        # 2. check that MANO has subscribed to EM
+        # 3. subscribe to EM and check the notifications
         # For now we use only traffic load to trigger scale out.
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
@@ -211,6 +216,8 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
             self.tc_result['error_info'] = 'Could not validate that scaling out has been attempted'
             return False
 
+        self.time_record.START('scale_out_vnf')
+
         LOG.info('Validating that the scaling out finished')
         notification_info = self.mano.wait_for_notification(subscription_id,
                                                             notification_type=VnfLifecycleChangeNotification,
@@ -223,6 +230,14 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'Could not validate that scale out finished'
             return False
+
+        self.time_record.END('scale_out_vnf')
+
+        self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
+
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_out']['status'] = notification_info.status
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Validate VNF has not resized
