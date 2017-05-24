@@ -283,8 +283,12 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         # - by GetIndicatorValue operation on the Ve-Vnfm-Vnf interface
         # - by subscribing for notifications related to VNF Indicator value changes with the VNF.
         #   The two operations involved are Subscribe and Notify
+        # Insert here code alters the VNF related indicators so that MANO can trigger scale out.
 
-        # Insert here code alters the VNF related indicators so that MANO can trigger scale in.
+        # TODO: Insert here code to:
+        # 1. alter the VNF related indicators so that MANO can trigger a VNF scale out.
+        # 2. check that MANO has subscribed to VNF
+        # 3. subscribe to VNF and check the notifications
         # For now we use only traffic load to trigger scale in.
         self.traffic.config_traffic_load('LOW_TRAFFIC_LOAD')
 
