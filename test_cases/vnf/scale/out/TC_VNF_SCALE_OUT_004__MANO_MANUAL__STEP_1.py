@@ -226,6 +226,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
         self.tc_result['resources']['After scale out'] = dict()
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
         for vnf_instance_id in ns_info.vnf_info_id:
             self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
 
@@ -237,7 +238,6 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # scale_out_steps + 1 = scale_out_level - 1
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the max (limited by NFVI)')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
         if len(ns_info.vnf_info_id) != scale_out_level - 1:
             LOG.error('TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1 execution failed')
             LOG.debug('NS did not scale to the max NFVI limit')

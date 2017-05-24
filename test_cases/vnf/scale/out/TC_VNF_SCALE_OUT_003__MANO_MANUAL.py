@@ -202,6 +202,7 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
         self.tc_result['resources']['After scale out'] = dict()
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
         for vnf_instance_id in ns_info.vnf_info_id:
             self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
 
@@ -211,7 +212,6 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         # 7. Validate NS has resized to the next level
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the next level')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
         if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances'] + \
                 self.tc_input['scaling']['increment']:
             LOG.error('TC_VNF_SCALE_OUT_003__MANO_MANUAL execution failed')
