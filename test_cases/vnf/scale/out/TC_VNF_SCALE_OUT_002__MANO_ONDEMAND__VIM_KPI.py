@@ -181,7 +181,10 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
         # - by subscribing for notifications related to performance information with the VIM. The MANO can define
         #   thresholds that generate notifications from the VIM when they are crossed.
 
-        # Insert here code that alters a VIM KPI so that MANO can trigger an NS scale out.
+        # TODO: Insert here code to:
+        # 1. alter a VIM KPI so that MANO can trigger an NS scale out
+        # 2. check that MANO has subscribed to VIM
+        # 3. subscribe to VIM and check the notifications
         # For now we use only traffic load to trigger the scale out (we will increase the traffic load to the maximum).
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 

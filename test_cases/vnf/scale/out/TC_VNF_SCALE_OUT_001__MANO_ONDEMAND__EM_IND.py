@@ -182,7 +182,10 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__EM_IND(TestCase):
         # - by subscribing for notifications related to VNF Indicator value changes with the EM.
         # The two operations involved are Subscribe and Notify.
 
-        # Insert here code that alters the VNF related indicators so that MANO can trigger an NS scale out.
+        # TODO: Insert here code to:
+        # 1. alter the VNF related indicators so that MANO can trigger an NS scale out
+        # 2. check that MANO has subscribed to EM
+        # 3. subscribe to EM and check the notifications
         # For now we use only traffic load to trigger the scale out (we will increase the traffic load to the maximum).
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
