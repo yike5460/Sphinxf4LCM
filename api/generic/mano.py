@@ -801,14 +801,13 @@ class Mano(object):
         self.notification_queues[subscription_id] = notification_queue
         return subscription_id
 
+    @log_entry_exit(LOG)
     def get_notification_queue(self, subscription_id):
         self.notification_queues[subscription_id], notification_queue_copy = tee(self.notification_queues[subscription_id])
         return notification_queue_copy
 
     @log_entry_exit(LOG)
-    def wait_for_notification(self, subscription_id, notification_type, notification_pattern, timeout):
-        notification_queue = self.get_notification_queue(subscription_id)
-
+    def search_in_notification_queue(self, notification_queue, notification_type, notification_pattern, timeout):
         timeout_occurred = Event()
         result = dict()
         lock = Lock()
@@ -837,3 +836,8 @@ class Mano(object):
 
         with lock:
             return result.get('found')
+
+    @log_entry_exit(LOG)
+    def wait_for_notification(self, subscription_id, notification_type, notification_pattern, timeout):
+        notification_queue = self.get_notification_queue(subscription_id)
+        return self.search_in_notification_queue(notification_queue, notification_type, notification_pattern, timeout)
