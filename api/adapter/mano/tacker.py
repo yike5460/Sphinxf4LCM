@@ -97,6 +97,34 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, default_instances, generic_vim_object):
+        vnfd = self.get_vnfd(vnfd_id)
+
+        # Get the resources required by one instance of the VNF
+        vcpus_req_one_inst = 0
+        vmem_req_one_inst = 0
+        vc_instances_req_one_inst = 0
+        for node in vnfd['topology_template']['node_templates'].keys():
+            if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.VDU.Tacker':
+                vcpus_req_one_inst += int(
+                    vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
+                        'num_cpus', 0))
+                vmem_req_one_inst += int(
+                    vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
+                        'mem_size', 0).split(' ')[0])
+                vc_instances_req_one_inst += 1
+
+        # Increase the total required compute resources by one to make sure the instantiation will not be possible.
+        required_vcpus = default_instances * vcpus_req_one_inst + 1
+        required_vmem = default_instances * vmem_req_one_inst + 1
+        required_vc_instances = default_instances * vc_instances_req_one_inst + 1
+
+        reservation_id = generic_vim_object.limit_compute_resources(required_vcpus, required_vmem,
+                                                                    required_vc_instances)
+
+        return reservation_id
+
+    @log_entry_exit(LOG)
     def limit_compute_resources_for_vnf_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
                                                 generic_vim_object):
         vnfd = self.get_vnfd(vnfd_id)
@@ -453,6 +481,10 @@ class TackerManoAdapter(object):
 
         tup = ('vnf', vnf_instance_id)
         return tup
+
+    @log_entry_exit(LOG)
+    def ns_lifecycle_change_notification_subscribe(self, notification_filter=None):
+        raise NotImplementedError
 
     @log_entry_exit(LOG)
     def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
