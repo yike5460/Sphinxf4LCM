@@ -44,7 +44,7 @@ class Mano(object):
                                                generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
-        NS defined by the provided nsd_id, with the provided number of default instances and scaling the NS.
+        NS defined by the provided nsd_id, with the provided number of default instances and scaling the NS
         scale_out_steps times.
 
         :param nsd_id:                  Identifier of the NSD which defines the NS.
@@ -61,11 +61,26 @@ class Mano(object):
                                                                         generic_vim_object)
 
     @log_entry_exit(LOG)
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, default_instances, generic_vim_object):
+        """
+        This function reserves compute resources so that the remaining resources are not enough for instantiating the
+        VNF defined by the provided vnfd_id and with the provided number of default instances.
+
+        :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
+        :param default_instances:       Default number of instances required by the VNF, as stated in the scaling policy
+                                        in the VNFD.
+        :param generic_vim_object:      Generic VIM object.
+        :return:                        The reservation ID if the reservation was successful, None otherwise.
+        """
+        return self.mano_adapter.limit_compute_resources_for_vnf_instantiation(vnfd_id, default_instances,
+                                                                               generic_vim_object)
+
+    @log_entry_exit(LOG)
     def limit_compute_resources_for_vnf_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
                                                 generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
-        VNF defined by the provided vnfd_id, with the provided number of default instances and scaling the VNF.
+        VNF defined by the provided vnfd_id, with the provided number of default instances and scaling the VNF
         scale_out_steps times.
 
         :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
@@ -794,6 +809,22 @@ class Mano(object):
                                                               max_wait_time=max_wait_time, poll_interval=poll_interval)
 
         return operation_status
+
+    @log_entry_exit(LOG)
+    def ns_lifecycle_change_notification_subscribe(self, notification_filter=None):
+        """
+        This function allows the OSS/BSS to subscribe to NS lifecycle change notifications, and the NFVO to provide such
+        notifications to the subscriber.
+
+        This function was written in accordance with section 7.4.2 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+
+        :param notification_filter: Input filter for selecting the notifications.
+        :return:                    Identifier of the subscription realized.
+        """
+        subscription_id, notification_queue = self.mano_adapter.ns_lifecycle_change_notification_subscribe(
+                                                                                                    notification_filter)
+        self.notification_queues[subscription_id] = notification_queue
+        return subscription_id
 
     @log_entry_exit(LOG)
     def vnf_lifecycle_change_notification_subscribe(self, notification_filter=None):
