@@ -205,10 +205,9 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         scale_ns_data.scale_ns_by_steps_data.number_of_steps = self.tc_input['scaling']['increment']
 
         self.time_record.START('scale_out_ns')
-        scale_out_level = 1
         # We are scaling the NS (max_scale_out_steps + 1) times and check at the next step that the NS scaled out only
         # scale_out_steps times
-        while scale_out_level <= self.tc_input['max_scale_out_steps'] + 1:
+        for scale_out_step in range(self.tc_input['max_scale_out_steps'] + 1):
             if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data) \
                     != constants.OPERATION_SUCCESS:
                 LOG.error('TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1 execution failed')
@@ -217,9 +216,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
                 self.tc_result['error_info'] = 'MANO could not scale out the NS to the next level'
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 return False
-            else:
-                time.sleep(self.tc_input['scaling']['cooldown'])
-                scale_out_level += 1
+            time.sleep(self.tc_input['scaling']['cooldown'])
 
         self.time_record.END('scale_out_ns')
 
@@ -234,17 +231,19 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate NS has resized to the max (limited by NFVI)
-        # The NS should have scale_out_steps + 1 VNFs: one initial VNF + scale_out_steps VNFs after scale out
-        # scale_out_steps + 1 = scale_out_level - 1
+        # The NS should have default_instances + max_scale_out_steps * increment VNFs after scale out
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the max (limited by NFVI)')
-        if len(ns_info.vnf_info_id) != scale_out_level - 1:
+        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances'] + \
+                                       self.tc_input['scaling']['increment'] * self.tc_input['max_scale_out_steps']:
             LOG.error('TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1 execution failed')
             LOG.debug('NS did not scale to the max NFVI limit')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'NS did not scale to the max NFVI limit'
             return False
-        self.tc_result['scaling_out']['level'] = scale_out_level - 1
+        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
+                                                 self.tc_input['scaling']['increment'] * \
+                                                 self.tc_input['max_scale_out_steps']
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Determine the length of service disruption

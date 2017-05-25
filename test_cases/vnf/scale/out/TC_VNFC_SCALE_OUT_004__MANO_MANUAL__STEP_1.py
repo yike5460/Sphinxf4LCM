@@ -181,10 +181,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering a resize of the VNF resources to the maximum by instructing the MANO to scale out the VNF')
         self.time_record.START('scale_out_vnf')
-        scale_out_level = 1
         # We are scaling the VNF (max_scale_out_steps + 1) times and check at the next step that the VNF scaled out only
         # scale_out_steps times
-        while scale_out_level <= self.tc_input['max_scale_out_steps'] + 1:
+        for scale_out_step in range(self.tc_input['max_scale_out_steps'] + 1):
             if self.mano.vnf_scale_sync(
                                     self.vnf_instance_id, scale_type='out',
                                     aspect_id=self.tc_input['scaling']['aspect'],
@@ -196,9 +195,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
                 self.tc_result['error_info'] = 'MANO could not scale out the VNF to the next level'
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 return False
-            else:
-                time.sleep(self.tc_input['scaling']['cooldown'])
-                scale_out_level += 1
+            time.sleep(self.tc_input['scaling']['cooldown'])
 
         self.time_record.END('scale_out_vnf')
 
@@ -210,18 +207,21 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate VNF has resized to the max (limited by NFVI)
-        # The VNF should have scale_out_steps + 1 VNFCs: one initial VNFC + scale_out_steps VNFCs after scale out
-        # scale_out_steps + 1 = scale_out_level - 1
+        # The VNF should have default_instances + max_scale_out_steps * increment VNFCs after scale out
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max (limited by NFVI)')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != scale_out_level - 1:
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances'] + \
+                                                                     self.tc_input['scaling']['increment'] * \
+                                                                     self.tc_input['max_scale_out_steps']:
             LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1 execution failed')
             LOG.debug('VNF did not scale to the max NFVI limit')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF did not scale to the max NFVI limit'
             return False
-        self.tc_result['scaling_out']['level'] = scale_out_level - 1
+        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
+                                                 self.tc_input['scaling']['increment'] * \
+                                                 self.tc_input['max_scale_out_steps']
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Determine the length of service disruption
