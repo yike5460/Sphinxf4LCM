@@ -250,6 +250,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         LOG.info('Validating VNF has resized to the max (limited by NFVI)')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances'] + \
+                                                                     self.tc_input['scaling']['increment'] * \
                                                                      self.tc_input['max_scale_out_steps']:
             LOG.error('TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1 execution failed')
             LOG.debug('VNF scaled out')
