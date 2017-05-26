@@ -40,7 +40,7 @@ class Mano(object):
         return self.mano_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_ns_scaling(self, nsd_id, default_instances, desired_scale_out_steps, scaling_step,
+    def limit_compute_resources_for_ns_scaling(self, nsd_id, scaling_policy_name, desired_scale_out_steps,
                                                generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
@@ -48,53 +48,45 @@ class Mano(object):
         desired_scale_out_steps times.
 
         :param nsd_id:                  Identifier of the NSD which defines the NS.
-        :param default_instances:       Default number of VNF instances required by the NS, as stated in the scaling
-                                        policy in the NSD.
+        :param scaling_policy_name:     Name of the scaling policy as stated in the NSD.
         :param desired_scale_out_steps: Desired number of steps the NS should be scaled out.
-        :param scaling_step:            Number of VNF instances added after each scaling step, as stated in the scaling
-                                        policy in the NSD.
         :param generic_vim_object:      Generic VIM object.
         :return:                        The reservation ID if the reservation was successful, None otherwise.
         """
-        return self.mano_adapter.limit_compute_resources_for_ns_scaling(nsd_id, default_instances,
-                                                                        desired_scale_out_steps, scaling_step,
+        return self.mano_adapter.limit_compute_resources_for_ns_scaling(nsd_id, scaling_policy_name,
+                                                                        desired_scale_out_steps,
                                                                         generic_vim_object)
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, default_instances, generic_vim_object):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, scaling_policy_name, generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are not enough for instantiating the
         VNF defined by the provided vnfd_id and with the provided number of default instances.
 
         :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
-        :param default_instances:       Default number of instances required by the VNF, as stated in the scaling policy
-                                        in the VNFD.
+        :param scaling_policy_name:     Name of the scaling policy as stated in the VNFD.
         :param generic_vim_object:      Generic VIM object.
         :return:                        The reservation ID if the reservation was successful, None otherwise.
         """
-        return self.mano_adapter.limit_compute_resources_for_vnf_instantiation(vnfd_id, default_instances,
+        return self.mano_adapter.limit_compute_resources_for_vnf_instantiation(vnfd_id, scaling_policy_name,
                                                                                generic_vim_object)
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_scaling(self, vnfd_id, default_instances, desired_scale_out_steps, scaling_step,
+    def limit_compute_resources_for_vnf_scaling(self, vnfd_id, scaling_policy_name, desired_scale_out_steps,
                                                 generic_vim_object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
-        VNF defined by the provided vnfd_id, with the provided number of default instances and scaling the VNF
-        desired_scale_out_steps times.
+        VNF defined by the provided vnfd_id, and scaling the VNF desired_scale_out_steps times according to the provided
+        scaling policy name.
 
         :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
-        :param default_instances:       Default number of instances required by the VNF, as stated in the scaling policy
-                                        in the VNFD.
+        :param scaling_policy_name:     Name of the scaling policy as stated in the VNFD.
         :param desired_scale_out_steps: Desired number of steps the VNF should be scaled out.
-        :param scaling_step:            Number of VNF instances added after each scaling step, as stated in the scaling
-                                        policy in the VNFD.
         :param generic_vim_object:      Generic VIM object.
         :return:                        The reservation ID if the reservation was successful, None otherwise.
         """
-        return self.mano_adapter.limit_compute_resources_for_vnf_scaling(vnfd_id, default_instances,
-                                                                         desired_scale_out_steps, scaling_step,
-                                                                         generic_vim_object)
+        return self.mano_adapter.limit_compute_resources_for_vnf_scaling(vnfd_id, scaling_policy_name,
+                                                                         desired_scale_out_steps, generic_vim_object)
 
     @log_entry_exit(LOG)
     def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
