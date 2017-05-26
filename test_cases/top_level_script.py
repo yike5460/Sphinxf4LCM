@@ -13,7 +13,7 @@ from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_002__MANO_MANUAL import TC_VNFC_
 from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_003__MANO_MANUAL import TC_VNFC_SCALE_OUT_003__MANO_MANUAL
 from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1 import TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1
 from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX import TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX
-from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND_STEP_MAX_mine import TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__STEP_MAX
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1 import TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1
 from test_cases.vnf.state.start.TC_VNF_STATE_START_001 import TC_VNF_STATE_START_001
 from test_cases.vnf.state.start.TC_VNF_STATE_START_002 import TC_VNF_STATE_START_002
 from test_cases.vnf.state.start.TC_VNF_STATE_START_003 import TC_VNF_STATE_START_003
@@ -92,9 +92,9 @@ if __name__ == '__main__':
                  # VNFD with SP & alarm scaling
                  # 'vnfd_id': '8e451832-349e-4589-893f-7339f5c05fbb',
                  # VNFD with exceeding SP step 1
-                 # 'vnfd_id': '3f7a41e6-d0d3-4afe-9f14-d7d619a89e6a',
+                 'vnfd_id': '3f7a41e6-d0d3-4afe-9f14-d7d619a89e6a',
                  # VNFD with exceeding SP step max
-                 'vnfd_id': '3404c2de-3a31-434b-bacf-62c913a6322f',
+                 # 'vnfd_id': '3404c2de-3a31-434b-bacf-62c913a6322f',
                  'vnf': {'type': 'ubuntu',
                          'instance_name': 'test_vnf',
                          'credentials': {'mgmt_ip_addr': '172.31.203.111',
@@ -117,6 +117,7 @@ if __name__ == '__main__':
                                                        'right_traffic_plen': '24',
                                                        'right_traffic_gw': '0.0.0.0',
                                                        'port_speed': 100}},
+                 'scaling_policy_name': 'SP2',
                  'scaling': {'policies': ['SP1'],
                              'aspect': 'VDU1',
                              'increment': 1,
@@ -221,10 +222,12 @@ if __name__ == '__main__':
     # TC_VNFC_SCALE_OUT_001__MANO_MANUAL(tc_input=openstack).execute()
 
     # Use VNFD with exceeding SP step max
-    LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
-    TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(tc_input=openstack).execute()
+    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
+    # TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(tc_input=openstack).execute()
 
     # Use VNFD with exceeding SP step 1
+    LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1')
+    TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(tc_input=openstack).execute()
     # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1')
     # TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(tc_input=openstack).execute()
 
@@ -233,12 +236,5 @@ if __name__ == '__main__':
     # TC_VNF_COMPLEX_002(tc_input=openstack).execute()
     # LOG.info('Calling test case TC_VNF_COMPLEX_003')
     # TC_VNF_COMPLEX_003(tc_input=openstack).execute()
-    cpd = VduCpd()
-    cpd.description = "Test"
-    print cpd.description
-
-    cpd2 = VduCpd()
-    cpd2.description = "Test2"
-    print cpd2.description
 
     LOG.info('Exiting top level script')
