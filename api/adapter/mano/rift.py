@@ -19,7 +19,7 @@ class RiftManoAdapter(object):
         self.ns_vnf_mapping = dict()
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_ns_scaling(self, nsd_id, default_instances, desired_scale_out_steps, scaling_step,
+    def limit_compute_resources_for_ns_scaling(self, nsd_id, scaling_policy_name, desired_scale_out_steps,
                                                generic_vim_object):
         raise NotImplementedError
 
