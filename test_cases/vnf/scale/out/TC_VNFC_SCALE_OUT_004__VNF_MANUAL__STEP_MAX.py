@@ -61,8 +61,8 @@ class TC_VNFC_SCALE_OUT_004__VNF_MANUAL__STEP_MAX(TestCase):
         LOG.info('Ensure NFVI has not enough vResources for the VNF to be scaled out')
         # Reserving only compute resources is enough for limiting the NFVI resources
         reservation_id = self.mano.limit_compute_resources_for_vnf_scaling(
-             vnfd_id=self.tc_input['vnfd_id'], default_instances=self.tc_input['scaling']['default_instances'],
-             desired_scale_out_steps=0, scaling_step=self.tc_input['scaling']['increment'], generic_vim_object=self.vim)
+                             vnfd_id=self.tc_input['vnfd_id'], scaling_policy_name=self.tc_input['scaling_policy_name'],
+                             desired_scale_out_steps=0, generic_vim_object=self.vim)
         if reservation_id is None:
             LOG.error('TC_VNFC_SCALE_OUT_004__VNF_MANUAL__STEP_MAX execution failed')
             LOG.debug('Compute resources could not be limited')
