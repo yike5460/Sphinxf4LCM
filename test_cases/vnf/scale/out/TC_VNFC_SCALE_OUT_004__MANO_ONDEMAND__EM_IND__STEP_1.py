@@ -19,14 +19,14 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
     Scaling step is set to max_instances.
 
     Sequence:
-    1. Ensure NFVI has vResources so that the VNF can be scaled out only scale_out_steps times
+    1. Ensure NFVI has vResources so that the VNF can be scaled out only desired_scale_out_steps times
     2. Instantiate the VNF
     3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     4. Start the low traffic load
     5. Validate the provided functionality and all traffic goes through
     6. Subscribe for VNF Lifecycle change notifications
     7. Trigger a resize of the VNF resources to the maximum by altering the VNF indicator produced by EM
-    8. Validate VNF scale out operation was performed max_scale_out_steps times
+    8. Validate VNF scale out operation was performed desired_scale_out_steps times
     9. Validate VNF has resized to the max (limited by NFVI)
     10. Determine if and length of service disruption
     11. Validate traffic goes through
@@ -57,14 +57,14 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         LOG.info('Starting TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Ensure NFVI has vResources so that the VNF can be scaled out only scale_out_steps times
+        # 1. Ensure NFVI has vResources so that the VNF can be scaled out only desired_scale_out_steps times
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Ensuring NFVI has vResources so that the VNF can be scaled out only scale_out_steps times')
+        LOG.info('Ensuring NFVI has vResources so that the VNF can be scaled out only desired_scale_out_steps times')
         # Reserving only compute resources is enough for limiting the NFVI resources
         reservation_id = self.mano.limit_compute_resources_for_vnf_scaling(
                                                                           self.tc_input['vnfd_id'],
                                                                           self.tc_input['scaling']['default_instances'],
-                                                                          self.tc_input['max_scale_out_steps'],
+                                                                          self.tc_input['desired_scale_out_steps'],
                                                                           self.tc_input['scaling']['increment'],
                                                                           self.vim)
         if reservation_id is None:
@@ -203,15 +203,15 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Validate VNF scale out operation was performed max_scale_out_steps times
+        # 8. Validate VNF scale out operation was performed desired_scale_out_steps times
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating VNF scale out operation was performed max_scale_out_steps times')
+        LOG.info('Validating VNF scale out operation was performed desired_scale_out_steps times')
         notification_queue = self.mano.get_notification_queue(subscription_id)
 
         self.time_record.START('scale_out_vnf')
-        # We are scaling the VNF (max_scale_out_steps + 1) times and check at the next step that the VNF scaled out only
-        # scale_out_steps times
-        for scale_out_level in range(self.tc_input['max_scale_out_steps'] + 1):
+        # We are scaling the VNF (desired_scale_out_steps + 1) times and check at the next step that the VNF scaled out
+        # only desired_scale_out_steps times
+        for scale_out_level in range(self.tc_input['desired_scale_out_steps'] + 1):
             notification_info = self.mano.search_in_notification_queue(
                                                                       notification_queue=notification_queue,
                                                                       notification_type=VnfLifecycleChangeNotification,
@@ -251,14 +251,14 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances'] + \
                                                                      self.tc_input['scaling']['increment'] * \
-                                                                     self.tc_input['max_scale_out_steps']:
+                                                                     self.tc_input['desired_scale_out_steps']:
             LOG.error('TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1 execution failed')
             LOG.debug('VNF scaled out')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF scaled out'
             return False
         self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
-                                                 self.tc_input['max_scale_out_steps']
+                                                 self.tc_input['desired_scale_out_steps']
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Determine if and length of service disruption
@@ -270,9 +270,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         # 11. Validate traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic goes through')
-        # Since the VNF scaled out only max_scale_out_steps, we are not checking the traffic loss because we do not
+        # Since the VNF scaled out only desired_scale_out_steps, we are not checking the traffic loss because we do not
         # expect all traffic to go through.
-        # Decreasing the traffic load to normal would not appropriate as it could trigger a scale in.
+        # Decreasing the traffic load to normal would not be appropriate as it could trigger a scale in.
         if not self.traffic.does_traffic_flow(delay_time=5):
             LOG.error('TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1 execution failed')
             LOG.debug('Traffic is not flowing')

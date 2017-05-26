@@ -123,7 +123,7 @@ if __name__ == '__main__':
                              'cooldown': 3,
                              'max_instances': 3,
                              'default_instances': 1},
-                 'max_scale_out_steps': 2,
+                 'desired_scale_out_steps': 2,
                  'process_type': 'update',
                  'performance': {'metric': 'vCPU',
                                  'collecting_period': 60,

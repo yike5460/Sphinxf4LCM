@@ -45,7 +45,7 @@ class Mano(object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
         NS defined by the provided nsd_id, with the provided number of default instances and scaling the NS
-        scale_out_steps times.
+        desired_scale_out_steps times.
 
         :param nsd_id:                  Identifier of the NSD which defines the NS.
         :param default_instances:       Default number of VNF instances required by the NS, as stated in the scaling
@@ -81,7 +81,7 @@ class Mano(object):
         """
         This function reserves compute resources so that the remaining resources are enough only for instantiating the
         VNF defined by the provided vnfd_id, with the provided number of default instances and scaling the VNF
-        scale_out_steps times.
+        desired_scale_out_steps times.
 
         :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
         :param default_instances:       Default number of instances required by the VNF, as stated in the scaling policy
