@@ -104,8 +104,9 @@ class Vnf(object):
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
         :param type:                Defines the type of the scale operation requested (scale out, scale in).
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
-                                    VNFD. Defaults to 1.
+                                    VNFD.
         :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+                                    Defaults to 1.
         :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
                                     to the VNF being scaled.
         :return:                    Identifier of the VNF lifecycle operation occurrence.
@@ -122,8 +123,9 @@ class Vnf(object):
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
         :param scale_type:          Defines the type of the scale operation requested. Possible values: 'in', or 'out'
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
-                                    VNFD. Defaults to 1.
+                                    VNFD.
         :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
+                                    Defaults to 1.
         :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
                                     to the VNF being scaled.
         :param max_wait_time:       Maximum interval of time in seconds to wait for the scaling operation to reach a
