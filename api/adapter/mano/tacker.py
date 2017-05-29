@@ -119,12 +119,15 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, scaling_policy_name, generic_vim_object):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
 
-        # Get the scaling policy properties.
-        increment, targets, min_instances, max_instances, default_instances, cooldown = self.get_scaling_properties(
+        # Get the scaling policy properties, if present.
+        if scaling_policy_name is not None:
+            increment, targets, min_instances, max_instances, default_instances, cooldown = self.get_scaling_properties(
                                                                                            vnfd_id, scaling_policy_name)
+        else:
+            default_instances = 1
 
         # Get the resources required by one instance of the VNF
         vcpus_req_one_inst = 0
