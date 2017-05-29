@@ -1,7 +1,7 @@
 import logging
 
 from api.adapter import construct_adapter
-from api.structures.objects import ComputePoolReservation
+from api.structures.objects import ComputePoolReservation, StoragePoolReservation
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 class Vim(object):
     """
-    Class of generic functions representing operations exposed by the VIM towards the NFVO as defined by 
+    Class of generic functions representing operations exposed by the VIM towards the NFVO as defined by
     ETSI GS NFV-IFA 005 v2.1.1 (2016-04).
     """
 
@@ -83,6 +83,41 @@ class Vim(object):
         reservation_data = self.create_compute_resource_reservation(resource_group_id=resource_group_id,
                                                                     compute_pool_reservation=compute_pool_reservation)
 
+        return reservation_data.reservation_id
+
+    @log_entry_exit(LOG)
+    def limit_storage_resources(self, vstorage):
+        """
+        This function limits the storage resources to the provided vstorage size by reserving all other storage
+        resources.
+
+        :param vstorage:            Desired disk size to be available after limiting storage resources
+        :return:                    The reservation ID if the reservation was successful, None otherwise.
+        """
+        # Get the available storage resources from the VIM.
+        virtual_storage_quota = self.query_storage_resource_quota()
+        if virtual_storage_quota.storage_size is not None:
+            vstorage_limit = int(virtual_storage_quota.storage_size)
+        else:
+            LOG.debug('No quota set for the storage size')
+            return
+        cinder_limits = self.query_storage_capacity()
+        used_vstorage = cinder_limits['vstorage']['used']
+        available_vstorage = vstorage_limit - used_vstorage
+
+        # Storage resources to be reserved
+        vstorage_to_be_reserved = max(0, (available_vstorage - vstorage))
+
+        # Make storage reservations so that only the required compute resources remain
+        storage_pool_reservation = StoragePoolReservation
+        storage_pool_reservation.storage_size = vstorage_to_be_reserved
+        storage_pool_reservation.num_snapshots = 0
+        storage_pool_reservation.num_volumes = 0
+
+        resource_group_id = self.get_resource_group_id()
+
+        reservation_data = self.create_storage_resource_reservation(resource_group_id=resource_group_id,
+                                                                    storage_pool_reservation=storage_pool_reservation)
         return reservation_data.reservation_id
 
     @log_entry_exit(LOG)
@@ -377,7 +412,7 @@ class Vim(object):
         :return: reservation_data:          Element containing information about the reserved resource.
         """
 
-        return self.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id, start_time,
+        return self.vim_adapter.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id, start_time,
                                                         end_time, expiry_time, affinity_constraint,
                                                         anti_affinity_constraint, location_constraints)
 

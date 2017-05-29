@@ -72,6 +72,20 @@ class Mano(object):
                                                                                scaling_policy_name)
 
     @log_entry_exit(LOG)
+    def limit_storage_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name=None):
+        """
+        This function reserves storage resources so that the remaining resources are not enough for instantiating the
+        VNF defined by the provided vnfd_id and with the provided number of default instances.
+
+        :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
+        :param generic_vim_object:      Generic VIM object.
+        :param scaling_policy_name:     Optional, name of the scaling policy as stated in the VNFD.
+        :return:                        The reservation ID if the reservation was successful, None otherwise.
+        """
+        return self.mano_adapter.limit_storage_resources_for_vnf_instantiation(vnfd_id, generic_vim_object,
+                                                                               scaling_policy_name)
+
+    @log_entry_exit(LOG)
     def limit_compute_resources_for_vnf_scaling(self, vnfd_id, scaling_policy_name, desired_scale_out_steps,
                                                 generic_vim_object):
         """
