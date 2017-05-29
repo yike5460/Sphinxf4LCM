@@ -168,7 +168,7 @@ class TackerManoAdapter(object):
             if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.VDU.Tacker':
                 vstorage_req_one_inst += int(
                     vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
-                        'disk_size', 0).split(' ')[0]))
+                        'disk_size', 0).split(' ')[0])
         # Increase the total required storage resources by one to make sure the instantiation will not be possible.
         required_vstorage = default_instances * vstorage_req_one_inst + 1
         reservation_id = generic_vim_object.limit_storage_resources(required_vstorage)
