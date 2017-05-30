@@ -3,7 +3,7 @@ import logging
 import os_client_config
 
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
-    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, ReservedVirtualCompute
+    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, ReservedVirtualCompute, ReservedVirtualStorage
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -76,8 +76,7 @@ class OpenstackVimAdapter(object):
         return
 
     @log_entry_exit(LOG)
-    def create_storage_resource_reservation(self, storage_pool_reservation=None, resource_group_id,
-                                            start_time=None,
+    def create_storage_resource_reservation(self, resource_group_id, storage_pool_reservation=None, start_time=None,
                                             end_time=None, expiry_time=None, affinity_constraint=None,
                                             anti_affinity_constraint=None, location_constraints=None):
         LOG.debug('Reservations are not implemented in Openstack yet')

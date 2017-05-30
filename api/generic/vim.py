@@ -359,7 +359,7 @@ class Vim(object):
         :return: reservation_data:          Element containing information about the reserved resource.
         """
 
-        return self.vim_adapter.create_network_resource_reservation(self, network_reservation, resource_group_id,
+        return self.vim_adapter.create_network_resource_reservation(network_reservation, resource_group_id,
                                                                     start_time, end_time, expiry_time,
                                                                     affinity_constraint, anti_affinity_constraint,
                                                                     location_constraints)
@@ -380,7 +380,7 @@ class Vim(object):
         return self.vim_adapter.terminate_network_resource_reservation(reservation_id)
 
     @log_entry_exit(LOG)
-    def create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id, start_time=None,
+    def create_storage_resource_reservation(self, resource_group_id, storage_pool_reservation, start_time=None,
                                             end_time=None, expiry_time=None, affinity_constraint=None,
                                             anti_affinity_constraint=None, location_constraints=None):
         """
@@ -411,7 +411,7 @@ class Vim(object):
         :return: reservation_data:          Element containing information about the reserved resource.
         """
 
-        return self.vim_adapter.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id,
+        return self.vim_adapter.create_storage_resource_reservation(resource_group_id, storage_pool_reservation,
                                                                     start_time, end_time, expiry_time,
                                                                     affinity_constraint, anti_affinity_constraint,
                                                                     location_constraints)
