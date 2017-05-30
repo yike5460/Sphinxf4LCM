@@ -79,7 +79,7 @@ class TackerEmAdapter(object):
         elapsed_time = 0
         max_wait_time = 300
         poll_interval = 5
-        lifecycle_operation_occurrence_id = ('vnf', vnf_instance_id)
+        lifecycle_operation_occurrence_id = vnf_instance_id
         final_states = constants.OPERATION_FINAL_STATES
 
         while operation_pending and elapsed_time < max_wait_time:
