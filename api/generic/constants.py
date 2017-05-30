@@ -32,10 +32,13 @@ OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
 # Mapping between operation results and OpenStack Stack states
 OPERATION_STATUS['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': OPERATION_SUCCESS,
                                              'CREATE_IN_PROGRESS': OPERATION_PENDING,
+                                             'CREATE_FAILED': OPERATION_FAILED,
                                              'RESUME_COMPLETE': OPERATION_SUCCESS,
                                              'RESUME_IN_PROGRESS': OPERATION_PENDING,
+                                             'RESUME_FAILED': OPERATION_FAILED,
                                              'SUSPEND_COMPLETE': OPERATION_SUCCESS,
-                                             'SUSPEND_IN_PROGRESS': OPERATION_PENDING}
+                                             'SUSPEND_IN_PROGRESS': OPERATION_PENDING,
+                                             'SUSPEND_FAILED': OPERATION_FAILED}
 
 # Mapping between OpenStack VNF states and ETSI VNF instantiation states
 VNF_INSTANTIATION_STATE = dict()
