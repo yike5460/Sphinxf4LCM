@@ -115,7 +115,6 @@ class Vim(object):
         storage_pool_reservation.num_volumes = 0
 
         resource_group_id = self.get_resource_group_id()
-
         reservation_data = self.create_storage_resource_reservation(resource_group_id=resource_group_id,
                                                                     storage_pool_reservation=storage_pool_reservation)
         return reservation_data.reservation_id
@@ -412,9 +411,10 @@ class Vim(object):
         :return: reservation_data:          Element containing information about the reserved resource.
         """
 
-        return self.vim_adapter.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id, start_time,
-                                                        end_time, expiry_time, affinity_constraint,
-                                                        anti_affinity_constraint, location_constraints)
+        return self.vim_adapter.create_storage_resource_reservation(self, storage_pool_reservation, resource_group_id,
+                                                                    start_time, end_time, expiry_time,
+                                                                    affinity_constraint, anti_affinity_constraint,
+                                                                    location_constraints)
 
     @log_entry_exit(LOG)
     def terminate_storage_resource_reservation(self, reservation_id):
