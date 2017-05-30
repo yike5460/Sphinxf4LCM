@@ -369,6 +369,9 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+        LOG.debug('"VNF Operate" operation is not implemented in OpenStack Tacker client!')
+        LOG.debug('As a workaround, we will perform the action of the VIM stack')
+
         # Get VNF information from Tacker
         tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
 
@@ -387,13 +390,13 @@ class TackerManoAdapter(object):
         # Starting a VNF is translated to resuming the HEAT stack
         if change_state_to == 'start' and vnf_state == constants.VNF_STOPPED:
             vim.stack_resume(stack_id)
-            LOG.debug('VNF successfully started')
+            LOG.debug('Resume operation initiated on VIM stack %s' % stack_id)
         # Stopping a VNF is translated to suspending the HEAT stack
         elif change_state_to == 'stop' and vnf_state == constants.VNF_STARTED:
             vim.stack_suspend(stack_id)
-            LOG.debug('VNF successfully stopped')
+            LOG.debug('Suspend operation initiated on VIM stack %s' % stack_id)
         else:
-            LOG.debug('VNF is already in the desired state')
+            LOG.debug('VIM stack is already in the desired state')
 
         tup = ('stack', vnf_instance_id)
         return tup
