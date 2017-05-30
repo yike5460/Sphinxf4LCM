@@ -75,6 +75,20 @@ class OpenstackVimAdapter(object):
         LOG.debug('Reservations are not implemented in Openstack yet')
         return
 
+    @log_entry_exit(LOG)
+    def create_storage_resource_reservation(self, storage_pool_reservation=None, resource_group_id,
+                                            start_time=None,
+                                            end_time=None, expiry_time=None, affinity_constraint=None,
+                                            anti_affinity_constraint=None, location_constraints=None):
+        LOG.debug('Reservations are not implemented in Openstack yet')
+        reserved_virtual_storage = ReservedVirtualStorage()
+        return reserved_virtual_storage
+
+    @log_entry_exit(LOG)
+    def terminate_storage_resource_reservation(self, reservation_id):
+        LOG.debug('Reservations are not implemented in Openstack yet')
+        return
+
     def get_resource_group_id(self):
         project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
         return project_id.encode()
@@ -224,7 +238,7 @@ class OpenstackVimAdapter(object):
     @log_entry_exit(LOG)
     def query_network_resource_quota(self, filter):
         """
-        This function gets quota information for resources specified in the filter for project_id retrieved from 
+        This function gets quota information for resources specified in the filter for project_id retrieved from
         neutron.
         """
         project_id = self.get_resource_group_id()
@@ -241,7 +255,7 @@ class OpenstackVimAdapter(object):
     @log_entry_exit(LOG)
     def query_storage_resource_quota(self, filter):
         """
-        This function gets quota information for resources specified in the filter for project_id retrieved from 
+        This function gets quota information for resources specified in the filter for project_id retrieved from
         neutron.
         """
         project_id = self.get_resource_group_id()

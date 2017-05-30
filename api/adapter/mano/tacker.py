@@ -144,9 +144,9 @@ class TackerManoAdapter(object):
                 vc_instances_req_one_inst += 1
 
         # Increase the total required compute resources by one to make sure the instantiation will not be possible.
-        required_vcpus = default_instances * vcpus_req_one_inst + 1
-        required_vmem = default_instances * vmem_req_one_inst + 1
-        required_vc_instances = default_instances * vc_instances_req_one_inst + 1
+        required_vcpus = default_instances * vcpus_req_one_inst - 1
+        required_vmem = default_instances * vmem_req_one_inst - 1
+        required_vc_instances = default_instances * vc_instances_req_one_inst - 1
 
         reservation_id = generic_vim_object.limit_compute_resources(required_vcpus, required_vmem,
                                                                     required_vc_instances)
@@ -170,7 +170,7 @@ class TackerManoAdapter(object):
                     vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
                         'disk_size', 0).split(' ')[0])
         # Increase the total required storage resources by one to make sure the instantiation will not be possible.
-        required_vstorage = default_instances * vstorage_req_one_inst + 1
+        required_vstorage = default_instances * vstorage_req_one_inst - 1
         reservation_id = generic_vim_object.limit_storage_resources(required_vstorage)
         return reservation_id
 
