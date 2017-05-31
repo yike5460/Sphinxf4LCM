@@ -58,17 +58,24 @@ class Mano(object):
                                                                         generic_vim_object)
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name=None):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus=True,
+                                                      limit_vmem=True, limit_vc_instances = True,
+                                                      scaling_policy_name=None):
         """
         This function reserves compute resources so that the remaining resources are not enough for instantiating the
         VNF defined by the provided vnfd_id and with the provided number of default instances.
 
         :param vnfd_id:                 Identifier of the VNFD which defines the VNF.
         :param generic_vim_object:      Generic VIM object.
+        :param limit_vcpus:             Boolean, specifying whether vCPUs should be limited or not.
+        :param limit_vmem:              Boolean, specifying whether vMemory should be limited or not.
+        :param limit_vc_instances:      Boolean, specifying whether virtual container instances should be limited or
+                                        not.
         :param scaling_policy_name:     Optional, name of the scaling policy as stated in the VNFD.
         :return:                        The reservation ID if the reservation was successful, None otherwise.
         """
-        return self.mano_adapter.limit_compute_resources_for_vnf_instantiation(vnfd_id, generic_vim_object,
+        return self.mano_adapter.limit_compute_resources_for_vnf_instantiation(vnfd_id, generic_vim_object, limit_vcpus,
+                                                                               limit_vmem, limit_vc_instances,
                                                                                scaling_policy_name)
 
     @log_entry_exit(LOG)
