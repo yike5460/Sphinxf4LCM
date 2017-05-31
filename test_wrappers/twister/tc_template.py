@@ -16,7 +16,7 @@ def twister_run(tc_module_name, tc_name):
     configure_logger(root_logger, console_level='INFO', propagate=True)
 
     # Logger for the current module.
-    LOG = logging.getLogger('top_level_script')
+    LOG = logging.getLogger(tc_name + 'wrapper')
 
     cfg_file_path = get_config(CONFIG[0], 'config/tc_input_dir')
     cfg_file = cfg_file_path + '/' + tc_name + '.json'
