@@ -188,7 +188,7 @@ class TC_VNFC_SCALE_OUT_004__VNF_MANUAL__STEP_1(TestCase):
         # only desired_scale_out_steps times
         for scale_out_step in range(self.tc_input['desired_scale_out_steps'] + 1):
             if self.vnf.scale_sync(self.vnf_instance_id, scale_type='out', aspect_id=self.tc_input['scaling']['aspect'],
-                                   additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
+                                   additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                     != constants.OPERATION_SUCCESS:
                 LOG.error('TC_VNFC_SCALE_OUT_004__VNF_MANUAL__STEP_1 execution failed')
                 LOG.debug('VNF could not instruct the MANO to scale out the VNF to the next level')

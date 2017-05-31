@@ -119,7 +119,8 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus, limit_vmem,
+                                                      limit_vc_instances, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the scaling policy properties, if present.
@@ -143,10 +144,19 @@ class TackerManoAdapter(object):
                         'mem_size', 0).split(' ')[0])
                 vc_instances_req_one_inst += 1
 
-        # Increase the total required compute resources by one to make sure the instantiation will not be possible.
-        required_vcpus = default_instances * vcpus_req_one_inst - 1
-        required_vmem = default_instances * vmem_req_one_inst - 1
-        required_vc_instances = default_instances * vc_instances_req_one_inst - 1
+        # Decrease the total required compute resources by one to make sure the instantiation will not be possible.
+        if limit_vcpus:
+            required_vcpus = default_instances * vcpus_req_one_inst - 1
+        else:
+            required_vcpus = 0
+        if limit_vmem:
+            required_vmem = default_instances * vmem_req_one_inst - 1
+        else:
+            required_vmem = 0
+        if limit_vc_instances:
+            required_vc_instances = default_instances * vc_instances_req_one_inst - 1
+        else:
+            required_vc_instances = 0
 
         reservation_id = generic_vim_object.limit_compute_resources(required_vcpus, required_vmem,
                                                                     required_vc_instances)
@@ -169,7 +179,7 @@ class TackerManoAdapter(object):
                 vstorage_req_one_inst += int(
                     vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
                         'disk_size', 0).split(' ')[0])
-        # Increase the total required storage resources by one to make sure the instantiation will not be possible.
+        # Decrease the total required storage resources by one to make sure the instantiation will not be possible.
         required_vstorage = default_instances * vstorage_req_one_inst - 1
         reservation_id = generic_vim_object.limit_storage_resources(required_vstorage)
         return reservation_id
@@ -369,6 +379,9 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+        LOG.debug('"VNF Operate" operation is not implemented in OpenStack Tacker client!')
+        LOG.debug('As a workaround, we will perform the action of the VIM stack')
+
         # Get VNF information from Tacker
         tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
 
@@ -387,13 +400,13 @@ class TackerManoAdapter(object):
         # Starting a VNF is translated to resuming the HEAT stack
         if change_state_to == 'start' and vnf_state == constants.VNF_STOPPED:
             vim.stack_resume(stack_id)
-            LOG.debug('VNF successfully started')
+            LOG.debug('Resume operation initiated on VIM stack %s' % stack_id)
         # Stopping a VNF is translated to suspending the HEAT stack
         elif change_state_to == 'stop' and vnf_state == constants.VNF_STARTED:
             vim.stack_suspend(stack_id)
-            LOG.debug('VNF successfully stopped')
+            LOG.debug('Suspend operation initiated on VIM stack %s' % stack_id)
         else:
-            LOG.debug('VNF is already in the desired state')
+            LOG.debug('VIM stack is already in the desired state')
 
         tup = ('stack', vnf_instance_id)
         return tup

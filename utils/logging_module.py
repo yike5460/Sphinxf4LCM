@@ -1,6 +1,7 @@
 import functools
 import logging
 import os
+import sys
 
 LOG_DIR = '/tmp/nfv'
 
@@ -50,7 +51,7 @@ def configure_logger(logger, file_level=None, console_level=None, propagate=Fals
 
     if console_level:
         # create file handler
-        ch = logging.StreamHandler()
+        ch = logging.StreamHandler(stream=sys.stdout)
         ch.setLevel(getattr(logging, str(console_level)))
 
         # create formatter and add it to the handlers

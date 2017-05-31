@@ -174,7 +174,7 @@ class TC_VNFC_SCALE_OUT_005__EM_MANUAL(TestCase):
                  'instruct the MANO to scale out the VNF')
         self.time_record.START('scale_out_vnf')
         if self.em.vnf_scale_sync(self.vnf_instance_id, scale_type='out',aspect_id=self.tc_input['scaling']['aspect'],
-                                  additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
+                                  additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNFC_SCALE_OUT_005__EM_MANUAL execution failed')
             LOG.debug('EM could not instruct the MANO to scale out the VNF')
@@ -301,7 +301,7 @@ class TC_VNFC_SCALE_OUT_005__EM_MANUAL(TestCase):
                  'instruct the MANO to scale in the VNF')
         self.time_record.START('scale_in_vnf')
         if self.em.vnf_scale_sync(self.vnf_instance_id, scale_type='in', aspect_id=self.tc_input['scaling']['aspect'],
-                                  additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
+                                  additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNFC_SCALE_OUT_005__EM_MANUAL execution failed')
             LOG.debug('EM could not instruct the MANO to scale in the VNF')
