@@ -119,7 +119,8 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus, limit_vmem,
+                                                      limit_vc_instances, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the scaling policy properties, if present.
@@ -143,10 +144,19 @@ class TackerManoAdapter(object):
                         'mem_size', 0).split(' ')[0])
                 vc_instances_req_one_inst += 1
 
-        # Increase the total required compute resources by one to make sure the instantiation will not be possible.
-        required_vcpus = default_instances * vcpus_req_one_inst - 1
-        required_vmem = default_instances * vmem_req_one_inst - 1
-        required_vc_instances = default_instances * vc_instances_req_one_inst - 1
+        # Decrease the total required compute resources by one to make sure the instantiation will not be possible.
+        if limit_vcpus:
+            required_vcpus = default_instances * vcpus_req_one_inst - 1
+        else:
+            required_vcpus = 0
+        if limit_vmem:
+            required_vmem = default_instances * vmem_req_one_inst - 1
+        else:
+            required_vmem = 0
+        if limit_vc_instances:
+            required_vc_instances = default_instances * vc_instances_req_one_inst - 1
+        else:
+            required_vc_instances = 0
 
         reservation_id = generic_vim_object.limit_compute_resources(required_vcpus, required_vmem,
                                                                     required_vc_instances)
@@ -169,7 +179,7 @@ class TackerManoAdapter(object):
                 vstorage_req_one_inst += int(
                     vnfd['topology_template']['node_templates'][node]['capabilities']['nfv_compute']['properties'].get(
                         'disk_size', 0).split(' ')[0])
-        # Increase the total required storage resources by one to make sure the instantiation will not be possible.
+        # Decrease the total required storage resources by one to make sure the instantiation will not be possible.
         required_vstorage = default_instances * vstorage_req_one_inst - 1
         reservation_id = generic_vim_object.limit_storage_resources(required_vstorage)
         return reservation_id
