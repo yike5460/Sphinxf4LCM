@@ -168,7 +168,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
                  'MANO to scale out the VNF')
         self.time_record.START('scale_out_vnf')
         if self.vnf.scale_sync(self.vnf_instance_id, scale_type='out', aspect_id=self.tc_input['scaling']['aspect'],
-                               additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
+                               additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNFC_SCALE_OUT_003__VNF_MANUAL execution failed')
             LOG.debug('VNF could not instruct the MANO to scale out the VNF')
@@ -263,7 +263,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         LOG.info('Triggering the downsize of the VNF by instructing the VNF to instruct the MANO to scale in the VNF')
         self.time_record.START('scale_in_vnf')
         if self.vnf.scale_sync(self.vnf_instance_id, scale_type='in', aspect_id=self.tc_input['scaling']['aspect'],
-                               additional_param={'scaling_policy_name': self.tc_input['scaling']['policies'][0]}) \
+                               additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             LOG.error('TC_VNFC_SCALE_OUT_003__VNF_MANUAL execution failed')
             LOG.debug('VNF could not instruct the MANO to scale in the VNF')
