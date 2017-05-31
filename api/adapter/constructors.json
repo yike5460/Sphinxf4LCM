@@ -1,28 +1,28 @@
 {
-  "mano"  :{
-    "rift"    : "api.adapter.mano.rift.RiftManoAdapter",
-    "tacker"  : "api.adapter.mano.tacker.TackerManoAdapter",
-    "dummy"   : "api.adapter.mano.dummy.DummyManoAdapter"
+  "mano": {
+    "dummy":  "api.adapter.mano.dummy.DummyManoAdapter",
+    "rift":   "api.adapter.mano.rift.RiftManoAdapter",
+    "tacker": "api.adapter.mano.tacker.TackerManoAdapter"
   },
-  "vnfm" : {
-    "tacker"  : "api.adapter.vnfm.tacker.TackerVnfmAdapter",
-    "rift"    : "api.adapter.vnfm.rift.RiftVimAdapter",
-    "dummy"   : "api.adapter.vnfm.dummy.DummyVnfmAdapter"
+  "vnfm": {
+    "dummy":  "api.adapter.vnfm.dummy.DummyVnfmAdapter",
+    "rift":   "api.adapter.vnfm.rift.RiftVimAdapter",
+    "tacker": "api.adapter.vnfm.tacker.TackerVnfmAdapter"
   },
-  "em" : {
-    "tacker"  : "api.adapter.em.tacker.TackerEmAdapter"
+  "em": {
+    "tacker": "api.adapter.em.tacker.TackerEmAdapter"
   },
   "vnf": {
-    "openwrt" : "api.adapter.vnf.openwrt.OpenwrtVnfAdapter",
-    "ubuntu"  : "api.adapter.vnf.ubuntu.UbuntuVnfAdapter",
-    "dummy"   : "api.adapter.vnf.dummy.DummyVnfAdapter"
+    "dummy":    "api.adapter.vnf.dummy.DummyVnfAdapter",
+    "openwrt":  "api.adapter.vnf.openwrt.OpenwrtVnfAdapter",
+    "ubuntu":   "api.adapter.vnf.ubuntu.UbuntuVnfAdapter"
   },
   "vim": {
-    "openstack" : "api.adapter.vim.openstack.OpenstackVimAdapter",
-    "windriver" : "api.adapter.vim.windriver.WindriverVimAdapter",
-    "dummy"     : "api.adapter.vim.dummy.DummyVimAdapter"
+    "dummy":      "api.adapter.vim.dummy.DummyVimAdapter",
+    "openstack":  "api.adapter.vim.openstack.OpenstackVimAdapter",
+    "windriver":  "api.adapter.vim.windriver.WindriverVimAdapter"
   },
   "traffic": {
-    "stc" : "api.adapter.traffic.stc.StcTrafficAdapter"
+    "stc":  "api.adapter.traffic.stc.StcTrafficAdapter"
   }
 }
