@@ -31,7 +31,7 @@ class TC_VNFC_SCALE_OUT_005__VNF_MANUAL(TestCase):
     11. Trigger a resize of the VNF resources to use less specialized hardware by instructing the VNF to instruct the
         MANO to scale in the VNF
     12. Validate VNF has resized and has decreased its capacity and removed VNFCs
-    13. Validate that MANO has allocated less specialized hardware resources and the previous specialized hardware 
+    13. Validate that MANO has allocated less specialized hardware resources and the previous specialized hardware
         resources have been freed up
     14. Determine the service disruption during the resizing
     15. Validate traffic flows through without issues
@@ -323,14 +323,14 @@ class TC_VNFC_SCALE_OUT_005__VNF_MANUAL(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized and has decreased its capacity and removed VNFCs')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances']:
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['min_instances']:
             LOG.error('TC_VNFC_SCALE_OUT_005__VNF_MANUAL execution failed')
             LOG.debug('VNF did not scale in')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF did not scale in'
             return False
 
-        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['default_instances']
+        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['min_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 13. Validate that MANO has allocated less specialized hardware resources and the previous specialized hardware

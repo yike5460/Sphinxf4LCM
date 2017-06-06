@@ -285,13 +285,13 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has released the resources and decreased the VNFCs')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances']:
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['min_instances']:
             LOG.error('TC_VNFC_SCALE_OUT_003__VNF_MANUAL execution failed')
             LOG.debug('VNF did not scale in')
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = 'VNF did not scale in'
             return False
-        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['default_instances']
+        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['min_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 12. Validate traffic drop occurred
