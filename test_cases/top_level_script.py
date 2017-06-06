@@ -121,6 +121,7 @@ if __name__ == '__main__':
                  'scaling': {'aspect': 'VDU1',
                              'increment': 1,
                              'cooldown': 3,
+                             'min_instances': 1,
                              'max_instances': 3,
                              'default_instances': 1},
                  'desired_scale_out_steps': 2,
