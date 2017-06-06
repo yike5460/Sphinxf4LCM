@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 class TC_VNF_STATE_TERM_001(TestCase):
     """
-    TC_VNF_STATE_TERM_001 VNF terminate from VNF state STARTED without traffic load
+    TC_VNF_STATE_TERM_001 VNF terminate from state STARTED without traffic load
 
     Sequence:
     1. Instantiate the VNF
