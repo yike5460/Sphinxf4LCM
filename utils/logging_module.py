@@ -29,7 +29,7 @@ def configure_logger(logger, file_level=None, console_level=None, propagate=Fals
     # set the desired propagation for the logger
     logger.propagate = propagate
 
-    if file_level:
+    if file_level is not None:
         module_name = logger.name.rsplit('.', 1)[-1]
         log_file_path = os.path.join(LOG_DIR, module_name + ".log")
 
@@ -49,7 +49,7 @@ def configure_logger(logger, file_level=None, console_level=None, propagate=Fals
         # add the file handler to the logger
         logger.addHandler(fh)
 
-    if console_level:
+    if console_level is not None:
         # create file handler
         ch = logging.StreamHandler(stream=sys.stdout)
         ch.setLevel(getattr(logging, str(console_level)))
