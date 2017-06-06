@@ -13,6 +13,7 @@
     "tacker": "api.adapter.em.tacker.TackerEmAdapter"
   },
   "vnf": {
+    "cirros":   "api.adapter.vnf.ubuntu.UbuntuVnfAdapter",
     "dummy":    "api.adapter.vnf.dummy.DummyVnfAdapter",
     "openwrt":  "api.adapter.vnf.openwrt.OpenwrtVnfAdapter",
     "ubuntu":   "api.adapter.vnf.ubuntu.UbuntuVnfAdapter"
