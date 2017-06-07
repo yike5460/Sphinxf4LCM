@@ -25,7 +25,7 @@ class TC_VNF_STATE_START_003(TestCase):
     8. Start the normal traffic load
     9. Validate no traffic goes through
     10. Start the VNF
-    11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED 
+    11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     12. Calculate the time for activation
     13. Validate traffic goes through
     14. Validate no scaling has occurred
@@ -101,6 +101,8 @@ class TC_VNF_STATE_START_003(TestCase):
             self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
                                            constants.VNF_STARTED
             return False
+
+        initial_instances = len(vnf_info.instantiated_vnf_info.vnfc_resource_info)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the normal traffic load
@@ -291,7 +293,7 @@ class TC_VNF_STATE_START_003(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no scaling has occurred')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances']:
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != initial_instances:
             LOG.error('TC_VNF_SCALE_OUT_003 execution failed')
             LOG.debug('VNF scaling occurred')
             self.tc_result['overall_status'] = constants.TEST_FAILED
