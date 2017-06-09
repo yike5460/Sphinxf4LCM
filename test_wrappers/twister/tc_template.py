@@ -35,14 +35,20 @@ def twister_run(tc_module_name, tc_name):
     set_details({'run_id': run_id})
 
     LOG.info('Calling test case %s' % tc_name)
-    tc_result = tc_class(tc_input).execute()
 
-    set_details({'instantiate': tc_result['events'].get('instantiate_vnf', {}).get('duration', -1)})
-    set_details({'stop': tc_result['events'].get('stop_vnf', {}).get('duration', -1)})
-    set_details({'scale_out': tc_result['events'].get('scale_out_vnf', {}).get('duration', -1)})
-    set_details({'scale_in': tc_result['events'].get('scale_in_vnf', {}).get('duration', -1)})
-    set_details({'service_disruption': tc_result['events'].get('service_disruption', {}).get('duration', -1)})
-    set_details({'traffic_fwd_disruption': tc_result['events'].get('traffic_fwd_disruption', {}).get('duration', -1)})
+    tc_result = dict()
+
+    try:
+        tc_result = tc_class(tc_input).execute()
+    except:
+        LOG.error('Test case %s failed' % tc_name)
+
+    set_details({'instantiate': tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', -1)})
+    set_details({'stop': tc_result.get('events', {}).get('stop_vnf', {}).get('duration', -1)})
+    set_details({'scale_out': tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', -1)})
+    set_details({'scale_in': tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', -1)})
+    set_details({'service_disruption': tc_result.get('events', {}).get('service_disruption', {}).get('duration', -1)})
+    set_details({'traffic_fwd_disruption': tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration', -1)})
 
     set_details({'vnfo': tc_input['mano_params']['type']})
     set_details({'vnfm': tc_input['mano_params']['type']})
@@ -50,7 +56,7 @@ def twister_run(tc_module_name, tc_name):
     set_details({'vnf': 'CirrOS'})
     set_details({'traffic_gen': 'STCv'})
 
-    if tc_result['overall_status'] == constants.TEST_PASSED:
+    if tc_result.get('overall_status') == constants.TEST_PASSED:
         _RESULT = 'PASS'
     else:
         _RESULT = 'FAIL'
@@ -71,6 +77,6 @@ def twister_run(tc_module_name, tc_name):
     json_dict['environment']['em'] = 'None'
 
     json_dict['durations'] = dict()
-    json_dict['durations']['vnf_instantiate'] = int(tc_result['events'].get('instantiate_vnf', {}).get('duration', -1))
+    json_dict['durations']['vnf_instantiate'] = int(tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', -1))
 
     requests.post(url='http://10.2.34.13:9200/nfv/tc-exec', json=json_dict)
