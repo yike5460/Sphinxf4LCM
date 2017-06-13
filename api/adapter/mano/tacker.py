@@ -558,7 +558,7 @@ class TackerManoAdapter(object):
     def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
         # TODO: implement notification filter
         last_vnf_event_id = list(self._get_vnf_events())[-1]['id']
-        print 'Got last event id: %d' % last_vnf_event_id  # TODO: use logger instead of print
+        LOG.debug('Got last event id: %d' % last_vnf_event_id)
 
         def notification_generator(starting_event_id):
             while True:
