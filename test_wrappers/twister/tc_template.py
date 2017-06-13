@@ -43,18 +43,24 @@ def twister_run(tc_module_name, tc_name):
     except:
         LOG.error('Test case %s failed' % tc_name)
 
-    set_details({'instantiate': tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', -1)})
-    set_details({'stop': tc_result.get('events', {}).get('stop_vnf', {}).get('duration', -1)})
-    set_details({'scale_out': tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', -1)})
-    set_details({'scale_in': tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', -1)})
-    set_details({'service_disruption': tc_result.get('events', {}).get('service_disruption', {}).get('duration', -1)})
-    set_details({'traffic_fwd_disruption': tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration', -1)})
+    durations = dict()
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration', None)
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', None)
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', None)
+    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration', None)
+    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration', None)
+
+    for duration_type, duration_value in durations.items():
+	set_details({duration_type: duration_value})
 
     set_details({'vnfo': tc_input['mano_params']['type']})
     set_details({'vnfm': tc_input['mano_params']['type']})
     set_details({'vim': 'OpenStack'})
     set_details({'vnf': 'CirrOS'})
     set_details({'traffic_gen': 'STCv'})
+
+    #set_details({'scale_type': '
 
     if tc_result.get('overall_status') == constants.TEST_PASSED:
         _RESULT = 'PASS'
@@ -76,7 +82,6 @@ def twister_run(tc_module_name, tc_name):
     json_dict['environment']['traffic'] = 'STCv'
     json_dict['environment']['em'] = 'None'
 
-    json_dict['durations'] = dict()
-    json_dict['durations']['vnf_instantiate'] = int(tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', -1))
+    json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
 
     requests.post(url='http://10.2.34.13:9200/nfv/tc-exec', json=json_dict)
