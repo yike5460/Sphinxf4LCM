@@ -23,8 +23,3 @@ for tc_name, tc_module in tc_mapping.items():
 
     wrapper_file_path = os.path.join(full_wrappers_dir_path, tc_name + '.py')
     shutil.copy(template_file_path, wrapper_file_path)
-
-    with open(wrapper_file_path, 'a') as wrapper_file:
-        wrapper_file.write('\n')
-        wrapper_file.write('twister_run(\'%s\', \'%s\')' % (tc_module, tc_name))
-        wrapper_file.write('\n')
