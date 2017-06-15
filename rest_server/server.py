@@ -2,7 +2,8 @@ import importlib
 import json
 import uuid
 from threading import Thread
-from bottle import route, run, request, response, abort
+
+from bottle import route, run, request, response
 
 execution_threads = dict()
 tc_results = dict()
@@ -82,5 +83,4 @@ def all_status():
 
     return {'status_list': status_list}
 
-
-run(host='0.0.0.0', port=8080, debug=True)
+run(host='0.0.0.0', port=8080, debug=False)
