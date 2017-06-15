@@ -72,7 +72,10 @@ class TackerEmAdapter(object):
             LOG.debug('Sleeping 10 seconds to allow the VNF to boot')
             time.sleep(10)
             vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
-            self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
+            try:
+                self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
+            except:
+                LOG.debug('Invalid VNF configuration')
 
         # Poll on the VNF status until it reaches one of the final states
         operation_pending = True
