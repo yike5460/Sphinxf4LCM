@@ -1,87 +1,87 @@
-import requests
+import json
+import time
 from datetime import datetime
 
-def twister_run(tc_module_name, tc_name):
-    global _RESULT
+import requests
 
-    import importlib
-    import json
-    import logging
+from api.generic import constants
 
-    from api.generic import constants
-    from utils.logging_module import configure_logger
+# Get test case name
+tc_name = __file__.rsplit('/', 1)[-1].rsplit('.', 1)[0]
 
-    tc_module = importlib.import_module(tc_module_name)
-    tc_class = getattr(tc_module, tc_name)
+# Get test case input
+cfg_file_path = get_config(CONFIG[0], 'config/tc_input_dir')
+cfg_file = cfg_file_path + '/' + tc_name + '.json'
+with open(cfg_file) as f:
+    tc_input = json.load(f)
 
-    # Getting and configuring the RootLogger.
-    root_logger = logging.getLogger()
-    configure_logger(root_logger, propagate=True)
+# Get run ID
+run_id_file = '/home/ubuntu/twister/resources/runid/current'
+with open(run_id_file) as f:
+   run_id = f.read()
+set_details({'run_id': run_id})
 
-    # Logger for the current module.
-    LOG = logging.getLogger(tc_name + ' wrapper')
-    configure_logger(LOG, console_level='INFO', propagate=False)
+# Build test case JSON
+tc_json = {"tc_name": tc_name}
+tc_json.update({'tc_input': tc_input})
 
-    # Get TC input
-    cfg_file_path = get_config(CONFIG[0], 'config/tc_input_dir')
-    cfg_file = cfg_file_path + '/' + tc_name + '.json'
-    with open(cfg_file) as f:
-        tc_input = json.load(f)
+# Start test case
+try:
+    server_response = requests.post(url='http://vnf_lcv_srv:8080/v1.0/exec', json=tc_json)
+    assert server_response.status_code == 200
+    data = server_response.json()
+    execution_id = data['execution_id']
+except:
+    _RESULT = 'FAIL'
+    exit()
 
-    # Get run ID
-    run_id_file = '/home/ubuntu/twister/resources/runid/current'
-    with open(run_id_file) as f:
-       run_id = f.read()
-    set_details({'run_id': run_id})
+# Poll on test case status
+while True:
+    server_response = requests.get(url='http://vnf_lcv_srv:8080/v1.0/exec/' + execution_id)
+    data = server_response.json()
+    tc_status = data['status']
+    if tc_status in ['DONE', 'NOT_FOUND']:
+        tc_result = data.get('tc_result', {})
+        break
+    time.sleep(constants.POLL_INTERVAL)
 
-    LOG.info('Calling test case %s' % tc_name)
+durations = dict()
+durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
+durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration', None)
+durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', None)
+durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', None)
+durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration', None)
+durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration', None)
 
-    tc_result = dict()
+for duration_type, duration_value in durations.items():
+    set_details({duration_type: duration_value})
 
-    try:
-        tc_result = tc_class(tc_input).execute()
-    except:
-        LOG.error('Test case %s failed' % tc_name)
+set_details({'vnfo': tc_input['mano_params']['type']})
+set_details({'vnfm': tc_input['mano_params']['type']})
+set_details({'vim': 'OpenStack'})
+set_details({'vnf': 'CirrOS'})
+set_details({'traffic_gen': 'STCv'})
 
-    durations = dict()
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration', None)
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', None)
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', None)
-    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration', None)
-    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration', None)
-
-    for duration_type, duration_value in durations.items():
-	set_details({duration_type: duration_value})
-
-    set_details({'vnfo': tc_input['mano_params']['type']})
-    set_details({'vnfm': tc_input['mano_params']['type']})
-    set_details({'vim': 'OpenStack'})
-    set_details({'vnf': 'CirrOS'})
-    set_details({'traffic_gen': 'STCv'})
-
-    #set_details({'scale_type': '
-
-    if tc_result.get('overall_status') == constants.TEST_PASSED:
-        _RESULT = 'PASS'
-    else:
-        _RESULT = 'FAIL'
+if tc_result.get('overall_status') == constants.TEST_PASSED:
+    _RESULT = 'PASS'
+else:
+    _RESULT = 'FAIL'
 
 
-    json_dict = dict()
-    json_dict['run_id'] = int(run_id)
-    json_dict['suite_name'] = SUITE_NAME
-    json_dict['tc_name'] = FILE_NAME.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-    json_dict['tc_start_time'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-    json_dict['tc_status'] = _RESULT
+json_dict = dict()
+json_dict['run_id'] = int(run_id)
+json_dict['suite_name'] = SUITE_NAME
+json_dict['tc_name'] = FILE_NAME.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+json_dict['tc_start_time'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+json_dict['tc_status'] = _RESULT
 
-    json_dict['environment'] = dict()
-    json_dict['environment']['vim'] = 'OpenStack'
-    json_dict['environment']['mano'] = tc_input['mano_params']['type']
-    json_dict['environment']['vnf'] = 'CirrOS'
-    json_dict['environment']['traffic'] = 'STCv'
-    json_dict['environment']['em'] = 'None'
+json_dict['environment'] = dict()
+json_dict['environment']['vim'] = 'OpenStack'
+json_dict['environment']['mano'] = tc_input['mano_params']['type']
+json_dict['environment']['vnf'] = 'CirrOS'
+json_dict['environment']['traffic'] = 'STCv'
+json_dict['environment']['em'] = 'None'
 
-    json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
+json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
 
-    requests.post(url='http://10.2.34.13:9200/nfv/tc-exec', json=json_dict)
+requests.post(url='http://kibana:9200/nfv/tc-exec', json=json_dict)
