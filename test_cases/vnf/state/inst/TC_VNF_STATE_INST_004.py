@@ -1,7 +1,5 @@
 import logging
 
-import yaml
-
 from api.generic import constants
 from api.generic.em import Em
 from api.generic.mano import Mano
@@ -49,10 +47,6 @@ class TC_VNF_STATE_INST_004(TestCase):
         self.tc_result['events']['instantiate_vnf'] = dict()
         self.tc_result['events']['update_vnf'] = dict()
         self.tc_result['events']['instantiate_update_vnf'] = dict()
-
-        # Store the VNF config.
-        with open(self.tc_input['vnf']['config'], 'r') as vnf_config_file:
-            self.vnf_config = yaml.load(vnf_config_file.read())
 
         LOG.info('Finished setup for TC_VNF_STATE_INST_004')
 
@@ -136,7 +130,8 @@ class TC_VNF_STATE_INST_004(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Modifying the VNF configuration')
         self.time_record.START('update_vnf')
-        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.vnf_config) != constants.OPERATION_SUCCESS:
+        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.tc_input['vnf']['config']) != \
+                constants.OPERATION_SUCCESS:
             LOG.error('TC_VNF_STATE_INST_004 execution failed')
             LOG.debug('Could not update VNF')
             self.tc_result['overall_status'] = constants.TEST_FAILED
