@@ -46,7 +46,6 @@ class TestCase(object):
         self.mano = None
         self.vim = None
         self.vnf = None
-        self.vnf_config = None
         self.vnf_instance_id = None
         self.ns_instance_id = None
         self.vnfm = None
