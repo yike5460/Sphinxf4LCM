@@ -9,6 +9,12 @@ from api.generic import constants
 # Get test case name
 tc_name = __file__.rsplit('/', 1)[-1].rsplit('.', 1)[0]
 
+# Get VNF Lifecycle Verification server IP address
+vnf_lcv_srv = get_config(CONFIG[0], 'config/vnf_lcv_srv_ip')
+
+# Get Kibana server IP address
+kibana_srv = get_config(CONFIG[0], 'config/kibana_srv_ip')
+
 # Get test case input
 cfg_file_path = get_config(CONFIG[0], 'config/tc_input_dir')
 cfg_file = cfg_file_path + '/' + tc_name + '.json'
@@ -27,7 +33,7 @@ tc_json.update({'tc_input': tc_input})
 
 # Start test case
 try:
-    server_response = requests.post(url='http://vnf_lcv_srv:8080/v1.0/exec', json=tc_json)
+    server_response = requests.post(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec', json=tc_json)
     assert server_response.status_code == 200
     data = server_response.json()
     execution_id = data['execution_id']
@@ -37,7 +43,7 @@ except:
 
 # Poll on test case status
 while True:
-    server_response = requests.get(url='http://vnf_lcv_srv:8080/v1.0/exec/' + execution_id)
+    server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec/' + execution_id)
     data = server_response.json()
     tc_status = data['status']
     if tc_status in ['DONE', 'NOT_FOUND']:
@@ -84,4 +90,4 @@ json_dict['environment']['em'] = 'None'
 
 json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
 
-requests.post(url='http://kibana:9200/nfv/tc-exec', json=json_dict)
+requests.post(url='http://' + kibana_srv + ':9200/nfv/tc-exec', json=json_dict)
