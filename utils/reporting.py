@@ -18,7 +18,6 @@ def report_test_case(tc_input, tc_result):
     print
 
     t1 = PrettyTable(['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
-    port_speed = tc_input['traffic_params']['traffic_config']['port_speed']
     print_scaling_results = False
     for direction in ['out', 'in', 'up', 'down']:
         scale_type = 'scaling_' + direction
@@ -28,6 +27,7 @@ def report_test_case(tc_input, tc_result):
             print_scaling_results = True
 
             # Build the scale table row
+            port_speed = tc_input['traffic_params']['traffic_config']['port_speed']
             status = tc_result[scale_type].get('status', None)
             scale_level = tc_result[scale_type].get('level', None)
             load_before_scaling = tc_result[scale_type].get('traffic_before', None)
