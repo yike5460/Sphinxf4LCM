@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import requests
 
 # Get VNF Lifecycle Verification server IP address
