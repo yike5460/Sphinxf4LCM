@@ -69,6 +69,8 @@ class TackerManoAdapter(object):
                 # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
                 # exception because the VNF can no longer be found
                 return constants.OPERATION_SUCCESS
+            except tackerclient.common.exceptions.TackerClientException:
+                return constants.OPERATION_PENDING
 
             tacker_status = tacker_show_vnf['vnf']['status']
 
