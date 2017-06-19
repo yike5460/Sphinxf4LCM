@@ -2,7 +2,7 @@
 
 import requests
 
-# Get VNF Lifecycle Verification server IP address
+# TODO: Get VNF Lifecycle Verification server IP address
 vnf_lcv_srv = '10.2.34.39'
 
 # Get the list with the test cases under execution
