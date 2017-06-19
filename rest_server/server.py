@@ -1,11 +1,12 @@
 import importlib
 import json
 import uuid
-from threading import Thread
+from multiprocessing import Process, Queue
 
 from bottle import route, run, request, response
 
-execution_threads = dict()
+execution_queues = dict()
+execution_processes = dict()
 tc_results = dict()
 
 # TODO: move mapping logic in test_cases module
@@ -32,9 +33,9 @@ def version():
     return {'version': 'v1.0'}
 
 
-def execute_test(tc_class, tc_input, execution_id):
+def execute_test(tc_class, tc_input, queue):
     tc_result = tc_class(tc_input).execute()
-    tc_results[execution_id] = tc_result
+    queue.put(tc_result)
 
 
 @route('/v1.0/exec', method='POST')
@@ -45,10 +46,12 @@ def do_exec():
     tc_class = get_tc_class(tc_name)
 
     execution_id = str(uuid.uuid4())
-    execution_thread = Thread(target=execute_test, args=(tc_class, tc_input, execution_id))
-    execution_thread.start()
+    queue = Queue()
+    execution_process = Process(target=execute_test, args=(tc_class, tc_input, queue))
+    execution_process.start()
 
-    execution_threads[execution_id] = execution_thread
+    execution_processes[execution_id] = execution_process
+    execution_queues[execution_id] = queue
 
     return {'execution_id': execution_id}
 
@@ -56,25 +59,39 @@ def do_exec():
 @route('/v1.0/exec/<execution_id>')
 def get_status(execution_id):
     try:
-        execution_thread = execution_threads[execution_id]
+        execution_process = execution_processes[execution_id]
     except KeyError:
         response.status = 404
         return {'status': 'NOT_FOUND'}
 
-    if execution_thread.is_alive():
+    if execution_process.is_alive():
         return {'status': 'PENDING'}
     else:
+        if tc_results.get(execution_id) is None:
+            queue = execution_queues[execution_id]
+            if queue.empty():
+                tc_result = {}
+            else:
+                tc_result = queue.get_nowait()
+            tc_results[execution_id] = tc_result
+            queue.close()
         return {'status': 'DONE',
                 'tc_result': tc_results[execution_id]}
+
+
+@route('/v1.0/exec/<execution_id>', method='DELETE')
+def do_stop_exec(execution_id):
+    execution_process = execution_processes[execution_id]
+    execution_process.terminate()
 
 
 @route('/v1.0/exec')
 def all_status():
     status_list = list()
-    for execution_id, execution_thread in execution_threads.items():
+    for execution_id, execution_process in execution_processes.items():
         execution_status = dict()
         execution_status['execution_id'] = execution_id
-        if execution_thread.is_alive():
+        if execution_process.is_alive():
             execution_status['status'] = 'PENDING'
         else:
             execution_status['status'] = 'DONE'
