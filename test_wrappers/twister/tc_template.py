@@ -4,8 +4,6 @@ from datetime import datetime
 
 import requests
 
-from api.generic import constants
-
 # Get test case name
 tc_name = __file__.rsplit('/', 1)[-1].rsplit('.', 1)[0]
 
@@ -14,6 +12,9 @@ vnf_lcv_srv = get_config(CONFIG[0], 'config/vnf_lcv_srv_ip')
 
 # Get Kibana server IP address
 kibana_srv = get_config(CONFIG[0], 'config/kibana_srv_ip')
+
+# Get poll interval
+poll_interval = get_config(CONFIG[0], 'config/poll_interval')
 
 # Get test case input
 cfg_file_path = get_config(CONFIG[0], 'config/tc_input_dir')
@@ -49,7 +50,7 @@ while True:
     if tc_status in ['DONE', 'NOT_FOUND']:
         tc_result = data.get('tc_result', {})
         break
-    time.sleep(constants.POLL_INTERVAL)
+    time.sleep(poll_interval)
 
 durations = dict()
 durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
@@ -68,7 +69,7 @@ set_details({'vim': 'OpenStack'})
 set_details({'vnf': 'CirrOS'})
 set_details({'traffic_gen': 'STCv'})
 
-if tc_result.get('overall_status') == constants.TEST_PASSED:
+if tc_result.get('overall_status') == 'PASSED':
     _RESULT = 'PASS'
 else:
     _RESULT = 'FAIL'
