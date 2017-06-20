@@ -28,14 +28,14 @@ def get_tc_class(tc_name):
     return tc_class
 
 
-@route('/v1.0/version')
-def version():
-    return {'version': 'v1.0'}
-
-
 def execute_test(tc_class, tc_input, queue):
     tc_result = tc_class(tc_input).execute()
     queue.put(tc_result)
+
+
+@route('/version')
+def get_version():
+    return {'versions': ['v1.0']}
 
 
 @route('/v1.0/exec', method='POST')
