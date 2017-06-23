@@ -100,4 +100,77 @@ def all_status():
 
     return {'status_list': status_list}
 
+
+@route('/v1.0/tcs')
+def get_tcs():
+    tc_list = dict()
+
+    global tc_name_module_mapping
+
+    if tc_name_module_mapping is None:
+        with open(mapping_file_path, 'r') as mapping_file:
+            tc_name_module_mapping = json.load(mapping_file)
+
+    for tc_name, tc_module_name in tc_name_module_mapping.items():
+        tc_path = tc_module_name.rsplit('.', 1)[0].split('.', 1)[1].replace('.', '/')
+        tc_list[tc_name] = tc_path
+
+    return tc_list
+
+
+def _read_resources(resource):
+    resource_file_name = '%s.json' % resource
+    try:
+        with open(resource_file_name, 'r') as resource_file:
+            all_resources = json.load(resource_file)
+    except IOError:
+        all_resources = {}
+
+    return all_resources
+
+
+def _read_resource(resource, name):
+    all_resources = _read_resources(resource)
+
+    return all_resources.get(name, {})
+
+
+def _write_resources(resource, all_resources):
+    resource_file_name = '%s.json' % resource
+    with open(resource_file_name, 'w') as resource_file:
+        json.dump(all_resources, resource_file, sort_keys=True, indent=2)
+
+
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>')
+def get_resource(resource, name):
+    resource_params = _read_resource(resource, name)
+    if resource_params == {}:
+        response.status = 404
+
+    return {name: resource_params}
+
+
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>', method='PUT')
+def set_resource(resource, name):
+    all_resources = _read_resources(resource)
+    all_resources[name] = request.json
+
+    _write_resources(resource, all_resources)
+
+    return {name: request.json}
+
+
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>', method='DELETE')
+def delete_resource(resource, name):
+    all_resources = _read_resources(resource)
+    resource_params = all_resources.pop(name, {})
+
+    _write_resources(resource, all_resources)
+
+    if resource_params == {}:
+        response.status = 404
+
+    return {name: resource_params}
+
+
 run(host='0.0.0.0', port=8080, debug=False)
