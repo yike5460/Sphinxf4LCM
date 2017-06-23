@@ -59,7 +59,7 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus=True,
-                                                      limit_vmem=True, limit_vc_instances = True,
+                                                      limit_vmem=True, limit_vc_instances=True,
                                                       scaling_policy_name=None):
         """
         This function reserves compute resources so that the remaining resources are not enough for instantiating the
