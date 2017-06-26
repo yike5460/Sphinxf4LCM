@@ -1,6 +1,7 @@
 import collections
 import importlib
 
+from api.generic import constants
 from utils import reporting
 from utils import timestamps
 from utils.logging_module import configure_logger
@@ -9,6 +10,34 @@ Function = collections.namedtuple('Function', 'function_reference function_args 
 
 
 class TestExecutionError(Exception):
+    """
+    Generic exception for test execution.
+    """
+    def __init__(self, message, err_details=None):
+        if err_details is None:
+            err_details = message
+        super(TestExecutionError, self).__init__(message)
+        self.error_info = err_details
+
+
+class TestSetupError(TestExecutionError):
+    """
+    A problem occurred during the test setup.
+    """
+    pass
+
+
+class TestRunError(TestExecutionError):
+    """
+    A problem occurred during the test run.
+    """
+    pass
+
+
+class TestCleanupError(TestExecutionError):
+    """
+    A problem occurred during the test cleanup.
+    """
     pass
 
 
@@ -59,10 +88,10 @@ class TestCase(object):
         configure_logger(cls._LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
     def setup(self):
-        return True
+        pass
 
     def run(self):
-        return True
+        pass
 
     def register_for_cleanup(self, function_reference, *args, **kwargs):
         """
@@ -79,7 +108,6 @@ class TestCase(object):
         for function in reversed(self.cleanup_registrations):
             function.function_reference(*function.function_args, **function.function_kwargs)
         self._LOG.info('Finished main cleanup')
-        return True
 
     def collect_timestamps(self):
         """
@@ -94,19 +122,22 @@ class TestCase(object):
         self.initialize()
 
         try:
-            if not self.setup():
-                raise TestExecutionError
-
-            if not self.run():
-                raise TestExecutionError
-
-            self.collect_timestamps()
-
-            if not self.cleanup():
-                raise TestExecutionError
-        except TestExecutionError:
+            self.setup()
+            self.run()
             self.collect_timestamps()
             self.cleanup()
+        except TestSetupError:
+            self.collect_timestamps()
+            self.cleanup()
+        except TestRunError as e:
+            self._LOG.error('%s execution failed' % self.tc_name)
+            self._LOG.debug(e.message)
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = e.error_info
+            self.collect_timestamps()
+            self.cleanup()
+        except:
+            raise
 
         self.report()
 

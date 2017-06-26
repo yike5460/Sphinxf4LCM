@@ -3,7 +3,7 @@ import logging
 from api.generic import constants
 from api.generic.mano import Mano
 from api.generic.traffic import Traffic
-from test_cases import TestCase
+from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
 # Instantiate logger
@@ -25,7 +25,7 @@ class TC_VNF_STATE_START_002(TestCase):
     8. Start the low traffic load
     9. Validate no traffic goes through
     10. Start the VNF
-    11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED 
+    11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     12. Calculate the time for activation
     13. Validate traffic goes through
     14. Stop the VNF
@@ -51,8 +51,6 @@ class TC_VNF_STATE_START_002(TestCase):
 
         LOG.info('Finished setup for TC_VNF_STATE_START_002')
 
-        return True
-
     def run(self):
         LOG.info('Starting TC_VNF_STATE_START_002')
 
@@ -66,11 +64,7 @@ class TC_VNF_STATE_START_002(TestCase):
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
         if self.vnf_instance_id is None:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF instantiation ID')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation operation failed'
-            return False
+            raise TestRunError('Unexpected VNF instantiation ID', err_details='VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
@@ -85,21 +79,15 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF instantiation state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' \
-                                           % constants.VNF_INSTANTIATED
-            return False
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
+                                           % constants.VNF_INSTANTIATED)
 
         LOG.info('Validating VNF state is STARTED')
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
-                                           constants.VNF_STARTED
-            return False
+            raise TestRunError('Unexpected VNF state',
+                               err_details='VNF state was not "%s" after the VNF was instantiated'
+                                           % constants.VNF_STARTED)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -107,18 +95,10 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Starting the low traffic load')
         if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                       traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
-            return False
+            raise TestRunError('Low traffic load and traffic configuration parameter could not be applied')
 
         if not self.traffic.start(return_when_emission_starts=True):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic could not be started')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be started'
-            return False
+            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
 
         self.register_for_cleanup(self.traffic.stop)
 
@@ -127,25 +107,13 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic goes through')
         if not self.traffic.does_traffic_flow(delay_time=5):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic is not flowing')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic did not flow'
-            return False
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss():
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic is flowing with packet loss')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
-            return False
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Could not validate allocated vResources')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not validate allocated vResources'
-            return False
+            raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
 
@@ -154,11 +122,7 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the low traffic load')
         if not self.traffic.stop():
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic could not be stopped')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be stopped'
-            return False
+            raise TestRunError('Traffic could not be stopped', err_details='Low traffic could not be stopped')
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Stop the VNF
@@ -166,11 +130,7 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Stopping the VNF')
         self.time_record.START('stop_vnf')
         if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Could not stop the VNF')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not stop the VNF'
-            return False
+            raise TestRunError('MANO could not stop the VNF')
         self.time_record.END('stop_vnf')
 
         self.tc_result['events']['stop_vnf']['duration'] = self.time_record.duration('stop_vnf')
@@ -181,43 +141,28 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF instantiation state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was stopped' \
-                                           % constants.VNF_INSTANTIATED
-            return False
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was stopped'
+                                           % constants.VNF_INSTANTIATED)
 
         LOG.info('Validating VNF state is STOPPED')
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STOPPED:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was stopped' % \
-                                           constants.VNF_STOPPED
-            return False
+            raise TestRunError('Unexpected VNF state',
+                               err_details='VNF state was not "%s" after the VNF was stopped' % constants.VNF_STOPPED)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
         if not self.traffic.start(return_when_emission_starts=True):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic could not be started')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be started'
-            return False
+            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Validate no traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic goes through')
         if self.traffic.does_traffic_flow(delay_time=5):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic is flowing')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic flew before VNF was started'
-            return False
+            raise TestRunError('Traffic is flowing', err_details='Traffic flew before VNF was started')
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Start the VNF
@@ -225,11 +170,7 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Starting the VNF')
         self.time_record.START('start_vnf')
         if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='start') != constants.OPERATION_SUCCESS:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Could not start VNF')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not start VNF'
-            return False
+            raise TestRunError('MANO could not start the VNF')
         self.time_record.END('start_vnf')
 
         self.tc_result['events']['start_vnf']['duration'] = self.time_record.duration('start_vnf')
@@ -240,21 +181,14 @@ class TC_VNF_STATE_START_002(TestCase):
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF instantiation state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was started' \
-                                           % constants.VNF_INSTANTIATED
-            return False
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was started'
+                                           % constants.VNF_INSTANTIATED)
 
         LOG.info('Validating VNF state is STARTED')
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Unexpected VNF state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was started' % \
-                                           constants.VNF_STARTED
-            return False
+            raise TestRunError('Unexpected VNF state',
+                               err_details='VNF state was not "%s" after the VNF was started' % constants.VNF_STARTED)
 
         # --------------------------------------------------------------------------------------------------------------
         # 12. Calculate the time for activation
@@ -271,41 +205,23 @@ class TC_VNF_STATE_START_002(TestCase):
         self.traffic.clear_counters()
 
         if not self.traffic.does_traffic_flow(delay_time=5):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic is not flowing')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic did not flow'
-            return False
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss():
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic is flowing with packet loss')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
-            return False
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         # --------------------------------------------------------------------------------------------------------------
         # 14. Stop the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the VNF')
         if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Could not stop the VNF')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not stop the VNF'
-            return False
+            raise TestRunError('MANO could not stop the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 15. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that no traffic flows once stop is completed')
         if self.traffic.does_traffic_flow(delay_time=5):
-            LOG.error('TC_VNF_STATE_START_002 execution failed')
-            LOG.debug('Traffic is still flowing')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Traffic still flew after VNF was stopped'
-            return False
+            raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was stopped')
 
         LOG.info('TC_VNF_STATE_START_002 execution completed successfully')
-
-        return True

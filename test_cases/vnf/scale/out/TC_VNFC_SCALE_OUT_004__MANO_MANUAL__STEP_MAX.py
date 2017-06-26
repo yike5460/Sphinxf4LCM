@@ -4,7 +4,7 @@ from api.generic import constants
 from api.generic.mano import Mano
 from api.generic.traffic import Traffic
 from api.generic.vim import Vim
-from test_cases import TestCase
+from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
 # Instantiate logger
@@ -47,8 +47,6 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
 
         LOG.info('Finished setup for TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
 
-        return True
-
     def run(self):
         LOG.info('Starting TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
 
@@ -61,11 +59,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
                              vnfd_id=self.tc_input['vnfd_id'], scaling_policy_name=self.tc_input['scaling_policy_name'],
                              desired_scale_out_steps=0, generic_vim_object=self.vim)
         if reservation_id is None:
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Compute resources could not be limited')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Compute resources could not be limited'
-            return False
+            raise TestRunError('Compute resources could not be limited')
 
         self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)
 
@@ -79,11 +73,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
         if self.vnf_instance_id is None:
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Unexpected VNF instantiation ID')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation operation failed'
-            return False
+            raise TestRunError('Unexpected VNF instantiation ID', err_details='VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
@@ -98,21 +88,15 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Unexpected VNF instantiation state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation state was not "%s" after the VNF was instantiated' \
-                                           % constants.VNF_INSTANTIATED
-            return False
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
+                                           % constants.VNF_INSTANTIATED)
 
         LOG.info('Validating VNF state is STARTED')
         if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Unexpected VNF state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF state was not "%s" after the VNF was instantiated' % \
-                                           constants.VNF_STARTED
-            return False
+            raise TestRunError('Unexpected VNF state',
+                               err_details='VNF state was not "%s" after the VNF was instantiated'
+                                           % constants.VNF_STARTED)
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
 
@@ -122,11 +106,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         LOG.info('Starting the low traffic load')
         if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                       traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Low traffic load and traffic configuration parameter could not be applied')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic load and traffic configuration parameter could not be applied'
-            return False
+            raise TestRunError('Low traffic load and traffic configuration parameter could not be applied')
 
         # Configure stream destination MAC address(es)
         dest_mac_addr_list = ''
@@ -136,11 +116,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         self.traffic.config_traffic_stream(dest_mac_addr_list)
 
         if not self.traffic.start(return_when_emission_starts=True):
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Traffic could not be started')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic could not be started'
-            return False
+            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
 
         self.register_for_cleanup(self.traffic.stop)
 
@@ -149,27 +125,15 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
         if not self.traffic.does_traffic_flow(delay_time=5):
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Traffic is not flowing')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic did not flow'
-            return False
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss():
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Traffic is flowing with packet loss')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
-            return False
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
 
         if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Could not validate allocated vResources')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Could not validate allocated vResources'
-            return False
+            raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Trigger a resize of the VNF resources to the maximum by instructing the MANO to scale out the VNF
@@ -180,12 +144,8 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
                                     aspect_id=self.tc_input['scaling']['aspect'],
                                     additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('MANO could not scale out the VNF')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'MANO could not scale out the VNF'
             self.tc_result['scaling_out']['status'] = 'Fail'
-            return False
+            raise TestRunError('MANO could not scale out the VNF')
 
         self.time_record.END('scale_out_vnf')
 
@@ -201,11 +161,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         LOG.info('Validating VNF has not resized')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances']:
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('VNF scaled out')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF scaled out'
-            return False
+            raise TestRunError('VNF scaled out')
         self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances']
 
         # --------------------------------------------------------------------------------------------------------------
@@ -219,21 +175,11 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating all traffic goes through')
         if not self.traffic.does_traffic_flow(delay_time=5):
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Traffic is not flowing')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic did not flow'
-            return False
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss():
-            LOG.error('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution failed')
-            LOG.debug('Traffic is flowing with packet loss')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'Low traffic flew with packet loss'
-            return False
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_after'] = 'LOW_TRAFFIC_LOAD'
 
         LOG.info('TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX execution completed successfully')
-
-        return True
