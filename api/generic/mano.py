@@ -1,17 +1,23 @@
 import logging
+import re
 import time
-
 from threading import Thread, Event, Lock
 
-import re
-
 from api.adapter import construct_adapter
+from api.generic import ApiGenericError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 from utils.misc import tee
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class ManoGenericError(ApiGenericError):
+    """
+    A problem occurred in the VNF LifeCycle Validation MANO generic API.
+    """
+    pass
 
 
 class Mano(object):

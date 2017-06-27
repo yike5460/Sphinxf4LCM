@@ -3,15 +3,15 @@ import logging
 import re
 import time
 import uuid
-
-import os_client_config
 from threading import Timer
 
+import os_client_config
 import tackerclient.common.exceptions
 import yaml
 from tackerclient.tacker.client import Client as TackerClient
 
 from api.adapter import construct_adapter
+from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
     VnfLifecycleChangeNotification
@@ -19,6 +19,13 @@ from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class TackerManoAdapterError(ManoAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Tacker MANO adapter API.
+    """
+    pass
 
 
 class TackerManoAdapter(object):

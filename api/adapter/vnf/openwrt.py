@@ -1,8 +1,16 @@
 import logging
 
+from api.adapter.vnf import VnfAdapterError
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
+
+
+class OpenwrtVnfAdapterError(VnfAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Openwrt VNF adapter API.
+    """
+    pass
 
 
 class OpenwrtVnfAdapter(object):

@@ -5,9 +5,17 @@ import uuid
 import requests
 from requests.auth import HTTPBasicAuth
 
+from api.adapter.mano import ManoAdapterError
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
+
+
+class RiftManoAdapterError(ManoAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Rift MANO adapter API.
+    """
+    pass
 
 
 class RiftManoAdapter(object):

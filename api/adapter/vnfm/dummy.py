@@ -1,5 +1,6 @@
 import logging
 
+from api.adapter.vnfm import VnfmAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfInfo
 from utils.logging_module import log_entry_exit
@@ -8,7 +9,14 @@ from utils.logging_module import log_entry_exit
 LOG = logging.getLogger(__name__)
 
 
-class VnfmDummyAdapter(object):
+class DummyVnfmAdapterError(VnfmAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Dummy VNFM adapter API.
+    """
+    pass
+
+
+class DummyVnfmAdapter(object):
     """
     Class of stub functions representing operations exposed by the VNFM towards the NFVO.
     """

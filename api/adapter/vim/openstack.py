@@ -2,11 +2,19 @@ import logging
 
 import os_client_config
 
+from api.adapter.vim import VimAdapterError
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
     VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, ReservedVirtualCompute, ReservedVirtualStorage
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
+
+
+class OpenstackVimAdapterError(VimAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Openstack VIM adapter API.
+    """
+    pass
 
 
 class OpenstackVimAdapter(object):

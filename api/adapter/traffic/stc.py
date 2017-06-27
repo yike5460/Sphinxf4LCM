@@ -4,10 +4,18 @@ from threading import Lock, Thread
 
 from stcrestclient import resthttp, stchttp
 
+from api.adapter.traffic import TrafficAdapterError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
+
+
+class StcTrafficAdapterError(TrafficAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation STC traffic adapter API.
+    """
+    pass
 
 
 class StcTrafficAdapter(object):

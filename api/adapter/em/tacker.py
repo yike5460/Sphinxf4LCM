@@ -6,11 +6,19 @@ import tackerclient.common.exceptions
 from tackerclient.tacker.client import Client as TackerClient
 
 from api.adapter import construct_adapter
+from api.adapter.em import EmAdapterError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class TackerEmAdapterError(EmAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Tacker EM adapter API.
+    """
+    pass
 
 
 class TackerEmAdapter(object):

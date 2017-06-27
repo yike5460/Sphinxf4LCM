@@ -1,12 +1,20 @@
 import logging
 import time
 
+from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, NsInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class DummyManoAdapterError(ManoAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Dummy MANO adapter API.
+    """
+    pass
 
 
 class DummyManoAdapter(object):
