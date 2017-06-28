@@ -150,6 +150,13 @@ def get_resource(resource, name):
     return {name: resource_params}
 
 
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>')
+def get_resources(resource):
+    all_resources = _read_resources(resource)
+
+    return all_resources
+
+
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>', method='PUT')
 def set_resource(resource, name):
     all_resources = _read_resources(resource)
