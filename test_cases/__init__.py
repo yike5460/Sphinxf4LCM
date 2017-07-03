@@ -1,6 +1,7 @@
 import collections
 import importlib
 
+from api import ApiError
 from api.generic import constants
 from utils import reporting
 from utils import timestamps
@@ -62,6 +63,8 @@ class TestCase(object):
         self.tc_input = tc_input
         self.tc_name = type(self).__name__
         self.tc_result = dict()
+        self.tc_result['overall_status'] = constants.TEST_PASSED
+        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events'] = collections.OrderedDict()
         self.tc_result['resources'] = collections.OrderedDict()
         self.tc_result['scaling_out'] = dict()
@@ -106,7 +109,10 @@ class TestCase(object):
         """
         self._LOG.info('Starting main cleanup')
         for function in reversed(self.cleanup_registrations):
-            function.function_reference(*function.function_args, **function.function_kwargs)
+            try:
+                function.function_reference(*function.function_args, **function.function_kwargs)
+            except Exception as e:
+                raise TestCleanupError(e.message)
         self._LOG.info('Finished main cleanup')
 
     def collect_timestamps(self):
@@ -124,22 +130,35 @@ class TestCase(object):
         try:
             self.setup()
             self.run()
-            self.collect_timestamps()
-            self.cleanup()
-        except TestSetupError:
-            self.collect_timestamps()
-            self.cleanup()
-        except TestRunError as e:
-            self._LOG.error('%s execution failed' % self.tc_name)
+        except TestSetupError as e:
+            self._LOG.error('%s setup failed' % self.tc_name)
             self._LOG.debug(e.message)
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = e.error_info
-            self.collect_timestamps()
-            self.cleanup()
-        except:
+        except TestRunError as e:
+            self._LOG.error('%s run failed' % self.tc_name)
+            self._LOG.debug(e.message)
+            self.tc_result['overall_status'] = constants.TEST_FAILED
+            self.tc_result['error_info'] = e.error_info
+        except ApiError:
+            self._LOG.error('%s execution crashed' % self.tc_name)
+            self.tc_result['overall_status'] = constants.TEST_ERROR
+            self.tc_result['error_info'] = 'A problem occurred in the VNF LifeCycle Validation API'
             raise
-
-        self.report()
+        except:
+            self._LOG.error('%s execution crashed' % self.tc_name)
+            self.tc_result['overall_status'] = constants.TEST_ERROR
+            self.tc_result['error_info'] = 'An unhandled exception appeared'
+            raise
+        finally:
+            try:
+                self.cleanup()
+            except TestCleanupError as e:
+                self._LOG.error('%s cleanup failed' % self.tc_name)
+                self._LOG.debug('Exception message %s' % e.message)
+            finally:
+                self.collect_timestamps()
+                self.report()
 
         return self.tc_result
 
