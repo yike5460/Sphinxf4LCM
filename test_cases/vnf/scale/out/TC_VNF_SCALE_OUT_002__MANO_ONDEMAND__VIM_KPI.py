@@ -38,8 +38,6 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_ns'] = dict()
         self.tc_result['events']['scale_out_ns'] = dict()
         self.tc_result['events']['service_disruption'] = dict()
@@ -102,9 +100,8 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
         # 4. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
-        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            raise TestRunError('Low traffic load and traffic configuration parameter could not be applied')
+        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
 
         # Configure stream destination MAC address(es)
         dest_mac_addr_list = ''
@@ -113,8 +110,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
         self.traffic.config_traffic_stream(dest_mac_addr_list)
 
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(self.traffic.stop)
 
@@ -171,12 +167,8 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
                 time.sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
             if elapsed_time == constants.SCALE_INTERVAL:
-                LOG.error('TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI execution failed')
-                LOG.debug('NS did not scale out to the max')
-                self.tc_result['overall_status'] = constants.TEST_FAILED
-                self.tc_result['error_info'] = 'NS did not scale out to the max'
                 self.tc_result['scaling_out']['status'] = 'Fail'
-                return False
+                raise TestRunError('NS did not scale out to the max')
 
         self.time_record.END('scale_out_ns')
 
@@ -203,8 +195,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
         # Because the NS scaled out, we need to reconfigure traffic so that it passes through all VNFs.
 
         # Stop the max traffic load.
-        if not self.traffic.stop():
-            raise TestRunError('Traffic could not be stopped', err_details='Max traffic could not be stopped')
+        self.traffic.stop()
 
         # Configure stream destination MAC address(es).
         dest_mac_addr_list = ''
@@ -218,8 +209,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
         self.traffic.clear_counters()
 
         # Start the max traffic load.
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Max traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')

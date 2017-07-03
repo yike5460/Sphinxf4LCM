@@ -33,8 +33,6 @@ class TC_VNF_STATE_INST_006(TestCase):
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_vnf'] = dict()
 
         LOG.info('Finished setup for TC_VNF_STATE_INST_006')
@@ -57,8 +55,6 @@ class TC_VNF_STATE_INST_006(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
-        if self.vnf_instance_id is None:
-            raise TestRunError('Unexpected VNF instantiation ID', err_details='VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
@@ -96,12 +92,10 @@ class TC_VNF_STATE_INST_006(TestCase):
         # 5. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
-        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            raise TestRunError('Low traffic load and traffic configuration parameter could not be applied')
+        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
 
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(self.traffic.stop)
 

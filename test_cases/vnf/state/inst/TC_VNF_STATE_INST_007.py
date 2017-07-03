@@ -27,8 +27,6 @@ class TC_VNF_STATE_INST_007(TestCase):
         self.vim = Vim(vendor=self.tc_input['vim_params']['type'], **self.tc_input['vim_params']['client_config'])
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_vnf'] = dict()
 
         LOG.info('Finished setup for %s' % self.tc_name)
@@ -45,8 +43,6 @@ class TC_VNF_STATE_INST_007(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'],
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
-        if self.vnf_instance_id is None:
-            raise TestRunError('Unexpected VNF instantiation ID', err_details='VNF instantiation operation failed')
 
         if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
                                           flavour_id=None) != constants.OPERATION_FAILED:

@@ -45,8 +45,6 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_ns'] = dict()
         self.tc_result['events']['scale_out_ns'] = dict()
         self.tc_result['events']['service_disruption'] = dict()
@@ -122,9 +120,8 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         # 5. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
-        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            raise TestRunError('Low traffic load and traffic configuration parameter could not be applied')
+        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
 
         # Configure stream destination MAC address(es)
         dest_mac_addr_list = ''
@@ -133,8 +130,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
         self.traffic.config_traffic_stream(dest_mac_addr_list)
 
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(self.traffic.stop)
 
@@ -234,16 +230,14 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         LOG.info('Starting the low traffic load')
 
         # Stop the max traffic load.
-        if not self.traffic.stop():
-            raise TestRunError('Traffic could not be stopped', err_details='MAX traffic could not be stopped')
+        self.traffic.stop()
 
         # Configure the traffic load and clear counters.
         self.traffic.config_traffic_load('LOW_TRAFFIC_LOAD')
         self.traffic.clear_counters()
 
         # Start the low traffic load.
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         # --------------------------------------------------------------------------------------------------------------
         # 13. Validate all traffic goes through

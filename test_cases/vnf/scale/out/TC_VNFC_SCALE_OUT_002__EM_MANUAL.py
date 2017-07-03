@@ -39,8 +39,6 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_vnf'] = dict()
         self.tc_result['events']['scale_out_vnf'] = dict()
         self.tc_result['events']['service_disruption'] = dict()
@@ -59,8 +57,6 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
-        if self.vnf_instance_id is None:
-            raise TestRunError('Unexpected VNF instantiation ID', err_details='VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
@@ -91,9 +87,8 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         # 3. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
-        if not self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            raise TestRunError('Low traffic load and traffic configuration parameter could not be applied')
+        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
 
         # Configure stream destination MAC address(es)
         dest_mac_addr_list = ''
@@ -102,8 +97,7 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
         self.traffic.config_traffic_stream(dest_mac_addr_list)
 
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Low traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(self.traffic.stop)
 
@@ -164,8 +158,7 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         LOG.info('Starting the max traffic load')
 
         # Stop the low traffic load.
-        if not self.traffic.stop():
-            raise TestRunError('Traffic could not be stopped', err_details='Low traffic could not be stopped')
+        self.traffic.stop()
 
         # Configure stream destination MAC address(es).
         dest_mac_addr_list = ''
@@ -177,8 +170,7 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
         # Start the max traffic load.
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Max traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Validate max capacity without traffic loss

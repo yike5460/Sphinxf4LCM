@@ -43,8 +43,6 @@ class TC_VNF_STATE_START_003(TestCase):
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_vnf'] = dict()
         self.tc_result['events']['stop_vnf'] = dict()
         self.tc_result['events']['start_vnf'] = dict()
@@ -64,8 +62,6 @@ class TC_VNF_STATE_START_003(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
-        if self.vnf_instance_id is None:
-            raise TestRunError('Unexpected VNF instantiation ID', err_details='VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
@@ -96,12 +92,10 @@ class TC_VNF_STATE_START_003(TestCase):
         # 3. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the normal traffic load')
-        if not self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
-                                      traffic_config=self.tc_input['traffic_params']['traffic_config']):
-            raise TestRunError('Normal traffic load and traffic configuration parameter could not be applied')
+        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
 
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Normal traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(self.traffic.stop)
 
@@ -125,8 +119,7 @@ class TC_VNF_STATE_START_003(TestCase):
         # 5. Stop the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the normal traffic load')
-        if not self.traffic.stop():
-            raise TestRunError('Traffic could not be stopped', err_details='Normal traffic could not be stopped')
+        self.traffic.stop()
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Stop the VNF
@@ -158,8 +151,7 @@ class TC_VNF_STATE_START_003(TestCase):
         # 8. Start the normal traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the normal traffic load')
-        if not self.traffic.start(return_when_emission_starts=True):
-            raise TestRunError('Traffic could not be started', err_details='Normal traffic could not be started')
+        self.traffic.start(return_when_emission_starts=True)
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Validate no traffic goes through
