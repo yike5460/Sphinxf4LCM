@@ -20,9 +20,12 @@ class StcTrafficAdapterError(TrafficAdapterError):
 
 class StcTrafficAdapter(object):
     def __init__(self, lab_server_addr, user_name, session_name):
-        self.stc = stchttp.StcHttp(lab_server_addr)
-        self.session = self.stc.new_session(user_name=user_name, session_name=session_name, kill_existing=True)
-        self.project = self.stc.create(object_type='project')
+        try:
+            self.stc = stchttp.StcHttp(lab_server_addr)
+            self.session = self.stc.new_session(user_name=user_name, session_name=session_name, kill_existing=True)
+            self.project = self.stc.create(object_type='project')
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
         self.tx_results = None
         self.rx_results = None
         self.tx_port = None
@@ -71,62 +74,77 @@ class StcTrafficAdapter(object):
 
     @log_entry_exit(LOG)
     def create_port(self, port_location):
-        port = self.stc.create(object_type='port', under=self.project)
-        self.stc.config(handle=port, location=port_location)
-        self.stc.apply()
+        try:
+            port = self.stc.create(object_type='port', under=self.project)
+            self.stc.config(handle=port, location=port_location)
+            self.stc.apply()
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         return port
 
     @log_entry_exit(LOG)
     def create_eth_ipv4_host_iface(self, address, plen, gw, affiliated_port):
-        host = self.stc.create(object_type='host', under=self.project)
-        self.stc.config(handle=host, affiliatedPort=affiliated_port)
+        try:
+            host = self.stc.create(object_type='host', under=self.project)
+            self.stc.config(handle=host, affiliatedPort=affiliated_port)
 
-        eth_iface = self.stc.create(object_type='EthIIIf', under=host, useDefaultPhyMac='TRUE')
-        ipv4_iface = self.stc.create(object_type='Ipv4If', under=host, address=address, prefixLength=plen,
-                                     usePortDefaultIpv4Gateway=False, gateway=gw, resolveGatewayMac=True)
+            eth_iface = self.stc.create(object_type='EthIIIf', under=host, useDefaultPhyMac='TRUE')
+            ipv4_iface = self.stc.create(object_type='Ipv4If', under=host, address=address, prefixLength=plen,
+                                         usePortDefaultIpv4Gateway=False, gateway=gw, resolveGatewayMac=True)
 
-        self.stc.config(handle=ipv4_iface, stackedOn=eth_iface)
-        self.stc.config(handle=host, topLevelIf=ipv4_iface)
-        self.stc.config(handle=host, primaryIf=ipv4_iface)
+            self.stc.config(handle=ipv4_iface, stackedOn=eth_iface)
+            self.stc.config(handle=host, topLevelIf=ipv4_iface)
+            self.stc.config(handle=host, primaryIf=ipv4_iface)
 
-        self.stc.apply()
+            self.stc.apply()
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         return ipv4_iface
 
     @log_entry_exit(LOG)
     def create_ipv4_stream(self, source_port, source_ipv4_iface, dest_ipv4_iface):
-        stream_block = self.stc.create(object_type='streamBlock', under=source_port)
-        self.stc.config(handle=stream_block, frameConfig='')
-        self.stc.create(object_type='ethernet:EthernetII', under=stream_block)
-        self.stc.create(object_type='ipv4:IPv4', under=stream_block)
-        self.stc.config(handle=stream_block, srcBinding=source_ipv4_iface, dstBinding=dest_ipv4_iface)
+        try:
+            stream_block = self.stc.create(object_type='streamBlock', under=source_port)
+            self.stc.config(handle=stream_block, frameConfig='')
+            self.stc.create(object_type='ethernet:EthernetII', under=stream_block)
+            self.stc.create(object_type='ipv4:IPv4', under=stream_block)
+            self.stc.config(handle=stream_block, srcBinding=source_ipv4_iface, dstBinding=dest_ipv4_iface)
 
-        self.stc.apply()
+            self.stc.apply()
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         return stream_block
 
     @log_entry_exit(LOG)
     def create_raw_stream(self, source_port, source_ipv4_addr, dest_ipv4_addr, dest_mac_addr):
-        stream_block = self.stc.create(object_type='streamBlock', under=source_port)
-        self.stc.config(handle=stream_block, frameConfig='')
-        self.stc.create(object_type='ethernet:EthernetII', under=stream_block, name='RAW_STREAM_ETH',
-                        dstMac=dest_mac_addr)
-        self.stc.create(object_type='ipv4:IPv4', under=stream_block, sourceAddr=source_ipv4_addr,
-                        destAddr=dest_ipv4_addr)
+        try:
+            stream_block = self.stc.create(object_type='streamBlock', under=source_port)
+            self.stc.config(handle=stream_block, frameConfig='')
+            self.stc.create(object_type='ethernet:EthernetII', under=stream_block, name='RAW_STREAM_ETH',
+                            dstMac=dest_mac_addr)
+            self.stc.create(object_type='ipv4:IPv4', under=stream_block, sourceAddr=source_ipv4_addr,
+                            destAddr=dest_ipv4_addr)
 
-        self.stc.apply()
+            self.stc.apply()
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         return stream_block
 
     @log_entry_exit(LOG)
     def config_port_rate(self, port_name, port_rate):
-        generator = self.stc.get(port_name, 'children-Generator')
-        generator_config = self.stc.get(generator, 'children-GeneratorConfig')
-        self.stc.config(handle=generator_config, DurationMode='CONTINUOUS', LoadMode='FIXED',
-                        FixedLoad=port_rate,
-                        LoadUnit='PERCENT_LINE_RATE', SchedulingMode='PORT_BASED')
-        self.stc.apply()
+        try:
+            generator = self.stc.get(port_name, 'children-Generator')
+            generator_config = self.stc.get(generator, 'children-GeneratorConfig')
+            self.stc.config(handle=generator_config, DurationMode='CONTINUOUS', LoadMode='FIXED',
+                            FixedLoad=port_rate,
+                            LoadUnit='PERCENT_LINE_RATE', SchedulingMode='PORT_BASED')
+            self.stc.apply()
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def config_traffic_load(self, traffic_load):
@@ -142,10 +160,13 @@ class StcTrafficAdapter(object):
             LOG.debug('No modifiers to delete')
 
         # Create new modifier with the provided destination MAC address list.
-        modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
-        self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
-                        OffsetReference='RAW_STREAM_ETH.dstMac')
-        self.stc.apply()
+        try:
+            modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
+            self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
+                            OffsetReference='RAW_STREAM_ETH.dstMac')
+            self.stc.apply()
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
@@ -179,18 +200,19 @@ class StcTrafficAdapter(object):
 
         self.config_traffic_load(traffic_load)
 
-        self.stc.perform('AttachPorts')
-        self.stc.perform('DevicesStartAll')
+        try:
+            self.stc.perform('AttachPorts')
+            self.stc.perform('DevicesStartAll')
 
-        self.stc.perform(command='ResultsSubscribe', parent=self.project, ConfigType='StreamBlock',
-                         ResultType='TxStreamResults')
-        self.stc.perform(command='ResultsSubscribe', parent=self.project, ConfigType='StreamBlock',
-                         ResultType='RxStreamSummaryResults')
+            self.stc.perform(command='ResultsSubscribe', parent=self.project, ConfigType='StreamBlock',
+                             ResultType='TxStreamResults')
+            self.stc.perform(command='ResultsSubscribe', parent=self.project, ConfigType='StreamBlock',
+                             ResultType='RxStreamSummaryResults')
 
-        self.tx_results = self.stc.get(self.stream_block, 'children-TxStreamResults')
-        self.rx_results = self.stc.get(self.stream_block, 'children-RxStreamSummaryResults')
-
-        return True
+            self.tx_results = self.stc.get(self.stream_block, 'children-TxStreamResults')
+            self.rx_results = self.stc.get(self.stream_block, 'children-RxStreamSummaryResults')
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def start(self, delay_time, return_when_emission_starts):
@@ -205,14 +227,20 @@ class StcTrafficAdapter(object):
                         return
 
                     LOG.debug('Address resolution status: %s. Will retry.' % resolution_status)
-                    resolution_status = self.stc.perform(command='ArpNdStart')['ArpNdState']
+                    try:
+                        resolution_status = self.stc.perform(command='ArpNdStart')['ArpNdState']
+                    except Exception as e:
+                        raise StcTrafficAdapterError(e.message)
                 LOG.debug('Address resolution status: %s' % resolution_status)
 
             if delay_time > 0:
                 LOG.debug('Sleeping %s seconds before starting emission' % delay_time)
                 time.sleep(delay_time)
 
-            self.stc.perform(command='StreamBlockStart')
+            try:
+                self.stc.perform(command='StreamBlockStart')
+            except Exception as e:
+                raise StcTrafficAdapterError(e.message)
             self.emission_started = True
 
             LOG.debug('Emission successfully started')
@@ -255,8 +283,6 @@ class StcTrafficAdapter(object):
         if return_when_emission_starts:
             traffic_starter_thread.join()
 
-        return self.emission_started
-
     @log_entry_exit(LOG)
     def stop(self, delay_time, return_when_emission_stops):
         self.attempt_to_start_traffic = False
@@ -267,7 +293,10 @@ class StcTrafficAdapter(object):
                     LOG.debug('Sleeping %s seconds before stopping emission' % delay_time)
                     time.sleep(delay_time)
 
-                self.stc.perform(command='StreamBlockStop')
+                try:
+                    self.stc.perform(command='StreamBlockStop')
+                except Exception as e:
+                    raise StcTrafficAdapterError(e.message)
                 self.emission_started = False
 
             LOG.debug('Emission successfully stopped')
@@ -278,15 +307,16 @@ class StcTrafficAdapter(object):
         if return_when_emission_stops:
             traffic_stopper_thread.join()
 
-        return not self.emission_started
-
     @log_entry_exit(LOG)
     def does_traffic_flow(self, delay_time):
         if delay_time > 0:
             LOG.debug('Sleeping %s seconds before polling traffic rate' % delay_time)
             time.sleep(delay_time)
 
-        rx_frame_rate = int(self.stc.get(self.rx_results)['FrameRate'])
+        try:
+            rx_frame_rate = int(self.stc.get(self.rx_results)['FrameRate'])
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
         LOG.debug('RX frame rate is: %d' % rx_frame_rate)
         return rx_frame_rate > 0
 
@@ -296,8 +326,11 @@ class StcTrafficAdapter(object):
             LOG.debug('Sleeping %s seconds before polling traffic rate' % delay_time)
             time.sleep(delay_time)
 
-        tx_results = self.stc.get(self.tx_results)
-        rx_results = self.stc.get(self.rx_results)
+        try:
+            tx_results = self.stc.get(self.tx_results)
+            rx_results = self.stc.get(self.rx_results)
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         tx_frame_count = int(tx_results['FrameCount'])
         rx_frame_count = int(rx_results['FrameCount'])
@@ -348,8 +381,11 @@ class StcTrafficAdapter(object):
     def calculate_activation_time(self):
         LOG.debug('Activation time is calculated per RFC 6201 Frame-Loss Method')
 
-        tx_results = self.stc.get(self.tx_results)
-        rx_results = self.stc.get(self.rx_results)
+        try:
+            tx_results = self.stc.get(self.tx_results)
+            rx_results = self.stc.get(self.rx_results)
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         rx_frame_count = float(rx_results['FrameCount'])
         tx_frame_count = float(tx_results['FrameCount'])
@@ -362,8 +398,11 @@ class StcTrafficAdapter(object):
         LOG.debug('Deactivation time is calculated per RFC 6201 Frame-Loss Method')
         LOG.debug('Make sure counters were cleared at the time of calling DUT termination')
 
-        tx_results = self.stc.get(self.tx_results)
-        rx_results = self.stc.get(self.rx_results)
+        try:
+            tx_results = self.stc.get(self.tx_results)
+            rx_results = self.stc.get(self.rx_results)
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
 
         rx_frame_count = float(rx_results['FrameCount'])
         tx_frame_rate = float(tx_results['FrameRate'])
@@ -376,13 +415,18 @@ class StcTrafficAdapter(object):
 
     @log_entry_exit(LOG)
     def clear_counters(self):
-        self.stc.perform(command='ResultsClearAll')
+        try:
+            self.stc.perform(command='ResultsClearAll')
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)
         self.service_disruption_length = 0
-        return True
 
     @log_entry_exit(LOG)
     def destroy(self):
-        self.stc.perform(command='DetachPorts')
-        self.stc.perform(command='ResetConfig')
-        self.stc.delete(handle=self.project)
-        self.stc.end_session(end_tcsession=self.session)
+        try:
+            self.stc.perform(command='DetachPorts')
+            self.stc.perform(command='ResetConfig')
+            self.stc.delete(handle=self.project)
+            self.stc.end_session(end_tcsession=self.session)
+        except Exception as e:
+            raise StcTrafficAdapterError(e.message)

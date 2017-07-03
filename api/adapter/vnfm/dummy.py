@@ -27,8 +27,8 @@ class DummyVnfmAdapter(object):
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         operation_status = 'Successfully done'
 
-        LOG.debug('Operation status for operation with ID %s: %s' % (lifecycle_operation_occurrence_id,
-                                                                     operation_status))
+        LOG.debug('Operation status for operation with ID %s: %s'
+                  % (lifecycle_operation_occurrence_id, operation_status))
 
         return constants.OPERATION_SUCCESS
 

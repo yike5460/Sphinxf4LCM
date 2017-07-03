@@ -241,10 +241,6 @@ class Mano(object):
         """
         ns_instance_id = self.ns_create_id(nsd_id, ns_name, ns_description)
         LOG.debug('NS instance ID: %s' % ns_instance_id)
-
-        if ns_instance_id is None:
-            return None
-
         operation_status = self.ns_instantiate_sync(ns_instance_id, flavour_id, sap_data, pnf_info, vnf_instance_data,
                                                     nested_ns_instance_data, location_constraints,
                                                     additional_param_for_ns, additional_param_for_vnf, start_time,
@@ -253,7 +249,7 @@ class Mano(object):
                                                     poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            return None
+            raise ManoGenericError('NS instantiation operation failed')
         return ns_instance_id
 
     @log_entry_exit(LOG)
@@ -464,9 +460,9 @@ class Mano(object):
         operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            LOG.debug('Expected termination operation status %s, got %s' % (
-                constants.OPERATION_SUCCESS, operation_status))
-            return operation_status
+            LOG.debug('Expected termination operation status %s, got %s'
+                      % (constants.OPERATION_SUCCESS, operation_status))
+            raise ManoGenericError('NS termination operation failed')
 
         self.ns_delete_id(ns_instance_id)
 
@@ -541,16 +537,12 @@ class Mano(object):
         """
         vnf_instance_id = self.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
         LOG.debug('VNF instance ID: %s' % vnf_instance_id)
-
-        if vnf_instance_id is None:
-            return None
-
         operation_status = self.vnf_instantiate_sync(vnf_instance_id, flavour_id, instantiation_level_id,
                                                      ext_virtual_link, ext_managed_virtual_link, localization_language,
                                                      additional_param, max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            return None
+            raise ManoGenericError('VNF instantiation operation failed')
         return vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -799,9 +791,9 @@ class Mano(object):
                                                    max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            LOG.debug('Expected termination operation status %s, got %s' % (
-                constants.OPERATION_SUCCESS, operation_status))
-            return operation_status
+            LOG.debug('Expected termination operation status %s, got %s'
+                      % (constants.OPERATION_SUCCESS, operation_status))
+            raise ManoGenericError('VNF termination operation failed')
 
         self.vnf_delete_id(vnf_instance_id)
 
@@ -849,13 +841,15 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def vnf_lifecycle_change_notification_subscribe(self, notification_filter=None):
-        subscription_id, notification_queue = self.mano_adapter.vnf_lifecycle_change_notification_subscribe(notification_filter)
+        subscription_id, notification_queue = self.mano_adapter.vnf_lifecycle_change_notification_subscribe(
+                                                                                                    notification_filter)
         self.notification_queues[subscription_id] = notification_queue
         return subscription_id
 
     @log_entry_exit(LOG)
     def get_notification_queue(self, subscription_id):
-        self.notification_queues[subscription_id], notification_queue_copy = tee(self.notification_queues[subscription_id])
+        self.notification_queues[subscription_id], notification_queue_copy = tee(
+                                                                              self.notification_queues[subscription_id])
         return notification_queue_copy
 
     @log_entry_exit(LOG)

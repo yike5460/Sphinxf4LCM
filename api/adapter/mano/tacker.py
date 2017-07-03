@@ -51,9 +51,9 @@ class TackerManoAdapter(object):
 
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
 
-        except:
-            LOG.debug('Unable to create %s instance' % self.__class__.__name__)
-            raise
+        except Exception as e:
+            LOG.error('Unable to create %s instance' % self.__class__.__name__)
+            raise TackerManoAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -65,27 +65,30 @@ class TackerManoAdapter(object):
         LOG.debug('Will return the state of the resource with given Id')
 
         if lifecycle_operation_occurrence_id is None:
-            return constants.OPERATION_FAILED
+            raise TackerManoAdapterError('Lifecycle Operation Occurrence ID is absent')
         else:
             resource_type, resource_id = lifecycle_operation_occurrence_id
 
         if resource_type == 'vnf':
             try:
-                tacker_show_vnf = self.tacker_client.show_vnf(resource_id)
+                tacker_vnf_status = self.tacker_client.show_vnf(resource_id)['vnf']['status']
             except tackerclient.common.exceptions.NotFound:
-                # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
-                # exception because the VNF can no longer be found
+                # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated if Tacker raises
+                # the NotFound exception
                 return constants.OPERATION_SUCCESS
             except tackerclient.common.exceptions.TackerClientException:
                 return constants.OPERATION_PENDING
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
 
-            tacker_status = tacker_show_vnf['vnf']['status']
-
-            return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_status]
+            return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_vnf_status]
 
         if resource_type == 'stack':
             # Get VNF information from Tacker
-            tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
+            try:
+                tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
 
             # Get VIM object
             vim_id = tacker_show_vnf['vim_id']
@@ -117,6 +120,9 @@ class TackerManoAdapter(object):
                 default_instances = sp[scaling_policy_name]['properties']['default_instances']
                 cooldown = sp[scaling_policy_name]['properties'].get('cooldown', 120)
                 break
+        else:
+            raise TackerManoAdapterError('No scaling policy named %s in the VNFD with ID %s'
+                                         % (scaling_policy_name, vnfd_id))
 
         sp_properties = (increment, targets, min_instances, max_instances, default_instances, cooldown)
 
@@ -229,7 +235,10 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
-        vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        try:
+            vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
         vim_auth_cred = vim_details['auth_cred']
         vim_type = vim_details['type']
 
@@ -241,7 +250,11 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def get_vnfd(self, vnfd_id):
         # TODO: translate to ETSI VNFD
-        return yaml.load(self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd'])
+        try:
+            tacker_show_vnfd = self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd']
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
+        return yaml.load(tacker_show_vnfd)
 
     def validate_allocated_vresources(self, vnfd_id, vnf_instance_id):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
@@ -277,11 +290,11 @@ class TackerManoAdapter(object):
             if actual_num_virtual_cpu != expected_num_virtual_cpu or \
                             actual_virtual_memory != expected_virtual_memory or \
                             actual_size_of_storage != expected_size_of_storage:
-                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_virtual_cpu,
-                                                                                 actual_num_virtual_cpu))
+                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s'
+                          % (expected_num_virtual_cpu, actual_num_virtual_cpu))
                 LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_virtual_memory, actual_virtual_memory))
-                LOG.debug('Expected %s vStorage, actual vStorage: %s' % (expected_size_of_storage,
-                                                                         actual_size_of_storage))
+                LOG.debug('Expected %s vStorage, actual vStorage: %s'
+                          % (expected_size_of_storage, actual_size_of_storage))
                 return False
 
             for vnic in virtual_compute.virtual_network_interface:
@@ -337,13 +350,16 @@ class TackerManoAdapter(object):
             LOG.debug('Sleeping 10 seconds to allow the VNF to boot')
             time.sleep(10)
             vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
-            self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
+            try:
+                self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
 
         # Poll on the VNF status until it reaches one of the final states
         operation_pending = True
         elapsed_time = 0
         max_wait_time = 300
-        poll_interval = 5
+        poll_interval = constants.POLL_INTERVAL
         lifecycle_operation_occurrence_id = ('vnf', vnf_instance_id)
         final_states = constants.OPERATION_FINAL_STATES
 
@@ -369,8 +385,8 @@ class TackerManoAdapter(object):
         try:
             vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
             LOG.debug('Response from vnfm:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
-        except tackerclient.common.exceptions.TackerException:
-            return None
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
         return vnf_instance['vnf']['id']
 
     @log_entry_exit(LOG)
@@ -382,9 +398,7 @@ class TackerManoAdapter(object):
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         LOG.debug('"VNF Instantiate" operation is not implemented in OpenStack Tacker client!')
         LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "VNF Instance Id"')
-
-        tup = ('vnf', vnf_instance_id)
-        return tup
+        return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
@@ -392,7 +406,10 @@ class TackerManoAdapter(object):
         LOG.debug('As a workaround, we will perform the action of the VIM stack')
 
         # Get VNF information from Tacker
-        tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
+        try:
+            tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
 
         # Get VIM object
         vim_id = tacker_show_vnf['vim_id']
@@ -417,8 +434,7 @@ class TackerManoAdapter(object):
         else:
             LOG.debug('VIM stack is already in the desired state')
 
-        tup = ('stack', vnf_instance_id)
-        return tup
+        return 'stack', vnf_instance_id
 
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
@@ -431,6 +447,8 @@ class TackerManoAdapter(object):
         except tackerclient.common.exceptions.TackerException:
             vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
             return vnf_info
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
 
         # Get the Heat stack ID
         stack_id = tacker_show_vnf['instance_id']
@@ -461,7 +479,7 @@ class TackerManoAdapter(object):
                 for vnf_resource in tacker_list_vnf_resources:
                     # When the VNFD contains scaling policies, Heat will not show the resources (VDUs, CPs, VLs, etc),
                     # but the scaling group.
-                    # In this case, grab the resources from Nova and break out of the for loop.
+                    # In this case, grab the resources from Nova and break out of the loop.
                     if vnf_resource.get('type').__contains__('Scaling'):
 
                         # Get the Nova list of servers filtering the servers based on their name.
@@ -475,6 +493,8 @@ class TackerManoAdapter(object):
                             match = re.search('VDU\d+', server.name)
                             if match:
                                 vnf_resource_name = match.group()
+                            else:
+                                raise TackerManoAdapterError('Cannot get the VDU ID')
 
                             # Build the VnfcResourceInfo data structure
                             vnfc_resource_info = VnfcResourceInfo()
@@ -523,11 +543,20 @@ class TackerManoAdapter(object):
                             match = re.search('CP\d+', port['name'])
                             if match:
                                 vnf_ext_cp_info.cpd_id = match.group().encode()
+                            else:
+                                raise TackerManoAdapterError('Cannot get the CP ID')
 
                             vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
             except tackerclient.common.exceptions.TackerException:
                 return vnf_info
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
+
+        # VNF instantiation state is not INSTANTIATED
+        else:
+            raise TackerManoAdapterError('The InstantiatedVnfInfo information element cannot be built as the VNF '
+                                         'instantiation state is not INSTANTIATED')
 
         return vnf_info
 
@@ -540,24 +569,27 @@ class TackerManoAdapter(object):
         try:
             body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
             self.tacker_client.scale_vnf(vnf_instance_id, body)
-        except tackerclient.common.exceptions.NotFound:
+        except tackerclient.common.exceptions.NotFound as e:
             LOG.debug('Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s"' %
                       (vnf_instance_id, additional_param['scaling_policy_name']))
-            return None
+            raise TackerManoAdapterError(e.message)
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
 
-        tup = ('vnf', vnf_instance_id)
-        return tup
+        return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
         try:
             self.tacker_client.delete_vnf(vnf_instance_id)
         except tackerclient.common.exceptions.NotFound:
+            # Treat the case when the VNF termination is attempted multiple times (ex. during test execution and as part
+            # of the cleanup procedure)
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
-            return None
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
 
-        tup = ('vnf', vnf_instance_id)
-        return tup
+        return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
     def ns_lifecycle_change_notification_subscribe(self, notification_filter=None):
@@ -637,7 +669,10 @@ class TackerManoAdapter(object):
         if event_type is not None:
             params['event_type'] = event_type
 
-        vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
+        try:
+            vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
 
