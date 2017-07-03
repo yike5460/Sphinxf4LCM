@@ -1,4 +1,3 @@
-import inspect
 import json
 import os
 import sys
@@ -228,7 +227,8 @@ class SchemaLoader(type):
 
                 for inherited_information_element in class_schema.get('inherits', []):
                     if inherited_information_element in information_element_names:
-                        raise TypeError('Cyclic inheritance detected for %s: %s' % (name, information_element_names + [inherited_information_element]))
+                        raise TypeError('Cyclic inheritance detected for %s: %s'
+                                        % (name, information_element_names + [inherited_information_element]))
                     information_element_names.append(inherited_information_element)
 
             class_schemas.reverse()
@@ -247,7 +247,8 @@ class SchemaLoader(type):
                         if issubclass(constructor, InformationElement):
                             class_attribute = Attribute(constructor)
                         else:
-                            raise TypeError('%s attribute type should be an Attribute subtype' % repr(class_attribute_type))
+                            raise TypeError('%s attribute type should be an Attribute subtype'
+                                            % repr(class_attribute_type))
                     else:
                         if class_attribute_constraints is not None:
                             class_attribute = constructor(
