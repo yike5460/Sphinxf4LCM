@@ -1,12 +1,20 @@
 import logging
 import time
 
+from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, NsInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class DummyManoAdapterError(ManoAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Dummy MANO adapter API.
+    """
+    pass
 
 
 class DummyManoAdapter(object):
@@ -55,7 +63,6 @@ class DummyManoAdapter(object):
 
     @log_entry_exit(LOG)
     def validate_allocated_vresources(self, vnfd_id, vnf_instance_id):
-
         return True
 
     @log_entry_exit(LOG)
@@ -65,11 +72,8 @@ class DummyManoAdapter(object):
         vresources = dict()
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-
             resource_id = vnfc_resource_info.compute_resource.resource_id
-
             vresources[resource_id] = dict()
-
             vresources[resource_id]['vCPU'] = '1'
             vresources[resource_id]['vMemory'] = '64 MB'
             vresources[resource_id]['vStorage'] = '1 GB'
@@ -80,7 +84,6 @@ class DummyManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         ns_instance_id = 'ns_instance_id'
-
         return ns_instance_id
 
     @log_entry_exit(LOG)
@@ -114,16 +117,13 @@ class DummyManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
-
         ns_instance_id = 'ns_instance_id'
-        tup = ('vnf', ns_instance_id)
-        return tup
+        return 'vnf', ns_instance_id
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None):
         ns_instance_id = 'ns_instance_id'
-        tup = ('vnf', ns_instance_id)
-        return tup
+        return 'vnf', ns_instance_id
 
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):

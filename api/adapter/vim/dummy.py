@@ -1,10 +1,18 @@
 import logging
 
+from api.adapter.vim import VimAdapterError
 from api.structures.objects import VirtualCompute, VirtualNetwork, VirtualStorage
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class DummyVimAdapterError(VimAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Dummy VIM adapter API.
+    """
+    pass
 
 
 class DummyVimAdapter(object):

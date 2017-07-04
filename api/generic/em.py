@@ -2,11 +2,19 @@ import logging
 import time
 
 from api.adapter import construct_adapter
+from api.generic import ApiGenericError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class EmGenericError(ApiGenericError):
+    """
+    A problem occurred in the VNF LifeCycle Validation EM generic API.
+    """
+    pass
 
 
 class Em(object):
@@ -73,13 +81,13 @@ class Em(object):
         This function is exposed by the EM at the Em-tst interface and is used by the Test System to trigger
         ModifyConfiguration on the VNF from the EM (and through the VNFM).
 
-        This function is a re-exposure of the VNF Configuration Management interface offered by the VNF/VNFM over the 
+        This function is a re-exposure of the VNF Configuration Management interface offered by the VNF/VNFM over the
         Ve-Vnfm reference points. See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.6.2.
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param vnf_configuration_data:  Configuration data for the VNF instance.
         :param ext_virtual_link:        Information about external VLs to connect the VNF to.
-        :param vnfc_configuration_data: Configuration data related to VNFC instance(s). 
+        :param vnfc_configuration_data: Configuration data related to VNFC instance(s).
         :return:                        None.
         """
 

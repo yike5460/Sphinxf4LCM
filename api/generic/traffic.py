@@ -1,11 +1,18 @@
 import logging
 
 from api.adapter import construct_adapter
+from api.generic import ApiGenericError
 from utils.logging_module import log_entry_exit
-
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class TrafficGenericError(ApiGenericError):
+    """
+    A problem occurred in the VNF LifeCycle Validation traffic generic API.
+    """
+    pass
 
 
 class Traffic(object):

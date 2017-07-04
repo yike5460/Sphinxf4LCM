@@ -5,9 +5,17 @@ import uuid
 import requests
 from requests.auth import HTTPBasicAuth
 
+from api.adapter.mano import ManoAdapterError
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
+
+
+class RiftManoAdapterError(ManoAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Rift MANO adapter API.
+    """
+    pass
 
 
 class RiftManoAdapter(object):
@@ -65,7 +73,7 @@ class RiftManoAdapter(object):
 
         except Exception as e:
             LOG.error('Unable to instantiate NS')
-            raise e
+            raise RiftManoAdapterError(e.message)
 
         return True
 
@@ -87,7 +95,7 @@ class RiftManoAdapter(object):
 
         except Exception as e:
             LOG.error('Unable to list NSs')
-            raise e
+            raise RiftManoAdapterError(e.message)
 
         return ns_list
 
@@ -102,4 +110,4 @@ class RiftManoAdapter(object):
             assert response.status_code == 201
         except Exception as e:
             LOG.error('Unable to delete NS')
-            raise e
+            raise RiftManoAdapterError(e.message)

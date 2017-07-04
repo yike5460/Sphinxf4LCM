@@ -2,11 +2,19 @@ import logging
 
 import os_client_config
 
+from api.adapter.vim import VimAdapterError
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
     VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, ReservedVirtualCompute, ReservedVirtualStorage
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
+
+
+class OpenstackVimAdapterError(VimAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Openstack VIM adapter API.
+    """
+    pass
 
 
 class OpenstackVimAdapter(object):
@@ -57,9 +65,9 @@ class OpenstackVimAdapter(object):
                                                               project_domain_name=project_domain_name,
                                                               user_domain_name=user_domain_name)
 
-        except:
+        except Exception as e:
             LOG.debug('Unable to create %s instance' % self.__class__.__name__)
-            raise
+            raise OpenstackVimAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
@@ -67,29 +75,30 @@ class OpenstackVimAdapter(object):
                                             anti_affinity_constraint=None, start_time=None, end_time=None,
                                             expiry_time=None, location_constraints=None):
         LOG.debug('Reservations are not implemented in Openstack yet')
-        reserved_virtual_compute = ReservedVirtualCompute()
-        return reserved_virtual_compute
+        raise NotImplementedError
 
     @log_entry_exit(LOG)
     def terminate_compute_resource_reservation(self, reservation_id):
         LOG.debug('Reservations are not implemented in Openstack yet')
-        return
+        raise NotImplementedError
 
     @log_entry_exit(LOG)
     def create_storage_resource_reservation(self, resource_group_id, storage_pool_reservation=None, start_time=None,
                                             end_time=None, expiry_time=None, affinity_constraint=None,
                                             anti_affinity_constraint=None, location_constraints=None):
         LOG.debug('Reservations are not implemented in Openstack yet')
-        reserved_virtual_storage = ReservedVirtualStorage()
-        return reserved_virtual_storage
+        raise NotImplementedError
 
     @log_entry_exit(LOG)
     def terminate_storage_resource_reservation(self, reservation_id):
         LOG.debug('Reservations are not implemented in Openstack yet')
-        return
+        raise NotImplementedError
 
     def get_resource_group_id(self):
-        project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
+        try:
+            project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         return project_id.encode()
 
     @log_entry_exit(LOG)
@@ -99,11 +108,17 @@ class OpenstackVimAdapter(object):
         compute_id = filter['compute_id']
         virtual_compute.compute_id = compute_id
 
-        nova_server = self.nova_client.servers.get(compute_id)
+        try:
+            nova_server = self.nova_client.servers.get(compute_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         server_flavor_id = nova_server.flavor['id']
         virtual_compute.flavour_id = server_flavor_id.encode()
 
-        server_flavor = self.nova_client.flavors.get(server_flavor_id)
+        try:
+            server_flavor = self.nova_client.flavors.get(server_flavor_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
 
         virtual_cpu = VirtualCpu()
         virtual_cpu.num_virtual_cpu = server_flavor.vcpus
@@ -140,7 +155,10 @@ class OpenstackVimAdapter(object):
         :param query_filter:    Additional params.
         :return:                List of ports.
         """
-        neutron_ports = self.neutron_client.list_ports(retrieve_all=False, **query_filter)
+        try:
+            neutron_ports = self.neutron_client.list_ports(retrieve_all=False, **query_filter)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         return neutron_ports
 
     @log_entry_exit(LOG)
@@ -152,7 +170,10 @@ class OpenstackVimAdapter(object):
                                 is a dictionary of key / value pairs that will be appended to the query string.
         :return:                List of servers.
         """
-        nova_servers = self.nova_client.servers.list(search_opts=query_filter)
+        try:
+            nova_servers = self.nova_client.servers.list(search_opts=query_filter)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         return nova_servers
 
     @log_entry_exit(LOG)
@@ -160,7 +181,10 @@ class OpenstackVimAdapter(object):
         """
         This function gets the metadata for the specified stack ID.
         """
-        stack_state = self.heat_client.stacks.get(stack_id)
+        try:
+            stack_state = self.heat_client.stacks.get(stack_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         return stack_state
 
     @log_entry_exit(LOG)
@@ -168,14 +192,20 @@ class OpenstackVimAdapter(object):
         """
         This function resumes the stack with the given ID.
         """
-        self.heat_client.actions.resume(stack_id)
+        try:
+            self.heat_client.actions.resume(stack_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def stack_suspend(self, stack_id):
         """
         This function suspends the stack with the given ID.
         """
-        self.heat_client.actions.suspend(stack_id)
+        try:
+            self.heat_client.actions.suspend(stack_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def query_compute_capacity(self, zone_id, compute_resource_type_id, resource_criteria, attribute_selector,
@@ -186,7 +216,11 @@ class OpenstackVimAdapter(object):
         for resource_type in resource_types:
             limits[resource_type] = dict()
 
-        for nova_limit in self.nova_client.limits.get().absolute:
+        try:
+            nova_limits = self.nova_client.limits.get().absolute
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
+        for nova_limit in nova_limits:
             if nova_limit.name == 'totalCoresUsed':
                 limits['vcpu']['used'] = nova_limit.value
             elif nova_limit.name == 'maxTotalCores':
@@ -211,7 +245,11 @@ class OpenstackVimAdapter(object):
         for resource_type in resource_types:
             limits[resource_type] = dict()
 
-        for cinder_limit in self.cinder_client.limits.get().absolute:
+        try:
+            cinder_limits = self.cinder_client.limits.get().absolute
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
+        for cinder_limit in cinder_limits:
             if cinder_limit.name == 'totalGigabytesUsed':
                 limits['vstorage']['used'] = cinder_limit.value
             elif cinder_limit.name == 'maxTotalVolumeGigabytes':
@@ -225,7 +263,10 @@ class OpenstackVimAdapter(object):
         This function gets quota information for resources specified in the filter for project_id retrieved from nova.
         """
         project_id = self.get_resource_group_id()
-        quotas = self.nova_client.quotas.get(tenant_id=project_id)
+        try:
+            quotas = self.nova_client.quotas.get(tenant_id=project_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         virtual_compute_quota = VirtualComputeQuota()
         virtual_compute_quota.resource_group_id = quotas._info['id'].encode()
         resources = {'num_vcpus': quotas.cores, 'num_vc_instances': quotas.instances, 'virtual_mem_size': quotas.ram}
@@ -241,7 +282,10 @@ class OpenstackVimAdapter(object):
         neutron.
         """
         project_id = self.get_resource_group_id()
-        quotas = self.neutron_client.show_quota(project_id)
+        try:
+            quotas = self.neutron_client.show_quota(project_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         virtual_network_quota = VirtualNetworkQuota()
         virtual_network_quota.resource_group_id = project_id.encode()
         resources = {'num_public_ips': quotas['quota']['floatingip'], 'num_ports': quotas['quota']['port'],
@@ -258,7 +302,10 @@ class OpenstackVimAdapter(object):
         neutron.
         """
         project_id = self.get_resource_group_id()
-        quotas = self.cinder_client.quotas.get(project_id)
+        try:
+            quotas = self.cinder_client.quotas.get(project_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
         virtual_storage_quota = VirtualStorageQuota()
         virtual_storage_quota.resource_group_id = project_id.encode()
         resources = {'storage_size': quotas.gigabytes, 'num_snapshots': quotas.snapshots,

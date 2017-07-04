@@ -3,7 +3,7 @@ import logging
 from api.generic import constants
 from api.generic.mano import Mano
 from api.generic.vim import Vim
-from test_cases import TestCase
+from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
 # Instantiate logger
@@ -27,13 +27,9 @@ class TC_VNF_STATE_INST_007(TestCase):
         self.vim = Vim(vendor=self.tc_input['vim_params']['type'], **self.tc_input['vim_params']['client_config'])
 
         # Initialize test case result.
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
         self.tc_result['events']['instantiate_vnf'] = dict()
 
         LOG.info('Finished setup for %s' % self.tc_name)
-
-        return True
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -47,20 +43,10 @@ class TC_VNF_STATE_INST_007(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'],
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
-        if self.vnf_instance_id is None:
-            LOG.error('%s execution failed' % self.tc_name)
-            LOG.debug('Unexpected VNF instantiation ID')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation operation failed'
-            return False
 
         if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
                                           flavour_id=None) != constants.OPERATION_FAILED:
-            LOG.error('%s execution failed' % self.tc_name)
-            LOG.debug('VNF instantiation operation succeeded')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'VNF instantiation operation succeeded'
-            return False
+            raise TestRunError('VNF instantiation operation succeeded')
 
         self.time_record.END('instantiate_vnf')
 
@@ -75,19 +61,14 @@ class TC_VNF_STATE_INST_007(TestCase):
         LOG.info('Validating MANO reports no VNF instance and the error')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
-            LOG.error('%s execution failed' % self.tc_name)
-            LOG.debug('Unexpected VNF instantiation state')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result[
-                'error_info'] = 'VNF instantiation state was "%s" although the instantiation operation failed' % \
-                                constants.VNF_INSTANTIATED
-            return False
+            raise TestRunError(
+                             'Unexpected VNF instantiation state',
+                              err_details='VNF instantiation state was "%s" although the instantiation operation failed'
+                                          % constants.VNF_INSTANTIATED)
 
         self.tc_result['events']['instantiate_vnf']['details'] = vnf_info.metadata['error_reason']
 
         LOG.info('%s execution completed successfully' % self.tc_name)
-
-        return True
 
 
 class TC_VNF_STATE_INST_007_001(TC_VNF_STATE_INST_007):
@@ -122,7 +103,7 @@ class TC_VNF_STATE_INST_007_003(TC_VNF_STATE_INST_007):
 
 class TC_VNF_STATE_INST_007_004(TC_VNF_STATE_INST_007):
     """
-    TC_VNF_STATE_INST_007_004 VNF Instantiation Failure with missing required virtual resources 'Hardware Acceleration, 
+    TC_VNF_STATE_INST_007_004 VNF Instantiation Failure with missing required virtual resources 'Hardware Acceleration,
                               e.g. DPDK, SRIOV'
 
     Sequence:
@@ -151,11 +132,7 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
                                                                scaling_policy_name=self.tc_input['scaling_policy_name'])
 
         if reservation_id is None:
-            LOG.error('TC_VNF_STATE_INST_007_005 execution failed')
-            LOG.debug('vMemory could not be limited')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'vMemory could not be limited'
-            return False
+            raise TestRunError('vMemory could not be limited')
 
         self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)
 
@@ -188,11 +165,7 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
                                                                                  self.tc_input['scaling_policy_name'])
 
         if reservation_id is None:
-            LOG.error('TC_VNF_STATE_INST_007_005 execution failed')
-            LOG.debug('vStorage could not be limited')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'vStorage could not be limited'
-            return False
+            raise TestRunError('vStorage could not be limited')
 
         self.register_for_cleanup(self.vim.terminate_storage_resource_reservation, reservation_id)
 
@@ -218,10 +191,6 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
                                                                scaling_policy_name=self.tc_input['scaling_policy_name'])
 
         if reservation_id is None:
-            LOG.error('TC_VNF_STATE_INST_007_008 execution failed')
-            LOG.debug('vCPU count could not be limited')
-            self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = 'vCPU count could not be limited'
-            return False
+            raise TestRunError('vCPU count could not be limited')
 
         self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)

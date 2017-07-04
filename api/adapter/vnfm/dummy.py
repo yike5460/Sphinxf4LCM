@@ -1,5 +1,6 @@
 import logging
 
+from api.adapter.vnfm import VnfmAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfInfo
 from utils.logging_module import log_entry_exit
@@ -8,7 +9,14 @@ from utils.logging_module import log_entry_exit
 LOG = logging.getLogger(__name__)
 
 
-class VnfmDummyAdapter(object):
+class DummyVnfmAdapterError(VnfmAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Dummy VNFM adapter API.
+    """
+    pass
+
+
+class DummyVnfmAdapter(object):
     """
     Class of stub functions representing operations exposed by the VNFM towards the NFVO.
     """
@@ -19,8 +27,8 @@ class VnfmDummyAdapter(object):
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         operation_status = 'Successfully done'
 
-        LOG.debug('Operation status for operation with ID %s: %s' % (lifecycle_operation_occurrence_id,
-                                                                     operation_status))
+        LOG.debug('Operation status for operation with ID %s: %s'
+                  % (lifecycle_operation_occurrence_id, operation_status))
 
         return constants.OPERATION_SUCCESS
 

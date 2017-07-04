@@ -2,6 +2,7 @@ import logging
 import time
 
 from api.adapter import construct_adapter
+from api.generic import ApiGenericError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
@@ -9,9 +10,16 @@ from utils.logging_module import log_entry_exit
 LOG = logging.getLogger(__name__)
 
 
+class VnfGenericError(ApiGenericError):
+    """
+    A problem occurred in the VNF LifeCycle Validation VNF generic API.
+    """
+    pass
+
+
 class Vnf(object):
     """
-    Class of generic functions representing operations exposed by the VNF towards the VNFM as defined by 
+    Class of generic functions representing operations exposed by the VNF towards the VNFM as defined by
     ETSI GS NFV-IFA 008 v2.1.1 (2016-10).
     """
     def __init__(self, vendor=None, **kwargs):

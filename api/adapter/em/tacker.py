@@ -6,11 +6,19 @@ import tackerclient.common.exceptions
 from tackerclient.tacker.client import Client as TackerClient
 
 from api.adapter import construct_adapter
+from api.adapter.em import EmAdapterError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class TackerEmAdapterError(EmAdapterError):
+    """
+    A problem occurred in the VNF LifeCycle Validation Tacker EM adapter API.
+    """
+    pass
 
 
 class TackerEmAdapter(object):
@@ -35,10 +43,9 @@ class TackerEmAdapter(object):
                                                                 user_domain_name=user_domain_name)
 
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
-
-        except:
-            LOG.debug('Unable to create %s instance' % self.__class__.__name__)
-            raise
+        except Exception as e:
+            LOG.error('Unable to create %s instance' % self.__class__.__name__)
+            raise TackerEmAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -46,7 +53,7 @@ class TackerEmAdapter(object):
         LOG.debug('Will return the state of the resource with given Id')
 
         if lifecycle_operation_occurrence_id is None:
-            return constants.OPERATION_FAILED
+            raise TackerEmAdapterError('Lifecycle Operation Occurrence ID is absent')
         else:
             try:
                 tacker_show_vnf = self.tacker_client.show_vnf(lifecycle_operation_occurrence_id)
@@ -54,6 +61,8 @@ class TackerEmAdapter(object):
                 # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated when Tacker raises
                 # exception because the VNF can no longer be found
                 return constants.OPERATION_SUCCESS
+            except Exception as e:
+                raise TackerEmAdapterError(e.message)
 
             tacker_status = tacker_show_vnf['vnf']['status']
 
@@ -74,14 +83,15 @@ class TackerEmAdapter(object):
             vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
             try:
                 self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
-            except:
-                LOG.debug('Invalid VNF configuration')
+            except Exception as e:
+                LOG.error('Invalid VNF configuration')
+                raise TackerEmAdapterError(e.message)
 
         # Poll on the VNF status until it reaches one of the final states
         operation_pending = True
         elapsed_time = 0
         max_wait_time = 300
-        poll_interval = 5
+        poll_interval = constants.POLL_INTERVAL
         lifecycle_operation_occurrence_id = vnf_instance_id
         final_states = constants.OPERATION_FINAL_STATES
 
@@ -101,7 +111,10 @@ class TackerEmAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
-        vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        try:
+            vim_details = self.tacker_client.show_vim(vim_id)['vim']
+        except Exception as e:
+            raise TackerEmAdapterError(e.message)
         vim_auth_cred = vim_details['auth_cred']
         vim_type = vim_details['type']
 
@@ -112,4 +125,4 @@ class TackerEmAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
-        return None
+        raise NotImplementedError

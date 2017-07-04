@@ -1,11 +1,19 @@
 import logging
 
 from api.adapter import construct_adapter
+from api.generic import ApiGenericError
 from api.structures.objects import ComputePoolReservation, StoragePoolReservation
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
+
+
+class VimGenericError(ApiGenericError):
+    """
+    A problem occurred in the VNF LifeCycle Validation VIM generic API.
+    """
+    pass
 
 
 class Vim(object):
