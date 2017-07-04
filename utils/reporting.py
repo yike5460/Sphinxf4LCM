@@ -1,3 +1,4 @@
+import requests
 import time
 
 from prettytable import PrettyTable
@@ -80,3 +81,35 @@ def report_test_case(tc_input, tc_result):
     t.add_row([tc_result['overall_status'], tc_result['error_info']])
     print t
     print
+
+
+def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
+    json_dict = dict()
+    json_dict['run_id'] = int(tc_exec_request['run_id'])
+    json_dict['suite_name'] = tc_exec_request['suite_name']
+    json_dict['tc_name'] = tc_exec_request['tc_name']
+    json_dict['tc_start_time'] = tc_result['tc_start_time']
+    json_dict['tc_end_time'] = tc_result['tc_end_time']
+    json_dict['tc_duration'] = tc_result['tc_duration']
+    json_dict['tc_status'] = tc_result['overall_status']
+
+    json_dict['environment'] = dict()
+    json_dict['environment']['vim'] = 'OpenStack'
+    json_dict['environment']['mano'] = tc_input['mano_params']['type']
+    json_dict['environment']['vnf'] = 'CirrOS'
+    json_dict['environment']['traffic'] = 'STCv'
+    json_dict['environment']['em'] = 'None'
+
+    durations = dict()
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration', None)
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', None)
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', None)
+    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration', None)
+    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration',
+                                                                                                            None)
+
+    json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
+
+    requests.post(url='http://' + kibana_srv + ':9200/nfv/tc-exec', json=json_dict)
+
