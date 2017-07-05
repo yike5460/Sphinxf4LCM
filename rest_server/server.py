@@ -1,17 +1,46 @@
 import importlib
 import json
 import uuid
+from datetime import datetime
 from multiprocessing import Process, Queue
 
 from bottle import route, run, request, response
 
+from utils import reporting
+
 execution_queues = dict()
 execution_processes = dict()
 tc_results = dict()
+tc_inputs = dict()
 
 # TODO: move mapping logic in test_cases module
 mapping_file_path = '../test_cases/tc_mapping.json'
 tc_name_module_mapping = None
+
+config_file_path = 'config.json'
+
+
+def _read_config(key):
+    try:
+        with open(config_file_path, 'r') as config_file:
+            config = json.load(config_file)
+    except Exception:
+        config = {}
+
+    return config.get(key)
+
+
+def _write_config(key, value):
+    try:
+        with open(config_file_path, 'r') as config_file:
+            config = json.load(config_file)
+    except Exception:
+        config = {}
+
+    config[key] = value
+
+    with open(config_file_path, 'w') as config_file:
+        json.dump(config, config_file, sort_keys=True, indent=2)
 
 
 def get_tc_class(tc_name):
@@ -28,9 +57,21 @@ def get_tc_class(tc_name):
     return tc_class
 
 
-def execute_test(tc_class, tc_input, queue):
+def execute_test(tc_exec_request, tc_input, queue):
+    tc_name = tc_exec_request['tc_name']
+    tc_class = get_tc_class(tc_name)
+
+    tc_start_time = datetime.utcnow()
     tc_result = tc_class(tc_input).execute()
+    tc_end_time = datetime.utcnow()
+
+    tc_result['tc_start_time'] = tc_start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    tc_result['tc_end_time'] = tc_end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    tc_result['tc_duration'] = str(tc_end_time - tc_start_time)
+
     queue.put(tc_result)
+
+    reporting.kibana_report(get_config('kibana-srv'), tc_exec_request, tc_input, tc_result)
 
 
 @route('/version')
@@ -40,15 +81,29 @@ def get_version():
 
 @route('/v1.0/exec', method='POST')
 def do_exec():
-    tc_name = request.json['tc_name']
-    tc_input = request.json['tc_input']
+    tc_exec_request = request.json
 
-    tc_class = get_tc_class(tc_name)
+    active_env = get_config('active-env')
+    if active_env is None:
+        response.status = 400
+        return {'error': 'Active environment not set'}
+
+    tc_input = dict()
+    for resource_type, resource_name in _read_resource('env', active_env).items():
+        resource_params = _read_resource(resource_type, resource_name)
+        tc_input[resource_type + '_params'] = resource_params
+
+    tc_input['vnfd_id'] = get_config('vnfd-id')
+
+    tc_input['vnf'] = dict()
+    tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
 
     execution_id = str(uuid.uuid4())
     queue = Queue()
-    execution_process = Process(target=execute_test, args=(tc_class, tc_input, queue))
+    execution_process = Process(target=execute_test, args=(tc_exec_request, tc_input, queue))
     execution_process.start()
+
+    tc_inputs[execution_id] = tc_input
 
     execution_processes[execution_id] = execution_process
     execution_queues[execution_id] = queue
@@ -65,7 +120,8 @@ def get_status(execution_id):
         return {'status': 'NOT_FOUND'}
 
     if execution_process.is_alive():
-        return {'status': 'PENDING'}
+        return {'status': 'PENDING',
+                'tc_input': tc_inputs[execution_id]}
     else:
         if tc_results.get(execution_id) is None:
             queue = execution_queues[execution_id]
@@ -76,7 +132,8 @@ def get_status(execution_id):
             tc_results[execution_id] = tc_result
             queue.close()
         return {'status': 'DONE',
-                'tc_result': tc_results[execution_id]}
+                'tc_result': tc_results[execution_id],
+                'tc_input': tc_inputs[execution_id]}
 
 
 @route('/v1.0/exec/<execution_id>', method='DELETE')
@@ -141,7 +198,7 @@ def _write_resources(resource, all_resources):
         json.dump(all_resources, resource_file, sort_keys=True, indent=2)
 
 
-@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>')
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>')
 def get_resource(resource, name):
     resource_params = _read_resource(resource, name)
     if resource_params == {}:
@@ -150,14 +207,14 @@ def get_resource(resource, name):
     return {name: resource_params}
 
 
-@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>')
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>')
 def get_resources(resource):
     all_resources = _read_resources(resource)
 
     return all_resources
 
 
-@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>', method='PUT')
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='PUT')
 def set_resource(resource, name):
     all_resources = _read_resources(resource)
     all_resources[name] = request.json
@@ -167,7 +224,7 @@ def set_resource(resource, name):
     return {name: request.json}
 
 
-@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic>/<name>', method='DELETE')
+@route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='DELETE')
 def delete_resource(resource, name):
     all_resources = _read_resources(resource)
     resource_params = all_resources.pop(name, {})
@@ -178,6 +235,16 @@ def delete_resource(resource, name):
         response.status = 404
 
     return {name: resource_params}
+
+
+@route('/v1.0/config/<name>')
+def get_config(name):
+    return _read_config(name)
+
+
+@route('/v1.0/config/<name>', method='PUT')
+def set_config(name):
+    _write_config(name, request.json)
 
 
 run(host='0.0.0.0', port=8080, debug=False)
