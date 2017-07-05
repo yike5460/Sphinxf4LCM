@@ -168,7 +168,7 @@ class OpenstackVimAdapter(object):
 
         :param query_filter:    Filter out servers which don't match the search_opts (optional). The search opts format
                                 is a dictionary of key / value pairs that will be appended to the query string.
-        :return:                List of servers.
+        :return:                List of 'Server' objects.
         """
         try:
             nova_servers = self.nova_client.servers.list(search_opts=query_filter)
@@ -206,6 +206,20 @@ class OpenstackVimAdapter(object):
             self.heat_client.actions.suspend(stack_id)
         except Exception as e:
             raise OpenstackVimAdapterError(e.message)
+
+    @log_entry_exit(LOG)
+    def stack_resource_list(self, stack_id):
+        """
+        This function shows a list of resources belonging to a stack.
+
+        :param stack_id:    ID of the stack to show the resources for.
+        :return:            List of 'Resource' objects.
+        """
+        try:
+            stack_resource_list = self.heat_client.resources.list(stack_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
+        return stack_resource_list
 
     @log_entry_exit(LOG)
     def query_compute_capacity(self, zone_id, compute_resource_type_id, resource_criteria, attribute_selector,
