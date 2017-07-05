@@ -449,7 +449,6 @@ class TackerManoAdapter(object):
             return vnf_info
         except Exception as e:
             raise TackerManoAdapterError(e.message)
-
         # Get the Heat stack ID
         stack_id = tacker_show_vnf['instance_id']
 
@@ -467,7 +466,7 @@ class TackerManoAdapter(object):
         vnf_info.metadata = {'error_reason': str(tacker_show_vnf['error_reason']),
                              'heat_stack_id': stack_id.encode()}
 
-        # Build the InstantiatedVnfInfo information element only if the VNF is in INSTANTIATED state
+        # Build the InstantiatedVnfInfo information element only if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_STACK_STATE'][
@@ -482,19 +481,41 @@ class TackerManoAdapter(object):
                     # In this case, grab the resources from Nova and break out of the loop.
                     if vnf_resource.get('type').__contains__('Scaling'):
 
-                        # Get the Nova list of servers filtering the servers based on their name.
-                        # The servers' names we are looking for start with ta-...
-                        # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
-                        server_list = vim.server_list(query_filter={'name': 'ta-*'})
-                        for server in server_list:
+                        # Get the auto scaling group physical resource ID
+                        # ! Assuming the stack contains only one auto scaling group !
+                        stack_resource_list = vim.stack_resource_list(stack_id)
+                        for resource in stack_resource_list:
+                            if resource.resource_type == 'OS::Heat::AutoScalingGroup':
+                                asg_physical_resource_id = resource.physical_resource_id
+                                break
+                        else:
+                            raise TackerManoAdapterError('Heat stack does not contain any scaling group resources')
+
+                        # Get all resource names contained by the auto scaling group
+                        asg_resource_list = vim.stack_resource_list(asg_physical_resource_id)
+
+                        # Get details from Nova for the servers corresponding to each resource belonging to the auto
+                        # scaling group
+                        for resource in asg_resource_list:
+                            resource_name = resource.resource_name
+
+                            # Get the Nova list of servers filtering the servers based on their name.
+                            # The servers' names we are looking for start with ta-...
+                            # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
+                            # The server name we are looking for should match the following pattern
+                            pattern = 'ta-[a-z0-9]{6}-' + resource_name + '-[a-z0-9]{12}-VDU\d+-[a-z0-9]{12}'
+                            server_list = vim.server_list(query_filter={'name': pattern})
+                            if len(server_list) == 0:
+                                raise TackerManoAdapterError('No Nova server name contains string %s' % resource_name)
+                            if len(server_list) != 1:
+                                raise TackerManoAdapterError('More than one Nova server contains string %s'
+                                                             % resource_name)
+                            server = server_list[0]
                             vnf_resource_id = server.id
 
                             # Extract the VDU ID from the server name
                             match = re.search('VDU\d+', server.name)
-                            if match:
-                                vnf_resource_name = match.group()
-                            else:
-                                raise TackerManoAdapterError('Cannot get the VDU ID')
+                            vnf_resource_name = match.group()
 
                             # Build the VnfcResourceInfo data structure
                             vnfc_resource_info = VnfcResourceInfo()
