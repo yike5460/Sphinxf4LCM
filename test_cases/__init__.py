@@ -90,6 +90,17 @@ class TestCase(object):
         """
         configure_logger(cls._LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
+    def check_requirements(self):
+        """
+        This method verifies that the test case instance tc_input dictionary contains all the required elements, if any.
+        """
+        try:
+            for element in self.required_elements:
+                if element not in self.tc_input.keys():
+                    raise TestSetupError('Missing required element: %s' % element)
+        except AttributeError:
+            self._LOG.debug('No required elements for this test case')
+
     def setup(self):
         pass
 
@@ -135,6 +146,7 @@ class TestCase(object):
         This method implements the test case execution logic.
         """
         self.initialize()
+        self.check_requirements()
 
         try:
             self.setup()
