@@ -36,6 +36,8 @@ class TC_VNF_SCALE_OUT_005__MANO_MANUAL(TestCase):
     16. Validate traffic flows through without issues
     """
 
+    required_elements = ('mano_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_005__MANO_MANUAL')
 

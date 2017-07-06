@@ -33,6 +33,8 @@ class TC_VNFC_SCALE_OUT_003__EM_MANUAL(TestCase):
     14. Validate traffic flows through without issues
     """
 
+    required_elements = ('mano_params', 'em_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_003__EM_MANUAL')
 

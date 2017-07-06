@@ -30,13 +30,15 @@ class TC_VNF_STATE_INST_005(TestCase):
     11. Calculate the instantiation time
     """
 
+    required_elements = ('mano_params', 'em_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_005')
 
         # Create objects needed by the test.
+        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
         self.em = Em(vendor=self.tc_input['em_params']['type'], **self.tc_input['em_params']['client_config'])
         self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
-        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic_params']['type'],
                                **self.tc_input['traffic_params']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)

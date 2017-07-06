@@ -28,6 +28,8 @@ class TC_VNFC_SCALE_OUT_002__VNF_MANUAL(TestCase):
     9. Validate max capacity without traffic loss
     """
 
+    required_elements = ('mano_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_002__VNF_MANUAL')
 

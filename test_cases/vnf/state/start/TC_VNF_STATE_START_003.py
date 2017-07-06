@@ -33,6 +33,8 @@ class TC_VNF_STATE_START_003(TestCase):
     16. Validate that no traffic flows once stop is completed
     """
 
+    required_elements = ('mano_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_START_003')
 

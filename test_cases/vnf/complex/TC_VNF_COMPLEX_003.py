@@ -28,6 +28,8 @@ class TC_VNF_COMPLEX_003(TestCase):
     11. Validate no traffic flows through
     """
 
+    required_elements = ('mano_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNF_COMPLEX_003')
 

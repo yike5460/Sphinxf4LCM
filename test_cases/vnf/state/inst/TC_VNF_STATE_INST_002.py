@@ -25,12 +25,14 @@ class TC_VNF_STATE_INST_002(TestCase):
     7. Validate traffic flows
     """
 
+    required_elements = ('mano_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_002')
 
         # Create objects needed by the test.
-        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
         self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
+        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
         self.traffic = Traffic(self.tc_input['traffic_params']['type'],
                                **self.tc_input['traffic_params']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)

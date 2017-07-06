@@ -28,6 +28,8 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
     9. Validate all traffic goes through
     """
 
+    required_elements = ('mano_params', 'vim_params', 'traffic_params')
+
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
 
