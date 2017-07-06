@@ -84,6 +84,7 @@ class TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_1(TestCase):
 
         self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
+        self.register_for_cleanup(self.mano.wait_for_vnf_stable_state, vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED

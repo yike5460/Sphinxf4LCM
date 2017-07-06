@@ -54,6 +54,7 @@ class TC_VNF_STATE_INST_007(TestCase):
 
         self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
+        self.register_for_cleanup(self.mano.wait_for_vnf_stable_state, vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate MANO reports no VNF instance and the error

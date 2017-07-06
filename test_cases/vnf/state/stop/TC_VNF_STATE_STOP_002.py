@@ -23,6 +23,7 @@ class TC_VNF_STATE_STOP_002(TestCase):
     6. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
     7. Validate that no traffic flows once stop is completed
     """
+    required_elements = ('mano', 'traffic')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_STOP_002')
@@ -59,6 +60,7 @@ class TC_VNF_STATE_STOP_002(TestCase):
 
         self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
                                   termination_type='graceful')
+        self.register_for_cleanup(self.mano.wait_for_vnf_stable_state, vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
