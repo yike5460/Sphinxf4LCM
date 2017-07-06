@@ -70,30 +70,30 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h1>VIM Environment</h1>
-          <h2>Update {{ vim_name }}</h2>
+          <h1>MANO Environment</h1>
+          <h2>Update {{ mano_name }}</h2>
           <table class="table table-striped">
-                <form action="/vim/update/" method="post">
-                  <% for key in vim.keys(): %>
+                <form action="/mano/update/" method="post">
+                  <% for key in mano.keys(): %>
                     <tr>
                       <td>
                         {{ key.capitalize() }}:
                       </td>
                       <td>
-                        <input type="text" name={{ key }} value={{vim[key]}} >
+                        <input type="text" name={{ key }} value={{mano[key]}} >
                       </td>
                     </tr>
                   <% end %>
-                  <input type="hidden" name="name" value={{vim_name}}>
                   <input type="hidden" name="confirmed" value="yes">
+                  <input type="hidden" name="name" value={{mano_name}}>
           </table>
             <div class="btn-group">
-                  <input value="Update VIM" type="submit" class="btn btn-default">
+                  <input value="Update MANO" type="submit" class="btn btn-default">
                   </input>
                 </form>
             </div>
             <div class="btn-group">
-              <form action="/vim/">
+              <form action="/mano/">
                 <input type="submit" value="Cancel" class="btn btn-default">
                 </input>
               </form>

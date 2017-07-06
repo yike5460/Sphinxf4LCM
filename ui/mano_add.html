@@ -70,30 +70,29 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h1>VIM Environment</h1>
-          <h2>Update {{ vim_name }}</h2>
+          <h1>MANO Environment</h1>
+          <h2>Add new {{mano_type.capitalize()}} MANO </h2>
           <table class="table table-striped">
-                <form action="/vim/update/" method="post">
-                  <% for key in vim.keys(): %>
-                    <tr>
-                      <td>
-                        {{ key.capitalize() }}:
-                      </td>
-                      <td>
-                        <input type="text" name={{ key }} value={{vim[key]}} >
-                      </td>
-                    </tr>
+                <form action="/mano/data/" method="post">
+                  <% if mano_type == 'tacker': %>
+                    <tr><td>Name:</td><td><input type="text" name="name"></td></tr>
+                    <tr><td>User_domain_name:</td><td><input type="text" name="user_domain_name"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username"></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password"></td></tr>
+                    <tr><td>Project_domain_name:</td><td><input type="text" name="project_domain_name"></td></tr>
+                    <tr><td>Project_name:</td><td><input type="text" name="project_name"></td></tr>
+                    <tr><td>Auth_url:</td><td><input type="text" name="auth_url"></td></tr>
+                    <tr><td>Identity_api_version:</td><td><input type="text" name="identity_api_version"></td></tr>
                   <% end %>
-                  <input type="hidden" name="name" value={{vim_name}}>
-                  <input type="hidden" name="confirmed" value="yes">
           </table>
             <div class="btn-group">
-                  <input value="Update VIM" type="submit" class="btn btn-default">
+                  <input type="hidden" name="type" value={{mano_type}}>
+                  <input value="Add MANO" type="submit" class="btn btn-default">
                   </input>
                 </form>
             </div>
             <div class="btn-group">
-              <form action="/vim/">
+              <form action="/mano/">
                 <input type="submit" value="Cancel" class="btn btn-default">
                 </input>
               </form>
