@@ -715,8 +715,8 @@ class TackerManoAdapter(object):
                 # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated if Tacker raises
                 # the NotFound exception
                 vnf_status = 'NOTFOUND'
-            # except tackerclient.common.exceptions.TackerClientException:
-            #     return constants.OPERATION_PENDING
+            except tackerclient.common.exceptions.TackerClientException:
+                return constants.OPERATION_PENDING
             except Exception as e:
                 raise TackerManoAdapterError(e.message)
             LOG.debug('Got VNF status %s for VNF with ID %s' % (vnf_status, vnf_instance_id))
