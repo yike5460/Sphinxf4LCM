@@ -73,7 +73,57 @@
           <h1>Active Lab Environment</h1>
 
           <h2>Available Labs</h2>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>MANO</th>
+                <th>VIM</th>
+                <th>EM</th>
+                <th>STC</th>
+              </tr>
+              </thead>
+          <!--div class="table-responsive" -->
+              <% for en in env.keys(): %>
+                <tr>
+                  <td>
+                    {{ env[en]['mano'] }}
+                  </td>
+                  <td>
+                    {{ env[en][vim] }}
+                  </td>
+                  <td>
+                    De completat
+                  </td>
+                  <td>
+                    <form action="/env/update/" method="post">
+                      <input type="hidden" name="update_env" value={{env}}>
+                      <input type="hidden" name="confirmed" value="no">
+                      <input value="Update Environment" type="submit" class="btn btn-default">
+                    </form>
+                  </td>
+                  <td>
+                    <form action="/env/delete/" method="post">
+                      <input type="hidden" name="delete_vim" value={{env}}>
+                      <input type="hidden" name="confirmed" value="no">
+                      <input value="Delete ENV" type="submit" class="btn btn-default">
+                    </form>
+                  </td>
 
+                </tr>
+              <% end %>
+          </table>
+            <div class="btn-group">
+              <form action="/env/add/" method="post">
+                <button name="vim_type" type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Add new ENV <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="/env/add/openstack/">OpenStack</a></li>
+                </ul>
+            </form>
+            </div>
       </div>
 
     </div> <!-- /container -->
