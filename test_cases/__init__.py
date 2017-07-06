@@ -100,6 +100,15 @@ class TestCase(object):
         """
         This method adds a "function" named tuple to the cleanup_registrations list.
         """
+        self._LOG.debug('Registering function %s.%s for test cleanup'
+                        % (function_reference.__module__, function_reference.__name__))
+        if args:
+            self._LOG.debug('Function will be called with arguments: (%s)' % ', '.join(map(str, args)))
+        if kwargs:
+            kv_args = list()
+            for key, value in kwargs.iteritems():
+                kv_args.append('%s=%s' % (key, value))
+            self._LOG.debug('Function will be called with keyword arguments: (%s)' % ', '.join(map(str, kv_args)))
         new_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
         self.cleanup_registrations.append(new_function)
 
