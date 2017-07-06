@@ -698,3 +698,36 @@ class TackerManoAdapter(object):
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
 
         return vnf_events
+
+    @log_entry_exit(LOG)
+    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval=constants):
+
+        if vnf_instance_id is None:
+            raise TackerManoAdapterError('VNF instance ID is absent')
+
+        stable_states = ['ACTIVE', 'ERROR', 'NOTFOUND']
+        elapsed_time = 0
+
+        while elapsed_time < max_wait_time:
+            try:
+                vnf_status = self.tacker_client.show_vnf(vnf_instance_id)['vnf']['status']
+            except tackerclient.common.exceptions.NotFound:
+                # Temporary workaround. When vnf_terminate() is called, declare the VNF as terminated if Tacker raises
+                # the NotFound exception
+                vnf_status = 'NOTFOUND'
+            # except tackerclient.common.exceptions.TackerClientException:
+            #     return constants.OPERATION_PENDING
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
+            LOG.debug('Got VNF status %s for VNF with ID %s' % (vnf_status, vnf_instance_id))
+            if vnf_status in stable_states:
+                return True
+            else:
+                LOG.debug('Expected VNF status to be one of %s, got %s' % (stable_states, vnf_status))
+                LOG.debug('Sleeping %s seconds' % poll_interval)
+                time.sleep(poll_interval)
+                elapsed_time += poll_interval
+                LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
+
+        LOG.debug('VNF with ID %s did not reach a stable state after %s' % (vnf_instance_id, max_wait_time))
+        return False
