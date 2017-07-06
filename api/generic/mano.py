@@ -887,3 +887,17 @@ class Mano(object):
     def wait_for_notification(self, subscription_id, notification_type, notification_pattern, timeout):
         notification_queue = self.get_notification_queue(subscription_id)
         return self.search_in_notification_queue(notification_queue, notification_type, notification_pattern, timeout)
+
+    @log_entry_exit(LOG)
+    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time=constants.SCALE_INTERVAL,
+                                  poll_interval=constants.POLL_INTERVAL):
+        """
+        This function waits for the VNF with the specified ID to be in a stable state. This is useful when an operation
+        requires the VNF to be in a particular state.
+
+        :param vnf_instance_id: Identifier of the VNF instance.
+        :param max_wait_time:   Maximum interval of time in seconds to wait for the operation to reach a final state.
+        :param poll_interval:   Interval of time in seconds between consecutive polls.
+        :return:                True if the VNF reached one of the final states, False otherwise.
+        """
+        return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time, poll_interval)
