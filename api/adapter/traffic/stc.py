@@ -321,7 +321,7 @@ class StcTrafficAdapter(object):
         return rx_frame_rate > 0
 
     @log_entry_exit(LOG)
-    def any_traffic_loss(self, delay_time):
+    def any_traffic_loss(self, delay_time, tolerance):
         if delay_time > 0:
             LOG.debug('Sleeping %s seconds before polling traffic rate' % delay_time)
             time.sleep(delay_time)
@@ -346,7 +346,7 @@ class StcTrafficAdapter(object):
         LOG.debug('TX frame - count: %s; rate: %s' % (tx_frame_count, tx_frame_rate))
         LOG.debug('RX frame - count: %s; rate: %s' % (rx_frame_count, rx_frame_rate))
 
-        if rx_frames_dropped > 0:
+        if rx_frames_dropped > tolerance * tx_frame_count:
             LOG.debug('Dropped frames: count = %d; rate = %.2f%%' % (rx_frames_dropped, rx_dropped_frame_percent))
             return True
         else:
@@ -369,8 +369,8 @@ class StcTrafficAdapter(object):
                     LOG.debug('Emitting traffic, but not receiving, so assuming all traffic is momentarily dropped')
                     return True
 
-                # 3b. Traffic emission stopped. Expecting TX count == RX count
-                if tx_frame_count != rx_frame_count:
+                # 3b. Traffic emission stopped. Expecting RX count == TX count
+                if rx_frame_count < (1 - tolerance) * tx_frame_count:
                     LOG.debug('Traffic stopped. Not all emitted traffic was received')
                     return True
 
