@@ -1,19 +1,128 @@
-from bottle import route, run, request, response, template, TEMPLATE_PATH, debug, view, static_file, Bottle, \
-    LocalRequest
+from bottle import route, run, request, template, static_file
 import requests
 import os
-import json
 from collections import OrderedDict
 
 
-#os.chdir(os.path.dirname(__file__))
+os.chdir(os.path.dirname(__file__))
 @route('/')
 def index():
-    get_env = requests.get(url='http://10.2.34.13:8080/v1.0/env')
-    active_env = requests.get(url='http://10.2.34.13:8080/v1.0/config/active-env')
-    print get_env.json()
-    print active_env.json()
-    return template('index.html', env=get_env.json(), active_env=active_env.json())
+    get_env_raw = requests.get(url='http://10.2.34.13:8080/v1.0/env')
+    active_env_name_raw = requests.get(url='http://10.2.34.13:8080/v1.0/config/active-env')
+    active_env_name = active_env_name_raw.json()
+    get_env_json = get_env_raw.json()
+    get_env_data = {}
+    for key in get_env_json:
+        get_env_data[key] = ()
+        if 'mano' in get_env_json[key].keys():
+            get_env_data[key] = get_env_data[key] + (get_env_json[key]['mano'],)
+        else:
+            get_env_data[key] = get_env_data[key] + ('N/A',)
+        if 'vim' in get_env_json[key].keys():
+            get_env_data[key] = get_env_data[key] + (get_env_json[key]['vim'],)
+        else:
+            get_env_data[key] = get_env_data[key] + ('N/A',)
+        if 'em' in get_env_json[key].keys():
+            get_env_data[key] = get_env_data[key] + (get_env_json[key]['em'],)
+        else:
+            get_env_data[key] = get_env_data[key] + ('N/A',)
+        if 'traffic' in get_env_json[key].keys():
+            get_env_data[key] = get_env_data[key] + (get_env_json[key]['traffic'],)
+        else:
+            get_env_data[key] = get_env_data[key] + ('N/A',)
+        if 'vnf' in get_env_json[key].keys():
+            get_env_data[key] = get_env_data[key] + (get_env_json[key]['vnf'],)
+        else:
+            get_env_data[key] = get_env_data[key] + ('N/A',)
+        if key == active_env_name:
+            get_env_data[key] = get_env_data[key] + ('Yes',)
+        else:
+            get_env_data[key] = get_env_data[key] + ('No',)
+    return template('index.html', env_list=get_env_data)
+
+@route('/env/add/')
+def env_add():
+    mano_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/mano')
+    vim_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/vim')
+    em_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/em')
+    traffic_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/traffic')
+    vnf_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/vnf')
+    env_list = {}
+    mano_list = mano_list_raw.json().keys()
+    vim_list = vim_list_raw.json().keys()
+    em_list = em_list_raw.json().keys()
+    traffic_list = traffic_list_raw.json().keys()
+    vnf_list = vnf_list_raw.json().keys()
+    mano_list.append('')
+    vim_list.append('')
+    em_list.append('')
+    traffic_list.append('')
+    vnf_list.append('')
+    mano_list.sort()
+    vim_list.sort()
+    em_list.sort()
+    traffic_list.sort()
+    vnf_list.sort()
+    env_list['mano'] = mano_list
+    env_list['vim'] = vim_list
+    env_list['em'] = em_list
+    env_list['traffic'] = traffic_list
+    env_list['vnf'] = vnf_list
+    return template('env_add.html', env_list=env_list)
+
+@route('/env/delete/')
+def env_delete():
+    return template('env_delete.html')
+
+@route('/env/update/', method="POST")
+def env_update():
+    if request.forms.get('confirmed') == "no":
+        env_name = request.forms.get('update_env')
+        env_data_raw = requests.get(url='http://10.2.34.13:8080/v1.0/env/%s' % env_name)
+        env_data = env_data_raw.json()[env_name]
+        mano_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/mano')
+        vim_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/vim')
+        em_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/em')
+        traffic_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/traffic')
+        vnf_list_raw = requests.get(url='http://10.2.34.13:8080/v1.0/vnf')
+        env_list = {}
+        env_list['mano'] = mano_list_raw.json().keys()
+        env_list['vim'] = vim_list_raw.json().keys()
+        env_list['em'] = em_list_raw.json().keys()
+        env_list['traffic'] = traffic_list_raw.json().keys()
+        env_list['vnf'] = vnf_list_raw.json().keys()
+        env_list['mano'].insert(0, '')
+        env_list['vim'].insert(0, '')
+        env_list['em'].insert(0, '')
+        env_list['traffic'].insert(0, '')
+        env_list['vnf'].insert(0, '')
+        for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
+            if element in env_data.keys():
+                env_list[element].insert(0, env_data[element])
+        return template('env_update.html', env_name=env_name, env_list=env_list)
+    else:
+        env_name = request.forms.get('env_name')
+        new_env = {}
+        for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
+            if request.forms.get(element) != '':
+                new_env[element] = request.forms.get(element)
+        requests.put(url='http://10.2.34.13:8080/v1.0/env/%s' % env_name, json=new_env)
+        return index()
+
+@route('/env/data/', method="POST")
+def env_data():
+    env_name = request.forms.get('env_name')
+    new_env = {}
+    for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
+        if request.forms.get(element) != '':
+            new_env[element] = request.forms.get(element)
+    requests.put(url='http://10.2.34.13:8080/v1.0/env/%s' % env_name, json=new_env)
+    return index()
+
+@route('/config/active-env/<active_env>')
+def set_active_env(active_env):
+    requests.put(url='http://10.2.34.13:8080/v1.0/config/active-env', json=active_env)
+    return index()
 
 @route('/vim/')
 def vim():
