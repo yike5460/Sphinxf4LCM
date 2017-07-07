@@ -239,7 +239,7 @@ def delete_resource(resource, name):
 
 @route('/v1.0/config/<name>')
 def get_config(name):
-    return _read_config(name)
+    return '"%s"' % _read_config(name)
 
 
 @route('/v1.0/config/<name>', method='PUT')
