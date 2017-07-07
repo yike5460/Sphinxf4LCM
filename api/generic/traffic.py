@@ -24,15 +24,16 @@ class Traffic(object):
         self.traffic_adapter = construct_adapter(vendor, module_type='traffic', **kwargs)
 
     @log_entry_exit(LOG)
-    def any_traffic_loss(self, delay_time=0):
+    def any_traffic_loss(self, delay_time=0, tolerance=0):
         """
         This function checks if any packets are dropped.
 
         :param delay_time:  Time, in seconds, to wait until polling for traffic.
+        :param tolerance:   Acceptable percent of lost traffic.
         :return:            True if traffic flows with dropped packets, False otherwise
         """
 
-        return self.traffic_adapter.any_traffic_loss(delay_time)
+        return self.traffic_adapter.any_traffic_loss(delay_time, tolerance)
 
     @log_entry_exit(LOG)
     def clear_counters(self):
