@@ -106,7 +106,7 @@ class TC_VNF_STATE_START_001(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
 
-        if self.traffic.any_traffic_loss():
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
@@ -209,7 +209,7 @@ class TC_VNF_STATE_START_001(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
 
-        if self.traffic.any_traffic_loss():
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 

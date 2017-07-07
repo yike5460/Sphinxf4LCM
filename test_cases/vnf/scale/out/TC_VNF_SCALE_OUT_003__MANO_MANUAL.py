@@ -129,7 +129,7 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
-        if self.traffic.any_traffic_loss():
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
@@ -213,7 +213,7 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
 
-        if self.traffic.any_traffic_loss():
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
@@ -287,7 +287,7 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
-        if self.traffic.any_traffic_loss():
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_in']['traffic_after'] = 'LOW_TRAFFIC_LOAD'
