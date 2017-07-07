@@ -71,7 +71,8 @@ START_TIME = 300
 STOP_TIME = 300
 TERMINATE_TIME = 300
 
-# Traffic load percent mappings
+# Traffic parameters
 traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 1,
                                 'NORMAL_TRAFFIC_LOAD': 3,
                                 'MAX_TRAFFIC_LOAD': 5}
+traffic_tolerance = 0
