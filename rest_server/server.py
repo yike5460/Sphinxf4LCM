@@ -83,7 +83,7 @@ def get_version():
 def do_exec():
     tc_exec_request = request.json
 
-    active_env = get_config('active-env')
+    active_env = _read_config('active-env')
     if active_env is None:
         response.status = 400
         return {'error': 'Active environment not set'}
