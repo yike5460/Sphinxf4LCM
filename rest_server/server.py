@@ -71,7 +71,9 @@ def execute_test(tc_exec_request, tc_input, queue):
 
     queue.put(tc_result)
 
-    reporting.kibana_report(get_config('kibana-srv'), tc_exec_request, tc_input, tc_result)
+    kibana_srv = _read_config('kibana-srv')
+    if kibana_srv is not None:
+        reporting.kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result)
 
 
 @route('/version')
@@ -93,7 +95,7 @@ def do_exec():
         resource_params = _read_resource(resource_type, resource_name)
         tc_input[resource_type + '_params'] = resource_params
 
-    tc_input['vnfd_id'] = get_config('vnfd-id')
+    tc_input['vnfd_id'] = _read_config('vnfd-id')
 
     tc_input['vnf'] = dict()
     tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
