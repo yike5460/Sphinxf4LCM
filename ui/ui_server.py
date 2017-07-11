@@ -227,14 +227,14 @@ def mano_delete():
         return mano()
 
 @route('/vim/')
-def vim():
+def vim(warning=None):
     get_vims = requests.get(url='http://localhost:8080/v1.0/vim')
     vim_list={}
     i=1
     for vim in get_vims.json().keys():
         vim_list[vim] = (get_vims.json()[vim]['type'], i)
         i = i+1
-    return template('vim.html', vim_list=vim_list)
+    return template('vim.html', vim_list=vim_list, warning=warning)
 
 @route('/vim/data/', method='POST')
 def vim_data():
@@ -260,7 +260,10 @@ def vim_data():
                 },
                 'type': type
         }
-    requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
+    response = requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
+    if response.status_code == 504:
+        return vim(warning=response.json().get('warning'))
+
     return vim()
 
 @route('/vim/update/', method='POST')
