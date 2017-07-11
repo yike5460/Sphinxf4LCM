@@ -69,29 +69,29 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h1>MANO Environment</h1>
-          <h2>Update MANO {{ mano_name }}</h2>
+          <h1>EM Environment</h1>
+          <h2>Delete EM {{ em['name'] }}?</h2>
           <table class="table table-striped">
-                <form action="/mano/update/" method="post">
-                  <% if mano['type'] == 'tacker': %>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" value={{mano['user_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username"  value={{mano['username']}} style="width: 200px"></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password"  value={{mano['password']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" value={{mano['project_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name"  value={{mano['project_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" value={{mano['auth_url']}} style="width: 200px"></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version"  value={{mano['identity_api_version']}} style="width: 200px"></td></tr>
+                <form action="/em/delete/" method="post">
+                  <% if em['type'] == 'tacker': %>
+                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" value={{em['user_domain_name']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" value={{em['username']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" value={{em['password']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" value={{em['project_domain_name']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Project Name:</td><td><input type="text" name="project_name" value={{em['project_name']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Auth_url:</td><td><input type="text" name="auth_url" value={{em['auth_url']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" value={{em['identity_api_version']}} readonly style="width: 200px"></td></tr>
                   <% end %>
                   <input type="hidden" name="confirmed" value="yes">
-                  <input type="hidden" name="name" value={{mano_name}}>
+                  <input type="hidden" name="name" value={{em['name']}}>
           </table>
             <div class="btn-group">
-                  <input value="Update MANO" type="submit" class="btn btn-default">
+                  <input value="Delete EM" type="submit" class="btn btn-default">
                   </input>
                 </form>
             </div>
             <div class="btn-group">
-              <form action="/mano/">
+              <form action="/em/">
                 <input type="submit" value="Cancel" class="btn btn-default">
                 </input>
               </form>

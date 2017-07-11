@@ -47,8 +47,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="/">Lab Environment</a></li>
-            <li class="dropdown active">
+            <li class="active"><a href="/">Lab Environment</a></li>
+            <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Elements <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="/mano/">Management & Orchestration</a></li>
@@ -69,29 +69,53 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h1>MANO Environment</h1>
-          <h2>Update MANO {{ mano_name }}</h2>
+          <h1>Delete Environment {{env_name}}</h1>
           <table class="table table-striped">
-                <form action="/mano/update/" method="post">
-                  <% if mano['type'] == 'tacker': %>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" value={{mano['user_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username"  value={{mano['username']}} style="width: 200px"></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password"  value={{mano['password']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" value={{mano['project_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name"  value={{mano['project_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" value={{mano['auth_url']}} style="width: 200px"></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version"  value={{mano['identity_api_version']}} style="width: 200px"></td></tr>
-                  <% end %>
-                  <input type="hidden" name="confirmed" value="yes">
-                  <input type="hidden" name="name" value={{mano_name}}>
+                <form action="/env/delete/" method="post">
+                  <input type="hidden" name="env_name" value={{env_name}}>
+                  <tr><td>Management & Orchestration:</td>
+                    <%if 'mano' in env_data.keys(): %>
+                    <td><input type="text" name="mano" value={{env_data['mano']}} readonly></td>
+                    <% else: %>
+                    <td><input type="text" name="mano" value="" readonly></td>
+                    <% end %>
+                  </tr>
+                  <tr><td>Virtualized Infrastructure Manager:</td>
+                    <%if 'vim' in env_data.keys(): %>
+                    <td><input type="text" name="vim" value={{env_data['vim']}} readonly></td>
+                    <% else: %>
+                    <td><input type="text" name="vim" value="" readonly></td>
+                    <% end %>
+                  </tr>
+                  <tr><td>Element Manager:</td>
+                    <% if 'em' in env_data.keys(): %>
+                    <td><input type="text" name="em" value={{env_data['em']}} readonly></td>
+                    <% else: %>
+                    <td><input type="text" name="em" value="" readonly></td>
+                    <% end %>
+                  </tr>
+                  <tr><td>Traffic Parameters:</td>
+                    <% if 'traffic' in env_data.keys(): %>
+                    <td><input type="text" name="traffic" value={{env_data['traffic']}} readonly></td>
+                    <% else: %>
+                    <td><input type="text" name="traffic" value="" readonly></td>
+                    <% end %>
+                  </tr>
+                  <tr><td>Virtual Network Function:</td>
+                    <% if 'vnf' in env_data.keys(): %>
+                    <td><input type="text" name="vnf" value={{env_data['vnf']}} readonly></td>
+                    <% else: %>
+                    <td><input type="text" name="vnf" value="" readonly></td>
+                    <% end %>
+                  </tr>
           </table>
             <div class="btn-group">
-                  <input value="Update MANO" type="submit" class="btn btn-default">
+                  <input value="Delete Environment" type="submit" class="btn btn-default">
                   </input>
                 </form>
             </div>
             <div class="btn-group">
-              <form action="/mano/">
+              <form action="/">
                 <input type="submit" value="Cancel" class="btn btn-default">
                 </input>
               </form>

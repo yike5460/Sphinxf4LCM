@@ -47,8 +47,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Lab Environment</a></li>
-            <li class="dropdown">
+            <li><a href="/">Lab Environment</a></li>
+            <li class="dropdown active">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Elements <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="/mano/">Management & Orchestration</a></li>
@@ -74,14 +74,14 @@
           <table class="table table-striped">
                 <form action="/mano/data/" method="post">
                   <% if mano_type == 'tacker': %>
-                    <tr><td>Name:</td><td><input type="text" name="name"></td></tr>
-                    <tr><td>User_domain_name:</td><td><input type="text" name="user_domain_name"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username"></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password"></td></tr>
-                    <tr><td>Project_domain_name:</td><td><input type="text" name="project_domain_name"></td></tr>
-                    <tr><td>Project_name:</td><td><input type="text" name="project_name"></td></tr>
-                    <tr><td>Auth_url:</td><td><input type="text" name="auth_url"></td></tr>
-                    <tr><td>Identity_api_version:</td><td><input type="text" name="identity_api_version"></td></tr>
+                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
+                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px"></td></tr>
+                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" style="width: 200px"></td></tr>
+                    <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px"></td></tr>
+                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" style="width: 200px"></td></tr>
+                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px"></td></tr>
                   <% end %>
           </table>
             <div class="btn-group">

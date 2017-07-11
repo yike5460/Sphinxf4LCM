@@ -47,8 +47,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Lab Environment</a></li>
-            <li class="dropdown">
+            <li><a href="/">Lab Environment</a></li>
+            <li class="dropdown active">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Elements <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="/mano/">Management & Orchestration</a></li>
@@ -70,18 +70,17 @@
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
           <h1>VIM Environment</h1>
-          <h2>Delete {{ vim['name'] }}?</h2>
+          <h2>Delete VIM {{ vim['name'] }}?</h2>
           <table class="table table-striped">
                 <form action="/vim/delete/" method="post">
-                  <% for key in vim: %>
-                    <tr>
-                      <td>
-                        {{ key.capitalize() }}:
-                      </td>
-                      <td>
-                        <input type="text" name="type" value={{vim[key]}} readonly>
-                      </td>
-                    </tr>
+                  <% if vim['type'] == 'openstack': %>
+                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" value={{vim['user_domain_name']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" value={{vim['username']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" value={{vim['password']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" value={{vim['project_domain_name']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Project Name:</td><td><input type="text" name="project_name" value={{vim['project_name']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" value={{vim['auth_url']}} readonly style="width: 200px"></td></tr>
+                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" value={{vim['identity_api_version']}} readonly style="width: 200px"></td></tr>
                   <% end %>
                   <input type="hidden" name="confirmed" value="yes">
                   <input type="hidden" name="name" value={{vim['name']}}>

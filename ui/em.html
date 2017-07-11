@@ -69,32 +69,59 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h1>MANO Environment</h1>
-          <h2>Update MANO {{ mano_name }}</h2>
+          <h1>EM Environment</h1>
+
+          <h2>EMs currently available</h2>
           <table class="table table-striped">
-                <form action="/mano/update/" method="post">
-                  <% if mano['type'] == 'tacker': %>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" value={{mano['user_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username"  value={{mano['username']}} style="width: 200px"></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password"  value={{mano['password']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" value={{mano['project_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name"  value={{mano['project_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" value={{mano['auth_url']}} style="width: 200px"></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version"  value={{mano['identity_api_version']}} style="width: 200px"></td></tr>
-                  <% end %>
-                  <input type="hidden" name="confirmed" value="yes">
-                  <input type="hidden" name="name" value={{mano_name}}>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Update</th>
+                <th>Delete</th>
+              </tr>
+              </thead>
+          <!--div class="table-responsive" -->
+              <% for em in em_list.keys(): %>
+                <tr>
+                  <td>
+                    {{ em_list[em][1] }}
+                  </td>
+                  <td>
+                    {{ em }}
+                  </td>
+                  <td>
+                    <!--<img src="/static/{{ em_list[em][0] }}-logo.png" width="40px"></img>-->
+                    {{em_list[em][0]}}
+                  </td>
+                  <td>
+                    <form action="/em/update/" method="post">
+                      <input type="hidden" name="update_em" value={{em}}>
+                      <input type="hidden" name="confirmed" value="no">
+                      <input value="Update EM" type="submit" class="btn btn-default">
+                    </form>
+                  </td>
+                  <td>
+                    <form action="/em/delete/" method="post">
+                      <input type="hidden" name="delete_em" value={{em}}>
+                      <input type="hidden" name="confirmed" value="no">
+                      <input value="Delete EM" type="submit" class="btn btn-default">
+                    </form>
+                  </td>
+
+                </tr>
+              <% end %>
           </table>
             <div class="btn-group">
-                  <input value="Update MANO" type="submit" class="btn btn-default">
-                  </input>
-                </form>
-            </div>
-            <div class="btn-group">
-              <form action="/mano/">
-                <input type="submit" value="Cancel" class="btn btn-default">
-                </input>
-              </form>
+              <form action="/em/add/" method="post">
+                <button name="em_type" type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Add new EM <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="/em/add/tacker/">Tacker</a></li>
+                </ul>
+            </form>
             </div>
       </div>
 
