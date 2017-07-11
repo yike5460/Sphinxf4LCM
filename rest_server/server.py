@@ -1,12 +1,13 @@
 import importlib
 import json
+import logging
 import uuid
 from datetime import datetime
 from multiprocessing import Process, Queue
 
 from bottle import route, run, request, response
 
-from utils import reporting
+from utils import reporting, logging_module
 
 execution_queues = dict()
 execution_processes = dict()
@@ -61,6 +62,9 @@ def execute_test(tc_exec_request, tc_input, queue):
     tc_name = tc_exec_request['tc_name']
     tc_class = get_tc_class(tc_name)
 
+    root_logger = logging.getLogger()
+    logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=tc_name)
+
     tc_start_time = datetime.utcnow()
     tc_result = tc_class(tc_input).execute()
     tc_end_time = datetime.utcnow()
@@ -85,20 +89,22 @@ def get_version():
 def do_exec():
     tc_exec_request = request.json
 
-    active_env = _read_config('active-env')
-    if active_env is None:
-        response.status = 400
-        return {'error': 'Active environment not set'}
+    tc_input = tc_exec_request.get('tc_input')
+    if tc_input is None:
+        active_env = _read_config('active-env')
+        if active_env is None:
+            response.status = 400
+            return {'error': 'Active environment not set'}
 
-    tc_input = dict()
-    for resource_type, resource_name in _read_resource('env', active_env).items():
-        resource_params = _read_resource(resource_type, resource_name)
-        tc_input[resource_type + '_params'] = resource_params
+        tc_input = dict()
+        for resource_type, resource_name in _read_resource('env', active_env).items():
+            resource_params = _read_resource(resource_type, resource_name)
+            tc_input[resource_type + '_params'] = resource_params
 
-    tc_input['vnfd_id'] = _read_config('vnfd-id')
+        tc_input['vnfd_id'] = _read_config('vnfd-id')
 
-    tc_input['vnf'] = dict()
-    tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
+        tc_input['vnf'] = dict()
+        tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
 
     execution_id = str(uuid.uuid4())
     queue = Queue()
