@@ -69,65 +69,39 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h1>VIM Environment</h1>
-
-          <% if warning != None: %>
-            <div class="alert alert-danger alert-dismissible" role="alert">
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <strong>Warning! </strong>{{warning}}
-            </div>
-          <% end %>
-
-          <h2>VIMs currently available</h2>
+          <h1>Traffic Elements</h1>
+          <h2>Add new {{traffic_type.capitalize()}} Traffic Element </h2>
           <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Update</th>
-                <th>Delete</th>
-              </tr>
-              </thead>
-          <!--div class="table-responsive" -->
-              <% for vim in vim_list.keys(): %>
-                <tr>
-                  <td>
-                    {{ vim_list[vim][1] }}
-                  </td>
-                  <td>
-                    {{ vim }}
-                  </td>
-                  <td>
-                    <img src="/static/{{ vim_list[vim][0] }}-logo.png" width="40px">
-                  </td>
-                  <td>
-                    <form action="/vim/update/" method="post">
-                      <input type="hidden" name="update_vim" value={{vim}}>
-                      <input type="hidden" name="confirmed" value="no">
-                      <input value="Update VIM" type="submit" class="btn btn-default">
-                    </form>
-                  </td>
-                  <td>
-                    <form action="/vim/delete/" method="post">
-                      <input type="hidden" name="delete_vim" value={{vim}}>
-                      <input type="hidden" name="confirmed" value="no">
-                      <input value="Delete VIM" type="submit" class="btn btn-default">
-                    </form>
-                  </td>
-
-                </tr>
-              <% end %>
+                <form action="/traffic/data/" method="post">
+                  <% if traffic_type == 'stc': %>
+                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
+                    <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px"></td></tr>
+                    <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px"></td></tr>
+                    <tr><td>Left Port Location:</td><td><input type="text" name="left_port_location" style="width: 200px"></td></tr>
+                    <tr><td>Left Traffic Address:</td><td><input type="text" name="left_traffic_addr" style="width: 200px"></td></tr>
+                    <tr><td>Left Traffic Prefix Length:</td><td><input type="number" name="left_traffic_plen" style="width: 200px"></td></tr>
+                    <tr><td>Left Traffic Gateway:</td><td><input type="text" name="left_traffic_gw" style="width: 200px"></td></tr>
+                    <tr><td>Left Traffic Gateway MAC:</td><td><input type="text" name="left_traffic_gw_mac" style="width: 200px"></td></tr>
+                    <tr><td>Left Connection Point Name:</td><td><input type="text" name="left_cp_name" style="width: 200px"></td></tr>
+                    <tr><td>Right Port Location:</td><td><input type="text" name="right_port_location" style="width: 200px"></td></tr>
+                    <tr><td>Right Traffic Address:</td><td><input type="text" name="right_traffic_addr" style="width: 200px"></td></tr>
+                    <tr><td>Right Traffic Prefix Length:</td><td><input type="number" name="right_traffic_plen" style="width: 200px"></td></tr>
+                    <tr><td>Right Traffic Gateway:</td><td><input type="text" name="right_traffic_gw" style="width: 200px"></td></tr>
+                    <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px"></td></tr>
+                  <% end %>
           </table>
             <div class="btn-group">
-              <form action="/vim/add/" method="post">
-                <button name="vim_type" type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Add new VIM <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a href="/vim/add/openstack/">OpenStack</a></li>
-                </ul>
-            </form>
+                  <input type="hidden" name="type" value={{traffic_type}}>
+                  <input value="Add Traffic Element" type="submit" class="btn btn-default">
+                  </input>
+                </form>
+            </div>
+            <div class="btn-group">
+              <form action="/traffic/">
+                <input type="submit" value="Cancel" class="btn btn-default">
+                </input>
+              </form>
             </div>
       </div>
 

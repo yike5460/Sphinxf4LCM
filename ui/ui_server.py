@@ -423,12 +423,149 @@ def em_delete():
         requests.delete(url='http://localhost:8080/v1.0/em/%s' % em_name)
         return em()
 
+@route('/traffic/')
+def traffic():
+    get_traffics = requests.get(url='http://localhost:8080/v1.0/traffic')
+    traffic_list={}
+    i=1
+    for traffic in get_traffics.json().keys():
+        traffic_list[traffic] = (get_traffics.json()[traffic]['type'], i)
+        i = i+1
+    return template('traffic.html', traffic_list=traffic_list)
+
+@route('/traffic/add/<traffic_type>/')
+def traffic_add(traffic_type):
+    return template('traffic_add.html', traffic_type=traffic_type)
+
+@route('/traffic/data/', method='POST')
+def traffic_data():
+    type = request.forms.get('type')
+    if type == 'stc':
+        name = request.forms.get('name')
+        lab_server_addr = request.forms.get('lab_server_addr')
+        user_name = request.forms.get('user_name')
+        session_name = request.forms.get('session_name')
+        left_port_location = request.forms.get('left_port_location')
+        left_traffic_addr = request.forms.get('left_traffic_addr')
+        left_traffic_plen = request.forms.get('left_traffic_plen')
+        left_traffic_gw = request.forms.get('left_traffic_gw')
+        left_traffic_gw_mac = request.forms.get('left_traffic_gw_mac')
+        left_cp_name = request.forms.get('left_cp_name')
+        right_port_location = request.forms.get('right_port_location')
+        right_traffic_addr = request.forms.get('right_traffic_addr')
+        right_traffic_plen = request.forms.get('right_traffic_plen')
+        right_traffic_gw = request.forms.get('right_traffic_gw')
+        port_speed = request.forms.get('port_speed')
+        new_traffic={
+                'client_config': {
+                    'lab_server_addr': lab_server_addr,
+                    'user_name': user_name,
+                    'session_name': session_name,
+                },
+                'traffic_config': {
+                    'left_port_location': left_port_location,
+                    'left_traffic_addr': left_traffic_addr,
+                    'left_traffic_plen': left_traffic_plen,
+                    'left_traffic_gw': left_traffic_gw,
+                    'left_traffic_gw_mac': left_traffic_gw_mac,
+                    'left_cp_name': left_cp_name,
+                    'right_port_location': right_port_location,
+                    'right_traffic_addr': right_traffic_addr,
+                    'right_traffic_plen': right_traffic_plen,
+                    'right_traffic_gw': right_traffic_gw,
+                    'port_speed': port_speed
+                },
+                'type': type
+        }
+    requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+    return traffic()
+
+@route('/traffic/update/', method='POST')
+def traffic_update():
+    if request.forms.get('confirmed') == "no":
+        traffic_name = request.forms.get('update_traffic')
+        traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
+        traffic_json = traffic_data.json()
+        traffic_info = OrderedDict()
+        traffic_info['type'] = traffic_json[traffic_name]['type']
+        traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
+        traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
+        traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
+        traffic_info['left_port_location'] = traffic_json[traffic_name]['traffic_config']['left_port_location']
+        traffic_info['left_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['left_traffic_addr']
+        traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
+        traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
+        traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
+        traffic_info['left_cp_name'] = traffic_json[traffic_name]['traffic_config']['left_cp_name']
+        traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
+        traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
+        traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
+        traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
+        traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
+        return template('traffic_update.html', traffic=traffic_info, traffic_name=traffic_name)
+    else:
+        traffic_name = request.forms.get('name')
+        traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
+        traffic_json = traffic_data.json()
+        traffic_type = traffic_json[traffic_name]['type']
+        traffic_to_add = {'client_config': {}, 'type': traffic_type, 'traffic_config': {}}
+        traffic_to_add['client_config'] = {
+            'lab_server_addr': request.forms.get('lab_server_addr'),
+            'user_name': request.forms.get('user_name'),
+            'session_name': request.forms.get('session_name')
+        }
+        traffic_to_add['traffic_config'] = {
+            'left_port_location': request.forms.get('left_port_location'),
+            'left_traffic_addr': request.forms.get('left_traffic_addr'),
+            'left_traffic_plen': request.forms.get('left_traffic_plen'),
+            'left_traffic_gw': request.forms.get('left_traffic_gw'),
+            'left_traffic_gw_mac': request.forms.get('left_traffic_gw_mac'),
+            'left_cp_name': request.forms.get('left_cp_name'),
+            'right_port_location': request.forms.get('right_port_location'),
+            'right_traffic_addr': request.forms.get('right_traffic_addr'),
+            'right_traffic_plen': request.forms.get('right_traffic_plen'),
+            'right_traffic_gw': request.forms.get('right_traffic_gw'),
+            'port_speed': request.forms.get('port_speed')
+        }
+        requests.put(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name, json=traffic_to_add)
+        return traffic()
+
+@route('/traffic/delete/', method='POST')
+def traffic_delete():
+    if request.forms.get('confirmed') == "no":
+        traffic_name = request.forms.get('delete_traffic')
+        traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
+        traffic_json = traffic_data.json()
+        traffic_info = OrderedDict()
+        traffic_info['name'] = traffic_name
+        print request.forms.get('delete_traffic')
+        traffic_info['type'] = traffic_json[traffic_name]['type']
+        traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
+        traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
+        traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
+        traffic_info['left_port_location'] = traffic_json[traffic_name]['traffic_config']['left_port_location']
+        traffic_info['left_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['left_traffic_addr']
+        traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
+        traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
+        traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
+        traffic_info['left_cp_name'] = traffic_json[traffic_name]['traffic_config']['left_cp_name']
+        traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
+        traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
+        traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
+        traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
+        traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
+        return template('traffic_delete.html', traffic=traffic_info)
+    else:
+        traffic_name = request.forms.get('name')
+        requests.delete(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
+        return traffic()
+
 @route('/static/<filename:re:.*\.css>')
 def all_css(filename):
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/css/")))
 
-@route('/static/<filename:re:.*\.png>')
+@route('/static/<filename:re:.*\.png|.*\.jpeg>')
 def all_png(filename):
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/img/")))
