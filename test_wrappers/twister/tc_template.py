@@ -41,14 +41,20 @@ def twister_run():
         return
 
     # Poll on test case status
+    elapsed_time = 0
     while True:
         server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec/' + execution_id)
         data = server_response.json()
         tc_status = data['status']
         if tc_status in ['DONE', 'NOT_FOUND']:
             tc_result = data.get('tc_result', {})
+            print
+            print 'Test case overall status: %s' % tc_result.get('overall_status', 'N/A')
+            print 'Test case error info: %s' % tc_result.get('error_info', 'N/A')
             break
         time.sleep(poll_interval)
+        elapsed_time += poll_interval
+        print 'Test case execution pending. Elapsed time: %s seconds' % elapsed_time
 
     durations = dict()
     durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
