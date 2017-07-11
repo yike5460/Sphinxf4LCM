@@ -7,6 +7,7 @@ from multiprocessing import Process, Queue
 
 from bottle import route, run, request, response
 
+from api.adapter import construct_adapter
 from utils import reporting, logging_module
 
 execution_queues = dict()
@@ -228,6 +229,13 @@ def set_resource(resource, name):
     all_resources[name] = request.json
 
     _write_resources(resource, all_resources)
+
+    if resource in ['vim', 'mano']:
+        try:
+            construct_adapter(request.json['type'], resource, **request.json['client_config'])
+        except Exception as e:
+            response.status = 504
+            return {'warning': e.message}
 
     return {name: request.json}
 
