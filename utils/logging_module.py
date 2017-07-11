@@ -1,12 +1,14 @@
+import datetime
 import functools
 import logging
 import os
 import sys
 
-LOG_DIR = '/tmp/nfv'
+LOG_DIR = '/var/log/vnflcv'
 
 
-def configure_logger(logger, file_level=None, console_level=None, propagate=False, override_parent=False):
+def configure_logger(logger, file_level=None, log_filename=None, console_level=None, propagate=False,
+                     override_parent=False):
     """
     This function configures a logger.
 
@@ -14,12 +16,13 @@ def configure_logger(logger, file_level=None, console_level=None, propagate=Fals
     :param file_level:      Desired logging level of the logs that are to be written to file.
                             Possible values: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
                             Default value: 'DEBUG'
+    :param log_filename:    Name of the file to dump logs to.
     :param console_level:   Desired logging level of the logs that are to be printed on the console
                             Possible values: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
                             Default value: None
     :param propagate:       Turn on/off propagation of messages.
                             Default value: "False" (message propagation is off).
-    :param override_parent: Set to True to make the parent logger point to this logger.
+    :param override_parent: Set to True to set current logger as parent of the RootLogger.
     :return:                None
     """
 
@@ -30,35 +33,36 @@ def configure_logger(logger, file_level=None, console_level=None, propagate=Fals
     logger.propagate = propagate
 
     if file_level is not None:
-        module_name = logger.name.rsplit('.', 1)[-1]
-        log_file_path = os.path.join(LOG_DIR, module_name + ".log")
+        # Generate unique logging file name
+        new_log_file_name = '{:%Y_%m_%d_%H_%M_%S}_'.format(datetime.datetime.now()) + str(log_filename)
+        log_file_path = os.path.join(LOG_DIR, new_log_file_name + ".log")
 
         try:
             os.stat(LOG_DIR)
         except:
             os.mkdir(LOG_DIR)
 
-        # create file handler
+        # Create file handler
         fh = logging.FileHandler(filename=log_file_path, mode="w")
         fh.setLevel(getattr(logging, str(file_level)))
 
-        # create formatter and add it to the handlers
+        # Create formatter and add it to the handlers
         fh_formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s - %(message)s')
         fh.setFormatter(fh_formatter)
 
-        # add the file handler to the logger
+        # Add the file handler to the logger
         logger.addHandler(fh)
 
     if console_level is not None:
-        # create file handler
+        # Create file handler
         ch = logging.StreamHandler(stream=sys.stdout)
         ch.setLevel(getattr(logging, str(console_level)))
 
-        # create formatter and add it to the handlers
+        # Create formatter and add it to the handlers
         ch_formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s - %(message)s')
         ch.setFormatter(ch_formatter)
 
-        # add the file handler to the logger
+        # Add the file handler to the logger
         logger.addHandler(ch)
 
     if override_parent:
