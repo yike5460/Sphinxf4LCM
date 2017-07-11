@@ -5,7 +5,6 @@ from api import ApiError
 from api.generic import constants
 from utils import reporting
 from utils import timestamps
-from utils.logging_module import configure_logger
 
 Function = collections.namedtuple('Function', 'function_reference function_args function_kwargs')
 
@@ -83,12 +82,12 @@ class TestCase(object):
         self.vnfm = None
         self.cleanup_registrations = list()
 
-    @classmethod
-    def initialize(cls):
-        """
-        This method configures the test case logger.
-        """
-        configure_logger(cls._LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
+    # @classmethod
+    # def initialize(cls):
+    #     """
+    #     This method configures the test case logger.
+    #     """
+    #     configure_logger(cls._LOG, file_level='DEBUG', console_level='INFO', override_parent=True)
 
     def check_requirements(self):
         """
@@ -145,7 +144,6 @@ class TestCase(object):
         """
         This method implements the test case execution logic.
         """
-        self.initialize()
         self.check_requirements()
 
         try:
