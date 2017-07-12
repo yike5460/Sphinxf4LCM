@@ -43,13 +43,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="http://www.spirent.com"><img src="/static/spirent-white-png.png" class="navbar-fixed-top"></img></a>
+          <a class="navbar-brand" href="http://www.spirent.com"><img src="/static/spirent-white-png.png" class="navbar-fixed-top"></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="/">Lab Environment</a></li>
             <li class="dropdown active">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Elements <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Lab Elements <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="/mano/">Management & Orchestration</a></li>
                 <li><a href="/vim/">Virtualized Infrastructure Manager</a></li>
@@ -73,21 +73,21 @@
           <h2>Update Traffic Element {{ traffic_name }}</h2>
           <table class="table table-striped">
                 <form action="/traffic/update/" method="post">
-                  <% if traffic['type'] == 'stc': %>
-                    <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" value={{traffic['lab_server_addr']}} style="width: 200px"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="user_name" value={{traffic['user_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Session Name:</td><td><input type="text" name="session_name" value={{traffic['session_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Left Port Location:</td><td><input type="text" name="left_port_location" value={{traffic['left_port_location']}} style="width: 200px"></td></tr>
-                    <tr><td>Left Traffic Address:</td><td><input type="text" name="left_traffic_addr" value={{traffic['left_traffic_addr']}} style="width: 200px"></td></tr>
-                    <tr><td>Left Traffic Prefix Length:</td><td><input type="text" name="left_traffic_plen" value={{traffic['left_traffic_plen']}} style="width: 200px"></td></tr>
-                    <tr><td>Left Traffic Gateway:</td><td><input type="text" name="left_traffic_gw" value={{traffic['left_traffic_gw']}} style="width: 200px"></td></tr>
-                    <tr><td>Left Traffic Gateway MAC:</td><td><input type="text" name="left_traffic_gw_mac" value={{traffic['left_traffic_gw_mac']}} style="width: 200px"></td></tr>
-                    <tr><td>Left Connection Point Name:</td><td><input type="text" name="left_cp_name" value={{traffic['left_cp_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Right Port Location:</td><td><input type="text" name="right_port_location" value={{traffic['right_port_location']}} style="width: 200px"></td></tr>
-                    <tr><td>Right Traffic Address:</td><td><input type="text" name="right_traffic_addr" value={{traffic['right_traffic_addr']}} style="width: 200px"></td></tr>
-                    <tr><td>Right Traffic Prefix Length:</td><td><input type="text" name="right_traffic_plen" value={{traffic['right_traffic_plen']}} style="width: 200px"></td></tr>
-                    <tr><td>Right Traffic Gateway:</td><td><input type="text" name="right_traffic_gw" value={{traffic['right_traffic_gw']}} style="width: 200px"></td></tr>
-                    <tr><td>Port Speed:</td><td><input type="number" name="port_speed" value={{traffic['port_speed']}} style="width: 200px"></td></tr>
+                  <% if traffic['type'] == 'stcv': %>
+                    <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px" value={{traffic['lab_server_addr']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px" value={{traffic['user_name']}}></td></tr>
+                    <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px" value={{traffic['session_name']}}></td></tr>
+                    <tr><td>Left Port Location:</td><td><input type="text" name="left_port_location" style="width: 200px" value={{traffic['left_port_location']}}></td></tr>
+                    <tr><td>Left Traffic Address:</td><td><input type="text" name="left_traffic_addr" style="width: 200px" value={{traffic['left_traffic_addr']}}></td></tr>
+                    <tr><td>Left Traffic Prefix Length:</td><td><input type="text" name="left_traffic_plen" style="width: 200px" value={{traffic['left_traffic_plen']}}></td></tr>
+                    <tr><td>Left Traffic Gateway:</td><td><input type="text" name="left_traffic_gw" style="width: 200px" value={{traffic['left_traffic_gw']}}></td></tr>
+                    <tr><td>Left Traffic Gateway MAC:</td><td><input type="text" name="left_traffic_gw_mac" style="width: 200px" value={{traffic['left_traffic_gw_mac']}}></td></tr>
+                    <tr><td>Left Connection Point Name:</td><td><input type="text" name="left_cp_name" style="width: 200px" value={{traffic['left_cp_name']}}></td></tr>
+                    <tr><td>Right Port Location:</td><td><input type="text" name="right_port_location" style="width: 200px" value={{traffic['right_port_location']}}></td></tr>
+                    <tr><td>Right Traffic Address:</td><td><input type="text" name="right_traffic_addr" style="width: 200px" value={{traffic['right_traffic_addr']}}></td></tr>
+                    <tr><td>Right Traffic Prefix Length:</td><td><input type="text" name="right_traffic_plen" style="width: 200px" value={{traffic['right_traffic_plen']}}></td></tr>
+                    <tr><td>Right Traffic Gateway:</td><td><input type="text" name="right_traffic_gw" style="width: 200px" value={{traffic['right_traffic_gw']}}></td></tr>
+                    <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px" value={{traffic['port_speed']}}></td></tr>
                   <% end %>
                   <input type="hidden" name="name" value={{traffic_name}}>
                   <input type="hidden" name="confirmed" value="yes">

@@ -440,7 +440,7 @@ def traffic_add(traffic_type):
 @route('/traffic/data/', method='POST')
 def traffic_data():
     type = request.forms.get('type')
-    if type == 'stc':
+    if type == 'stcv':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         user_name = request.forms.get('user_name')
@@ -477,6 +477,7 @@ def traffic_data():
                 },
                 'type': type
         }
+        print new_traffic
     requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
     return traffic()
 
@@ -538,7 +539,6 @@ def traffic_delete():
         traffic_json = traffic_data.json()
         traffic_info = OrderedDict()
         traffic_info['name'] = traffic_name
-        print request.forms.get('delete_traffic')
         traffic_info['type'] = traffic_json[traffic_name]['type']
         traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
         traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']

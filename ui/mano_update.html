@@ -43,13 +43,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="http://www.spirent.com"><img src="/static/spirent-white-png.png" class="navbar-fixed-top"></img></a>
+          <a class="navbar-brand" href="http://www.spirent.com"><img src="/static/spirent-white-png.png" class="navbar-fixed-top"></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="/">Lab Environment</a></li>
             <li class="dropdown active">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Elements <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Define Lab Elements <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="/mano/">Management & Orchestration</a></li>
                 <li><a href="/vim/">Virtualized Infrastructure Manager</a></li>
@@ -74,13 +74,13 @@
           <table class="table table-striped">
                 <form action="/mano/update/" method="post">
                   <% if mano['type'] == 'tacker': %>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" value={{mano['user_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username"  value={{mano['username']}} style="width: 200px"></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password"  value={{mano['password']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" value={{mano['project_domain_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name"  value={{mano['project_name']}} style="width: 200px"></td></tr>
-                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" value={{mano['auth_url']}} style="width: 200px"></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version"  value={{mano['identity_api_version']}} style="width: 200px"></td></tr>
+                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px" value={{mano['user_domain_name']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px" value={{mano['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{mano['password']}}></td></tr>
+                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" style="width: 200px" value={{mano['project_domain_name']}}></td></tr>
+                    <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px" value={{mano['project_name']}}></td></tr>
+                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" style="width: 200px" value={{mano['auth_url']}}></td></tr>
+                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version"  style="width: 200px" value={{mano['identity_api_version']}}></td></tr>
                   <% end %>
                   <input type="hidden" name="confirmed" value="yes">
                   <input type="hidden" name="name" value={{mano_name}}>
