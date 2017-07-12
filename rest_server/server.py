@@ -23,6 +23,9 @@ config_file_path = 'config.json'
 
 
 def _read_config(key):
+    """
+    This function returns the content of the JSON config file.
+    """
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
@@ -33,6 +36,9 @@ def _read_config(key):
 
 
 def _write_config(key, value):
+    """
+    This function adds the specified key and value to the JSON config file.
+    """
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
@@ -46,6 +52,9 @@ def _write_config(key, value):
 
 
 def _delete_config(key):
+    """
+    This function deletes the specified key from the JSON config file.
+    """
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
@@ -59,6 +68,9 @@ def _delete_config(key):
 
 
 def get_tc_class(tc_name):
+    """
+    This function returns the test class for the specified test case name.
+    """
     global tc_name_module_mapping
 
     if tc_name_module_mapping is None:
@@ -73,6 +85,9 @@ def get_tc_class(tc_name):
 
 
 def execute_test(tc_exec_request, tc_input, queue):
+    """
+    This function is used as a process target and it starts the execution of a test case.
+    """
     tc_name = tc_exec_request['tc_name']
     tc_class = get_tc_class(tc_name)
 
@@ -96,11 +111,17 @@ def execute_test(tc_exec_request, tc_input, queue):
 
 @route('/version')
 def get_version():
+    """
+    Request mapped function that returns the list of REST server supported versions.
+    """
     return {'versions': ['v1.0']}
 
 
 @route('/v1.0/exec', method='POST')
 def do_exec():
+    """
+    Request mapped function that starts the execution of a test case in a new process.
+    """
     tc_exec_request = request.json
 
     tc_input = tc_exec_request.get('tc_input')
@@ -135,6 +156,9 @@ def do_exec():
 
 @route('/v1.0/exec/<execution_id>')
 def get_status(execution_id):
+    """
+    Request mapped function that returns the status of the specified test execution ID.
+    """
     try:
         execution_process = execution_processes[execution_id]
     except KeyError:
@@ -160,12 +184,18 @@ def get_status(execution_id):
 
 @route('/v1.0/exec/<execution_id>', method='DELETE')
 def do_stop_exec(execution_id):
+    """
+    Request mapped function that stops the test execution with the specified ID.
+    """
     execution_process = execution_processes[execution_id]
     execution_process.terminate()
 
 
 @route('/v1.0/exec')
 def all_status():
+    """
+    Request mapped function that returns the status of all test execution IDs.
+    """
     status_list = list()
     for execution_id, execution_process in execution_processes.items():
         execution_status = dict()
@@ -182,6 +212,10 @@ def all_status():
 
 @route('/v1.0/tcs')
 def get_tcs():
+    """
+    Request mapped function that returns the mappings between all existing test case names and their module path.
+    Example: "TC_VNF_STATE_TERM_003": "vnf/state/term"
+    """
     tc_list = dict()
 
     global tc_name_module_mapping
@@ -198,6 +232,10 @@ def get_tcs():
 
 
 def _read_resources(resource):
+    """
+    This function returns the contents of the JSON resource file corresponding to the specified resource.
+    Example: if resource is 'mano', the function will return the contents of the file mano.json.
+    """
     resource_file_name = '%s.json' % resource
     try:
         with open(resource_file_name, 'r') as resource_file:
@@ -209,12 +247,20 @@ def _read_resources(resource):
 
 
 def _read_resource(resource, name):
+    """
+    This function returns the details for the specified resource type and name.
+    Example: if resource is 'mano' and name is tacker1 the function will return the details about the MANO with the name
+    tacker1.
+    """
     all_resources = _read_resources(resource)
 
     return all_resources.get(name, {})
 
 
 def _write_resources(resource, all_resources):
+    """
+    This function creates a JSON resource file containing the specified resources.
+    """
     resource_file_name = '%s.json' % resource
     with open(resource_file_name, 'w') as resource_file:
         json.dump(all_resources, resource_file, sort_keys=True, indent=2)
@@ -222,6 +268,9 @@ def _write_resources(resource, all_resources):
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>')
 def get_resource(resource, name):
+    """
+    Request mapped function that returns the details for the specified resource type and name.
+    """
     resource_params = _read_resource(resource, name)
     if resource_params == {}:
         response.status = 404
@@ -231,6 +280,9 @@ def get_resource(resource, name):
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>')
 def get_resources(resource):
+    """
+    Request mapped function that returns all resources of the 'resource' type.
+    """
     all_resources = _read_resources(resource)
 
     return all_resources
@@ -238,6 +290,9 @@ def get_resources(resource):
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='PUT')
 def set_resource(resource, name):
+    """
+    Request mapped function that adds a new resource with the specified name.
+    """
     all_resources = _read_resources(resource)
     all_resources[name] = request.json
 
@@ -255,6 +310,9 @@ def set_resource(resource, name):
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='DELETE')
 def delete_resource(resource, name):
+    """
+    Request mapped function that deletes the resource with the specified name.
+    """
     all_resources = _read_resources(resource)
     resource_params = all_resources.pop(name, {})
 
@@ -268,16 +326,27 @@ def delete_resource(resource, name):
 
 @route('/v1.0/config/<name>')
 def get_config(name):
+    """
+    Request mapped function that returns the value corresponding to the specified key name in the JSON config file.
+    """
     return '"%s"' % _read_config(name)
 
 
 @route('/v1.0/config/<name>', method='PUT')
 def set_config(name):
+    """
+    Request mapped function that adds a key with the specified name and value specified in the request body in the JSON
+    config file.
+    """
     _write_config(name, request.json)
 
 
 @route('/v1.0/config/<name>', method='DELETE')
 def remove_config(name):
+    """
+    Request mapped function that removes the key with the specified name and its corresponding value from the JSON
+    config file.
+    """
     _delete_config(name)
 
 
