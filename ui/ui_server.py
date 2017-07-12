@@ -3,6 +3,10 @@ import requests
 import os
 from collections import OrderedDict
 
+MANO_TYPES = ['tacker']
+VIM_TYPES = ['openstack']
+EM_TYPES = ['tacker']
+TRAFFIC_TYPES = ['stcv']
 
 # os.chdir(os.path.dirname(__file__))
 @route('/')
@@ -11,8 +15,8 @@ def index():
     active_env_name_raw = requests.get(url='http://localhost:8080/v1.0/config/active-env')
     active_env_name = active_env_name_raw.json()
     get_env_json = get_env_raw.json()
-    get_env_data = {}
-    for key in get_env_json:
+    get_env_data = OrderedDict()
+    for key in sorted(get_env_json.iterkeys()):
         get_env_data[key] = ()
         if 'mano' in get_env_json[key].keys():
             get_env_data[key] = get_env_data[key] + (get_env_json[key]['mano'],)
@@ -102,8 +106,11 @@ def env_update():
         for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
             env_list[element].insert(0, '')
             if element in env_data.keys():
-                env_list[element].remove(env_data[element])
-                env_list[element].insert(0, env_data[element])
+                if env_data[element] in env_list[element]:
+                    env_list[element].remove(env_data[element])
+                    env_list[element].insert(0, env_data[element])
+                else:
+                    continue
         return template('env_update.html', env_name=env_name, env_list=env_list)
     else:
         env_name = request.forms.get('env_name')
@@ -132,11 +139,12 @@ def set_active_env(active_env):
 @route('/mano/')
 def mano():
     get_manos = requests.get(url='http://localhost:8080/v1.0/mano')
-    mano_list={}
-    i=1
-    for mano in get_manos.json().keys():
-        mano_list[mano] = (get_manos.json()[mano]['type'], i)
-        i = i+1
+    mano_list = []
+    for mano in sorted(get_manos.json().iterkeys()):
+        if 'type' in get_manos.json()[mano].keys() and get_manos.json()[mano]['type'] in MANO_TYPES:
+            mano_list.append((mano, get_manos.json()[mano]['type']))
+        else:
+            continue
     return template('mano.html', mano_list=mano_list)
 
 @route('/mano/add/<mano_type>/')
@@ -229,10 +237,13 @@ def mano_delete():
 @route('/vim/')
 def vim(warning=None):
     get_vims = requests.get(url='http://localhost:8080/v1.0/vim')
-    vim_list={}
+    vim_list=[]
     i=1
-    for vim in get_vims.json().keys():
-        vim_list[vim] = (get_vims.json()[vim]['type'], i)
+    for vim in sorted(get_vims.json().iterkeys()):
+        if 'type' in get_vims.json()[vim].keys() and get_vims.json()[vim]['type'] in VIM_TYPES:
+            vim_list.append((vim, get_vims.json()[vim]['type']))
+        else:
+            continue
         i = i+1
     return template('vim.html', vim_list=vim_list, warning=warning)
 
@@ -329,10 +340,13 @@ def vim_add(vim_type):
 @route('/em/')
 def em():
     get_ems = requests.get(url='http://localhost:8080/v1.0/em')
-    em_list={}
+    em_list=[]
     i=1
-    for em in get_ems.json().keys():
-        em_list[em] = (get_ems.json()[em]['type'], i)
+    for em in sorted(get_ems.json().iterkeys()):
+        if 'type' in get_ems.json()[em].keys() and get_ems.json()[em]['type'] in EM_TYPES:
+            em_list.append((em, get_ems.json()[em]['type']))
+        else:
+            continue
         i = i+1
     return template('em.html', em_list=em_list)
 
@@ -426,10 +440,13 @@ def em_delete():
 @route('/traffic/')
 def traffic():
     get_traffics = requests.get(url='http://localhost:8080/v1.0/traffic')
-    traffic_list={}
+    traffic_list=[]
     i=1
-    for traffic in get_traffics.json().keys():
-        traffic_list[traffic] = (get_traffics.json()[traffic]['type'], i)
+    for traffic in sorted(get_traffics.json().iterkeys()):
+        if 'type' in get_traffics.json()[traffic].keys() and get_traffics.json()[traffic]['type'] in TRAFFIC_TYPES:
+            traffic_list.append((traffic, get_traffics.json()[traffic]['type']))
+        else:
+            continue
         i = i+1
     return template('traffic.html', traffic_list=traffic_list)
 
@@ -477,7 +494,6 @@ def traffic_data():
                 },
                 'type': type
         }
-        print new_traffic
     requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
     return traffic()
 
@@ -566,7 +582,7 @@ def all_css(filename):
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/css/")))
 
 @route('/static/<filename:re:.*\.png|.*\.jpeg>')
-def all_png(filename):
+def all_img(filename):
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/img/")))
 
