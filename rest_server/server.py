@@ -45,6 +45,19 @@ def _write_config(key, value):
         json.dump(config, config_file, sort_keys=True, indent=2)
 
 
+def _delete_config(key):
+    try:
+        with open(config_file_path, 'r') as config_file:
+            config = json.load(config_file)
+    except Exception:
+        config = {}
+
+    config.pop(key, None)
+
+    with open(config_file_path, 'w') as config_file:
+        json.dump(config, config_file, sort_keys=True, indent=2)
+
+
 def get_tc_class(tc_name):
     global tc_name_module_mapping
 
@@ -261,6 +274,11 @@ def get_config(name):
 @route('/v1.0/config/<name>', method='PUT')
 def set_config(name):
     _write_config(name, request.json)
+
+
+@route('/v1.0/config/<name>', method='DELETE')
+def remove_config(name):
+    _delete_config(name)
 
 
 run(host='0.0.0.0', port=8080, debug=False)
