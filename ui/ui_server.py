@@ -7,6 +7,7 @@ MANO_TYPES = ['tacker']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
 TRAFFIC_TYPES = ['stcv']
+VNF_TYPES = ['ubuntu']
 
 # os.chdir(os.path.dirname(__file__))
 @route('/')
@@ -16,6 +17,8 @@ def index():
     active_env_name = active_env_name_raw.json()
     get_env_json = get_env_raw.json()
     get_env_data = OrderedDict()
+    print active_env_name
+    print get_env_json
     for key in sorted(get_env_json.iterkeys()):
         get_env_data[key] = ()
         if 'mano' in get_env_json[key].keys():
@@ -575,6 +578,95 @@ def traffic_delete():
         traffic_name = request.forms.get('name')
         requests.delete(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
         return traffic()
+
+@route('/vnf/')
+def vnf(warning=None):
+    get_vnfs = requests.get(url='http://localhost:8080/v1.0/vnf')
+    vnf_list=[]
+    for vnf in sorted(get_vnfs.json().iterkeys()):
+        if 'type' in get_vnfs.json()[vnf].keys():
+	    vnf_type = get_vnfs.json()[vnf]['type']
+            vnf_list.append((vnf, vnf_type))
+        else:
+            continue
+    return template('vnf.html', vnf_list=vnf_list, warning=warning)
+
+@route('/vnf/add/', method="POST")
+def vnf_add():
+    return template('vnf_add.html')
+
+@route('/vnf/data/', method='POST')
+def vnf_data():
+    type = request.forms.get('type')
+    instance_name = request.forms.get('instance_name')
+    mgmt_ip_addr = request.forms.get('mgmt_ip_addr')
+    username = request.forms.get('username')
+    password = request.forms.get('password')
+    config = request.forms.get('config')
+    new_vnf={
+            'credentials': {
+                'mgmt_ip_addr': mgmt_ip_addr,
+                'password': password,
+                'username': username
+            },
+            'type': type,
+            'instance_name': instance_name,
+            'config': config
+    }
+    response = requests.put(url='http://localhost:8080/v1.0/vnf/%s' % instance_name, json=new_vnf)
+    if response.status_code == 504:
+        return vnf(warning=response.json().get('warning'))
+    return vnf()
+
+@route('/vnf/update/', method='POST')
+def vnf_update():
+    if request.forms.get('confirmed') == "no":
+        vnf_name = request.forms.get('update_vnf')
+        vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        vnf_json = vnf_data.json()
+        vnf_info = OrderedDict()
+        vnf_info['type'] = vnf_json[vnf_name]['type']
+        vnf_info['instance_name'] = vnf_json[vnf_name]['instance_name']
+        vnf_info['mgmt_ip_addr'] = vnf_json[vnf_name]['credentials']['mgmt_ip_addr']
+        vnf_info['username'] = vnf_json[vnf_name]['credentials']['username']
+        vnf_info['password'] = vnf_json[vnf_name]['credentials']['password']
+        vnf_info['config'] = vnf_json[vnf_name]['config']
+        return template('vnf_update.html', vnf=vnf_info, vnf_name=vnf_name)
+    else:
+        vnf_name = request.forms.get('instance_name')
+        vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        vnf_json = vnf_data.json()
+        vnf_type = vnf_json[vnf_name]['type']
+        vnf_to_add = {'credentials': {}, 
+		'type': vnf_type, 
+		'instance_name': request.forms.get('instance_name'), 
+		'config': request.forms.get('config')}
+        vnf_to_add['credentials'] = {
+            'mgmt_ip_addr': request.forms.get('mgmt_ip_addr'),
+            'username': request.forms.get('username'),
+            'password': request.forms.get('password'),
+        }
+        requests.put(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name, json=vnf_to_add)
+        return vnf()
+
+@route('/vnf/delete/', method='POST')
+def vnf_delete():
+    if request.forms.get('confirmed') == "no":
+        vnf_name = request.forms.get('delete_vnf')
+        vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        vnf_json = vnf_data.json()
+        vnf_info = OrderedDict()
+        vnf_info['type'] = vnf_json[vnf_name]['type']
+        vnf_info['instance_name'] = vnf_name
+        vnf_info['config'] = vnf_json[vnf_name]['config']
+        vnf_info['mgmt_ip_addr'] = vnf_json[vnf_name]['credentials']['mgmt_ip_addr']
+        vnf_info['username'] = vnf_json[vnf_name]['credentials']['username']
+        vnf_info['password'] = vnf_json[vnf_name]['credentials']['password']
+        return template('vnf_delete.html', vnf=vnf_info)
+    else:
+        vnf_name = request.forms.get('instance_name')
+        requests.delete(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        return vnf()
 
 @route('/static/<filename:re:.*\.css>')
 def all_css(filename):
