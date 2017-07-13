@@ -107,14 +107,14 @@
                     <form action="/vnf/update/" method="post">
                       <input type="hidden" name="update_vnf" value={{vnf_list[i][0]}}>
                       <input type="hidden" name="confirmed" value="no">
-                      <input value="Update VNF" type="submit" class="btn btn-default">
+                      <input value="Update" type="submit" class="btn btn-default">
                     </form>
                   </td>
                   <td>
                     <form action="/vnf/delete/" method="post">
                       <input type="hidden" name="delete_vnf" value={{vnf_list[i][0]}}>
                       <input type="hidden" name="confirmed" value="no">
-                      <input value="Delete VNF" type="submit" class="btn btn-default">
+                      <input value="Delete" type="submit" class="btn btn-default">
                     </form>
                   </td>
 
@@ -124,7 +124,7 @@
             <div class="btn-group">
               <form action="/vnf/add/" method="post">
                 <!--button name="vnf_type" type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Add VNF <span class="caret"></span>
+                Add <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
                     <li><a href="/vnf/add/ubuntu/">Ubuntu</a></li>

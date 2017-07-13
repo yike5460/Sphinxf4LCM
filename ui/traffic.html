@@ -96,14 +96,14 @@
                     <form action="/traffic/update/" method="post">
                       <input type="hidden" name="update_traffic" value={{traffic_list[i][0]}}>
                       <input type="hidden" name="confirmed" value="no">
-                      <input value="Update Traffic Element" type="submit" class="btn btn-default">
+                      <input value="Update" type="submit" class="btn btn-default">
                     </form>
                   </td>
                   <td>
                     <form action="/traffic/delete/" method="post">
                       <input type="hidden" name="delete_traffic" value={{traffic_list[i][0]}}>
                       <input type="hidden" name="confirmed" value="no">
-                      <input value="Delete Traffic Element" type="submit" class="btn btn-default">
+                      <input value="Delete" type="submit" class="btn btn-default">
                     </form>
                   </td>
 
@@ -113,7 +113,7 @@
             <div class="btn-group">
               <form action="/traffic/add/" method="post">
                 <button name="traffic_type" type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Add Traffic Element <span class="caret"></span>
+                Add <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
                     <li><a href="/traffic/add/stcv/">STCv</a></li>
