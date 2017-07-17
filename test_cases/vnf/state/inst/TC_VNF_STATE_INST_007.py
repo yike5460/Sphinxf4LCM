@@ -84,6 +84,7 @@ class TC_VNF_STATE_INST_007_001(TC_VNF_STATE_INST_007):
 
     """
 
+
 class TC_VNF_STATE_INST_007_002(TC_VNF_STATE_INST_007):
     """
     TC_VNF_STATE_INST_007_002 VNF Instantiation Failure with missing required virtual resources 'Instructions sets'
@@ -140,7 +141,6 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
         self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)
 
 
-
 class TC_VNF_STATE_INST_007_006(TC_VNF_STATE_INST_007):
     """
     TC_VNF_STATE_INST_007_006 VNF Instantiation Failure with missing required virtual resources 'vStorage type'
@@ -171,7 +171,6 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
             raise TestRunError('vStorage could not be limited')
 
         self.register_for_cleanup(self.vim.terminate_storage_resource_reservation, reservation_id)
-
 
 
 class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
