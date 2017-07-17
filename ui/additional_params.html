@@ -47,7 +47,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Lab Environment</a></li>
+            <li><a href="/">Lab Environment</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Lab Elements<span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -58,7 +58,7 @@
                 <li><a href="/vnf/">Virtual Network Function</a></li>
               </ul>
             </li>
-            <li><a href="/additional/">Additional Parameters</a></li>
+            <li class="active"><a href="/additional/">Additional Parameters</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -69,66 +69,17 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h2>Add environment - please select environment elements:</h2>
+          <h2>Additional Parameters</h2>
           <table class="table table-striped">
-                <form action="/env/data/" method="post">
-                    <tr><td>Environment Name:</td><td><input type="text" name="env_name" style="width: 200px"></td></tr>
-                    <tr><td>Management & Orchestration:</td>
-                      <td>
-                        <select name="mano" style="width: 200px">
-                          <% for element in env_list['mano']: %>
-                            <option value={{element}}>{{element}}</option>
-                          <% end %>
-                        </select>
-                      </td>
-                    </tr>
-                    <tr><td>Virtualized Infrastructure Manager:</td>
-                      <td>
-                        <select name="vim" style="width: 200px">
-                          <% for element in env_list['vim']: %>
-                            <option value={{element}}>{{element}}</option>
-                          <% end %>
-                        </select>
-                      </td>
-                    </tr>
-                    <tr><td>Element Manager:</td>
-                      <td>
-                        <select name="em" style="width: 200px">
-                          <% for element in env_list['em']: %>
-                            <option value={{element}}>{{element}}</option>
-                          <% end %>
-                        </select>
-                      </td>
-                    </tr>
-                    <tr><td>Traffic Parameters:</td>
-                      <td>
-                        <select name="traffic" style="width: 200px">
-                          <% for element in env_list['traffic']: %>
-                            <option value={{element}}>{{element}}</option>
-                          <% end %>
-                        </select>
-                      </td>
-                    </tr>
-                    <tr><td>Virtual Network Function:</td>
-                      <td>
-                        <select name="vnf" style="width: 200px">
-                          <% for element in env_list['vnf']: %>
-                            <option value={{element}}>{{element}}</option>
-                          <% end %>
-                        </select>
-                      </td>
-                    </tr>
+                <form action="/additional/update/" method="post">
+                    <tr><td>Virtual Network Function Descriptor:</td><td><input type="vnfd" name="name" style="width: 200px" readonly value={{additional_params['vnfd']}}></td></tr>
+                    <tr><td>Scaling Policy Name:</td><td><input type="text" name="scaling_policy_name" style="width: 200px" readonly value={{additional_params['scaling_policy_name']}}></td></tr>
+                    <tr><td>Desired Scale Out Steps:</td><td><input type="number" name="desired_scale_out_steps" style="width: 200px" readonly value={{additional_params['desired_scale_out_steps']}}></td></tr>
           </table>
             <div class="btn-group">
-                  <input value="Add" type="submit" class="btn btn-default">
+                  <input value="Update" type="submit" class="btn btn-default">
                   </input>
                 </form>
-            </div>
-            <div class="btn-group">
-              <form action="/">
-                <input type="submit" value="Cancel" class="btn btn-default">
-                </input>
-              </form>
             </div>
       </div>
 
