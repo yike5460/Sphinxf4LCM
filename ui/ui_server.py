@@ -1,4 +1,4 @@
-from bottle import route, run, request, template, static_file
+from bottle import route, run, request, template, static_file, redirect
 import requests
 import os
 from collections import OrderedDict
@@ -837,6 +837,10 @@ def additional_update():
             'desired_scale_out_steps': desired_scale_out_steps.json()
         }
         return template('additional_params_update.html', additional_params = additional_params)
+
+@route('/twister/')
+def twister():
+    redirect("go_to_twister")
 
 @route('/static/<filename:re:.*\.css>')
 def all_css(filename):
