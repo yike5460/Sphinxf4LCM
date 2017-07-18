@@ -89,8 +89,17 @@
                 <% for env in env_list.keys(): %>
               <tr>
                   <td>{{env}}</td>
-                  <% for i in range(0,6): %>
+                  <% for i in range(0,5): %>
+                    <% if env_list[env][i] == 'N/A': %>
+                      <td><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></td>
+                    <% else: %>
                     <td>{{env_list[env][i]}}</td>
+                    <% end %>
+                  <% end %>
+                  <% if env_list[env][5] == 'Yes': %>
+                    <td><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></td>
+                  <% else: %>
+                    <td><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> </td>
                   <% end %>
                 <td>
                   <form action="/env/update/" method="post">

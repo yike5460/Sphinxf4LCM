@@ -802,11 +802,11 @@ def additional():
     This function displays the additional parameters that a customer must setup.
     """
 
-    vnfd = requests.get(url='http://localhost:8080/v1.0/config/vnfd')
+    vnfd_id = requests.get(url='http://localhost:8080/v1.0/config/vnfd-id')
     scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
     desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
     additional_params = {
-        'vnfd': vnfd.json(),
+        'vnfd-id': vnfd_id.json(),
         'scaling_policy_name': scaling_policy_name.json(),
         'desired_scale_out_steps': desired_scale_out_steps.json()
     }
@@ -820,19 +820,19 @@ def additional_update():
 
     confirmed = request.forms.get('confirmed')
     if confirmed == 'yes':
-        vnfd = request.forms.get('vnfd')
+        vnfd_id = request.forms.get('vnfd_id')
         scaling_policy_name = request.forms.get('scaling_policy_name')
         desired_scale_out_steps = request.forms.get('desired_scale_out_steps')
-        requests.put(url='http://localhost:8080/v1.0/config/vnfd', json=vnfd)
+        requests.put(url='http://localhost:8080/v1.0/config/vnfd-id', json=vnfd_id)
         requests.put(url='http://localhost:8080/v1.0/config/scaling_policy_name', json=scaling_policy_name)
         requests.put(url='http://localhost:8080/v1.0/config/desired_scale_out_steps', json=desired_scale_out_steps)
         return additional()
     else:
-        vnfd = requests.get(url='http://localhost:8080/v1.0/config/vnfd')
+        vnfd_id = requests.get(url='http://localhost:8080/v1.0/config/vnfd-id')
         scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
         desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
         additional_params = {
-            'vnfd': vnfd.json(),
+            'vnfd-id': vnfd_id.json(),
             'scaling_policy_name': scaling_policy_name.json(),
             'desired_scale_out_steps': desired_scale_out_steps.json()
         }
@@ -878,5 +878,15 @@ def all_js(filename):
 
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/js/")))
+
+@route('/fonts/<font>')
+def all_img(font):
+    """
+    This function is for bottle to find the path to the font files.
+    :param font: Name of the font file
+    """
+
+    return static_file(font,
+                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/fonts/")))
 
 run(host='0.0.0.0', port=8081, debug=False)
