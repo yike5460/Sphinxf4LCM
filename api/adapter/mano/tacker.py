@@ -104,29 +104,34 @@ class TackerManoAdapter(object):
             return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
 
     @log_entry_exit(LOG)
-    def get_scaling_properties(self, vnfd_id, scaling_policy_name):
-        """
-        This function returns the scaling properties for the provided scaling policy from the VNFD with the provided ID.
-        """
+    def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get scaling details for the provided scaling policy name.
-        for sp in vnfd['topology_template']['policies']:
-            if scaling_policy_name in sp.keys():
-                increment = sp[scaling_policy_name]['properties']['increment']
-                targets = sp[scaling_policy_name]['properties']['targets']
-                min_instances = sp[scaling_policy_name]['properties']['min_instances']
-                max_instances = sp[scaling_policy_name]['properties']['max_instances']
-                default_instances = sp[scaling_policy_name]['properties']['default_instances']
-                cooldown = sp[scaling_policy_name]['properties'].get('cooldown', 120)
-                break
+        if 'policies' in vnfd['topology_template'].keys():
+            for sp in vnfd['topology_template']['policies']:
+                if scaling_policy_name in sp.keys():
+                    # TOSCA policies regarding Tacker scaling indicate that all scaling properties are required, except
+                    # the cooldown, which has a default value of 120 seconds
+                    sp_properties = dict()
+                    sp_properties['increment'] = sp[scaling_policy_name]['properties']['increment']
+                    sp_properties['targets'] = sp[scaling_policy_name]['properties']['targets']
+                    sp_properties['min_instances'] = sp[scaling_policy_name]['properties']['min_instances']
+                    sp_properties['max_instances'] = sp[scaling_policy_name]['properties']['max_instances']
+                    sp_properties['default_instances'] = sp[scaling_policy_name]['properties']['default_instances']
+                    sp_properties['cooldown'] = sp[scaling_policy_name]['properties'].get('cooldown', 120)
+                    break
+            else:
+                raise TackerManoAdapterError('No scaling policy named %s in the VNFD with ID %s'
+                                             % (scaling_policy_name, vnfd_id))
         else:
-            raise TackerManoAdapterError('No scaling policy named %s in the VNFD with ID %s'
-                                         % (scaling_policy_name, vnfd_id))
-
-        sp_properties = (increment, targets, min_instances, max_instances, default_instances, cooldown)
+            raise TackerManoAdapterError('VNFD with ID %s does not have a scaling policy' % vnfd_id)
 
         return sp_properties
+
+    @log_entry_exit(LOG)
+    def get_nsd_scaling_properties(self, nsd_id, scaling_policy_name):
+        raise NotImplementedError
 
     @log_entry_exit(LOG)
     def limit_compute_resources_for_ns_scaling(self, nsd_id, scaling_policy_name, desired_scale_out_steps,
@@ -140,8 +145,8 @@ class TackerManoAdapter(object):
 
         # Get the scaling policy properties, if present.
         if scaling_policy_name is not None:
-            increment, targets, min_instances, max_instances, default_instances, cooldown = self.get_scaling_properties(
-                                                                                           vnfd_id, scaling_policy_name)
+            sp = self.get_vnfd_scaling_properties(vnfd_id, scaling_policy_name)
+            default_instances = sp['default_instances']
         else:
             default_instances = 1
 
@@ -183,8 +188,8 @@ class TackerManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
         # Get the scaling policy properties, if present.
         if scaling_policy_name is not None:
-            increment, targets, min_instances, max_instances, default_instances, cooldown = self.get_scaling_properties(
-                                                                                           vnfd_id, scaling_policy_name)
+            sp = self.get_vnfd_scaling_properties(vnfd_id, scaling_policy_name)
+            default_instances = sp['default_instances']
         else:
             default_instances = 1
         # Get the resources required by one instance of the VNF
@@ -205,8 +210,9 @@ class TackerManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the scaling policy properties.
-        increment, targets, min_instances, max_instances, default_instances, cooldown = self.get_scaling_properties(
-                                                                                           vnfd_id, scaling_policy_name)
+        sp = self.get_vnfd_scaling_properties(vnfd_id, scaling_policy_name)
+        increment = sp['increment']
+        default_instances = sp['default_instances']
 
         # Get the resources required by one instance of the VNF
         # Currently, Tacker scales all VDUs, regardless of the those mentioned in the targets list
