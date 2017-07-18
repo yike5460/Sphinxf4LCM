@@ -159,15 +159,15 @@ class TestCase(object):
             self._LOG.debug(e.message)
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = e.error_info
-        except ApiError:
+        except ApiError as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = 'A problem occurred in the VNF LifeCycle Validation API'
+            self.tc_result['error_info'] = e.message
             raise
-        except:
+        except Exception as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = 'An unhandled exception appeared'
+            self.tc_result['error_info'] = e.message
             raise
         finally:
             try:
