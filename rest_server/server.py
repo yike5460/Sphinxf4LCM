@@ -343,8 +343,8 @@ def remove_config(name):
     _delete_config(name)
 
 
-@route('/v1.0/validate/<resource:re:vim|mano|em>/<name>', method="PUT")
-def validate(resource, name):
+@route('/v1.0/validate/<resource:re:vim|mano>', method="PUT")
+def validate(resource):
     """
     Validate parameters for connecting to resource.
     """
