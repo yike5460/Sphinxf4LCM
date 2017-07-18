@@ -5,7 +5,13 @@ import uuid
 from datetime import datetime
 from multiprocessing import Process, Queue
 
-from bottle import route, run, request, response
+from gevent import monkey
+
+monkey.patch_all()
+
+from bottle import route, run, request, response, abort
+from geventwebsocket import WebSocketError
+from geventwebsocket.handler import WebSocketHandler
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
@@ -137,9 +143,8 @@ def do_exec():
             tc_input[resource_type + '_params'] = resource_params
 
         tc_input['vnfd_id'] = _read_config('vnfd-id')
-
-        tc_input['vnf'] = dict()
-        tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
+        tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
+        tc_input['vnf_params']['instance_name'] = tc_exec_request['tc_name']
 
     execution_id = str(uuid.uuid4())
     queue = Queue()
@@ -357,4 +362,26 @@ def validate(resource):
         response.status = 200
         return {'message': "Object sucessfully validated."}
 
-run(host='0.0.0.0', port=8080, debug=False)
+
+@route('/websocket')
+def handle_websocket():
+    """
+    WebSocket endpoint that receives the test case execution ID, waits for the process corresponding to the received
+    execution ID to finish and sends a message to the client.
+    """
+    wsock = request.environ.get('wsgi.websocket')
+    if not wsock:
+        abort(400, 'Expected WebSocket request')
+    while True:
+        try:
+            execution_id = wsock.receive()
+            execution_process = execution_processes.get(execution_id)
+            if execution_process is not None:
+                execution_process.join()
+                wsock.send('DONE')
+            else:
+                wsock.send('NOT_FOUND')
+        except WebSocketError:
+            break
+
+run(host='0.0.0.0', port=8080, debug=False, server='gevent', handler_class=WebSocketHandler)
