@@ -298,13 +298,6 @@ def set_resource(resource, name):
 
     _write_resources(resource, all_resources)
 
-    if resource in ['vim', 'mano']:
-        try:
-            construct_adapter(request.json['type'], resource, **request.json['client_config'])
-        except Exception as e:
-            response.status = 504
-            return {'warning': e.message}
-
     return {name: request.json}
 
 
@@ -349,5 +342,19 @@ def remove_config(name):
     """
     _delete_config(name)
 
+
+@route('/v1.0/validate/<resource:re:vim|mano|em>/<name>', method="PUT")
+def validate(resource, name):
+    """
+    Validate parameters for connecting to resource.
+    """
+    if resource in ['vim', 'mano']:
+        try:
+            construct_adapter(request.json['type'], resource, **request.json['client_config'])
+        except Exception as e:
+            response.status = 504
+            return {'warning': e.message}
+        response.status = 200
+        return {'message': "Object sucessfully validated."}
 
 run(host='0.0.0.0', port=8080, debug=False)
