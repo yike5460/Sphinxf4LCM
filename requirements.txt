@@ -8,6 +8,7 @@ cmd2==0.7.3
 debtcollector==1.15.0
 funcsigs==1.0.2
 futures==3.1.1
+gevent-websocket==0.10.1
 idna==2.5
 iso8601==0.1.11
 keystoneauth1==2.21.0
@@ -48,4 +49,5 @@ stcrestclient==1.6.2
 stevedore==1.23.0
 unicodecsv==0.14.1
 urllib3==1.21.1
+websocket-client==0.44.0
 wrapt==1.10.10
