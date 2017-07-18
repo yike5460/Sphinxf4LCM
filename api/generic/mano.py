@@ -46,6 +46,32 @@ class Mano(object):
         return self.mano_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
+    def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
+        """
+        This function returns the scaling properties for the provided scaling policy name from the VNFD with the
+        provided ID.
+
+        :param vnfd_id:             ID of the VNFD to get the scaling properties from.
+        :param scaling_policy_name: Name of the scaling policy to get the properties for.
+        :return:                    Dictionary with the scaling properties.
+        """
+
+        return self.mano_adapter.get_vnfd_scaling_properties(vnfd_id, scaling_policy_name)
+
+    @log_entry_exit(LOG)
+    def get_nsd_scaling_properties(self, nsd_id, scaling_policy_name):
+        """
+        This function returns the scaling properties for the provided scaling policy name from the NSD with the
+        provided ID.
+
+        :param nsd_id:              ID of the NSD to get the scaling properties from.
+        :param scaling_policy_name: Name of the scaling policy to get the properties for.
+        :return:                    Dictionary with the scaling properties.
+        """
+
+        return self.mano_adapter.get_nsd_scaling_properties(nsd_id, scaling_policy_name)
+
+    @log_entry_exit(LOG)
     def limit_compute_resources_for_ns_scaling(self, nsd_id, scaling_policy_name, desired_scale_out_steps,
                                                generic_vim_object):
         """
