@@ -574,7 +574,7 @@ def traffic_data():
         right_traffic_addr = request.forms.get('right_traffic_addr')
         right_traffic_plen = request.forms.get('right_traffic_plen')
         right_traffic_gw = request.forms.get('right_traffic_gw')
-        port_speed = request.forms.get('port_speed')
+        port_speed = int(request.forms.get('port_speed'))
         new_traffic={
                 'client_config': {
                     'lab_server_addr': lab_server_addr,
@@ -648,7 +648,7 @@ def traffic_update():
             'right_traffic_addr': request.forms.get('right_traffic_addr'),
             'right_traffic_plen': request.forms.get('right_traffic_plen'),
             'right_traffic_gw': request.forms.get('right_traffic_gw'),
-            'port_speed': request.forms.get('port_speed')
+            'port_speed': int(request.forms.get('port_speed'))
         }
         requests.put(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name, json=traffic_to_add)
         return traffic()
@@ -840,7 +840,15 @@ def additional_update():
 
 @route('/twister/')
 def twister():
-    redirect("go_to_twister")
+    twister_url_raw = requests.get(url='http://localhost:8080/v1.0/config/twister_url')
+    twister_url = twister_url_raw.json()
+    redirect(twister_url)
+
+@route('/kibana/')
+def kibana():
+    kibana_url_raw = requests.get(url='http://localhost:8080/v1.0/config/kibana-url')
+    kibana_url = kibana_url_raw.json()
+    redirect(kibana_url)
 
 @route('/static/<filename:re:.*\.css>')
 def all_css(filename):
