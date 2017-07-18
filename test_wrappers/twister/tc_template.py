@@ -1,9 +1,5 @@
-import json
-import time
-import os
-from datetime import datetime
-
 import requests
+from websocket import create_connection
 
 
 def twister_run():
@@ -14,9 +10,6 @@ def twister_run():
 
     # Set VNF Lifecycle Verification hostname
     vnf_lcv_srv = 'vnflcv'
-
-    # Set poll interval
-    poll_interval = 5
 
     # Get run ID
     run_id_file = '/home/spirent/twister/resources/runid/current'
@@ -40,21 +33,26 @@ def twister_run():
         _RESULT = 'FAIL'
         return
 
-    # Poll on test case status
-    elapsed_time = 0
-    while True:
-        server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec/' + execution_id)
-        data = server_response.json()
-        tc_status = data['status']
-        if tc_status in ['DONE', 'NOT_FOUND']:
-            tc_result = data.get('tc_result', {})
-            print
-            print 'Test case overall status: %s' % tc_result.get('overall_status', 'N/A')
-            print 'Test case error info: %s' % tc_result.get('error_info', 'N/A')
-            break
-        time.sleep(poll_interval)
-        elapsed_time += poll_interval
-        print 'Test case execution pending. Elapsed time: %s seconds' % elapsed_time
+    # Create WebSocket
+    ws = create_connection('ws://' + vnf_lcv_srv + ':8080/websocket')
+
+    print 'Test case execution pending'
+
+    # Send the execution ID back to the server so that it knows which process to wait for to finish
+    ws.send(execution_id)
+
+    # Wait for the server to indicate that the server finished executing the test
+    ws.recv()
+
+    # Get the results for this execution
+    server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec/' + execution_id)
+    data = server_response.json()
+    tc_status = data['status']
+    if tc_status in ['DONE', 'NOT_FOUND']:
+        tc_result = data.get('tc_result', {})
+        print
+        print 'Test case overall status: %s' % tc_result.get('overall_status', 'N/A')
+        print 'Test case error info: %s' % tc_result.get('error_info', 'N/A')
 
     durations = dict()
     durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
