@@ -55,6 +55,9 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_SCALE_OUT_003__MANO_MANUAL')
 
+        # Get scaling policy properties
+        sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate the NS
         # --------------------------------------------------------------------------------------------------------------
@@ -147,8 +150,8 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         scale_ns_data = ScaleNsData()
         scale_ns_data.scale_ns_by_steps_data = ScaleNsByStepsData()
         scale_ns_data.scale_ns_by_steps_data.scaling_direction = 'scale_out'
-        scale_ns_data.scale_ns_by_steps_data.aspect_id = self.tc_input['scaling']['aspect']
-        scale_ns_data.scale_ns_by_steps_data.number_of_steps = self.tc_input['scaling']['increment']
+        scale_ns_data.scale_ns_by_steps_data.aspect_id = sp['targets']
+        scale_ns_data.scale_ns_by_steps_data.number_of_steps = sp['increment']
 
         self.time_record.START('scale_out_ns')
         if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data) \
@@ -171,12 +174,10 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         # 7. Validate NS has resized to the next level
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the next level')
-        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances'] + \
-                self.tc_input['scaling']['increment']:
+        if len(ns_info.vnf_info_id) != sp['default_instances'] + sp['increment']:
             raise TestRunError('VNFs not added after NS scaled out')
 
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
-                                                 self.tc_input['scaling']['increment']
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Determine if and length of service disruption
@@ -248,9 +249,9 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has released the resources and decreased the VNFs')
         ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
-        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances']:
+        if len(ns_info.vnf_info_id) != sp['default_instances']:
             raise TestRunError('NS did not scale in')
-        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['default_instances']
+        self.tc_result['scaling_in']['level'] = sp['default_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 13. Validate traffic drop occurred

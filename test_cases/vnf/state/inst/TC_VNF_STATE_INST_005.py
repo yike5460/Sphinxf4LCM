@@ -38,7 +38,7 @@ class TC_VNF_STATE_INST_005(TestCase):
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
         self.em = Em(vendor=self.tc_input['em_params']['type'], **self.tc_input['em_params']['client_config'])
-        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
+        self.vnf = Vnf(vendor=self.tc_input['vnf_params']['type'])
         self.traffic = Traffic(self.tc_input['traffic_params']['type'],
                                **self.tc_input['traffic_params']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
@@ -65,9 +65,9 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                                                 vnf_instance_description=None)
+                                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']),
+                                          vnf_instance_description=None)
 
         self.time_record.END('instantiate_vnf')
 
@@ -96,7 +96,7 @@ class TC_VNF_STATE_INST_005(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Modifying the VNF configuration')
         self.time_record.START('update_vnf')
-        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.tc_input['vnf']['config']) != \
+        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.tc_input['vnf_params']['config']) != \
                 constants.OPERATION_SUCCESS:
             raise TestRunError('EM could not modify the VNF configuration')
 
@@ -133,15 +133,15 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Validating configuration has NOT been applied by the EM to the VNF')
         # The function that checks if the config has been applied is a stub function and always returns True.
         # The commented if statement is the correct line. Also adding a line so that the test does not fail.
-        # if self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
-        if not self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
+        # if self.vnf.config_applied(**self.tc_input['vnf_params']['credentials']):
+        if not self.vnf.config_applied(**self.tc_input['vnf_params']['credentials']):
             raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating license has been applied to the VNF')
-        if not self.vnf.license_applied(**self.tc_input['vnf']['credentials']):
+        if not self.vnf.license_applied(**self.tc_input['vnf_params']['credentials']):
             raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------

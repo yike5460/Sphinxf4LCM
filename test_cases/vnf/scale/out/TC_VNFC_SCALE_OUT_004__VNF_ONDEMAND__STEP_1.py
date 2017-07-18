@@ -55,6 +55,9 @@ class TC_VNFC_SCALE_OUT_004__VNF_ONDEMAND__STEP_1(TestCase):
     def run(self):
         LOG.info('Starting TC_VNFC_SCALE_OUT_004__VNF_ONDEMAND__STEP_1')
 
+        # Get scaling policy properties
+        sp = self.mano.get_vnfd_scaling_properties(self.tc_input['vnfd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Ensure NFVI has vResources so that the VNF can be scaled out only desired_scale_out_steps times
         # --------------------------------------------------------------------------------------------------------------
@@ -76,9 +79,9 @@ class TC_VNFC_SCALE_OUT_004__VNF_ONDEMAND__STEP_1(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                                                 vnf_instance_description=None)
+                                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']),
+                                          vnf_instance_description=None)
 
         self.time_record.END('instantiate_vnf')
 
@@ -197,12 +200,10 @@ class TC_VNFC_SCALE_OUT_004__VNF_ONDEMAND__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max (limited by NFVI)')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances'] + \
-                                                                     self.tc_input['scaling']['increment'] * \
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment'] * \
                                                                      self.tc_input['desired_scale_out_steps']:
             raise TestRunError('VNF scaled out')
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
-                                                 self.tc_input['desired_scale_out_steps']
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + self.tc_input['desired_scale_out_steps']
 
         # --------------------------------------------------------------------------------------------------------------
         # 11. Determine if and length of service disruption

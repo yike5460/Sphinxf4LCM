@@ -52,6 +52,9 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
 
+        # Get scaling policy properties
+        sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Ensure NFVI has not enough vResources for the NS to be scaled out
         # --------------------------------------------------------------------------------------------------------------
@@ -156,8 +159,8 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         scale_ns_data = ScaleNsData()
         scale_ns_data.scale_ns_by_steps_data = ScaleNsByStepsData()
         scale_ns_data.scale_ns_by_steps_data.scaling_direction = 'scale_out'
-        scale_ns_data.scale_ns_by_steps_data.aspect_id = self.tc_input['scaling']['aspect']
-        scale_ns_data.scale_ns_by_steps_data.number_of_steps = self.tc_input['scaling']['increment']
+        scale_ns_data.scale_ns_by_steps_data.aspect_id = sp['targets']
+        scale_ns_data.scale_ns_by_steps_data.number_of_steps = sp['increment']
 
         self.time_record.START('scale_out_ns')
         if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data) \
@@ -180,9 +183,9 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         # 8. Validate NS has not resized
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has not resized')
-        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances']:
+        if len(ns_info.vnf_info_id) != sp['default_instances']:
             raise TestRunError('NS did not scale out to the max NFVI limit')
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances']
+        self.tc_result['scaling_out']['level'] = sp['default_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Determine is and length of service disruption

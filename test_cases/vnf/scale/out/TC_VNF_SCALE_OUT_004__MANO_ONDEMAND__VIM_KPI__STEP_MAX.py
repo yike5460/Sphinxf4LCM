@@ -56,6 +56,9 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX')
 
+        # Get scaling policy properties
+        sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Ensure NFVI has not enough vResources for the NS to be scaled out
         # --------------------------------------------------------------------------------------------------------------
@@ -216,9 +219,9 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         # 10. Validate NS has not resized
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has not resized')
-        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances']:
+        if len(ns_info.vnf_info_id) != sp['default_instances']:
             raise TestRunError('NS did not scale out to the max NFVI limit')
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances']
+        self.tc_result['scaling_out']['level'] = sp['default_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 11. Determine is and length of service disruption

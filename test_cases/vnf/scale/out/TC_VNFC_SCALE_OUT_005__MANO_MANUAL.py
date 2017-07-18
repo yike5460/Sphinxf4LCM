@@ -60,15 +60,18 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         # TODO: Check the VNFD to see if hardware acceleration is present. This check will be added after we create an
         # internal representation for the VNFD.
 
+        # Get scaling policy properties
+        sp = self.mano.get_vnfd_scaling_properties(self.tc_input['vnfd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                                                 vnf_instance_description=None)
+                                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']),
+                                          vnf_instance_description=None)
 
         self.time_record.END('instantiate_vnf')
 
@@ -136,8 +139,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         LOG.info('Triggering a resize of the VNF resources to use more specialized hardware by instructing the MANO to '
                  'scale out the VNF')
         self.time_record.START('scale_out_vnf')
-        if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='out',
-                                    aspect_id=self.tc_input['scaling']['aspect'],
+        if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='out', aspect_id=sp['targets'],
                                     additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_out']['status'] = 'Fail'
@@ -156,12 +158,10 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['default_instances'] + \
-                                                                     self.tc_input['scaling']['increment']:
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment']:
             raise TestRunError('VNF did not scale out')
 
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
-                                                 self.tc_input['scaling']['increment']
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Start the normal traffic load
@@ -225,7 +225,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         LOG.info('Triggering a resize of the VNF resources to use less specialized hardware by instructing the MANO to '
                  'scale in the VNF')
         self.time_record.START('scale_in_vnf')
-        if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='in', aspect_id=self.tc_input['scaling']['aspect'],
+        if self.mano.vnf_scale_sync(self.vnf_instance_id, scale_type='in', aspect_id=sp['targets'],
                                     additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_in']['status'] = 'Fail'
@@ -244,10 +244,10 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized and has decreased its capacity and removed VNFCs')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.tc_input['scaling']['min_instances']:
+        if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['min_instances']:
             raise TestRunError('VNF did not scale in')
 
-        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['min_instances']
+        self.tc_result['scaling_in']['level'] = sp['min_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 13. Validate that MANO has allocated less specialized hardware resources and the previous specialized hardware

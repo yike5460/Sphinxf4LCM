@@ -49,6 +49,9 @@ class TC_VNF_SCALE_OUT_002__MANO_MANUAL(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_SCALE_OUT_002__MANO_MANUAL')
 
+        # Get scaling policy properties
+        sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate the NS
         # --------------------------------------------------------------------------------------------------------------
@@ -140,8 +143,8 @@ class TC_VNF_SCALE_OUT_002__MANO_MANUAL(TestCase):
         scale_ns_data = ScaleNsData()
         scale_ns_data.scale_ns_by_steps_data = ScaleNsByStepsData()
         scale_ns_data.scale_ns_by_steps_data.scaling_direction = 'scale_out'
-        scale_ns_data.scale_ns_by_steps_data.aspect_id = self.tc_input['scaling']['aspect']
-        scale_ns_data.scale_ns_by_steps_data.number_of_steps = self.tc_input['scaling']['max_instances']
+        scale_ns_data.scale_ns_by_steps_data.aspect_id = sp['targets']
+        scale_ns_data.scale_ns_by_steps_data.number_of_steps = sp['max_instances']
 
         self.time_record.START('scale_out_ns')
         if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data) \
@@ -164,9 +167,9 @@ class TC_VNF_SCALE_OUT_002__MANO_MANUAL(TestCase):
         # 7. Validate NS has resized to the max
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the max')
-        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['max_instances']:
+        if len(ns_info.vnf_info_id) != sp['max_instances']:
             raise TestRunError('NS did not scale out to the max')
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['max_instances']
+        self.tc_result['scaling_out']['level'] = sp['max_instances']
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Determine if and length of service disruption

@@ -55,6 +55,9 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND')
 
+        # Get scaling policy properties
+        sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Instantiate the NS
         # --------------------------------------------------------------------------------------------------------------
@@ -171,8 +174,7 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND(TestCase):
         elapsed_time = 0
         while elapsed_time < constants.SCALE_INTERVAL:
             ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
-            if len(ns_info.vnf_info_id) == self.tc_input['scaling']['default_instances'] + \
-                    self.tc_input['scaling']['increment']:
+            if len(ns_info.vnf_info_id) == sp['default_instances'] + sp['increment']:
                 break
             else:
                 time.sleep(constants.POLL_INTERVAL)
@@ -183,8 +185,7 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND(TestCase):
 
         self.time_record.END('scale_out_ns')
 
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
-                                                 self.tc_input['scaling']['increment']
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
@@ -264,7 +265,7 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND(TestCase):
         elapsed_time = 0
         while elapsed_time < constants.SCALE_INTERVAL:
             ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
-            if len(ns_info.vnf_info_id) == self.tc_input['scaling']['default_instances']:
+            if len(ns_info.vnf_info_id) == sp['default_instances']:
                 break
             else:
                 time.sleep(constants.POLL_INTERVAL)
@@ -275,7 +276,7 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND(TestCase):
 
         self.time_record.END('scale_in_ns')
 
-        self.tc_result['scaling_in']['level'] = self.tc_input['scaling']['default_instances']
+        self.tc_result['scaling_in']['level'] = sp['default_instances']
 
         self.tc_result['events']['scale_in_ns']['duration'] = self.time_record.duration('scale_in_ns')
 

@@ -50,6 +50,9 @@ class TC_VNF_COMPLEX_001(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_COMPLEX_001')
 
+        # Get scaling policy properties
+        sp = self.mano.get_vnfd_scaling_properties(self.tc_input['vnfd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Start the max traffic load
         # --------------------------------------------------------------------------------------------------------------
@@ -67,9 +70,9 @@ class TC_VNF_COMPLEX_001(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                                                 vnf_instance_description=None)
+                                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']),
+                                          vnf_instance_description=None)
 
         self.time_record.END('instantiate_vnf')
 
@@ -111,7 +114,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         elapsed_time = 0
         while elapsed_time < constants.SCALE_INTERVAL:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
-            if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == self.tc_input['scaling']['max_instances']:
+            if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['max_instances']:
                 break
             else:
                 time.sleep(constants.POLL_INTERVAL)
@@ -122,7 +125,7 @@ class TC_VNF_COMPLEX_001(TestCase):
 
         self.time_record.END('scale_out_vnf')
 
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['max_instances']
+        self.tc_result['scaling_out']['level'] = sp['max_instances']
 
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 

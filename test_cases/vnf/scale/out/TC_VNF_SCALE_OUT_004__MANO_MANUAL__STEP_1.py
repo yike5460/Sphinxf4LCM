@@ -54,6 +54,9 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
     def run(self):
         LOG.info('Starting TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1')
 
+        # Get scaling policy properties
+        sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
+
         # --------------------------------------------------------------------------------------------------------------
         # 1. Ensure NFVI has vResources so that the NS can be scaled out only desired_scale_out_steps times
         # --------------------------------------------------------------------------------------------------------------
@@ -159,8 +162,8 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         scale_ns_data = ScaleNsData()
         scale_ns_data.scale_ns_by_steps_data = ScaleNsByStepsData()
         scale_ns_data.scale_ns_by_steps_data.scaling_direction = 'scale_out'
-        scale_ns_data.scale_ns_by_steps_data.aspect_id = self.tc_input['scaling']['aspect']
-        scale_ns_data.scale_ns_by_steps_data.number_of_steps = self.tc_input['scaling']['increment']
+        scale_ns_data.scale_ns_by_steps_data.aspect_id = sp['targets']
+        scale_ns_data.scale_ns_by_steps_data.number_of_steps = sp['increment']
 
         self.time_record.START('scale_out_ns')
         # We are scaling the NS (desired_scale_out_steps + 1) times and check at the next step that the NS scaled out
@@ -170,7 +173,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
                     != constants.OPERATION_SUCCESS:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('MANO could not scale out the NS to the next level')
-            time.sleep(self.tc_input['scaling']['cooldown'])
+            time.sleep(sp['cooldown'])
 
         self.time_record.END('scale_out_ns')
 
@@ -188,11 +191,10 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the max (limited by NFVI)')
         # The NS should have default_instances + desired_scale_out_steps * increment VNFs after scale out
-        if len(ns_info.vnf_info_id) != self.tc_input['scaling']['default_instances'] + \
-                                       self.tc_input['scaling']['increment'] * self.tc_input['desired_scale_out_steps']:
+        if len(ns_info.vnf_info_id) != sp['default_instances'] + sp['increment'] * \
+                                       self.tc_input['desired_scale_out_steps']:
             raise TestRunError('NS did not scale out to the max NFVI limit')
-        self.tc_result['scaling_out']['level'] = self.tc_input['scaling']['default_instances'] + \
-                                                 self.tc_input['scaling']['increment'] * \
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment'] * \
                                                  self.tc_input['desired_scale_out_steps']
 
         # --------------------------------------------------------------------------------------------------------------
