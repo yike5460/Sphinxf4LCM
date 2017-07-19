@@ -191,39 +191,6 @@ def mano_add(mano_type, validation={'warning': None, 'message': None}, mano=None
     return template('mano_add.html', mano_type=mano_type, validation=validation, mano=mano, name=name)
 
 
-@route('/mano/data/', method='POST')
-def mano_data():
-    """
-    This function is used by the mano_add function to send the new data to the REST server with 'PUT'
-    command.
-    """
-
-    type = request.forms.get('type')
-    if type == 'tacker':
-        name = request.forms.get('name')
-        user_domain_name = request.forms.get('user_domain_name')
-        username = request.forms.get('username')
-        password = request.forms.get('password')
-        project_domain_name = request.forms.get('project_domain_name')
-        project_name = request.forms.get('project_name')
-        auth_url = request.forms.get('auth_url')
-        identity_api_version = request.forms.get('identity_api_version')
-        new_mano = {
-            'client_config': {
-                'auth_url': auth_url,
-                'identity_api_version': identity_api_version,
-                'password': password,
-                'project_domain_name': project_domain_name,
-                'project_name': project_name,
-                'user_domain_name': user_domain_name,
-                'username': username
-            },
-            'type': type
-        }
-        requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
-    return mano()
-
-
 @route('/mano/validate/', method='POST')
 def mano_validate():
     """
@@ -240,7 +207,7 @@ def mano_validate():
         project_domain_name = request.forms.get('project_domain_name')
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
-        identity_api_version = request.forms.get('identity_api_version')
+        identity_api_version = int(request.forms.get('identity_api_version'))
         (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
                                        password=password, project_domain_name=project_domain_name,
                                        project_name=project_name, auth_url=auth_url,
@@ -318,79 +285,20 @@ def vim(warning=None):
     return template('vim.html', vim_list=vim_list, warning=warning)
 
 
-@route('/vim/data/', method='POST')
-def vim_data():
-    """
-    This function is used by the vim_add function to send the new data to the REST server with 'PUT'
-    command.
-    """
-
-    type = request.forms.get('type')
-    if type == 'openstack':
-        name = request.forms.get('name')
-        user_domain_name = request.forms.get('user_domain_name')
-        username = request.forms.get('username')
-        password = request.forms.get('password')
-        project_domain_name = request.forms.get('project_domain_name')
-        project_name = request.forms.get('project_name')
-        auth_url = request.forms.get('auth_url')
-        identity_api_version = request.forms.get('identity_api_version')
-        new_vim = {
-            'client_config': {
-                'auth_url': auth_url,
-                'identity_api_version': identity_api_version,
-                'password': password,
-                'project_domain_name': project_domain_name,
-                'project_name': project_name,
-                'user_domain_name': user_domain_name,
-                'username': username
-            },
-            'type': type
-        }
-    response = requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
-    if response.status_code == 504:
-        return vim(warning=response.json().get('warning'))
-
-    return vim()
-
-
 @route('/vim/update/', method='POST')
-def vim_update():
+def vim_update(validation={'warning': None, 'message': None}, vim=None, name=None):
     """
     This function displays the required form to update an existing VIM platform.
     """
 
-    if request.forms.get('confirmed') == "no":
-        vim_name = request.forms.get('update_vim')
-        vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name)
-        vim_json = vim_data.json()
-        vim_info = OrderedDict()
-        vim_info['type'] = vim_json[vim_name]['type']
-        vim_info['user_domain_name'] = vim_json[vim_name]['client_config']['user_domain_name']
-        vim_info['username'] = vim_json[vim_name]['client_config']['username']
-        vim_info['password'] = vim_json[vim_name]['client_config']['password']
-        vim_info['project_domain_name'] = vim_json[vim_name]['client_config']['project_domain_name']
-        vim_info['project_name'] = vim_json[vim_name]['client_config']['project_name']
-        vim_info['auth_url'] = vim_json[vim_name]['client_config']['auth_url']
-        vim_info['identity_api_version'] = vim_json[vim_name]['client_config']['identity_api_version']
-        return template('vim_update.html', vim=vim_info, vim_name=vim_name)
+    if vim is None:
+        name = request.forms.get('update_vim')
+        vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % name)
+        vim_json = vim_data.json()[name]
+        return template('vim_update.html', validation=validation, vim=vim_json, name=name)
     else:
-        vim_name = request.forms.get('name')
-        vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name)
-        vim_json = vim_data.json()
-        vim_type = vim_json[vim_name]['type']
-        vim_to_add = {'client_config': {}, 'type': vim_type}
-        vim_to_add['client_config'] = {
-            'auth_url': request.forms.get('auth_url'),
-            'identity_api_version': request.forms.get('identity_api_version'),
-            'password': request.forms.get('password'),
-            'project_domain_name': request.forms.get('project_domain_name'),
-            'project_name': request.forms.get('project_name'),
-            'user_domain_name': request.forms.get('user_domain_name'),
-            'username': request.forms.get('username')
-        }
-        requests.put(url='http://localhost:8080/v1.0/vim/%s' % vim_name, json=vim_to_add)
-        return vim()
+        return template('vim_update.html', validation=validation, vim=vim, name=name)
+    return vim()
 
 
 @route('/vim/delete/', method='POST')
@@ -421,14 +329,47 @@ def vim_delete():
 
 
 @route('/vim/add/<vim_type>/')
-def vim_add(vim_type):
+def vim_add(vim_type, validation={'warning': None, 'message': None}, vim=None, name=None):
     """
     This function displays the required form to add a new VIM platform.
     :param vim_type: Type of VIM platform to be added
-
     """
 
-    return template('vim_add.html', vim_type=vim_type)
+    return template('vim_add.html', vim_type=vim_type, validation=validation, vim=vim, name=name)
+
+
+@route('/vim/validate/', method='POST')
+def vim_validate():
+    """
+    This function is used by the vim_add and vim_update functions to send the new data to the REST server with 'PUT'
+    command and to validate the VIM configuration.
+    """
+
+    type = request.forms.get('type')
+    if type == 'openstack':
+        name = request.forms.get('name')
+        user_domain_name = request.forms.get('user_domain_name')
+        username = request.forms.get('username')
+        password = request.forms.get('password')
+        project_domain_name = request.forms.get('project_domain_name')
+        project_name = request.forms.get('project_name')
+        auth_url = request.forms.get('auth_url')
+        identity_api_version = int(request.forms.get('identity_api_version'))
+        (name, new_vim) = struct_vim(type=type, name=name, user_domain_name=user_domain_name, username=username,
+                                       password=password, project_domain_name=project_domain_name,
+                                       project_name=project_name, auth_url=auth_url,
+                                       identity_api_version=identity_api_version)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('vim', new_vim)
+            return vim_add(vim_type=type, validation=validation, vim=new_vim, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('vim', new_vim)
+            return vim_update(validation=validation, vim=new_vim, name=name)
+        elif request.forms.get('add'):
+            requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
+    return vim()
 
 
 @route('/em/')
