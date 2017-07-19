@@ -182,13 +182,13 @@ def mano():
 
 
 @route('/mano/add/<mano_type>/')
-def mano_add(mano_type):
+def mano_add(mano_type, validation={'warning': None, 'message': None}, mano=None, name=None):
     """
     This function displays the required form to add a new MANO platform.
     :param mano_type: Type of MANO platform to be added
     """
 
-    return template('mano_add.html', mano_type=mano_type)
+    return template('mano_add.html', mano_type=mano_type, validation=validation, mano=mano, name=name)
 
 
 @route('/mano/data/', method='POST')
@@ -220,47 +220,58 @@ def mano_data():
             },
             'type': type
         }
-    requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+    return mano()
+
+
+@route('/mano/validate/', method='POST')
+def mano_validate():
+    """
+    This function is used by the mano_add and mano_update functions to send the new data to the REST server with 'PUT'
+    command and to validate the MANO configuration.
+    """
+
+    type = request.forms.get('type')
+    if type == 'tacker':
+        name = request.forms.get('name')
+        user_domain_name = request.forms.get('user_domain_name')
+        username = request.forms.get('username')
+        password = request.forms.get('password')
+        project_domain_name = request.forms.get('project_domain_name')
+        project_name = request.forms.get('project_name')
+        auth_url = request.forms.get('auth_url')
+        identity_api_version = request.forms.get('identity_api_version')
+        (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
+                                       password=password, project_domain_name=project_domain_name,
+                                       project_name=project_name, auth_url=auth_url,
+                                       identity_api_version=identity_api_version)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('mano', new_mano)
+            return mano_add(mano_type=type, validation=validation, mano=new_mano, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('mano', new_mano)
+            return mano_update(validation=validation, mano=new_mano, name=name)
+        elif request.forms.get('add'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
     return mano()
 
 
 @route('/mano/update/', method='POST')
-def mano_update():
+def mano_update(validation={'warning': None, 'message': None}, mano=None, name=None):
     """
     This function displays the required form to update an existing MANO platform.
     """
 
-    if request.forms.get('confirmed') == "no":
-        mano_name = request.forms.get('update_mano')
-        mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % mano_name)
-        mano_json = mano_data.json()
-        mano_info = OrderedDict()
-        mano_info['type'] = mano_json[mano_name]['type']
-        mano_info['user_domain_name'] = mano_json[mano_name]['client_config']['user_domain_name']
-        mano_info['username'] = mano_json[mano_name]['client_config']['username']
-        mano_info['password'] = mano_json[mano_name]['client_config']['password']
-        mano_info['project_domain_name'] = mano_json[mano_name]['client_config']['project_domain_name']
-        mano_info['project_name'] = mano_json[mano_name]['client_config']['project_name']
-        mano_info['auth_url'] = mano_json[mano_name]['client_config']['auth_url']
-        mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
-        return template('mano_update.html', mano=mano_info, mano_name=mano_name)
+    if mano is None:
+        name = request.forms.get('update_mano')
+        mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
+        mano_json = mano_data.json()[name]
+        return template('mano_update.html', validation=validation, mano=mano_json, name=name)
     else:
-        mano_name = request.forms.get('name')
-        mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % mano_name)
-        mano_json = mano_data.json()
-        mano_type = mano_json[mano_name]['type']
-        mano_to_add = {'client_config': {}, 'type': mano_type}
-        mano_to_add['client_config'] = {
-            'auth_url': request.forms.get('auth_url'),
-            'identity_api_version': request.forms.get('identity_api_version'),
-            'password': request.forms.get('password'),
-            'project_domain_name': request.forms.get('project_domain_name'),
-            'project_name': request.forms.get('project_name'),
-            'user_domain_name': request.forms.get('user_domain_name'),
-            'username': request.forms.get('username')
-        }
-        requests.put(url='http://localhost:8080/v1.0/mano/%s' % mano_name, json=mano_to_add)
-        return mano()
+        return template('mano_update.html', validation=validation, mano=mano, name=name)
+    return mano()
 
 
 @route('/mano/delete/', method='POST')
@@ -876,7 +887,7 @@ def additional_update():
 
 @route('/twister/')
 def twister():
-    twister_url_raw = requests.get(url='http://localhost:8080/v1.0/config/twister_url')
+    twister_url_raw = requests.get(url='http://localhost:8080/v1.0/config/twister-url')
     twister_url = twister_url_raw.json()
     redirect(twister_url)
 
@@ -977,7 +988,6 @@ def struct_vim(type, name, user_domain_name, username, password, project_domain_
     :return: The function returns a tuple containing MANO name and associated structure
     """
 
-
     vim = {
         'type': type,
         'client_config': {
@@ -993,7 +1003,7 @@ def struct_vim(type, name, user_domain_name, username, password, project_domain_
     return (name, vim)
 
 
-def validate(element, type, struct):
+def validate(element, struct):
     """
     This is a helper function to validate one configured MANO or VIM against the REST API server. The REST server
     actually tries to connect to the configured element.
@@ -1003,12 +1013,13 @@ def validate(element, type, struct):
     :return: The function returns a dictionary containig either warning or message keys. If warning is set, then
     connection to the element has failed. If message is set, then connection to the element succeeded.
     """
-    response = requests.put(url='http://localhost:8080/v1.0/validate/%s' % elem, json=struct)
+    response = requests.put(url='http://localhost:8080/v1.0/validate/%s' % element, json=struct)
     if response.status_code == 504:
         warning = response.json().get('warning')
-        return {'warning': warning}
+        return {'warning': warning, 'message': None}
     elif response.status_code == 200:
         message = response.json().get('message')
-        return {'message': message}
+        return {'warning': None, 'message': message}
+
 
 run(host='0.0.0.0', port=8081, debug=False)
