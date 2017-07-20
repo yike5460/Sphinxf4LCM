@@ -371,4 +371,20 @@ def validate(resource):
         return {'message': "Object validated."}
 
 
+@route('/v1.0/wait/<execution_id>')
+def wait_for_exec(execution_id):
+    """
+    Request mapped function that waits for the process that executes the test corresponding to the specified execution
+    ID to finish.
+    """
+    try:
+        execution_process = execution_processes[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'status': 'NOT_FOUND'}
+
+    execution_process.join()
+    return {'status': 'DONE'}
+
+
 run(host='0.0.0.0', port=8080, server='paste')
