@@ -71,7 +71,9 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h2>Add new {{traffic_type}} Traffic Element </h2>
+          <% if traffic_type == 'stcv': %>
+            <h2>Add new STCv Traffic Element </h2>
+          <% end %>
           <table class="table table-striped">
                 <form action="/traffic/data/" method="post">
                   <% if traffic_type == 'stcv': %>

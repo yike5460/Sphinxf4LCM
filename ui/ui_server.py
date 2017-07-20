@@ -524,8 +524,7 @@ def traffic_add(traffic_type):
     :param traffic_type: Type of Traffic generation element to be added
 
     """
-    if traffic_type == 'stcv':
-        traffic_type = 'SCTv'
+
     return template('traffic_add.html', traffic_type=traffic_type)
 
 
