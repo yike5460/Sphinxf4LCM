@@ -29,10 +29,10 @@ def report_test_case(tc_input, tc_result):
 
             # Build the scale table row
             port_speed = tc_input['traffic_params']['traffic_config']['port_speed']
-            status = tc_result[scale_type].get('status', None)
-            scale_level = tc_result[scale_type].get('level', None)
-            load_before_scaling = tc_result[scale_type].get('traffic_before', None)
-            load_after_scaling = tc_result[scale_type].get('traffic_after', None)
+            status = tc_result[scale_type].get('status', 'N/A')
+            scale_level = tc_result[scale_type].get('level', 'N/A')
+            load_before_scaling = tc_result[scale_type].get('traffic_before', 'N/A')
+            load_after_scaling = tc_result[scale_type].get('traffic_after', 'N/A')
             traffic_before_scaling = str(
                         constants.traffic_load_percent_mapping.get(load_before_scaling, 0) * port_speed / 100) + ' Mbps'
             traffic_after_scaling = str(
@@ -61,7 +61,7 @@ def report_test_case(tc_input, tc_result):
     t = PrettyTable(['Event', 'Duration (sec)', 'Details'])
     for event_name in tc_result.get('events', {}).keys():
         try:
-            event_duration = round(tc_result['events'][event_name].get('duration', None), 1)
+            event_duration = round(tc_result['events'][event_name].get('duration'), 1)
         except TypeError:
             event_duration = 'N/A'
         event_details = tc_result['events'][event_name].get('details', '')
@@ -101,13 +101,12 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['environment']['em'] = 'None'
 
     durations = dict()
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration', None)
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', None)
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', None)
-    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration', None)
-    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration',
-                                                                                                            None)
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration')
+    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
+    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
 
     json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
 
