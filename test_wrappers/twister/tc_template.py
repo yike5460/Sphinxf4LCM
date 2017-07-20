@@ -1,5 +1,4 @@
 import requests
-from websocket import create_connection
 
 
 def twister_run():
@@ -33,16 +32,9 @@ def twister_run():
         _RESULT = 'FAIL'
         return
 
-    # Create WebSocket
-    ws = create_connection('ws://' + vnf_lcv_srv + ':8080/websocket')
-
+    # Wait for the test case execution to finish
     print 'Test case execution pending'
-
-    # Send the execution ID back to the server so that it knows which process to wait for to finish
-    ws.send(execution_id)
-
-    # Wait for the server to indicate that the server finished executing the test
-    ws.recv()
+    requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/wait/' + execution_id)
 
     # Get the results for this execution
     server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec/' + execution_id)
