@@ -207,7 +207,10 @@ def mano_validate():
         project_domain_name = request.forms.get('project_domain_name')
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
-        identity_api_version = int(request.forms.get('identity_api_version'))
+        if not request.forms.get('identity_api_version'):
+            identity_api_version = 0
+        else:
+            identity_api_version = int(request.forms.get('identity_api_version'))
         (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
                                        password=password, project_domain_name=project_domain_name,
                                        project_name=project_name, auth_url=auth_url,
@@ -229,6 +232,10 @@ def mano_validate():
 def mano_update(validation={'warning': None, 'message': None}, mano=None, name=None):
     """
     This function displays the required form to update an existing MANO platform.
+    :param validation: Dictionary containing validation reply received from the REST server. If 'warning' is set, the
+    validation has failed. If 'message' is set, the validation succeeded.
+    :param mano: MANO structure containing data to reach the MANO element.
+    :param name: name of MANO element.
     """
 
     if mano is None:
@@ -238,7 +245,6 @@ def mano_update(validation={'warning': None, 'message': None}, mano=None, name=N
         return template('mano_update.html', validation=validation, mano=mano_json, name=name)
     else:
         return template('mano_update.html', validation=validation, mano=mano, name=name)
-    return mano()
 
 
 @route('/mano/delete/', method='POST')
@@ -298,7 +304,6 @@ def vim_update(validation={'warning': None, 'message': None}, vim=None, name=Non
         return template('vim_update.html', validation=validation, vim=vim_json, name=name)
     else:
         return template('vim_update.html', validation=validation, vim=vim, name=name)
-    return vim()
 
 
 @route('/vim/delete/', method='POST')
@@ -354,11 +359,14 @@ def vim_validate():
         project_domain_name = request.forms.get('project_domain_name')
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
-        identity_api_version = int(request.forms.get('identity_api_version'))
+        if not request.forms.get('identity_api_version'):
+            identity_api_version = 0
+        else:
+            identity_api_version = int(request.forms.get('identity_api_version'))
         (name, new_vim) = struct_vim(type=type, name=name, user_domain_name=user_domain_name, username=username,
-                                       password=password, project_domain_name=project_domain_name,
-                                       project_name=project_name, auth_url=auth_url,
-                                       identity_api_version=identity_api_version)
+                                     password=password, project_domain_name=project_domain_name,
+                                     project_name=project_name, auth_url=auth_url,
+                                     identity_api_version=identity_api_version)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('vim', new_vim)
             return vim_add(vim_type=type, validation=validation, vim=new_vim, name=name)
