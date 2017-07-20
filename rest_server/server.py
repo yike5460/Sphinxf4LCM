@@ -3,15 +3,10 @@ import json
 import logging
 import uuid
 from datetime import datetime
+from threading import Lock
 from multiprocessing import Process, Queue
 
-from gevent import monkey
-
-monkey.patch_all()
-
-from bottle import route, run, request, response, abort
-from geventwebsocket import WebSocketError
-from geventwebsocket.handler import WebSocketHandler
+from bottle import route, request, response, run
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
@@ -26,6 +21,12 @@ mapping_file_path = '../test_cases/tc_mapping.json'
 tc_name_module_mapping = None
 
 config_file_path = 'config.json'
+
+
+lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
+lock = dict()
+for lock_type in lock_types:
+    lock[lock_type] = Lock()
 
 
 def _read_config(key):
@@ -276,11 +277,12 @@ def get_resource(resource, name):
     """
     Request mapped function that returns the details for the specified resource type and name.
     """
-    resource_params = _read_resource(resource, name)
-    if resource_params == {}:
-        response.status = 404
+    with lock[resource]:
+        resource_params = _read_resource(resource, name)
+        if resource_params == {}:
+            response.status = 404
 
-    return {name: resource_params}
+        return {name: resource_params}
 
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>')
@@ -288,9 +290,10 @@ def get_resources(resource):
     """
     Request mapped function that returns all resources of the 'resource' type.
     """
-    all_resources = _read_resources(resource)
+    with lock[resource]:
+        all_resources = _read_resources(resource)
 
-    return all_resources
+        return all_resources
 
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='PUT')
@@ -298,12 +301,13 @@ def set_resource(resource, name):
     """
     Request mapped function that adds a new resource with the specified name.
     """
-    all_resources = _read_resources(resource)
-    all_resources[name] = request.json
+    with lock[resource]:
+        all_resources = _read_resources(resource)
+        all_resources[name] = request.json
 
-    _write_resources(resource, all_resources)
+        _write_resources(resource, all_resources)
 
-    return {name: request.json}
+        return {name: request.json}
 
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='DELETE')
@@ -311,15 +315,16 @@ def delete_resource(resource, name):
     """
     Request mapped function that deletes the resource with the specified name.
     """
-    all_resources = _read_resources(resource)
-    resource_params = all_resources.pop(name, {})
+    with lock[resource]:
+        all_resources = _read_resources(resource)
+        resource_params = all_resources.pop(name, {})
 
-    _write_resources(resource, all_resources)
+        _write_resources(resource, all_resources)
 
-    if resource_params == {}:
-        response.status = 404
+        if resource_params == {}:
+            response.status = 404
 
-    return {name: resource_params}
+        return {name: resource_params}
 
 
 @route('/v1.0/config/<name>')
@@ -327,7 +332,8 @@ def get_config(name):
     """
     Request mapped function that returns the value corresponding to the specified key name in the JSON config file.
     """
-    return '"%s"' % _read_config(name)
+    with lock['config']:
+        return '"%s"' % _read_config(name)
 
 
 @route('/v1.0/config/<name>', method='PUT')
@@ -336,16 +342,18 @@ def set_config(name):
     Request mapped function that adds a key with the specified name and value specified in the request body in the JSON
     config file.
     """
-    _write_config(name, request.json)
+    with lock['config']:
+        _write_config(name, request.json)
 
 
 @route('/v1.0/config/<name>', method='DELETE')
-def remove_config(name):
+def delete_config(name):
     """
     Request mapped function that removes the key with the specified name and its corresponding value from the JSON
     config file.
     """
-    _delete_config(name)
+    with lock['config']:
+        _delete_config(name)
 
 
 @route('/v1.0/validate/<resource:re:vim|mano>', method="PUT")
@@ -360,28 +368,7 @@ def validate(resource):
             response.status = 504
             return {'warning': e.message}
         response.status = 200
-        return {'message': "Object sucessfully validated."}
+        return {'message': "Object validated."}
 
 
-@route('/websocket')
-def handle_websocket():
-    """
-    WebSocket endpoint that receives the test case execution ID, waits for the process corresponding to the received
-    execution ID to finish and sends a message to the client.
-    """
-    wsock = request.environ.get('wsgi.websocket')
-    if not wsock:
-        abort(400, 'Expected WebSocket request')
-    while True:
-        try:
-            execution_id = wsock.receive()
-            execution_process = execution_processes.get(execution_id)
-            if execution_process is not None:
-                execution_process.join()
-                wsock.send('DONE')
-            else:
-                wsock.send('NOT_FOUND')
-        except WebSocketError:
-            break
-
-run(host='0.0.0.0', port=8080, debug=False, server='gevent', handler_class=WebSocketHandler)
+run(host='0.0.0.0', port=8080, server='paste')
