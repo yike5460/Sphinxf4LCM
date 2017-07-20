@@ -1,13 +1,15 @@
-from bottle import route, run, request, template, static_file, redirect
-import requests
 import os
 from collections import OrderedDict
+
+import requests
+from bottle import route, run, request, template, static_file, redirect
 
 MANO_TYPES = ['tacker']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
 TRAFFIC_TYPES = ['stcv']
 VNF_TYPES = ['ubuntu']
+
 
 # os.chdir(os.path.dirname(__file__))
 @route('/')
@@ -49,6 +51,7 @@ def index():
             get_env_data[key] = get_env_data[key] + ('No',)
     return template('index.html', env_list=get_env_data)
 
+
 @route('/env/add/')
 def env_add():
     """
@@ -83,6 +86,7 @@ def env_add():
     env_list['vnf'] = vnf_list
     return template('env_add.html', env_list=env_list)
 
+
 @route('/env/delete/', method="POST")
 def env_delete():
     """
@@ -98,6 +102,7 @@ def env_delete():
         env_name = request.forms.get('env_name')
         requests.delete(url='http://localhost:8080/v1.0/env/%s' % env_name)
         return index()
+
 
 @route('/env/update/', method="POST")
 def env_update():
@@ -138,6 +143,7 @@ def env_update():
         requests.put(url='http://localhost:8080/v1.0/env/%s' % env_name, json=new_env)
         return index()
 
+
 @route('/env/data/', method="POST")
 def env_data():
     """
@@ -153,10 +159,12 @@ def env_data():
     requests.put(url='http://localhost:8080/v1.0/env/%s' % env_name, json=new_env)
     return index()
 
+
 @route('/config/active-env/<active_env>')
 def set_active_env(active_env):
     requests.put(url='http://localhost:8080/v1.0/config/active-env', json=active_env)
     return index()
+
 
 @route('/mano/')
 def mano():
@@ -172,20 +180,22 @@ def mano():
             continue
     return template('mano.html', mano_list=mano_list)
 
+
 @route('/mano/add/<mano_type>/')
-def mano_add(mano_type):
+def mano_add(mano_type, validation={'warning': None, 'message': None}, mano=None, name=None):
     """
     This function displays the required form to add a new MANO platform.
     :param mano_type: Type of MANO platform to be added
     """
 
-    return template('mano_add.html', mano_type=mano_type)
+    return template('mano_add.html', mano_type=mano_type, validation=validation, mano=mano, name=name)
 
-@route('/mano/data/', method='POST')
-def mano_data():
+
+@route('/mano/validate/', method='POST')
+def mano_validate():
     """
-    This function is used by the mano_add function to send the new data to the REST server with 'PUT'
-    command.
+    This function is used by the mano_add and mano_update functions to send the new data to the REST server with 'PUT'
+    command and to validate the MANO configuration.
     """
 
     type = request.forms.get('type')
@@ -197,59 +207,39 @@ def mano_data():
         project_domain_name = request.forms.get('project_domain_name')
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
-        identity_api_version = request.forms.get('identity_api_version')
-        new_mano={
-                'client_config': {
-                    'auth_url': auth_url,
-                    'identity_api_version': identity_api_version,
-                    'password': password,
-                    'project_domain_name': project_domain_name,
-                    'project_name': project_name,
-                    'user_domain_name': user_domain_name,
-                    'username': username
-                },
-                'type': type
-        }
-    requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        identity_api_version = int(request.forms.get('identity_api_version'))
+        (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
+                                       password=password, project_domain_name=project_domain_name,
+                                       project_name=project_name, auth_url=auth_url,
+                                       identity_api_version=identity_api_version)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('mano', new_mano)
+            return mano_add(mano_type=type, validation=validation, mano=new_mano, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('mano', new_mano)
+            return mano_update(validation=validation, mano=new_mano, name=name)
+        elif request.forms.get('add'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
     return mano()
 
+
 @route('/mano/update/', method='POST')
-def mano_update():
+def mano_update(validation={'warning': None, 'message': None}, mano=None, name=None):
     """
     This function displays the required form to update an existing MANO platform.
     """
 
-    if request.forms.get('confirmed') == "no":
-        mano_name = request.forms.get('update_mano')
-        mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % mano_name)
-        mano_json = mano_data.json()
-        mano_info = OrderedDict()
-        mano_info['type'] = mano_json[mano_name]['type']
-        mano_info['user_domain_name'] = mano_json[mano_name]['client_config']['user_domain_name']
-        mano_info['username'] = mano_json[mano_name]['client_config']['username']
-        mano_info['password'] = mano_json[mano_name]['client_config']['password']
-        mano_info['project_domain_name'] = mano_json[mano_name]['client_config']['project_domain_name']
-        mano_info['project_name'] = mano_json[mano_name]['client_config']['project_name']
-        mano_info['auth_url'] = mano_json[mano_name]['client_config']['auth_url']
-        mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
-        return template('mano_update.html', mano=mano_info, mano_name=mano_name)
+    if mano is None:
+        name = request.forms.get('update_mano')
+        mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
+        mano_json = mano_data.json()[name]
+        return template('mano_update.html', validation=validation, mano=mano_json, name=name)
     else:
-        mano_name = request.forms.get('name')
-        mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % mano_name)
-        mano_json = mano_data.json()
-        mano_type = mano_json[mano_name]['type']
-        mano_to_add = {'client_config': {}, 'type': mano_type}
-        mano_to_add['client_config'] = {
-            'auth_url': request.forms.get('auth_url'),
-            'identity_api_version': request.forms.get('identity_api_version'),
-            'password': request.forms.get('password'),
-            'project_domain_name': request.forms.get('project_domain_name'),
-            'project_name': request.forms.get('project_name'),
-            'user_domain_name': request.forms.get('user_domain_name'),
-            'username': request.forms.get('username')
-        }
-        requests.put(url='http://localhost:8080/v1.0/mano/%s' % mano_name, json=mano_to_add)
-        return mano()
+        return template('mano_update.html', validation=validation, mano=mano, name=name)
+    return mano()
+
 
 @route('/mano/delete/', method='POST')
 def mano_delete():
@@ -277,94 +267,39 @@ def mano_delete():
         requests.delete(url='http://localhost:8080/v1.0/mano/%s' % mano_name)
         return mano()
 
+
 @route('/vim/')
 def vim(warning=None):
     """
     This function displays the available VIM platforms configured.
     """
     get_vims = requests.get(url='http://localhost:8080/v1.0/vim')
-    vim_list=[]
-    i=1
+    vim_list = []
+    i = 1
     for vim in sorted(get_vims.json().iterkeys()):
         if 'type' in get_vims.json()[vim].keys() and get_vims.json()[vim]['type'] in VIM_TYPES:
             vim_list.append((vim, get_vims.json()[vim]['type']))
         else:
             continue
-        i = i+1
+        i = i + 1
     return template('vim.html', vim_list=vim_list, warning=warning)
 
-@route('/vim/data/', method='POST')
-def vim_data():
-    """
-    This function is used by the vim_add function to send the new data to the REST server with 'PUT'
-    command.
-    """
-
-    type = request.forms.get('type')
-    if type == 'openstack':
-        name = request.forms.get('name')
-        user_domain_name = request.forms.get('user_domain_name')
-        username = request.forms.get('username')
-        password = request.forms.get('password')
-        project_domain_name = request.forms.get('project_domain_name')
-        project_name = request.forms.get('project_name')
-        auth_url = request.forms.get('auth_url')
-        identity_api_version = request.forms.get('identity_api_version')
-        new_vim={
-                'client_config': {
-                    'auth_url': auth_url,
-                    'identity_api_version': identity_api_version,
-                    'password': password,
-                    'project_domain_name': project_domain_name,
-                    'project_name': project_name,
-                    'user_domain_name': user_domain_name,
-                    'username': username
-                },
-                'type': type
-        }
-    response = requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
-    if response.status_code == 504:
-        return vim(warning=response.json().get('warning'))
-
-    return vim()
 
 @route('/vim/update/', method='POST')
-def vim_update():
+def vim_update(validation={'warning': None, 'message': None}, vim=None, name=None):
     """
     This function displays the required form to update an existing VIM platform.
     """
 
-    if request.forms.get('confirmed') == "no":
-        vim_name = request.forms.get('update_vim')
-        vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name)
-        vim_json = vim_data.json()
-        vim_info = OrderedDict()
-        vim_info['type'] = vim_json[vim_name]['type']
-        vim_info['user_domain_name'] = vim_json[vim_name]['client_config']['user_domain_name']
-        vim_info['username'] = vim_json[vim_name]['client_config']['username']
-        vim_info['password'] = vim_json[vim_name]['client_config']['password']
-        vim_info['project_domain_name'] = vim_json[vim_name]['client_config']['project_domain_name']
-        vim_info['project_name'] = vim_json[vim_name]['client_config']['project_name']
-        vim_info['auth_url'] = vim_json[vim_name]['client_config']['auth_url']
-        vim_info['identity_api_version'] = vim_json[vim_name]['client_config']['identity_api_version']
-        return template('vim_update.html', vim=vim_info, vim_name=vim_name)
+    if vim is None:
+        name = request.forms.get('update_vim')
+        vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % name)
+        vim_json = vim_data.json()[name]
+        return template('vim_update.html', validation=validation, vim=vim_json, name=name)
     else:
-        vim_name = request.forms.get('name')
-        vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name)
-        vim_json = vim_data.json()
-        vim_type = vim_json[vim_name]['type']
-        vim_to_add = {'client_config': {}, 'type': vim_type}
-        vim_to_add['client_config'] = {
-            'auth_url': request.forms.get('auth_url'),
-            'identity_api_version': request.forms.get('identity_api_version'),
-            'password': request.forms.get('password'),
-            'project_domain_name': request.forms.get('project_domain_name'),
-            'project_name': request.forms.get('project_name'),
-            'user_domain_name': request.forms.get('user_domain_name'),
-            'username': request.forms.get('username')
-        }
-        requests.put(url='http://localhost:8080/v1.0/vim/%s' % vim_name, json=vim_to_add)
-        return vim()
+        return template('vim_update.html', validation=validation, vim=vim, name=name)
+    return vim()
+
 
 @route('/vim/delete/', method='POST')
 def vim_delete():
@@ -392,15 +327,50 @@ def vim_delete():
         requests.delete(url='http://localhost:8080/v1.0/vim/%s' % vim_name)
         return vim()
 
+
 @route('/vim/add/<vim_type>/')
-def vim_add(vim_type):
+def vim_add(vim_type, validation={'warning': None, 'message': None}, vim=None, name=None):
     """
     This function displays the required form to add a new VIM platform.
     :param vim_type: Type of VIM platform to be added
-
     """
 
-    return template('vim_add.html', vim_type=vim_type)
+    return template('vim_add.html', vim_type=vim_type, validation=validation, vim=vim, name=name)
+
+
+@route('/vim/validate/', method='POST')
+def vim_validate():
+    """
+    This function is used by the vim_add and vim_update functions to send the new data to the REST server with 'PUT'
+    command and to validate the VIM configuration.
+    """
+
+    type = request.forms.get('type')
+    if type == 'openstack':
+        name = request.forms.get('name')
+        user_domain_name = request.forms.get('user_domain_name')
+        username = request.forms.get('username')
+        password = request.forms.get('password')
+        project_domain_name = request.forms.get('project_domain_name')
+        project_name = request.forms.get('project_name')
+        auth_url = request.forms.get('auth_url')
+        identity_api_version = int(request.forms.get('identity_api_version'))
+        (name, new_vim) = struct_vim(type=type, name=name, user_domain_name=user_domain_name, username=username,
+                                       password=password, project_domain_name=project_domain_name,
+                                       project_name=project_name, auth_url=auth_url,
+                                       identity_api_version=identity_api_version)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('vim', new_vim)
+            return vim_add(vim_type=type, validation=validation, vim=new_vim, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('vim', new_vim)
+            return vim_update(validation=validation, vim=new_vim, name=name)
+        elif request.forms.get('add'):
+            requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
+    return vim()
+
 
 @route('/em/')
 def em():
@@ -409,15 +379,16 @@ def em():
     """
 
     get_ems = requests.get(url='http://localhost:8080/v1.0/em')
-    em_list=[]
-    i=1
+    em_list = []
+    i = 1
     for em in sorted(get_ems.json().iterkeys()):
         if 'type' in get_ems.json()[em].keys() and get_ems.json()[em]['type'] in EM_TYPES:
             em_list.append((em, get_ems.json()[em]['type']))
         else:
             continue
-        i = i+1
+        i = i + 1
     return template('em.html', em_list=em_list)
+
 
 @route('/em/add/<em_type>/')
 def em_add(em_type):
@@ -427,6 +398,7 @@ def em_add(em_type):
     """
 
     return template('em_add.html', em_type=em_type)
+
 
 @route('/em/data/', method='POST')
 def em_data():
@@ -445,20 +417,21 @@ def em_data():
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
         identity_api_version = request.forms.get('identity_api_version')
-        new_em={
-                'client_config': {
-                    'auth_url': auth_url,
-                    'identity_api_version': identity_api_version,
-                    'password': password,
-                    'project_domain_name': project_domain_name,
-                    'project_name': project_name,
-                    'user_domain_name': user_domain_name,
-                    'username': username
-                },
-                'type': type
+        new_em = {
+            'client_config': {
+                'auth_url': auth_url,
+                'identity_api_version': identity_api_version,
+                'password': password,
+                'project_domain_name': project_domain_name,
+                'project_name': project_name,
+                'user_domain_name': user_domain_name,
+                'username': username
+            },
+            'type': type
         }
     requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
     return em()
+
 
 @route('/em/update/', method='POST')
 def em_update():
@@ -498,6 +471,7 @@ def em_update():
         requests.put(url='http://localhost:8080/v1.0/em/%s' % em_name, json=em_to_add)
         return em()
 
+
 @route('/em/delete/', method='POST')
 def em_delete():
     """
@@ -524,6 +498,7 @@ def em_delete():
         requests.delete(url='http://localhost:8080/v1.0/em/%s' % em_name)
         return em()
 
+
 @route('/traffic/')
 def traffic():
     """
@@ -531,15 +506,16 @@ def traffic():
     """
 
     get_traffics = requests.get(url='http://localhost:8080/v1.0/traffic')
-    traffic_list=[]
-    i=1
+    traffic_list = []
+    i = 1
     for traffic in sorted(get_traffics.json().iterkeys()):
         if 'type' in get_traffics.json()[traffic].keys() and get_traffics.json()[traffic]['type'] in TRAFFIC_TYPES:
             traffic_list.append((traffic, get_traffics.json()[traffic]['type']))
         else:
             continue
-        i = i+1
+        i = i + 1
     return template('traffic.html', traffic_list=traffic_list)
+
 
 @route('/traffic/add/<traffic_type>/')
 def traffic_add(traffic_type):
@@ -548,8 +524,10 @@ def traffic_add(traffic_type):
     :param traffic_type: Type of Traffic generation element to be added
 
     """
-
+    if traffic_type == 'stcv':
+        traffic_type = 'SCTv'
     return template('traffic_add.html', traffic_type=traffic_type)
+
 
 @route('/traffic/data/', method='POST')
 def traffic_data():
@@ -575,29 +553,30 @@ def traffic_data():
         right_traffic_plen = request.forms.get('right_traffic_plen')
         right_traffic_gw = request.forms.get('right_traffic_gw')
         port_speed = int(request.forms.get('port_speed'))
-        new_traffic={
-                'client_config': {
-                    'lab_server_addr': lab_server_addr,
-                    'user_name': user_name,
-                    'session_name': session_name,
-                },
-                'traffic_config': {
-                    'left_port_location': left_port_location,
-                    'left_traffic_addr': left_traffic_addr,
-                    'left_traffic_plen': left_traffic_plen,
-                    'left_traffic_gw': left_traffic_gw,
-                    'left_traffic_gw_mac': left_traffic_gw_mac,
-                    'left_cp_name': left_cp_name,
-                    'right_port_location': right_port_location,
-                    'right_traffic_addr': right_traffic_addr,
-                    'right_traffic_plen': right_traffic_plen,
-                    'right_traffic_gw': right_traffic_gw,
-                    'port_speed': port_speed
-                },
-                'type': type
+        new_traffic = {
+            'client_config': {
+                'lab_server_addr': lab_server_addr,
+                'user_name': user_name,
+                'session_name': session_name,
+            },
+            'traffic_config': {
+                'left_port_location': left_port_location,
+                'left_traffic_addr': left_traffic_addr,
+                'left_traffic_plen': left_traffic_plen,
+                'left_traffic_gw': left_traffic_gw,
+                'left_traffic_gw_mac': left_traffic_gw_mac,
+                'left_cp_name': left_cp_name,
+                'right_port_location': right_port_location,
+                'right_traffic_addr': right_traffic_addr,
+                'right_traffic_plen': right_traffic_plen,
+                'right_traffic_gw': right_traffic_gw,
+                'port_speed': port_speed
+            },
+            'type': type
         }
     requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
     return traffic()
+
 
 @route('/traffic/update/', method='POST')
 def traffic_update():
@@ -653,6 +632,7 @@ def traffic_update():
         requests.put(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name, json=traffic_to_add)
         return traffic()
 
+
 @route('/traffic/delete/', method='POST')
 def traffic_delete():
     """
@@ -686,6 +666,7 @@ def traffic_delete():
         requests.delete(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
         return traffic()
 
+
 @route('/vnf/')
 def vnf(warning=None):
     """
@@ -693,14 +674,15 @@ def vnf(warning=None):
     """
 
     get_vnfs = requests.get(url='http://localhost:8080/v1.0/vnf')
-    vnf_list=[]
+    vnf_list = []
     for vnf in sorted(get_vnfs.json().iterkeys()):
         if 'type' in get_vnfs.json()[vnf].keys():
-	    vnf_type = get_vnfs.json()[vnf]['type']
+            vnf_type = get_vnfs.json()[vnf]['type']
             vnf_list.append((vnf, vnf_type))
         else:
             continue
     return template('vnf.html', vnf_list=vnf_list, warning=warning)
+
 
 @route('/vnf/add/', method="POST")
 def vnf_add():
@@ -709,6 +691,7 @@ def vnf_add():
     """
 
     return template('vnf_add.html')
+
 
 @route('/vnf/data/', method='POST')
 def vnf_data():
@@ -723,20 +706,21 @@ def vnf_data():
     username = request.forms.get('username')
     password = request.forms.get('password')
     config = request.forms.get('config')
-    new_vnf={
-            'credentials': {
-                'mgmt_ip_addr': mgmt_ip_addr,
-                'password': password,
-                'username': username
-            },
-            'type': type,
-            'instance_name': instance_name,
-            'config': config
+    new_vnf = {
+        'credentials': {
+            'mgmt_ip_addr': mgmt_ip_addr,
+            'password': password,
+            'username': username
+        },
+        'type': type,
+        'instance_name': instance_name,
+        'config': config
     }
     response = requests.put(url='http://localhost:8080/v1.0/vnf/%s' % instance_name, json=new_vnf)
     if response.status_code == 504:
         return vnf(warning=response.json().get('warning'))
     return vnf()
+
 
 @route('/vnf/update/', method='POST')
 def vnf_update():
@@ -762,16 +746,17 @@ def vnf_update():
         vnf_json = vnf_data.json()
         vnf_type = vnf_json[vnf_name]['type']
         vnf_to_add = {'credentials': {},
-		    'type': vnf_type,
-		    'instance_name': request.forms.get('instance_name'),
-		    'config': request.forms.get('config')}
+                      'type': vnf_type,
+                      'instance_name': request.forms.get('instance_name'),
+                      'config': request.forms.get('config')}
         vnf_to_add['credentials'] = {
-                'mgmt_ip_addr': request.forms.get('mgmt_ip_addr'),
-                'username': request.forms.get('username'),
-                'password': request.forms.get('password'),
+            'mgmt_ip_addr': request.forms.get('mgmt_ip_addr'),
+            'username': request.forms.get('username'),
+            'password': request.forms.get('password'),
         }
         requests.put(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name, json=vnf_to_add)
         return vnf()
+
 
 @route('/vnf/delete/', method='POST')
 def vnf_delete():
@@ -796,6 +781,7 @@ def vnf_delete():
         requests.delete(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
         return vnf()
 
+
 @route('/additional/')
 def additional():
     """
@@ -810,7 +796,8 @@ def additional():
         'scaling_policy_name': scaling_policy_name.json(),
         'desired_scale_out_steps': desired_scale_out_steps.json()
     }
-    return template('additional_params.html', additional_params = additional_params)
+    return template('additional_params.html', additional_params=additional_params)
+
 
 @route('/additional/update/', method="POST")
 def additional_update():
@@ -836,19 +823,22 @@ def additional_update():
             'scaling_policy_name': scaling_policy_name.json(),
             'desired_scale_out_steps': desired_scale_out_steps.json()
         }
-        return template('additional_params_update.html', additional_params = additional_params)
+        return template('additional_params_update.html', additional_params=additional_params)
+
 
 @route('/twister/')
 def twister():
-    twister_url_raw = requests.get(url='http://localhost:8080/v1.0/config/twister_url')
+    twister_url_raw = requests.get(url='http://localhost:8080/v1.0/config/twister-url')
     twister_url = twister_url_raw.json()
     redirect(twister_url)
+
 
 @route('/kibana/')
 def kibana():
     kibana_url_raw = requests.get(url='http://localhost:8080/v1.0/config/kibana-url')
     kibana_url = kibana_url_raw.json()
     redirect(kibana_url)
+
 
 @route('/static/<filename:re:.*\.css>')
 def all_css(filename):
@@ -858,6 +848,7 @@ def all_css(filename):
     """
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/css/")))
+
 
 @route('/static/<filename:re:.*\.png|.*\.jpeg>')
 def all_img(filename):
@@ -869,6 +860,7 @@ def all_img(filename):
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/img/")))
 
+
 @route('/static/<filename:re:.*\.js>')
 def all_js(filename):
     """
@@ -879,6 +871,7 @@ def all_js(filename):
     return static_file(filename,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/js/")))
 
+
 @route('/fonts/<font>')
 def all_img(font):
     """
@@ -888,5 +881,86 @@ def all_img(font):
 
     return static_file(font,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/fonts/")))
+
+
+def struct_mano(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
+                identity_api_version):
+    """
+    This is a helper function for building the JSON for a MANO element
+    :param type: MANO type
+    :param name: MANO name
+    :param user_domain_name: User Domain Name
+    :param username: Username
+    :param password: Password
+    :param project_domain_name: Project Domain Name
+    :param project_name: Project Name
+    :param auth_url: Authentication URL
+    :param identity_api_version: Keystone version
+    :return: The function returns a tuple containing MANO name and associated structure
+    """
+    mano = {
+        'type': type,
+        'client_config': {
+            'user_domain_name': user_domain_name,
+            'username': username,
+            'password': password,
+            'project_domain_name': project_domain_name,
+            'project_name': project_name,
+            'auth_url': auth_url,
+            'identity_api_version': identity_api_version
+        }
+    }
+    return (name, mano)
+
+
+def struct_vim(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
+               identity_api_version):
+    """
+    This is a helper function for building the JSON for a VIM element
+    :param type: VIM type
+    :param name: VIM name
+    :param user_domain_name: User Domain Name
+    :param username: Username
+    :param password: Password
+    :param project_domain_name: Project Domain Name
+    :param project_name: Project Name
+    :param auth_url: Authentication URL
+    :param identity_api_version: Keystone version
+    :return: The function returns a tuple containing MANO name and associated structure
+    """
+
+    vim = {
+        'type': type,
+        'client_config': {
+            'user_domain_name': user_domain_name,
+            'username': username,
+            'password': password,
+            'project_domain_name': project_domain_name,
+            'project_name': project_name,
+            'auth_url': auth_url,
+            'identity_api_version': identity_api_version
+        }
+    }
+    return (name, vim)
+
+
+def validate(element, struct):
+    """
+    This is a helper function to validate one configured MANO or VIM against the REST API server. The REST server
+    actually tries to connect to the configured element.
+    :param element: Element can be a MANO or a VIM
+    :param type: Type of MANO or VIM element (e.g. 'tacker' for a MANO of this type)
+    :param struct: a dictionary containing the
+    :return: The function returns a dictionary containig either warning or message keys. If warning is set, then
+    connection to the element has failed. If message is set, then connection to the element succeeded.
+    """
+    response = requests.put(url='http://localhost:8080/v1.0/validate/%s' % element, json=struct)
+    if response.status_code == 504:
+        warning = response.json().get('warning')
+        return {'warning': warning, 'message': None}
+    elif response.status_code == 200:
+        message = response.json().get('message')
+        return {'warning': None, 'message': message}
+
 
 run(host='0.0.0.0', port=8081, debug=False)
