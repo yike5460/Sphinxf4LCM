@@ -206,27 +206,29 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
                                                                        timeout=constants.SCALE_INTERVAL)
             if notification_info is None:
                 raise TestRunError('Could not validate that NS scale out finished')
+
         self.time_record.END('scale_out_ns')
 
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
-
-        self.tc_result['resources']['After scale out'] = dict()
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
-        for vnf_instance_id in ns_info.vnf_info_id:
-            self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
-
-        self.tc_result['scaling_out']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Validate NS has resized to the max (limited by NFVI)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the max (limited by NFVI)')
         # The NS should have default_instances + desired_scale_out_steps * increment VNFs after scale out
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
         if len(ns_info.vnf_info_id) != sp['default_instances'] + sp['increment'] * \
                                        self.tc_input['desired_scale_out_steps']:
             raise TestRunError('NS did not scale out to the max NFVI limit')
+
+        self.tc_result['resources']['After scale out'] = dict()
+        for vnf_instance_id in ns_info.vnf_info_id:
+            self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
+
         self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment'] * \
                                                  self.tc_input['desired_scale_out_steps']
+
+        self.tc_result['scaling_out']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 11. Determine is and length of service disruption

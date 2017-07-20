@@ -139,10 +139,6 @@ class TC_VNF_COMPLEX_002(TestCase):
 
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
-
-        self.tc_result['scaling_out']['status'] = 'Success'
-
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF has resized to the max and has max capacity
         # --------------------------------------------------------------------------------------------------------------
@@ -151,7 +147,11 @@ class TC_VNF_COMPLEX_002(TestCase):
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['max_instances']:
             raise TestRunError('VNF did not scale out to the max')
 
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
         self.tc_result['scaling_out']['level'] = sp['max_instances']
+
+        self.tc_result['scaling_out']['status'] = 'Success'
 
         self.tc_result['events']['service_disruption']['duration'] = self.traffic.calculate_service_disruption_length()
 

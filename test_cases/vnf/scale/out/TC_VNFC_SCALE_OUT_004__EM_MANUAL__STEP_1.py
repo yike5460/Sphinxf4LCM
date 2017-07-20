@@ -162,10 +162,6 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_1(TestCase):
 
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
-
-        self.tc_result['scaling_out']['status'] = 'Success'
-
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate VNF has resized to the max (limited by NFVI)
         # The VNF should have default_instances + desired_scale_out_steps * increment VNFCs after scale out
@@ -175,8 +171,13 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_1(TestCase):
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment'] * \
                                                                      self.tc_input['desired_scale_out_steps']:
             raise TestRunError('VNF did not scale out to the max NFVI limit')
+
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
         self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment'] * \
                                                  self.tc_input['desired_scale_out_steps']
+
+        self.tc_result['scaling_out']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Determine the length of service disruption

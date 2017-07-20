@@ -145,10 +145,6 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
 
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
-
-        self.tc_result['scaling_out']['status'] = 'Success'
-
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF has resized to the next level
         # --------------------------------------------------------------------------------------------------------------
@@ -156,6 +152,11 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment']:
             raise TestRunError('VNF did not scale out to the next level')
+
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_out']['status'] = 'Success'
+
         self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         # --------------------------------------------------------------------------------------------------------------
@@ -213,10 +214,6 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
 
         self.tc_result['events']['scale_in_vnf']['duration'] = self.time_record.duration('scale_in_vnf')
 
-        self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
-
-        self.tc_result['scaling_in']['status'] = 'Success'
-
         # --------------------------------------------------------------------------------------------------------------
         # 11. Validate VNF has released the resources and decreased the VNFCs
         # --------------------------------------------------------------------------------------------------------------
@@ -224,7 +221,12 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['min_instances']:
             raise TestRunError('VNF did not scale in')
+
+        self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
         self.tc_result['scaling_in']['level'] = sp['min_instances']
+
+        self.tc_result['scaling_in']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 12. Validate traffic drop occurred

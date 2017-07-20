@@ -187,13 +187,13 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
 
         self.time_record.END('scale_out_ns')
 
-        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
-
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
         self.tc_result['resources']['After scale out'] = dict()
         for vnf_instance_id in ns_info.vnf_info_id:
             self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
+
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         self.tc_result['scaling_out']['status'] = 'Success'
 
@@ -282,12 +282,12 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
 
         self.time_record.END('scale_in_ns')
 
-        self.tc_result['scaling_in']['level'] = sp['default_instances']
-
         self.tc_result['events']['scale_in_ns']['duration'] = self.time_record.duration('scale_in_ns')
 
         self.vnf_instance_id = ns_info.vnf_info_id[0]
         self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_in']['level'] = sp['default_instances']
 
         self.tc_result['scaling_in']['status'] = 'Success'
 

@@ -149,11 +149,11 @@ class TC_VNFC_SCALE_OUT_002__VNF_ONDEMAND(TestCase):
 
         self.time_record.END('scale_out_vnf')
 
-        self.tc_result['scaling_out']['level'] = sp['max_instances']
-
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
         self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_out']['level'] = sp['max_instances']
 
         self.tc_result['scaling_out']['status'] = 'Success'
 

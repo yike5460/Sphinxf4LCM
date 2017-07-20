@@ -177,13 +177,13 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VIM_KPI(TestCase):
 
         self.time_record.END('scale_out_ns')
 
-        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
-
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
         self.tc_result['resources']['After scale out'] = dict()
         for vnf_instance_id in ns_info.vnf_info_id:
             self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
+
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         self.tc_result['scaling_out']['status'] = 'Success'
 

@@ -162,11 +162,11 @@ class TC_VNFC_SCALE_OUT_005__VNF_ONDEMAND(TestCase):
 
         self.time_record.END('scale_out_vnf')
 
-        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
-
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
         self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
         self.tc_result['scaling_out']['status'] = 'Success'
 
@@ -238,11 +238,11 @@ class TC_VNFC_SCALE_OUT_005__VNF_ONDEMAND(TestCase):
 
         self.time_record.END('scale_in_vnf')
 
-        self.tc_result['scaling_in']['level'] = sp['default_instances']
-
         self.tc_result['events']['scale_in_vnf']['duration'] = self.time_record.duration('scale_in_vnf')
 
         self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        self.tc_result['scaling_in']['level'] = sp['default_instances']
 
         self.tc_result['scaling_in']['status'] = 'Success'
 

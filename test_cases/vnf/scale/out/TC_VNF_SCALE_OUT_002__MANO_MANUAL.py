@@ -156,20 +156,21 @@ class TC_VNF_SCALE_OUT_002__MANO_MANUAL(TestCase):
 
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
 
-        self.tc_result['resources']['After scale out'] = dict()
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
-        for vnf_instance_id in ns_info.vnf_info_id:
-            self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
-
-        self.tc_result['scaling_out']['status'] = 'Success'
-
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate NS has resized to the max
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS has resized to the max')
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
         if len(ns_info.vnf_info_id) != sp['max_instances']:
             raise TestRunError('NS did not scale out to the max')
+
+        self.tc_result['resources']['After scale out'] = dict()
+        for vnf_instance_id in ns_info.vnf_info_id:
+            self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
+
         self.tc_result['scaling_out']['level'] = sp['max_instances']
+
+        self.tc_result['scaling_out']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Determine if and length of service disruption
