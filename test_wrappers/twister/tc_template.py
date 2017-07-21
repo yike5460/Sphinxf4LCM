@@ -61,11 +61,11 @@ def twister_run():
     data = server_response.json()
     tc_input = data['tc_input']
 
-    set_details({'vnfo': tc_input['mano_params']['type']})
-    set_details({'vnfm': tc_input['mano_params']['type']})
-    set_details({'vim': 'OpenStack'})
-    set_details({'vnf': 'CirrOS'})
-    set_details({'traffic_gen': 'STCv'})
+    set_details({'vnfo': tc_input.get('mano_params', {}).get('type', 'N/A')})
+    set_details({'vnfm': tc_input.get('mano_params', {}).get('type', 'N/A')})
+    set_details({'vnf': tc_input.get('vnf_params', {}).get('type', 'N/A')})
+    set_details({'vim': tc_input.get('vim_params', {}).get('type', 'N/A')})
+    set_details({'traffic_gen': tc_input.get('traffic_params', {}).get('type', 'N/A')})
 
     if tc_result.get('overall_status') == 'PASSED':
         _RESULT = 'PASS'
