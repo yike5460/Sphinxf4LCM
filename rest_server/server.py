@@ -145,7 +145,9 @@ def do_exec():
 
         tc_input['vnfd_id'] = _read_config('vnfd-id')
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
-        tc_input['vnf_params']['instance_name'] = tc_exec_request['tc_name']
+        if 'vnf_params' not in tc_input.keys():
+            tc_input['vnf_params'] = dict()
+            tc_input['vnf_params']['instance_name'] = tc_exec_request['tc_name']
 
     execution_id = str(uuid.uuid4())
     queue = Queue()
@@ -182,7 +184,6 @@ def get_status(execution_id):
             else:
                 tc_result = queue.get_nowait()
             tc_results[execution_id] = tc_result
-            queue.close()
         return {'status': 'DONE',
                 'tc_result': tc_results[execution_id],
                 'tc_input': tc_inputs[execution_id]}

@@ -144,30 +144,29 @@ class TestCase(object):
         """
         This method implements the test case execution logic.
         """
-        self.check_requirements()
-
         try:
+            self.check_requirements()
             self.setup()
             self.run()
         except TestSetupError as e:
             self._LOG.error('%s setup failed' % self.tc_name)
             self._LOG.debug(e.message)
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = e.error_info
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.error_info)
         except TestRunError as e:
             self._LOG.error('%s run failed' % self.tc_name)
             self._LOG.debug(e.message)
             self.tc_result['overall_status'] = constants.TEST_FAILED
-            self.tc_result['error_info'] = e.error_info
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.error_info)
         except ApiError as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = e.message
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
             raise
         except Exception as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = e.message
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
             raise
         finally:
             try:
@@ -178,8 +177,7 @@ class TestCase(object):
             finally:
                 self.collect_timestamps()
                 self.report()
-
-        return self.tc_result
+                return self.tc_result
 
     def report(self):
         reporting.report_test_case(self.tc_input, self.tc_result)
