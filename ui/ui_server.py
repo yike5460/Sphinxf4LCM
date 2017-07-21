@@ -186,6 +186,9 @@ def mano_add(mano_type, validation={'warning': None, 'message': None}, mano=None
     """
     This function displays the required form to add a new MANO platform.
     :param mano_type: Type of MANO platform to be added
+    :param validation: Dictionary containing a warning or a message from the REST server at the validation operation.
+    :param mano: MANO element data structure
+    :param name: Name of MANO element
     """
 
     return template('mano_add.html', mano_type=mano_type, validation=validation, mano=mano, name=name)
@@ -437,7 +440,7 @@ def em_data():
             },
             'type': type
         }
-    requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
+        requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
     return em()
 
 
@@ -581,7 +584,7 @@ def traffic_data():
             },
             'type': type
         }
-    requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+        requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
     return traffic()
 
 
@@ -956,7 +959,6 @@ def validate(element, struct):
     This is a helper function to validate one configured MANO or VIM against the REST API server. The REST server
     actually tries to connect to the configured element.
     :param element: Element can be a MANO or a VIM
-    :param type: Type of MANO or VIM element (e.g. 'tacker' for a MANO of this type)
     :param struct: a dictionary containing the
     :return: The function returns a dictionary containig either warning or message keys. If warning is set, then
     connection to the element has failed. If message is set, then connection to the element succeeded.
