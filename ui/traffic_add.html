@@ -71,12 +71,12 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <% if traffic_type == 'stcv': %>
-            <h2>Add new STCv Traffic Element </h2>
+          <% if traffic_type == 'stc': %>
+            <h2>Add new STC Traffic Element </h2>
           <% end %>
           <table class="table table-striped">
                 <form action="/traffic/data/" method="post">
-                  <% if traffic_type == 'stcv': %>
+                  <% if traffic_type == 'stc': %>
                     <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
                     <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px"></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px"></td></tr>

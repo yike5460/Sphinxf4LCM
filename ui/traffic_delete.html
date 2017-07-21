@@ -74,7 +74,7 @@
           <h2>Delete Traffic Element {{ traffic['name'] }}?</h2>
           <table class="table table-striped">
                 <form action="/traffic/delete/" method="post">
-                  <% if traffic['type'] == 'stcv': %>
+                  <% if traffic['type'] == 'stc': %>
                     <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px" readonly value={{traffic['lab_server_addr']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px" readonly value={{traffic['user_name']}}></td></tr>
                     <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px" readonly value={{traffic['session_name']}}></td></tr>

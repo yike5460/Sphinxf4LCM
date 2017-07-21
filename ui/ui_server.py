@@ -7,7 +7,7 @@ from bottle import route, run, request, template, static_file, redirect
 MANO_TYPES = ['tacker']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
-TRAFFIC_TYPES = ['stcv']
+TRAFFIC_TYPES = ['stc']
 VNF_TYPES = ['ubuntu']
 
 
@@ -544,7 +544,7 @@ def traffic_data():
     """
 
     type = request.forms.get('type')
-    if type == 'stcv':
+    if type == 'stc':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         user_name = request.forms.get('user_name')
