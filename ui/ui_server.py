@@ -182,16 +182,17 @@ def mano():
 
 
 @route('/mano/add/<mano_type>/')
-def mano_add(mano_type, validation={'warning': None, 'message': None}, mano=None, name=None):
+def mano_add(mano_type, warning=None, message=None, mano=None, name=None):
     """
     This function displays the required form to add a new MANO platform.
     :param mano_type: Type of MANO platform to be added
-    :param validation: Dictionary containing a warning or a message from the REST server at the validation operation.
+    :param warning: Warning information from the REST server at the validation operation.
+    :param message: Success message from the REST server at the validation operation.
     :param mano: MANO element data structure
     :param name: Name of MANO element
     """
 
-    return template('mano_add.html', mano_type=mano_type, validation=validation, mano=mano, name=name)
+    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano, name=name)
 
 
 @route('/mano/validate/', method='POST')
@@ -220,10 +221,14 @@ def mano_validate():
                                        identity_api_version=identity_api_version)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
-            return mano_add(mano_type=type, validation=validation, mano=new_mano, name=name)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
-            return mano_update(validation=validation, mano=new_mano, name=name)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
         elif request.forms.get('add'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
@@ -232,11 +237,11 @@ def mano_validate():
 
 
 @route('/mano/update/', method='POST')
-def mano_update(validation={'warning': None, 'message': None}, mano=None, name=None):
+def mano_update(warning=None, message=None, mano=None, name=None):
     """
     This function displays the required form to update an existing MANO platform.
-    :param validation: Dictionary containing validation reply received from the REST server. If 'warning' is set, the
-    validation has failed. If 'message' is set, the validation succeeded.
+    :param warning: Warning information from the REST server at the validation operation.
+    :param message: Success message from the REST server at the validation operation.
     :param mano: MANO structure containing data to reach the MANO element.
     :param name: name of MANO element.
     """
@@ -245,9 +250,9 @@ def mano_update(validation={'warning': None, 'message': None}, mano=None, name=N
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
-        return template('mano_update.html', validation=validation, mano=mano_json, name=name)
+        return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name)
     else:
-        return template('mano_update.html', validation=validation, mano=mano, name=name)
+        return template('mano_update.html', warning=warning, message=message, mano=mano, name=name)
 
 
 @route('/mano/delete/', method='POST')
@@ -295,7 +300,7 @@ def vim(warning=None):
 
 
 @route('/vim/update/', method='POST')
-def vim_update(validation={'warning': None, 'message': None}, vim=None, name=None):
+def vim_update(warning=None, message=None, vim=None, name=None):
     """
     This function displays the required form to update an existing VIM platform.
     """
@@ -304,9 +309,9 @@ def vim_update(validation={'warning': None, 'message': None}, vim=None, name=Non
         name = request.forms.get('update_vim')
         vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % name)
         vim_json = vim_data.json()[name]
-        return template('vim_update.html', validation=validation, vim=vim_json, name=name)
+        return template('vim_update.html', warning=warning, message=message, vim=vim_json, name=name)
     else:
-        return template('vim_update.html', validation=validation, vim=vim, name=name)
+        return template('vim_update.html', warning=warning, message=message, vim=vim, name=name)
 
 
 @route('/vim/delete/', method='POST')
@@ -337,13 +342,17 @@ def vim_delete():
 
 
 @route('/vim/add/<vim_type>/')
-def vim_add(vim_type, validation={'warning': None, 'message': None}, vim=None, name=None):
+def vim_add(vim_type, warning=None, message=None, vim=None, name=None):
     """
     This function displays the required form to add a new VIM platform.
     :param vim_type: Type of VIM platform to be added
+    :param warning: Warning information from the REST server at the validation operation.
+    :param message: Success message from the REST server at the validation operation.
+    :param vim: VIM structure containing data to reach the VIM element.
+    :param name: name of VIM element.
     """
 
-    return template('vim_add.html', vim_type=vim_type, validation=validation, vim=vim, name=name)
+    return template('vim_add.html', vim_type=vim_type, warning=warning, message=message, vim=vim, name=name)
 
 
 @route('/vim/validate/', method='POST')
@@ -372,10 +381,14 @@ def vim_validate():
                                      identity_api_version=identity_api_version)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('vim', new_vim)
-            return vim_add(vim_type=type, validation=validation, vim=new_vim, name=name)
+            warning = validation['warning']
+            message = validation['message']
+            return vim_add(vim_type=type, warning=warning, message=message, vim=new_vim, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('vim', new_vim)
-            return vim_update(validation=validation, vim=new_vim, name=name)
+            warning = validation['warning']
+            message = validation['message']
+            return vim_update(warning=warning, message=message, vim=new_vim, name=name)
         elif request.forms.get('add'):
             requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
         elif request.forms.get('update'):

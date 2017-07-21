@@ -72,16 +72,16 @@
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
           <h2>Add new {{vim_type.capitalize()}} VIM </h2>
-          <% if validation['warning'] != None: %>
+          <% if warning != None: %>
             <div class="alert alert-danger alert-dismissible" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <strong>Warning! </strong>{{validation['warning']}}
+              <strong>Warning! </strong>{{warning}}
             </div>
           <% end %>
-          <% if validation['message'] != None: %>
+          <% if message != None: %>
             <div class="alert alert-success" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <strong>Success! </strong>{{validation['message']}}
+              <strong>Success! </strong>{{message}}
             </div>
           <% end %>
 
