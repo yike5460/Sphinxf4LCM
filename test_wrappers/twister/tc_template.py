@@ -47,12 +47,12 @@ def twister_run():
         print 'Test case error info: %s' % tc_result.get('error_info', 'N/A')
 
     durations = dict()
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration', None)
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration', None)
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration', None)
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration', None)
-    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration', None)
-    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration', None)
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration')
+    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
+    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
 
     for duration_type, duration_value in durations.items():
         set_details({duration_type: duration_value})
