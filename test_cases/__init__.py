@@ -94,7 +94,7 @@ class TestCase(object):
         """
         try:
             for element in self.required_elements:
-                if element not in self.tc_input.keys():
+                if self.tc_input.get(element) is None:
                     raise TestSetupError('Missing required element: %s' % element)
         except AttributeError:
             self._LOG.debug('No required elements for this test case')
