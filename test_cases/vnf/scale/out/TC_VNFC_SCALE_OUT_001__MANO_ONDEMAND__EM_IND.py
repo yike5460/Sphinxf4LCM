@@ -28,7 +28,7 @@ class TC_VNFC_SCALE_OUT_001__MANO_ONDEMAND__EM_IND(TestCase):
     8. Validate increased capacity without loss
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_001__MANO_ONDEMAND__EM_IND')

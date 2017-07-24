@@ -23,7 +23,7 @@ class TC_VNF_STATE_INST_006(TestCase):
     6. Validate no traffic flows
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_006')

@@ -27,7 +27,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
     10. Validate no traffic has been forwarded while the termination
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_TERM_005')

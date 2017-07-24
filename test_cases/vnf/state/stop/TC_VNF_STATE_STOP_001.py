@@ -27,7 +27,7 @@ class TC_VNF_STATE_STOP_001(TestCase):
     10. Validate that no traffic flows once stop is completed
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_STOP_001')

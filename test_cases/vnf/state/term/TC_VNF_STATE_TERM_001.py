@@ -25,7 +25,7 @@ class TC_VNF_STATE_TERM_001(TestCase):
     8. Validate VNF is terminated and all resources have been released
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_TERM_001')

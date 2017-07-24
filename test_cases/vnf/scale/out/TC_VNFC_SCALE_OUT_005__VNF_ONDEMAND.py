@@ -35,7 +35,7 @@ class TC_VNFC_SCALE_OUT_005__VNF_ONDEMAND(TestCase):
     13. Validate traffic flows through without issues
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_005__VNF_ONDEMAND')

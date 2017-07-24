@@ -34,7 +34,7 @@ class TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_MAX(TestCase):
     13. Validate all traffic goes through
     """
 
-    required_elements = ('mano_params', 'vim_params', 'traffic_params')
+    required_elements = ('mano_params', 'vim_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_MAX')

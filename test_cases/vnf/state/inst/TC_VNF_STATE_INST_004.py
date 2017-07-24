@@ -30,7 +30,7 @@ class TC_VNF_STATE_INST_004(TestCase):
     11. Calculate the instantiation time
     """
 
-    required_elements = ('mano_params', 'em_params', 'traffic_params')
+    required_elements = ('mano_params', 'em_params', 'traffic_params', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_004')
