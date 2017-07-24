@@ -3,7 +3,6 @@ import importlib
 
 from api import ApiError
 from api.generic import constants
-from utils import reporting
 from utils import timestamps
 
 Function = collections.namedtuple('Function', 'function_reference function_args function_kwargs')
@@ -176,8 +175,4 @@ class TestCase(object):
                 self._LOG.debug('Exception message %s' % e.message)
             finally:
                 self.collect_timestamps()
-                self.report()
                 return self.tc_result
-
-    def report(self):
-        reporting.report_test_case(self.tc_input, self.tc_result)
