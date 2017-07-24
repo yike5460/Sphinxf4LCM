@@ -30,17 +30,16 @@ class TC_VNF_STATE_INST_003(TestCase):
     11. Calculate the instantiation time
     """
 
-    required_elements = ('mano_params', 'em_params', 'traffic_params', 'vnfd_id')
+    required_elements = ('mano', 'em', 'traffic', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_003')
 
         # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
-        self.em = Em(vendor=self.tc_input['em_params']['type'], **self.tc_input['em_params']['client_config'])
-        self.vnf = Vnf(vendor=self.tc_input['vnf_params']['type'])
-        self.traffic = Traffic(self.tc_input['traffic_params']['type'],
-                               **self.tc_input['traffic_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
+        self.em = Em(vendor=self.tc_input['em']['type'], **self.tc_input['em']['client_config'])
+        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
+        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
@@ -65,9 +64,9 @@ class TC_VNF_STATE_INST_003(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']),
-                                          vnf_instance_description=None)
+                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
+                                                 vnf_instance_description=None)
 
         self.time_record.END('instantiate_vnf')
 
@@ -96,7 +95,7 @@ class TC_VNF_STATE_INST_003(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Modifying the VNF configuration')
         self.time_record.START('update_vnf')
-        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.tc_input['vnf_params']['config']) != \
+        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.tc_input['vnf']['config']) != \
                 constants.OPERATION_SUCCESS:
             raise TestRunError('EM could not modify the VNF configuration')
 
@@ -131,14 +130,14 @@ class TC_VNF_STATE_INST_003(TestCase):
         # 7. Validate configuration has been applied by the EM to the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating configuration has been applied by the EM to the VNF')
-        if not self.vnf.config_applied(**self.tc_input['vnf_params']['credentials']):
+        if not self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
             raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating license has been applied to the VNF')
-        if not self.vnf.license_applied(**self.tc_input['vnf_params']['credentials']):
+        if not self.vnf.license_applied(**self.tc_input['vnf']['credentials']):
             raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -146,7 +145,7 @@ class TC_VNF_STATE_INST_003(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
 
         self.traffic.start(return_when_emission_starts=True)
 

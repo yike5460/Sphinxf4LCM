@@ -34,16 +34,15 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
     13. Validate all traffic goes through
     """
 
-    required_elements = ('mano_params', 'vim_params', 'traffic_params')
+    required_elements = ('mano', 'vim', 'traffic')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX')
 
         # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
-        self.vim = Vim(vendor=self.tc_input['vim_params']['type'], **self.tc_input['vim_params']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic_params']['type'],
-                               **self.tc_input['traffic_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
+        self.vim = Vim(vendor=self.tc_input['vim']['type'], **self.tc_input['vim']['client_config'])
+        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
@@ -126,12 +125,12 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
 
         # Configure stream destination MAC address(es)
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
         self.traffic.config_traffic_stream(dest_mac_addr_list)
 

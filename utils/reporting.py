@@ -11,10 +11,10 @@ def report_test_case(tc_input, tc_result):
     print
     print '*** Test case environment ***'
     t = PrettyTable(['Module', 'Type'])
-    t.add_row(['MANO', tc_input.get('mano_params', {}).get('type')])
-    t.add_row(['VIM', tc_input.get('vim_params', {}).get('type')])
+    t.add_row(['MANO', tc_input.get('mano', {}).get('type')])
+    t.add_row(['VIM', tc_input.get('vim', {}).get('type')])
     t.add_row(['VNF', tc_input.get('vnf', {}).get('type')])
-    t.add_row(['Traffic', tc_input.get('traffic_params', {}).get('type')])
+    t.add_row(['Traffic', tc_input.get('traffic', {}).get('type')])
     print t
     print
 
@@ -28,7 +28,7 @@ def report_test_case(tc_input, tc_result):
             print_scaling_results = True
 
             # Build the scale table row
-            port_speed = tc_input['traffic_params']['traffic_config']['port_speed']
+            port_speed = tc_input['traffic']['traffic_config']['port_speed']
             status = tc_result[scale_type].get('status', 'N/A')
             scale_level = tc_result[scale_type].get('level', 'N/A')
             load_before_scaling = tc_result[scale_type].get('traffic_before', 'N/A')
@@ -95,7 +95,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
 
     json_dict['environment'] = dict()
     json_dict['environment']['vim'] = 'OpenStack'
-    json_dict['environment']['mano'] = tc_input['mano_params']['type']
+    json_dict['environment']['mano'] = tc_input['mano']['type']
     json_dict['environment']['vnf'] = 'CirrOS'
     json_dict['environment']['traffic'] = 'STCv'
     json_dict['environment']['em'] = 'None'

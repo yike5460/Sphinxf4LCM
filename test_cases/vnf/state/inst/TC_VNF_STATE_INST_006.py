@@ -23,15 +23,14 @@ class TC_VNF_STATE_INST_006(TestCase):
     6. Validate no traffic flows
     """
 
-    required_elements = ('mano_params', 'traffic_params', 'vnfd_id')
+    required_elements = ('mano', 'traffic', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_STATE_INST_006')
 
         # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic_params']['type'],
-                               **self.tc_input['traffic_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
+        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
@@ -54,9 +53,9 @@ class TC_VNF_STATE_INST_006(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']),
-                                          vnf_instance_description=None)
+                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
+                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
+                                                 vnf_instance_description=None)
 
         self.time_record.END('instantiate_vnf')
 
@@ -96,7 +95,7 @@ class TC_VNF_STATE_INST_006(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
 
         self.traffic.start(return_when_emission_starts=True)
 

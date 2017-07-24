@@ -19,14 +19,14 @@ class TC_VNF_STATE_INST_007(TestCase):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano_params', 'vim_params', 'vnfd_id')
+    required_elements = ('mano', 'vim', 'vnfd_id')
 
     def setup(self):
         LOG.info('Starting setup for %s' % self.tc_name)
 
         # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
-        self.vim = Vim(vendor=self.tc_input['vim_params']['type'], **self.tc_input['vim_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
+        self.vim = Vim(vendor=self.tc_input['vim']['type'], **self.tc_input['vim']['client_config'])
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_vnf'] = dict()
@@ -43,7 +43,7 @@ class TC_VNF_STATE_INST_007(TestCase):
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_id(
                                           vnfd_id=self.tc_input['vnfd_id'], vnf_instance_description=None,
-                                          vnf_instance_name=generate_name(self.tc_input['vnf_params']['instance_name']))
+                                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']))
 
         if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
                                           flavour_id=None) != constants.OPERATION_FAILED:

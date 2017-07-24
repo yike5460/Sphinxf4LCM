@@ -141,13 +141,13 @@ def do_exec():
         tc_input = dict()
         for resource_type, resource_name in _read_resource('env', active_env).items():
             resource_params = _read_resource(resource_type, resource_name)
-            tc_input[resource_type + '_params'] = resource_params
+            tc_input[resource_type] = resource_params
 
         tc_input['vnfd_id'] = _read_config('vnfd-id')
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
-        if 'vnf_params' not in tc_input.keys():
-            tc_input['vnf_params'] = dict()
-            tc_input['vnf_params']['instance_name'] = tc_exec_request['tc_name']
+        if 'vnf' not in tc_input.keys():
+            tc_input['vnf'] = dict()
+            tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
 
     execution_id = str(uuid.uuid4())
     queue = Queue()

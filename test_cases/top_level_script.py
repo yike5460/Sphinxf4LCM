@@ -43,7 +43,7 @@ LOG = logging.getLogger(__name__)
 
 
 if __name__ == '__main__':
-    openstack = {'mano_params': {'type': 'tacker',
+    openstack = {'mano': {'type': 'tacker',
                                  'client_config': {'auth_url': 'http://controller:35357/v3',
                                                    'username': 'admin',
                                                    'password': 'stack',
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                                                    'project_name': 'admin',
                                                    'project_domain_name': 'default',
                                                    'user_domain_name': 'default'}},
-                 'vim_params': {'type': 'openstack',
+                 'vim': {'type': 'openstack',
                                 'client_config': {'auth_url': 'http://controller:35357/v3',
                                                   'username': 'admin',
                                                   'password': 'stack',
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                                                   'project_name': 'admin',
                                                   'project_domain_name': 'default',
                                                   'user_domain_name': 'default'}},
-                 'em_params': {'type': 'tacker',
+                 'em': {'type': 'tacker',
                                'client_config': {'auth_url': 'http://controller:35357/v3',
                                                  'username': 'admin',
                                                  'password': 'stack',
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                                          'password': 'cubswin:)'},
                          'config': '/home/mdragomir/Downloads/owrt_forward.yaml'},
                          # 'config': '/home/mdragomir/Downloads/owrt_empty_config.yaml'},
-                 'traffic_params': {'type': 'stc',
+                 'traffic': {'type': 'stc',
                                     'client_config': {'lab_server_addr': '10.3.228.13',
                                                       'user_name': 'mdragomir',
                                                       'session_name': 'automation'},

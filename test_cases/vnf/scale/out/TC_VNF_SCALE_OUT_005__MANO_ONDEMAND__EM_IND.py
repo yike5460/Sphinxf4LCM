@@ -37,15 +37,14 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
     14. Validate traffic flows through without issues
     """
 
-    required_elements = ('mano_params', 'traffic_params')
+    required_elements = ('mano', 'traffic')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND')
 
         # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano_params']['type'], **self.tc_input['mano_params']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic_params']['type'],
-                               **self.tc_input['traffic_params']['client_config'])
+        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
+        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
         self.register_for_cleanup(self.traffic.destroy)
 
         # Initialize test case result.
@@ -118,12 +117,12 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic_params']['traffic_config'])
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
 
         # Configure stream destination MAC address(es)
         dest_mac_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
         self.traffic.config_traffic_stream(dest_mac_addr_list)
 
@@ -215,7 +214,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         for vnf_instance_id in ns_info.vnf_info_id:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
             for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-                if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
+                if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
                     dest_mac_addr_list += ext_cp_info.address[0] + ' '
 
         self.traffic.config_traffic_stream(dest_mac_addr_list)
@@ -324,7 +323,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         dest_mac_addr_list = ''
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic_params']['traffic_config']['left_cp_name']:
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
                 dest_mac_addr_list += ext_cp_info.address[0] + ' '
 
         self.traffic.config_traffic_stream(dest_mac_addr_list)
