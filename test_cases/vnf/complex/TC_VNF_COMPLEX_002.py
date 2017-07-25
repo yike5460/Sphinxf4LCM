@@ -28,7 +28,7 @@ class TC_VNF_COMPLEX_002(TestCase):
     11. Validate no traffic flows through
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id')
+    required_elements = ('mano', 'traffic', 'vnfd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_COMPLEX_002')

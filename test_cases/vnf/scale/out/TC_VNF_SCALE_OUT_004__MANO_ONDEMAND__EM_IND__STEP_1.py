@@ -33,7 +33,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
     12. Validate traffic goes through
     """
 
-    required_elements = ('mano', 'vim', 'traffic')
+    required_elements = ('mano', 'vim', 'traffic', 'nsd_id', 'scaling_policy_name', 'desired_scale_out_steps')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1')

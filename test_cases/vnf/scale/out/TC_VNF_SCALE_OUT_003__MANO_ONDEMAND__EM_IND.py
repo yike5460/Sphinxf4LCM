@@ -33,7 +33,7 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND(TestCase):
     13. Validate traffic flows through without issues
     """
 
-    required_elements = ('mano', 'traffic')
+    required_elements = ('mano', 'traffic', 'nsd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__EM_IND')

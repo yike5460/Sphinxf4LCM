@@ -29,7 +29,7 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND(TestCase):
     9. Validate increased capacity without loss
     """
 
-    required_elements = ('mano', 'traffic')
+    required_elements = ('mano', 'traffic', 'nsd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND')

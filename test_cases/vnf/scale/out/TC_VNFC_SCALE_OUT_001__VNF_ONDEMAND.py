@@ -26,7 +26,7 @@ class TC_VNFC_SCALE_OUT_001__VNF_ONDEMAND(TestCase):
     8. Validate increased capacity without loss
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id')
+    required_elements = ('mano', 'traffic', 'vnfd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_001__VNF_ONDEMAND')

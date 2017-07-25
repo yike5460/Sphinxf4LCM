@@ -19,7 +19,7 @@ class TC_VNF_STATE_INST_007(TestCase):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano', 'vim', 'vnfd_id')
+    required_elements = ('mano', 'vim', 'vnfd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for %s' % self.tc_name)

@@ -34,7 +34,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
     13. Validate traffic flows through without issues
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id')
+    required_elements = ('mano', 'traffic', 'vnfd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI')

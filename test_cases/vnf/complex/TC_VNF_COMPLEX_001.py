@@ -27,7 +27,7 @@ class TC_VNF_COMPLEX_001(TestCase):
     9. Validate that no traffic flows once stop is completed
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id')
+    required_elements = ('mano', 'traffic', 'vnfd_id', 'scaling_policy_name')
 
     def setup(self):
         LOG.info('Starting setup for TC_VNF_COMPLEX_001')
