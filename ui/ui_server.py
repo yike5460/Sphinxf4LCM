@@ -230,6 +230,9 @@ def mano_validate():
             message = validation['message']
             return mano_update(warning=warning, message=message, mano=new_mano, name=name)
         elif request.forms.get('add'):
+            if not name:
+                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
+                                mano=new_mano, name=name)
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
@@ -390,6 +393,9 @@ def vim_validate():
             message = validation['message']
             return vim_update(warning=warning, message=message, vim=new_vim, name=name)
         elif request.forms.get('add'):
+            if not name:
+                return vim_add(vim_type=type, warning='Mandatory field missing: name', message=None,
+                               vim=new_vim, name=name)
             requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
@@ -415,13 +421,13 @@ def em():
 
 
 @route('/em/add/<em_type>/')
-def em_add(em_type):
+def em_add(em_type, warning=None, message=None, em=None, name=None):
     """
     This function displays the required form to add a new Element Manager platform.
     :param em_type: Type of Element Manager platform to be added
     """
 
-    return template('em_add.html', em_type=em_type)
+    return template('em_add.html', em_type=em_type, warning=warning, message=message, em=em, name=name)
 
 
 @route('/em/data/', method='POST')
@@ -453,6 +459,8 @@ def em_data():
             },
             'type': type
         }
+        if not name:
+            return em_add(em_type=type, warning='Mandatory field missing: name', message=None, em=new_em, name=name)
         requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
     return em()
 
@@ -542,14 +550,15 @@ def traffic():
 
 
 @route('/traffic/add/<traffic_type>/')
-def traffic_add(traffic_type):
+def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=None):
     """
     This function displays the required form to add a new Traffic generation element.
     :param traffic_type: Type of Traffic generation element to be added
 
     """
 
-    return template('traffic_add.html', traffic_type=traffic_type)
+    return template('traffic_add.html', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
+                    name=name)
 
 
 @route('/traffic/data/', method='POST')
@@ -575,7 +584,10 @@ def traffic_data():
         right_traffic_addr = request.forms.get('right_traffic_addr')
         right_traffic_plen = request.forms.get('right_traffic_plen')
         right_traffic_gw = request.forms.get('right_traffic_gw')
-        port_speed = int(request.forms.get('port_speed'))
+        if not request.forms.get('port_speed'):
+            port_speed = 0
+        else:
+            port_speed = int(request.forms.get('port_speed'))
         new_traffic = {
             'client_config': {
                 'lab_server_addr': lab_server_addr,
@@ -597,6 +609,9 @@ def traffic_data():
             },
             'type': type
         }
+        if not name:
+            return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
+                               traffic=new_traffic, name=name)
         requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
     return traffic()
 
@@ -708,12 +723,12 @@ def vnf(warning=None):
 
 
 @route('/vnf/add/', method="POST")
-def vnf_add():
+def vnf_add(warning=None, message=None, vnf=None, instance_name=None):
     """
     This function displays the required form to add a new Virtual Network Function element.
     """
 
-    return template('vnf_add.html')
+    return template('vnf_add.html', warning=warning, message=message, vnf=vnf, instance_name=None)
 
 
 @route('/vnf/data/', method='POST')
@@ -739,6 +754,12 @@ def vnf_data():
         'instance_name': instance_name,
         'config': config
     }
+    if not instance_name:
+        return vnf_add(warning='Mandatory field missing: Instance Name', message=None, vnf=new_vnf,
+                       instance_name=instance_name)
+    elif not type:
+        return vnf_add(warning='Mandatory field missing: Type', message=None, vnf=new_vnf,
+                       instance_name=instance_name)
     response = requests.put(url='http://localhost:8080/v1.0/vnf/%s' % instance_name, json=new_vnf)
     if response.status_code == 504:
         return vnf(warning=response.json().get('warning'))
