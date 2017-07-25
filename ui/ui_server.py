@@ -53,7 +53,7 @@ def index():
 
 
 @route('/env/add/')
-def env_add():
+def env_add(warning=None, message=None):
     """
     This function displays the required form to add a new Environment.
     """
@@ -84,7 +84,7 @@ def env_add():
     env_list['em'] = em_list
     env_list['traffic'] = traffic_list
     env_list['vnf'] = vnf_list
-    return template('env_add.html', env_list=env_list)
+    return template('env_add.html', env_list=env_list, warning=warning, message=message)
 
 
 @route('/env/delete/', method="POST")
@@ -152,6 +152,8 @@ def env_data():
     """
 
     env_name = request.forms.get('env_name')
+    if not env_name:
+        return env_add(warning="Missing mandatory field: name", message=None)
     new_env = {}
     for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
         if request.forms.get(element) != '':
