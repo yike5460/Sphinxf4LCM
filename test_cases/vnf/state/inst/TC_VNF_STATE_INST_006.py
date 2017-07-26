@@ -113,6 +113,6 @@ class TC_VNF_STATE_INST_006(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows')
         if self.traffic.does_traffic_flow(delay_time=5):
-            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
+            raise TestRunError('Traffic is flowing', err_details='Low traffic flew')
 
         LOG.info('TC_VNF_STATE_INST_006 execution completed successfully')
