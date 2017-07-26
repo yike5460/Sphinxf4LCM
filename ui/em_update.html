@@ -71,31 +71,40 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h2>Update EM {{ em_name }}</h2>
+          <h2>Update EM {{ name }}</h2>
+          <% if warning != None: %>
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <strong>Warning! </strong>{{warning}}
+            </div>
+          <% end %>
+          <% if message != None: %>
+            <div class="alert alert-success" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <strong>Success! </strong>{{message}}
+            </div>
+          <% end %>
           <table class="table table-striped">
-                <form action="/em/update/" method="post">
+                <form action="/em/validate/" method="post">
                   <% if em['type'] == 'tacker': %>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px" value={{em['user_domain_name']}}></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px" value={{em['username']}}></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{em['password']}}></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" style="width: 200px" value={{em['project_domain_name']}}></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px" value={{em['project_name']}}></td></tr>
-                    <tr><td>Auth_url:</td><td><input type="text" name="auth_url" style="width: 200px" value={{em['auth_url']}}></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px" value={{em['identity_api_version']}}></td></tr>
+                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px" value={{em['client_config']['user_domain_name']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px" value={{em['client_config']['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{em['client_config']['password']}}></td></tr>
+                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" style="width: 200px" value={{em['client_config']['project_domain_name']}}></td></tr>
+                    <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px" value={{em['client_config']['project_name']}}></td></tr>
+                    <tr><td>Auth_url:</td><td><input type="text" name="auth_url" style="width: 200px" value={{em['client_config']['auth_url']}}></td></tr>
+                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px" value={{em['client_config']['identity_api_version']}}></td></tr>
                   <% end %>
-                  <input type="hidden" name="name" value={{em_name}}>
+                  <input type="hidden" name="name" value={{name}}>
                   <input type="hidden" name="confirmed" value="yes">
           </table>
-            <div class="btn-group">
-                  <input value="Update" type="submit" class="btn btn-default">
-                  </input>
-                </form>
+            <div class="btn-group navbar-left">
+                  <input type="hidden" name="type" value={{em['type']}}>
+                  <input type="hidden" name="action" value="Update">
+                  <input value="Update" name="update" type="submit" class="btn btn-default">
             </div>
             <div class="btn-group">
-              <form action="/em/">
-                <input type="submit" value="Cancel" class="btn btn-default">
-                </input>
-              </form>
+                <input type="submit" name="cancel" value="Cancel" class="btn btn-default">
             </div>
       </div>
 

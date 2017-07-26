@@ -432,11 +432,11 @@ def em_add(em_type, warning=None, message=None, em=None, name=None):
     return template('em_add.html', em_type=em_type, warning=warning, message=message, em=em, name=name)
 
 
-@route('/em/data/', method='POST')
-def em_data():
+@route('/em/validate/', method='POST')
+def em_validate():
     """
-    This function is used by the em_add function to send the new data to the REST server with 'PUT'
-    command.
+    This function is used by the vim_add and em_update functions to send the new data to the REST server with 'PUT'
+    command and to validate the EM configuration.
     """
 
     type = request.forms.get('type')
@@ -448,63 +448,37 @@ def em_data():
         project_domain_name = request.forms.get('project_domain_name')
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
-        identity_api_version = request.forms.get('identity_api_version')
-        new_em = {
-            'client_config': {
-                'auth_url': auth_url,
-                'identity_api_version': identity_api_version,
-                'password': password,
-                'project_domain_name': project_domain_name,
-                'project_name': project_name,
-                'user_domain_name': user_domain_name,
-                'username': username
-            },
-            'type': type
-        }
-        if not name:
-            return em_add(em_type=type, warning='Mandatory field missing: name', message=None, em=new_em, name=name)
-        requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
+        if not request.forms.get('identity_api_version'):
+            identity_api_version = 0
+        else:
+            identity_api_version = int(request.forms.get('identity_api_version'))
+        (name, new_em) = struct_em(type=type, name=name, user_domain_name=user_domain_name, username=username,
+                                     password=password, project_domain_name=project_domain_name,
+                                     project_name=project_name, auth_url=auth_url,
+                                     identity_api_version=identity_api_version)
+        if request.forms.get('add'):
+            if not name:
+                return em_add(em_type=type, warning='Mandatory field missing: name', message=None,
+                               em=new_em, name=name)
+            requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
     return em()
 
 
 @route('/em/update/', method='POST')
-def em_update():
+def em_update(warning=None, message=None, em=None, name=None):
     """
     This function displays the required form to update an existing Element Manager platform.
     """
 
-    if request.forms.get('confirmed') == "no":
-        em_name = request.forms.get('update_em')
-        em_data = requests.get(url='http://localhost:8080/v1.0/em/%s' % em_name)
-        em_json = em_data.json()
-        em_info = OrderedDict()
-        em_info['type'] = em_json[em_name]['type']
-        em_info['user_domain_name'] = em_json[em_name]['client_config']['user_domain_name']
-        em_info['username'] = em_json[em_name]['client_config']['username']
-        em_info['password'] = em_json[em_name]['client_config']['password']
-        em_info['project_domain_name'] = em_json[em_name]['client_config']['project_domain_name']
-        em_info['project_name'] = em_json[em_name]['client_config']['project_name']
-        em_info['auth_url'] = em_json[em_name]['client_config']['auth_url']
-        em_info['identity_api_version'] = em_json[em_name]['client_config']['identity_api_version']
-        return template('em_update.html', em=em_info, em_name=em_name)
+    if em is None:
+        name = request.forms.get('update_em')
+        em_data = requests.get(url='http://localhost:8080/v1.0/em/%s' % name)
+        em_json = em_data.json()[name]
+        return template('em_update.html', warning=warning, message=message, em=em_json, name=name)
     else:
-        em_name = request.forms.get('name')
-        em_data = requests.get(url='http://localhost:8080/v1.0/em/%s' % em_name)
-        em_json = em_data.json()
-        em_type = em_json[em_name]['type']
-        em_to_add = {'client_config': {}, 'type': em_type}
-        em_to_add['client_config'] = {
-            'auth_url': request.forms.get('auth_url'),
-            'identity_api_version': request.forms.get('identity_api_version'),
-            'password': request.forms.get('password'),
-            'project_domain_name': request.forms.get('project_domain_name'),
-            'project_name': request.forms.get('project_name'),
-            'user_domain_name': request.forms.get('user_domain_name'),
-            'username': request.forms.get('username')
-        }
-        requests.put(url='http://localhost:8080/v1.0/em/%s' % em_name, json=em_to_add)
-        return em()
-
+        return template('em_update.html', warning=warning, message=message, em=em, name=name)
 
 @route('/em/delete/', method='POST')
 def em_delete():
@@ -563,11 +537,11 @@ def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=Non
                     name=name)
 
 
-@route('/traffic/data/', method='POST')
-def traffic_data():
+@route('/traffic/validate/', method='POST')
+def traffic_validate():
     """
-    This function is used by the traffic_add function to send the new data to the REST server with 'PUT'
-    command.
+    This function is used by the mano_add and mano_update functions to send the new data to the REST server with 'PUT'
+    command and to validate the MANO configuration.
     """
 
     type = request.forms.get('type')
@@ -611,66 +585,29 @@ def traffic_data():
             },
             'type': type
         }
-        if not name:
-            return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
-                               traffic=new_traffic, name=name)
-        requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+        if request.forms.get('add'):
+            if not name:
+                return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
+                                traffic=new_traffic, name=name)
+            requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
     return traffic()
 
 
 @route('/traffic/update/', method='POST')
-def traffic_update():
+def traffic_update(warning=None, message=None, traffic=None, name=None):
     """
     This function displays the required form to update an existing Traffic generation element.
     """
 
-    if request.forms.get('confirmed') == "no":
-        traffic_name = request.forms.get('update_traffic')
-        traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
-        traffic_json = traffic_data.json()
-        traffic_info = OrderedDict()
-        traffic_info['type'] = traffic_json[traffic_name]['type']
-        traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
-        traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
-        traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
-        traffic_info['left_port_location'] = traffic_json[traffic_name]['traffic_config']['left_port_location']
-        traffic_info['left_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['left_traffic_addr']
-        traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
-        traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
-        traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
-        traffic_info['left_cp_name'] = traffic_json[traffic_name]['traffic_config']['left_cp_name']
-        traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
-        traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
-        traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
-        traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
-        traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
-        return template('traffic_update.html', traffic=traffic_info, traffic_name=traffic_name)
+    if traffic is None:
+        name = request.forms.get('update_traffic')
+        traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % name)
+        traffic_json = traffic_data.json()[name]
+        return template('traffic_update.html', warning=warning, message=message, traffic=traffic_json, name=name)
     else:
-        traffic_name = request.forms.get('name')
-        traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
-        traffic_json = traffic_data.json()
-        traffic_type = traffic_json[traffic_name]['type']
-        traffic_to_add = {'client_config': {}, 'type': traffic_type, 'traffic_config': {}}
-        traffic_to_add['client_config'] = {
-            'lab_server_addr': request.forms.get('lab_server_addr'),
-            'user_name': request.forms.get('user_name'),
-            'session_name': request.forms.get('session_name')
-        }
-        traffic_to_add['traffic_config'] = {
-            'left_port_location': request.forms.get('left_port_location'),
-            'left_traffic_addr': request.forms.get('left_traffic_addr'),
-            'left_traffic_plen': request.forms.get('left_traffic_plen'),
-            'left_traffic_gw': request.forms.get('left_traffic_gw'),
-            'left_traffic_gw_mac': request.forms.get('left_traffic_gw_mac'),
-            'left_cp_name': request.forms.get('left_cp_name'),
-            'right_port_location': request.forms.get('right_port_location'),
-            'right_traffic_addr': request.forms.get('right_traffic_addr'),
-            'right_traffic_plen': request.forms.get('right_traffic_plen'),
-            'right_traffic_gw': request.forms.get('right_traffic_gw'),
-            'port_speed': int(request.forms.get('port_speed'))
-        }
-        requests.put(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name, json=traffic_to_add)
-        return traffic()
+        return template('traffic_update.html', warning=warning, message=message, traffic=traffic, name=name)
 
 
 @route('/traffic/delete/', method='POST')
@@ -988,6 +925,37 @@ def struct_vim(type, name, user_domain_name, username, password, project_domain_
         }
     }
     return (name, vim)
+
+
+def struct_em(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
+               identity_api_version):
+    """
+    This is a helper function for building the JSON for a VIM element
+    :param type: EM type
+    :param name: EM name
+    :param user_domain_name: User Domain Name
+    :param username: Username
+    :param password: Password
+    :param project_domain_name: Project Domain Name
+    :param project_name: Project Name
+    :param auth_url: Authentication URL
+    :param identity_api_version: Keystone version
+    :return: The function returns a tuple containing MANO name and associated structure
+    """
+
+    em = {
+        'type': type,
+        'client_config': {
+            'user_domain_name': user_domain_name,
+            'username': username,
+            'password': password,
+            'project_domain_name': project_domain_name,
+            'project_name': project_name,
+            'auth_url': auth_url,
+            'identity_api_version': identity_api_version
+        }
+    }
+    return (name, em)
 
 
 def validate(element, struct):

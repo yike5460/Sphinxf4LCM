@@ -88,17 +88,7 @@
           <table class="table table-striped">
                 <form action="/vim/validate/" method="post">
                   <% if vim['type'] == 'openstack': %>
-                    <% if vim == None: %>
-                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px"></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px"></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" style="width: 200px"></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px"></td></tr>
-                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" style="width: 200px"></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px"></td></tr>
-                    <% else: %>
-                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px" value={{name}}></td></tr>
+                    <!--<tr><td>Name:</td><td><input type="text" name="name" style="width: 200px" value={{name}}></td></tr>-->
                     <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px" value={{vim['client_config']['user_domain_name']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"  value={{vim['client_config']['username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{vim['client_config']['password']}}></td></tr>
@@ -106,11 +96,11 @@
                     <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px" value={{vim['client_config']['project_name']}}></td></tr>
                     <tr><td>Auth URL:</td><td><input type="text" name="auth_url" style="width: 200px" value={{vim['client_config']['auth_url']}}></td></tr>
                     <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px" value={{vim['client_config']['identity_api_version']}}></td></tr>
-                    <% end %>
                   <% end %>
           </table>
             <div class="btn-group navbar-left">
                   <input type="hidden" name="type" value={{vim['type']}}>
+                  <input type="hidden" name="name" value={{name}}>
                   <input type="hidden" name="action" value="Update">
                   <input value="Update" name="update" type="submit" class="btn btn-default">
             </div>
