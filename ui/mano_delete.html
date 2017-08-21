@@ -83,6 +83,17 @@
                     <tr><td>Auth URL:</td><td><input type="text" name="auth_url" readonly style="width: 200px" value={{mano['auth_url']}}></td></tr>
                     <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" readonly style="width: 200px" value={{mano['identity_api_version']}}></td></tr>
                   <% end %>
+                  <% if mano['type'] == 'cisco': %>
+                    <tr><td><h3>Cisco NSO</h3></td><td></td></tr>
+                    <tr><td>Hostname|IP Address:</td><td><input type="text" name="nso_hostname" readonly style="width: 200px" value={{mano['nso_hostname']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="nso_username" readonly style="width: 200px" value={{mano['nso_username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="nso_password" readonly style="width: 200px" value={{mano['nso_password']}}></td></tr>
+                    <tr><td><h3>Cisco ESC</h3></td><td></td></tr>
+                    <tr><td>Hostname|IP Address:</td><td><input type="text" name="esc_hostname" readonly style="width: 200px" value={{mano['esc_hostname']}}></td></tr>
+                    <tr><td>Userame:</td><td><input type="text" name="esc_username" readonly style="width: 200px" value={{mano['esc_username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="text" name="esc_password" readonly style="width: 200px" value={{mano['esc_password']}}></td></tr>
+                  <% end %>
+
                   <input type="hidden" name="confirmed" value="yes">
                   <input type="hidden" name="name" value={{mano['name']}}>
           </table>

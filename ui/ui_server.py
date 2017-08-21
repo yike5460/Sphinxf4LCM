@@ -4,7 +4,7 @@ from collections import OrderedDict
 import requests
 from bottle import route, run, request, template, static_file, redirect
 
-MANO_TYPES = ['tacker']
+MANO_TYPES = ['tacker', 'cisco']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
 TRAFFIC_TYPES = ['stc']
@@ -238,6 +238,34 @@ def mano_validate():
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+    if type == 'cisco':
+        name = request.forms.get('name')
+        nso_hostname = request.forms.get('nso_hostname')
+        nso_username = request.forms.get('nso_username')
+        nso_password = request.forms.get('nso_password')
+        esc_hostname = request.forms.get('esc_hostname')
+        esc_username = request.forms.get('esc_username')
+        esc_password = request.forms.get('esc_password')
+        (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
+                                       nso_password=nso_password, esc_hostname=esc_hostname, esc_username=esc_username,
+                                       esc_password=esc_password)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+        elif request.forms.get('add'):
+            if not name:
+                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
+                                mano=new_mano, name=name)
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
     return mano()
 
 
@@ -273,13 +301,21 @@ def mano_delete():
         mano_info = OrderedDict()
         mano_info['name'] = mano_name
         mano_info['type'] = mano_json[mano_name]['type']
-        mano_info['user_domain_name'] = mano_json[mano_name]['client_config']['user_domain_name']
-        mano_info['username'] = mano_json[mano_name]['client_config']['username']
-        mano_info['password'] = mano_json[mano_name]['client_config']['password']
-        mano_info['project_domain_name'] = mano_json[mano_name]['client_config']['project_domain_name']
-        mano_info['project_name'] = mano_json[mano_name]['client_config']['project_name']
-        mano_info['auth_url'] = mano_json[mano_name]['client_config']['auth_url']
-        mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
+        if mano_json[mano_name]['type'] == 'tacker':
+            mano_info['user_domain_name'] = mano_json[mano_name]['client_config']['user_domain_name']
+            mano_info['username'] = mano_json[mano_name]['client_config']['username']
+            mano_info['password'] = mano_json[mano_name]['client_config']['password']
+            mano_info['project_domain_name'] = mano_json[mano_name]['client_config']['project_domain_name']
+            mano_info['project_name'] = mano_json[mano_name]['client_config']['project_name']
+            mano_info['auth_url'] = mano_json[mano_name]['client_config']['auth_url']
+            mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
+        elif mano_json[mano_name]['type'] == 'cisco':
+            mano_info['nso_hostname'] = mano_json[mano_name]['client_config']['nso_hostname']
+            mano_info['nso_username'] = mano_json[mano_name]['client_config']['nso_username']
+            mano_info['nso_password'] = mano_json[mano_name]['client_config']['nso_password']
+            mano_info['esc_hostname'] = mano_json[mano_name]['client_config']['esc_hostname']
+            mano_info['esc_username'] = mano_json[mano_name]['client_config']['esc_username']
+            mano_info['esc_password'] = mano_json[mano_name]['client_config']['esc_password']
         return template('mano_delete.html', mano=mano_info)
     else:
         mano_name = request.forms.get('name')
@@ -540,8 +576,8 @@ def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=Non
 @route('/traffic/validate/', method='POST')
 def traffic_validate():
     """
-    This function is used by the mano_add and mano_update functions to send the new data to the REST server with 'PUT'
-    command and to validate the MANO configuration.
+    This function is used by the traffic_add and traffic_update functions to send the new data to the REST server with
+    'PUT' command and to validate the MANO configuration.
     """
 
     type = request.forms.get('type')
@@ -866,8 +902,7 @@ def all_img(font):
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/fonts/")))
 
 
-def struct_mano(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
-                identity_api_version):
+def struct_mano(type, name, **kwargs):
     """
     This is a helper function for building the JSON for a MANO element
     :param type: MANO type
@@ -881,18 +916,31 @@ def struct_mano(type, name, user_domain_name, username, password, project_domain
     :param identity_api_version: Keystone version
     :return: The function returns a tuple containing MANO name and associated structure
     """
-    mano = {
-        'type': type,
-        'client_config': {
-            'user_domain_name': user_domain_name,
-            'username': username,
-            'password': password,
-            'project_domain_name': project_domain_name,
-            'project_name': project_name,
-            'auth_url': auth_url,
-            'identity_api_version': identity_api_version
+    if type == 'tacker':
+        mano = {
+            'type': type,
+            'client_config': {
+                'user_domain_name': kwargs['user_domain_name'],
+                'username': kwargs['username'],
+                'password': kwargs['password'],
+                'project_domain_name': kwargs['project_domain_name'],
+                'project_name': kwargs['project_name'],
+                'auth_url': kwargs['auth_url'],
+                'identity_api_version': kwargs['identity_api_version']
+            }
         }
-    }
+    elif type == 'cisco':
+        mano = {
+            'type': type,
+            'client_config': {
+                'nso_hostname': kwargs['nso_hostname'],
+                'nso_username': kwargs['nso_username'],
+                'nso_password': kwargs['nso_password'],
+                'esc_hostname': kwargs['esc_hostname'],
+                'esc_username': kwargs['esc_username'],
+                'esc_password': kwargs['esc_password']
+            }
+        }
     return (name, mano)
 
 

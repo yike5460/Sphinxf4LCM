@@ -108,6 +108,30 @@
                     <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px" value={{mano['client_config']['identity_api_version']}}></td></tr>
                     <% end %>
                   <% end %>
+
+                  <% if mano_type == 'cisco': %>
+                    <% if mano == None: %>
+                    <tr><td><h3>Cisco NSO</h3></td><td></td></tr>
+                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
+                    <tr><td>Hostname|IP Address:</td><td><input type="text" name="nso_hostname" style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="nso_username" style="width: 200px"></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="nso_password" style="width: 200px"></td></tr>
+                    <tr><td><h3>Cisco ESC</h3></td><td></td></tr>
+                    <tr><td>Hostname|IP Address:</td><td><input type="text" name="esc_hostname" style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="esc_username" style="width: 200px"></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="esc_password" style="width: 200px"></td></tr>
+                    <% else: %>
+                    <tr><td><h3>Cisco NSO</h3></td><td></td></tr>
+                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px" value={{name}}></td></tr>
+                    <tr><td>Hostname|IP Address:</td><td><input type="text" name="nso_hostname" style="width: 200px" value={{mano['client_config']['nso_hostname']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="nso_username" style="width: 200px"  value={{mano['client_config']['nso_username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="nso_password" style="width: 200px" value={{mano['client_config']['nso_password']}}></td></tr>
+                    <tr><td><h3>Cisco ESC</h3></td><td></td></tr>
+                    <tr><td>Hostname|IP Address:</td><td><input type="text" name="esc_hostname" style="width: 200px" value={{mano['client_config']['esc_hostname']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="esc_username" style="width: 200px"  value={{mano['client_config']['esc_username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="esc_password" style="width: 200px" value={{mano['client_config']['esc_password']}}></td></tr>
+                    <% end %>
+                  <% end %>
           </table>
             <div class="btn-group navbar-left">
                   <input type="hidden" name="type" value={{mano_type}}>
