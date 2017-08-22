@@ -2,7 +2,8 @@
   "mano": {
     "dummy":  "api.adapter.mano.dummy.DummyManoAdapter",
     "rift":   "api.adapter.mano.rift.RiftManoAdapter",
-    "tacker": "api.adapter.mano.tacker.TackerManoAdapter"
+    "tacker": "api.adapter.mano.tacker.TackerManoAdapter",
+    "cisconfv": "api.adapter.mano.cisconfv.CiscoNFVManoAdapter"
   },
   "vnfm": {
     "dummy":  "api.adapter.vnfm.dummy.DummyVnfmAdapter",
