@@ -58,6 +58,22 @@ VNFD_CP_TEMPLATE = '''
                             <vlr>%(vlr)s</vlr>
                         </vnfd-connection-point>'''
 
+VNFR_DELETE_TEMPLATE = '''
+<config>
+    <nfvo xmlns="http://tail-f.com/pkg/nfvo">
+        <vnfr>
+            <esc xmlns="http://tail-f.com/pkg/tailf-nfvo-esc">
+                <vnf-deployment operation="delete">
+                    <tenant>%(tenant)s</admin>
+                    <deployment-name>%(deployment_name)s</deployment-name>
+                    <esc>%(esc)s</esc>
+                </vnf-deployment>
+            </esc>
+        </vnfr>
+    </nfvo>
+</config>
+'''
+
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
     A problem occurred in the VNF LifeCycle Validation Cisco NFV MANO adapter API.
@@ -85,7 +101,7 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError(e.message)
 
         self.vnf_vnfd_mapping = dict()
-        self.lifecycle_operation_occurence_ids = dict()
+        self.lifecycle_operation_occurrence_ids = dict()
 
     @log_entry_exit(LOG)
     def get_vnfd(self, vnfd_id):
@@ -160,6 +176,17 @@ class CiscoNFVManoAdapter(object):
         return vnfr_xml
 
     @log_entry_exit(LOG)
+    def build_vnfr_delete(self, vnf_instance_id, additional_param):
+        vnfr_delete_template_values = {
+            'tenant': additional_param['tenant'],
+            'deployment_name': vnf_instance_id,
+            'esc': additional_param['esc']
+        }
+
+        vnfr_delete_xml = VNFR_DELETE_TEMPLATE % vnfr_delete_template_values
+        return vnfr_delete_xml
+
+    @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         vnf_instance_id = vnf_instance_name
         self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
@@ -182,12 +209,41 @@ class CiscoNFVManoAdapter(object):
 
         print netconf_reply.xml
 
-        lifecycle_operation_occurence_id = uuid.uuid4()
-        lifecycle_operation_occurence_dict = {
+        lifecycle_operation_occurrence_id = uuid.uuid4()
+        lifecycle_operation_occurrence_dict = {
             'operation_type': 'vnf_instantiate',
             'tenant_name': additional_param['tenant'],
             'deployment_name': vnf_instance_id
         }
-        self.lifecycle_operation_occurence_ids[lifecycle_operation_occurence_id] = lifecycle_operation_occurence_dict
+        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
-        return lifecycle_operation_occurence_id
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None, additional_param=None):
+        vnfr_delete_xml = self.build_vnfr_delete(vnf_instance_id, additional_param)
+        print vnfr_delete_xml
+
+        try:
+            netconf_reply = self.nso.edit_config(target='running', config=vnfr_delete_xml)
+        except NCClientError as e:
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+        print netconf_reply.xml
+
+        lifecycle_operation_occurrence_id = uuid.uuid4()
+        lifecycle_operation_occurrence_dict = {
+            'operation_type': 'vnf_terminate',
+            'tenant_name': additional_param['tenant'],
+            'deployment_name': vnf_instance_id
+        }
+        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def vnf_delete_id(self, vnf_instance_id):
+        self.vnf_vnfd_mapping.pop(vnf_instance_id)
