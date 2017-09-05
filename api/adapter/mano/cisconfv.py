@@ -2,9 +2,12 @@ import logging
 import uuid
 
 import ncclient
+from lxml import etree
 from ncclient import manager, NCClientError
 
 from api.adapter.mano import ManoAdapterError
+from api.generic import constants
+from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -102,6 +105,141 @@ class CiscoNFVManoAdapter(object):
 
         self.vnf_vnfd_mapping = dict()
         self.lifecycle_operation_occurrence_ids = dict()
+
+    @log_entry_exit(LOG)
+    def get_operation_status(self, lifecycle_operation_occurrence_id):
+        """
+        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
+        VNF with given ID.
+
+        :param lifecycle_operation_occurrence_id:   UUID used to retrieve the operation details from the class
+                                                     attribute self.lifecycle_operation_occurrence_ids
+        """
+        LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in Cisco NFV MANO!')
+        LOG.debug('Will return the state of the VNF with the given ID')
+
+        if lifecycle_operation_occurrence_id is None:
+            raise CiscoNFVManoAdapterError('Lifecycle Operation Occurrence ID is absent')
+        else:
+            operation_details = self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id]
+            operation_type = operation_details['operation_type']
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
+        if operation_type == 'vnf_instantiate':
+            # Get the NSO VNF deployment state for the 'self' component
+            try:
+                xml = self.nso.get(('xpath',
+                                    '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
+                                                           'state[name="ncs:ready"]/status' % deployment_name)).data_xml
+                xml = etree.fromstring(xml)
+                nso_deployment_state = xml.find(
+                     './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
+                LOG.debug('VNF deployment state reported by NSO: %s' % nso_deployment_state)
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.debug('VNF deployment state not yet available in NSO')
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Return the operation status depending on the VNF deployment state reported by NSO
+            if nso_deployment_state == 'failed':
+                return constants.OPERATION_FAILED
+            elif nso_deployment_state == 'not-reached':
+                return constants.OPERATION_PENDING
+
+            # Get the ESC deployment state
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                                       'state_machine/state' % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_deployment_state = xml.find(
+                              './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+                LOG.debug('VNF deployment state reported by ESC: %s' % esc_deployment_state)
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.debug('VNF deployment state not yet available in ESC')
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Return the operation status depending on the VNF deployment state reported by ESC
+            if nso_deployment_state == 'reached' and esc_deployment_state == 'SERVICE_ACTIVE_STATE':
+                return constants.OPERATION_SUCCESS
+            return constants.OPERATION_FAILED
+
+        raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
+
+    @log_entry_exit(LOG)
+    def vnf_query(self, filter, attribute_selector=None):
+        vnf_instance_id = filter['vnf_instance_id']
+        vnf_info = VnfInfo()
+        vnf_info.vnf_instance_id = vnf_instance_id.encode()
+
+        # Try to retrieve the instantiation state for the VNF with the given deployment name. If an AttributeError
+        # exception is raised, report the VNF instantiation state as NOT_INSTANTIATED.
+        try:
+            xml = self.nso.get(('xpath',
+                                '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
+                                'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
+            xml = etree.fromstring(xml)
+            instantiation_state = xml.find(
+                     './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
+        except AttributeError:
+            vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
+            return vnf_info
+        except Exception as e:
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Get the VNF state from the ESC
+        xml = self.esc.get(('xpath',
+                            '/esc_datamodel/opdata/tenants/tenant[name="admin"]/deployments[deployment_name="%s"]/'
+                                                                      'state_machine/state' % vnf_instance_id)).data_xml
+        xml = etree.fromstring(xml)
+        vnf_state = xml.find('.//{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+
+        # Build the vnf_info data structure
+        vnf_info.vnf_instance_name = vnf_instance_id
+        # vnf_info.vnf_instance_description =
+        # vnf_info.vnfd_id =
+        vnf_info.instantiation_state = instantiation_state
+
+        # Build the InstantiatedVnfInfo information element only if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
+            vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
+            vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['ESC_SERVICE_STATE'][vnf_state]
+
+            vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+
+            # Build the VnfcResourceInfo data structure
+            # vnfc_resource_info = VnfcResourceInfo()
+            # vnfc_resource_info.vnfc_instance_id =
+            # vnfc_resource_info.vdu_id =
+            #
+            # vnfc_resource_info.compute_resource = ResourceHandle()
+            # vnfc_resource_info.compute_resource.vim_id =
+            # vnfc_resource_info.compute_resource.resource_id =
+            #
+            # vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+            # Build the VnfExtCpInfo data structure
+            # vnf_info.instantiated_vnf_info.ext_cp_info = list()
+            # for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            #
+            #     vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
+            #             vnf_ext_cp_info = VnfExtCpInfo()
+            #             vnf_ext_cp_info.cp_instance_id =
+            #             vnf_ext_cp_info.address =
+            #             vnf_ext_cp_info.cpd_id =
+            #
+            #             vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
+
+        # VNF instantiation state is not INSTANTIATED
+        else:
+            print("")
+        return vnf_info
 
     @log_entry_exit(LOG)
     def get_vnfd(self, vnfd_id):
