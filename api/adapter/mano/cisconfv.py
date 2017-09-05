@@ -1,18 +1,62 @@
 import logging
-from xml.dom import minidom
+import uuid
 
 import ncclient
-from ncclient import manager
-from ncclient.operations.rpc import RPC
+from ncclient import manager, NCClientError
 
 from api.adapter.mano import ManoAdapterError
-from api.adapter.mano.resources import ADD_NSD
 from utils.logging_module import log_entry_exit
-from utils.misc import generate_name
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
 
+VNFR_TEMPLATE = '''
+<config>
+    <nfvo xmlns="http://tail-f.com/pkg/nfvo">
+        <vnfr>
+            <esc xmlns="http://tail-f.com/pkg/tailf-nfvo-esc">
+                <vnf-deployment>
+                    <tenant>%(tenant)s</tenant>
+                    <deployment-name>%(deployment_name)s</deployment-name>
+                    <esc>%(esc)s</esc>
+                    <username>%(username)s</username>
+                    <vnfr>
+                        <id>%(vnfd_id)s</id>
+                        <vnfd-flavor>%(vnfd_flavor)s</vnfd-flavor>
+                        <instantiation-level>%(instantiation_level)s</instantiation-level>
+                        %(vdu_list)s
+                        %(vnfd_cp_list)s
+                    </vnfr>
+                </vnf-deployment>
+            </esc>
+        </vnfr>
+    </nfvo>
+</config>'''
+
+VDU_TEMPLATE = '''
+                        <vdu>
+                            <id>%(vdu_id)s</id>
+                            <image-name>%(image_name)s</image-name>
+                            <flavor-name>%(flavor_name)s</flavor-name>
+                            <day0>
+                                <destination>%(day0_dest)s</destination>
+                                <url>%(day0_url)s</url>
+                            </day0>
+                            %(vdu_cp_list)s
+                        </vdu>'''
+
+VDU_CP_TEMPLATE = '''
+                        <connection-point-address>
+                            <id>%(cp_id)s</id>
+                            <start>%(start_addr)s</start>
+                            <end>%(end_addr)s</end>
+                        </connection-point-address>'''
+
+VNFD_CP_TEMPLATE = '''
+                        <vnfd-connection-point>
+                            <id>%(cp_id)s</id>
+                            <vlr>%(vlr)s</vlr>
+                        </vnfd-connection-point>'''
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
@@ -40,97 +84,110 @@ class CiscoNFVManoAdapter(object):
             LOG.error('Unable to create %s instance' % self.__class__.__name__)
             raise CiscoNFVManoAdapterError(e.message)
 
-    @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
-        vnfd_data = self.get_vnfd_details(vnfd_id)
+        self.vnf_vnfd_mapping = dict()
+        self.lifecycle_operation_occurence_ids = dict()
 
-        # Creating temporary NSD
+    @log_entry_exit(LOG)
+    def get_vnfd(self, vnfd_id):
+        netconf_reply = self.nso.get(('xpath', '/nfvo/vnfd[id="%s"]' % vnfd_id))
+        vnfd_xml = netconf_reply.data_xml
+        return vnfd_xml
+
+    @log_entry_exit(LOG)
+    def build_vdu_list(self, vdu_params):
+        vdu_list_xml = ''
+        for vdu_id, vdu_param in vdu_params.items():
+            vdu_template_values = {
+                'vdu_id': vdu_id,
+                'image_name': vdu_param['image'],
+                'flavor_name': vdu_param['flavor'],
+                'day0_dest': vdu_param['day0']['destination'],
+                'day0_url': vdu_param['day0']['url'],
+                'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
+            }
+
+            vdu_xml = VDU_TEMPLATE % vdu_template_values
+            vdu_list_xml += vdu_xml
+
+        return vdu_list_xml
+
+    @log_entry_exit(LOG)
+    def build_vdu_cp_list(self, vdu_cp_params):
+        vdu_cp_list_xml = ''
+        for vdu_cp_id, vdu_cp_addr in vdu_cp_params.items():
+            vdu_cp_template_values = {
+                'cp_id': vdu_cp_id,
+                'start_addr': vdu_cp_addr['start'],
+                'end_addr': vdu_cp_addr['end']
+            }
+
+            vdu_cp_xml = VDU_CP_TEMPLATE % vdu_cp_template_values
+            vdu_cp_list_xml += vdu_cp_xml
+
+        return vdu_cp_list_xml
+
+    @log_entry_exit(LOG)
+    def build_vnfd_cp_list(self, ext_cp_vlr):
+        vnfd_cp_list_xml = ''
+        for cp_id, vlr_name in ext_cp_vlr.items():
+            vnfd_cp_template_values = {
+                'cp_id': cp_id,
+                'vlr': vlr_name
+            }
+
+            vnfd_cp_xml = VNFD_CP_TEMPLATE % vnfd_cp_template_values
+            vnfd_cp_list_xml += vnfd_cp_xml
+
+        return vnfd_cp_list_xml
+
+    @log_entry_exit(LOG)
+    def build_vnfr(self, vnf_instance_id, flavour_id, instantiation_level_id, additional_param):
+        vnfd_id = self.vnf_vnfd_mapping[vnf_instance_id]
+
+        vnfr_template_values = {
+            'tenant': additional_param['tenant'],
+            'deployment_name': vnf_instance_id,
+            'esc': additional_param['esc'],
+            'username': additional_param['username'],
+            'vnfd_id': vnfd_id,
+            'vnfd_flavor': flavour_id,
+            'instantiation_level': instantiation_level_id,
+            'vdu_list': self.build_vdu_list(additional_param['vdu']),
+            'vnfd_cp_list': self.build_vnfd_cp_list(additional_param['ext_cp_vlr'])
+        }
+
+        vnfr_xml = VNFR_TEMPLATE % vnfr_template_values
+        return vnfr_xml
+
+    @log_entry_exit(LOG)
+    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
+        vnf_instance_id = vnf_instance_name
+        self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
+
+        return vnf_instance_id
+
+    @log_entry_exit(LOG)
+    def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                        ext_managed_virtual_link=None, localization_language=None, additional_param=None):
+
+        vnfr_xml = self.build_vnfr(vnf_instance_id, flavour_id, instantiation_level_id, additional_param)
+        print vnfr_xml
         try:
-            nsd_id = self.create_nsd(vnfd_connection_point=vnfd_data['connection-points'], vnfd_id=vnfd_id,
-                                           vnfd_flavour_id=vnfd_data['flavours'][0], vnfd_vdu_id=vnfd_data['vdus'][0])
-            LOG.debug('Successfully created NSD %s' % nsd_id)
-        except Exception as e:
+            netconf_reply = self.nso.edit_config(target='running', config=vnfr_xml)
+        except NCClientError as e:
             raise CiscoNFVManoAdapterError(e.message)
 
-        #Instantiating NSR - ar trebui sa chemam o alta functie pentru crearea unui NSR
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
 
+        print netconf_reply.xml
 
-    @log_entry_exit(LOG)
-    def create_nsr(self, nsr, vnfm, tenant, connection_point, address):
-        return True
+        lifecycle_operation_occurence_id = uuid.uuid4()
+        lifecycle_operation_occurence_dict = {
+            'operation_type': 'vnf_instantiate',
+            'tenant_name': additional_param['tenant'],
+            'deployment_name': vnf_instance_id
+        }
+        self.lifecycle_operation_occurence_ids[lifecycle_operation_occurence_id] = lifecycle_operation_occurence_dict
 
-    @log_entry_exit(LOG)
-    def create_nsd(self, vnfd_connection_point, vnfd_id, vnfd_flavour_id, vnfd_vdu_id):
-        nsd = generate_name(vnfd_id + '-temp-nsd')
-        member_vnf = vnfd_id + '-1'
-        nsd_flavour_id = 'flavour1'
-        config = ADD_NSD % (nsd, nsd_flavour_id, member_vnf, vnfd_id, vnfd_flavour_id, vnfd_vdu_id)
-        config_xml = minidom.parseString(config)
-        conn_point_name = 'a'
-        for vnfd_connection in vnfd_connection_point:
-            xml_connection_point = self.add_connection_point(vnfd_connection, conn_point_name, member_vnf)
-            conn_point_name = chr(ord(conn_point_name) + 1)
-            config_xml.getElementsByTagName('config')[0].getElementsByTagName('mano')[0].getElementsByTagName('nsd')[
-                0].appendChild(xml_connection_point)
-        try:
-            rpc_obj = self.nso.edit_config(target='running', config=config_xml.toxml())
-            if rpc_obj.ok:
-                return nsd
-        except Exception as e:
-            raise CiscoNFVManoAdapterError(e.message)
-
-    @log_entry_exit(LOG)
-    def get_vnfd_details(self, vnfd_id):
-        raw_data = self.nso.get(filter=('xpath', '/mano/vnfd[name="%s"]' % vnfd_id))
-        vnfd_data = minidom.parseString(raw_data.data_xml)
-
-        # Initialise VNFD data structures
-        vnfd_info = {}
-        conn_point_id_list = []
-        flavour_id_list = []
-        vdu_id_list = []
-        vnfm_list = []
-
-        # Populate VNFD connection-points list
-        conn_points = vnfd_data.getElementsByTagName('connection-points')
-        for conn_point in conn_points:
-            conn_point_data = conn_point.getElementsByTagName('connection-point-id')[0]
-            conn_point_id_list.append(conn_point_data.firstChild.data)
-        vnfd_info['connection-points'] = conn_point_id_list
-
-        # Populate VNFD flavours list
-        flavours = vnfd_data.getElementsByTagName('flavours')[0].getElementsByTagName('flavour-id')
-        for flavour in flavours:
-            flavour_id_list.append(flavour.firstChild.data)
-        vnfd_info['flavours'] = flavour_id_list
-
-        # Populate VNFD VDUs list
-        vdus = vnfd_data.getElementsByTagName('flavours')[0].getElementsByTagName('vdus')[0].getElementsByTagName(
-            'vdu-id')
-        for vdu in vdus:
-            vdu_id_list.append(vdu.firstChild.data)
-        vnfd_info['vdus'] = vdu_id_list
-
-        # Populate with VNFD structure with VNFM responsible for it
-        vnfms = vnfd_data.getElementsByTagName('vnfm')[0].getElementsByTagName('esc')[0].getElementsByTagName('name')
-        for vnfm in vnfms:
-            vnfm_list.append(vnfm.firstChild.data)
-        vnfd_info['vnfm'] = vnfm_list
-
-        return vnfd_info
-
-    @log_entry_exit(LOG)
-    def add_connection_point(self, connection_point, conn_point_name, member_vnf):
-        config = "<connection-points></connection-points>"
-        config_xml = minidom.parseString(config)
-        for elem_name, elem_val in zip(['connection-point-id', 'member-vnf', 'vnfd-connection-point'],
-                                       [conn_point_name, member_vnf, connection_point]):
-            elem = config_xml.createElement(elem_name)
-            val = config_xml.createTextNode(elem_val)
-            if elem_name in ['member-vnf', 'vnfd-connection-point']:
-                elem.setAttributeNS("", "xmlns", "http://cisco.com/yang/nso/tail-f-nsd")
-            elem.appendChild(val)
-            config_xml.childNodes[0].appendChild(elem)
-        result = config_xml.getElementsByTagName('connection-points')[0]
-
-        return result
+        return lifecycle_operation_occurence_id
