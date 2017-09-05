@@ -57,6 +57,10 @@ VNF_STATE['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
                                       'RESUME_COMPLETE': VNF_STARTED,
                                       'SUSPEND_COMPLETE': VNF_STOPPED}
 
+# Mapping between Cisco ESC service state and ETSI VNF state
+VNF_STATE['ESC_SERVICE_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
+                                  'SERVICE_STOPPED_STATE': VNF_STOPPED}
+
 # Test results
 TEST_FAILED = 'FAILED'
 TEST_PASSED = 'PASSED'
