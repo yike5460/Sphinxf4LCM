@@ -780,25 +780,30 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None, additional_param=None):
         """
         This function terminates a VNF.
 
-        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
+        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 v2.1.6 (2017-06).
 
         :param vnf_instance_id:             Identifier of the VNF instance to be terminated.
         :param termination_type:            Signals whether forceful or graceful termination is requested.
         :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
                                             graceful termination, before shutting down the VNF and releasing the
                                             resources.
+        :param additional_param:            Additional parameters passed by the NFVO as input to the Terminate VNF
+                                            operation, specific to the VNF being terminated.
+                                            operation, specific to the VNF being terminated.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.mano_adapter.vnf_terminate(vnf_instance_id, termination_type, graceful_termination_type)
+        return self.mano_adapter.vnf_terminate(vnf_instance_id, termination_type, graceful_termination_type,
+                                               additional_param)
 
     @log_entry_exit(LOG)
     def vnf_terminate_and_delete(self, vnf_instance_id, termination_type, graceful_termination_type=None,
-                                 max_wait_time=constants.INSTANTIATION_TIME, poll_interval=constants.POLL_INTERVAL):
+                                 additional_param=None, max_wait_time=constants.INSTANTIATION_TIME,
+                                 poll_interval=constants.POLL_INTERVAL):
         """
         This function synchronously terminates a VNF and deletes its instance ID.
 
@@ -807,6 +812,8 @@ class Mano(object):
         :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
                                             graceful termination, before shutting down the VNF and releasing the
                                             resources.
+        :param additional_param:            Additional parameters passed by the NFVO as input to the Terminate VNF
+                                            operation, specific to the VNF being terminated.
         :param max_wait_time:               Maximum interval of time in seconds to wait for the termination operation to
                                             reach a final state.
         :param poll_interval:               Interval of time in seconds between consecutive polls on the terminate
@@ -814,7 +821,7 @@ class Mano(object):
         :return:                            'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
         operation_status = self.vnf_terminate_sync(vnf_instance_id, termination_type, graceful_termination_type,
-                                                   max_wait_time, poll_interval)
+                                                   additional_param, max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
@@ -825,7 +832,8 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def vnf_terminate_sync(self, vnf_instance_id, termination_type, graceful_termination_type=None,
-                           max_wait_time=constants.INSTANTIATION_TIME, poll_interval=constants.POLL_INTERVAL):
+                           additional_param=None, max_wait_time=constants.INSTANTIATION_TIME,
+                           poll_interval=constants.POLL_INTERVAL):
         """
         This function synchronously terminates a VNF.
 
@@ -834,6 +842,8 @@ class Mano(object):
         :param graceful_termination_type:   The time interval to wait for the VNF to be taken out of service during
                                             graceful termination, before shutting down the VNF and releasing the
                                             resources.
+        :param additional_param:            Additional parameters passed by the NFVO as input to the Terminate VNF
+                                            operation, specific to the VNF being terminated.
         :param max_wait_time:               Maximum interval of time in seconds to wait for the terminate operation to
                                             reach a final state.
         :param poll_interval:               Interval of time in seconds between consecutive polls on the terminate
@@ -841,7 +851,7 @@ class Mano(object):
         :return:                            Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_terminate(vnf_instance_id, termination_type,
-                                                               graceful_termination_type)
+                                                               graceful_termination_type, additional_param)
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
