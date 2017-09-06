@@ -5,6 +5,7 @@ import ncclient
 from lxml import etree
 from ncclient import manager, NCClientError
 
+from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle
@@ -67,7 +68,7 @@ VNFR_DELETE_TEMPLATE = '''
         <vnfr>
             <esc xmlns="http://tail-f.com/pkg/tailf-nfvo-esc">
                 <vnf-deployment operation="delete">
-                    <tenant>%(tenant)s</admin>
+                    <tenant>%(tenant)s</tenant>
                     <deployment-name>%(deployment_name)s</deployment-name>
                     <esc>%(esc)s</esc>
                 </vnf-deployment>
@@ -109,6 +110,9 @@ class CiscoNFVManoAdapter(object):
             self.esc = ncclient.manager.connect(host=esc_hostname, port=esc_port, username=esc_username,
                                                 password=esc_password,
                                                 hostkey_verify=False, look_for_keys=False)
+
+            self.vim_helper = None
+
         except Exception as e:
             LOG.error('Unable to create %s instance' % self.__class__.__name__)
             raise CiscoNFVManoAdapterError(e.message)
@@ -438,3 +442,37 @@ class CiscoNFVManoAdapter(object):
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
         return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def get_vim_helper(self):
+        if self.vim_helper is None:
+            netconf_reply = self.esc.get(('xpath', '/esc_system_config/vim_connectors/vim_connector'))
+            vim_xml = etree.fromstring(netconf_reply.data_xml)
+
+            vim_type = vim_xml.find('.//{http://www.cisco.com/esc/esc}type').text
+            if vim_type == 'OPENSTACK':
+                client_params = dict()
+                property_name_mapping = {
+                    'os_auth_url': 'auth_url',
+                    'os_password': 'password',
+                    'os_tenant_name': 'project_name'
+                }
+                property_list = vim_xml.findall('.//{http://www.cisco.com/esc/esc}property')
+                for property_elem in property_list:
+                    property_name = property_elem.find('.//{http://www.cisco.com/esc/esc}name').text
+                    property_value = property_elem.find('.//{http://www.cisco.com/esc/esc}value').text
+
+                    vim_param = property_name_mapping.get(property_name)
+                    if vim_param is not None:
+                        client_params[vim_param] = property_value
+
+                user_id_elem = vim_xml.find('.//{http://www.cisco.com/esc/esc}user/{http://www.cisco.com/esc/esc}id')
+                user_id = user_id_elem.text
+                client_params['username'] = user_id
+
+                self.vim_helper = construct_adapter(vendor='openstack', module_type='vim', **client_params)
+
+            else:
+                raise CiscoNFVManoAdapterError('Cannot create VIM helper for unsupported type: %s' % vim_type)
+
+        return self.vim_helper
