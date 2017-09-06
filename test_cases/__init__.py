@@ -107,7 +107,7 @@ class TestCase(object):
 
     def register_for_cleanup(self, function_reference, *args, **kwargs):
         """
-        This method adds a "function" named tuple to the cleanup_registrations list.
+        This method appends a "function" named tuple to the cleanup_registrations list.
         """
         self._LOG.debug('Registering function %s.%s for test cleanup'
                         % (function_reference.__module__, function_reference.__name__))
@@ -120,6 +120,15 @@ class TestCase(object):
             self._LOG.debug('Function will be called with keyword arguments: (%s)' % ', '.join(map(str, kv_args)))
         new_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
         self.cleanup_registrations.append(new_function)
+
+    def unregister_from_cleanup(self, function_reference, *args, **kwargs):
+        """
+        This method removes a "function" named tuple from the cleanup_registrations list.
+        """
+        self._LOG.debug('Unregistering function %s.%s from test cleanup'
+                        % (function_reference.__module__, function_reference.__name__))
+        obsolete_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
+        self.cleanup_registrations.remove(obsolete_function)
 
     def cleanup(self):
         """
