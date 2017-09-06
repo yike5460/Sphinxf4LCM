@@ -645,11 +645,12 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
+                    additional_param=None):
         """
         This function changes the state of a VNF instance.
 
-        This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
+        This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 v2.1.6 (2017-06).
 
         :param vnf_instance_id:         Identifier of the VNF instance.
         :param change_state_to:         Desired state to change the VNF to. Permitted values are: start, stop.
@@ -657,14 +658,18 @@ class Mano(object):
                                         'forceful' and 'graceful'.
         :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during graceful
                                         stop, before stopping the VNF.
+        :param additional_param:        Additional parameters passed by the NFVO as input to the Operate VNF operation,
+                                        specific to the VNF being operated.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.mano_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout)
+        return self.mano_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout,
+                                             additional_param)
 
     @log_entry_exit(LOG)
     def vnf_operate_sync(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
-                         max_wait_time=constants.OPERATE_TIME, poll_interval=constants.POLL_INTERVAL):
+                         additional_param=None, max_wait_time=constants.OPERATE_TIME,
+                         poll_interval=constants.POLL_INTERVAL):
         """
         This function performs a synchronous change of a VNF state.
 
@@ -674,6 +679,8 @@ class Mano(object):
                                         'forceful' and 'graceful'.
         :param graceful_stop_timeout:   Time interval to wait for the VNF to be taken out of service during
                                         graceful stop, before stopping the VNF.
+        :param additional_param:        Additional parameters passed by the NFVO as input to the Operate VNF operation,
+                                        specific to the VNF being operated.
         :param max_wait_time:           Maximum interval of time in seconds to wait for the operate operation to reach a
                                         final state.
         :param poll_interval:           Interval of time in seconds between consecutive polls on the operate operation
@@ -681,7 +688,7 @@ class Mano(object):
         :return:                        Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type,
-                                                             graceful_stop_timeout)
+                                                             graceful_stop_timeout, additional_param)
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
