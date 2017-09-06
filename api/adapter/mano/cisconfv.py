@@ -147,20 +147,20 @@ class CiscoNFVManoAdapter(object):
                                     '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
                                                            'state[name="ncs:ready"]/status' % deployment_name)).data_xml
                 xml = etree.fromstring(xml)
-                nso_deployment_state = xml.find(
+                nso_vnf_deployment_state = xml.find(
                      './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
-                LOG.debug('VNF deployment state reported by NSO: %s' % nso_deployment_state)
+                LOG.debug('VNF deployment state reported by NSO: %s' % nso_vnf_deployment_state)
             except NCClientError as e:
                 LOG.debug('Error occurred while communicating with the NSO Netconf server')
                 raise CiscoNFVManoAdapterError(e.message)
             except AttributeError as e:
-                LOG.debug('VNF deployment state not yet available in NSO')
+                LOG.debug('VNF deployment state not available in NSO')
                 raise CiscoNFVManoAdapterError(e.message)
 
             # Return the operation status depending on the VNF deployment state reported by NSO
-            if nso_deployment_state == 'failed':
+            if nso_vnf_deployment_state == 'failed':
                 return constants.OPERATION_FAILED
-            elif nso_deployment_state == 'not-reached':
+            elif nso_vnf_deployment_state == 'not-reached':
                 return constants.OPERATION_PENDING
 
             # Get the ESC deployment state
@@ -169,37 +169,79 @@ class CiscoNFVManoAdapter(object):
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
                                                        'state_machine/state' % (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
-                esc_deployment_state = xml.find(
+                esc_vnf_deployment_state = xml.find(
                               './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
-                LOG.debug('VNF deployment state reported by ESC: %s' % esc_deployment_state)
+                LOG.debug('VNF deployment state reported by ESC: %s' % esc_vnf_deployment_state)
             except NCClientError as e:
                 LOG.debug('Error occurred while communicating with the ESC Netconf server')
                 raise CiscoNFVManoAdapterError(e.message)
             except AttributeError as e:
-                LOG.debug('VNF deployment state not yet available in ESC')
+                LOG.debug('VNF deployment state not available in ESC')
                 raise CiscoNFVManoAdapterError(e.message)
 
             # Return the operation status depending on the VNF deployment state reported by ESC
-            if nso_deployment_state == 'reached' and esc_deployment_state == 'SERVICE_ACTIVE_STATE':
+            if nso_vnf_deployment_state == 'reached' and esc_vnf_deployment_state == 'SERVICE_ACTIVE_STATE':
                 return constants.OPERATION_SUCCESS
             return constants.OPERATION_FAILED
+
+        if operation_type == 'vnf_terminate':
+            # To check that the VNF was un-deployed, try to retrieve the VNF deployment name until the AttributeError
+            # exception is raised. Do this first on the ESC. When the ESC reports that the VNF was un-deployed, check on
+            # the NSO.
+
+            # Try to retrieve the VNF deployment name from the ESC.
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                    'deployments[deployment_name="%s"]/''state_machine/state' %
+                                    (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_vnf_deployment_state = xml.find(
+                    './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+                LOG.debug('VNF deployment state reported by ESC: %s' % esc_vnf_deployment_state)
+                if esc_vnf_deployment_state == 'SERVICE_ERROR_STATE':
+                    return constants.OPERATION_FAILED
+                else:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError:
+                # So far the ESC reports the VNF as un-deployed. Check the NSO reports the same.
+                try:
+                    xml = self.nso.get(('xpath',
+                                        '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]'
+                                        '/state[name="ncs:ready"]/status' % deployment_name)).data_xml
+                    xml = etree.fromstring(xml)
+                    nso_vnf_deployment_state = xml.find(
+                        './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
+                    LOG.debug('VNF deployment state reported by NSO: %s' % nso_vnf_deployment_state)
+                    if nso_vnf_deployment_state == 'reached':
+                        LOG.debug('ESC reports the VNF as un-deployed, but the NSO does not')
+                        return constants.OPERATION_PENDING
+                except NCClientError as e:
+                    LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                    raise CiscoNFVManoAdapterError(e.message)
+                except AttributeError:
+                    return constants.OPERATION_SUCCESS
 
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
 
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
+        tenant_name = filter['additional_param']['tenant']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id.encode()
 
-        # Try to retrieve the instantiation state for the VNF with the given deployment name. If an AttributeError
+        # Try to retrieve the instantiation state for the VNF with the given deployment name. If the AttributeError
         # exception is raised, report the VNF instantiation state as NOT_INSTANTIATED.
         try:
             xml = self.nso.get(('xpath',
                                 '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
                                 'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
             xml = etree.fromstring(xml)
-            instantiation_state = xml.find(
+            nso_vnf_deployment_state = xml.find(
                      './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
         except AttributeError:
             vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
@@ -208,51 +250,136 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError(e.message)
 
         # Get the VNF state from the ESC
-        xml = self.esc.get(('xpath',
-                            '/esc_datamodel/opdata/tenants/tenant[name="admin"]/deployments[deployment_name="%s"]/'
-                                                                      'state_machine/state' % vnf_instance_id)).data_xml
+        try:
+            xml = self.esc.get(('xpath',
+                                '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                                       'state_machine/state' % (tenant_name, vnf_instance_id))).data_xml
+            xml = etree.fromstring(xml)
+            esc_vnf_deployment_state = xml.find(
+                              './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+        except Exception as e:
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Get the VNFD ID from the NSO
+        xml = self.nso.get(('xpath',
+                            '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/vnfr/id' % vnf_instance_id)).data_xml
         xml = etree.fromstring(xml)
-        vnf_state = xml.find('.//{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+        vnfd_id = xml.find(
+            './/{http://tail-f.com/pkg/tailf-nfvo-esc}vnfr/{http://tail-f.com/pkg/tailf-nfvo-esc}id').text
 
         # Build the vnf_info data structure
         vnf_info.vnf_instance_name = vnf_instance_id
         # vnf_info.vnf_instance_description =
-        # vnf_info.vnfd_id =
-        vnf_info.instantiation_state = instantiation_state
+        vnf_info.vnfd_id = vnfd_id
+        vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'][
+            nso_vnf_deployment_state]
 
         # Build the InstantiatedVnfInfo information element only if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-            vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['ESC_SERVICE_STATE'][vnf_state]
+            vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['ESC_DEPLOYMENT_STATE'][
+                esc_vnf_deployment_state]
 
+            # Initialize the VnfcResourceInfo list
             vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
 
-            # Build the VnfcResourceInfo data structure
-            # vnfc_resource_info = VnfcResourceInfo()
-            # vnfc_resource_info.vnfc_instance_id =
-            # vnfc_resource_info.vdu_id =
-            #
-            # vnfc_resource_info.compute_resource = ResourceHandle()
-            # vnfc_resource_info.compute_resource.vim_id =
-            # vnfc_resource_info.compute_resource.resource_id =
-            #
-            # vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+            # Initialize the VnfExtCpInfo list
+            vnf_info.instantiated_vnf_info.ext_cp_info = list()
 
-            # Build the VnfExtCpInfo data structure
-            # vnf_info.instantiated_vnf_info.ext_cp_info = list()
-            # for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            #
-            #     vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
-            #             vnf_ext_cp_info = VnfExtCpInfo()
-            #             vnf_ext_cp_info.cp_instance_id =
-            #             vnf_ext_cp_info.address =
-            #             vnf_ext_cp_info.cpd_id =
-            #
-            #             vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
+            # Get the deployment XML from the ESC
+            deployment_xml = self.esc.get(('xpath',
+                                           '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                                                               'deployments[deployment_name="%s"]' %
+                                                                               (tenant_name, vnf_instance_id))).data_xml
+            deployment_xml = etree.fromstring(deployment_xml)
+
+            # Get the VM group list from the deployment XML
+            vm_group_list = deployment_xml.findall(
+                './/{http://www.cisco.com/esc/esc}vm_group/{http://www.cisco.com/esc/esc}name')
+            for vm_group in vm_group_list:
+                vm_group_text = vm_group.text
+
+                # Find all VM IDs in this VM group
+                vm_id_list = deployment_xml.findall(
+                    './/{http://www.cisco.com/esc/esc}vm_group[{http://www.cisco.com/esc/esc}name="%s"]/'
+                        '{http://www.cisco.com/esc/esc}vm_instance/{http://www.cisco.com/esc/esc}vm_id' % vm_group_text)
+
+                # Iterate over the VM IDs in this VM group
+                for vm_id in vm_id_list:
+                    vm_id_text = vm_id.text
+
+                    # Get the VM name
+                    name = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                   '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                   '{http://www.cisco.com/esc/esc}vm_instance'
+                                                   '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                   '{http://www.cisco.com/esc/esc}name' % (vm_group_text, vm_id_text))
+                    name_text = name.text
+
+                    # Build the VnfcResourceInfo data structure
+                    vnfc_resource_info = VnfcResourceInfo()
+                    vnfc_resource_info.vnfc_instance_id = name_text
+                    vnfc_resource_info.vdu_id = vm_group_text
+
+                    vnfc_resource_info.compute_resource = ResourceHandle()
+                    # Cisco ESC only support one VIM. Hardcode the VIM ID to string 'default_vim'
+                    vnfc_resource_info.compute_resource.vim_id = 'default_vim'
+                    vnfc_resource_info.compute_resource.resource_id = vm_id_text
+
+                    # Append the current VnfvResourceInfo element to the VnfcResourceInfo list
+                    vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+                    # Get the list NIC IDs for this VM instance
+                    nic_id_list = deployment_xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                             '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                             '{http://www.cisco.com/esc/esc}vm_instance'
+                                                             '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                             '{http://www.cisco.com/esc/esc}interfaces/'
+                                                             '{http://www.cisco.com/esc/esc}interface/'
+                                                             '{http://www.cisco.com/esc/esc}nicid'
+                                                             % (vm_group_text, vm_id_text))
+
+                    # Iterate over the NIC IDs
+                    for nic_id in nic_id_list:
+                        nic_id_text = nic_id.text
+
+                        # Get the port ID
+                        port_id = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                          '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                          '{http://www.cisco.com/esc/esc}vm_instance'
+                                                          '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                          '{http://www.cisco.com/esc/esc}interfaces/'
+                                                          '{http://www.cisco.com/esc/esc}interface'
+                                                          '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
+                                                          '{http://www.cisco.com/esc/esc}port_id'
+                                                          % (vm_group_text, vm_id_text, nic_id_text))
+                        port_id_text = port_id.text
+
+                        # Get the MAC address
+                        mac_address = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                              '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                              '{http://www.cisco.com/esc/esc}vm_instance'
+                                                              '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                              '{http://www.cisco.com/esc/esc}interfaces/'
+                                                              '{http://www.cisco.com/esc/esc}interface'
+                                                              '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
+                                                              '{http://www.cisco.com/esc/esc}mac_address'
+                                                              % (vm_group_text, vm_id_text, nic_id_text))
+                        mac_address_text = mac_address.text
+
+                        # Build the VnfExtCpInfo data structure
+                        vnf_ext_cp_info = VnfExtCpInfo()
+                        vnf_ext_cp_info.cp_instance_id = port_id_text
+                        vnf_ext_cp_info.address = [mac_address_text]
+                        vnf_ext_cp_info.cpd_id = nic_id_text
+
+                        # Append the current VnfExtCpInfo element to the VnfExtCpInfo list
+                        vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
         # VNF instantiation state is not INSTANTIATED
         else:
-            print("")
+            raise CiscoNFVManoAdapterError('The InstantiatedVnfInfo information element cannot be built as the VNF '
+                                           'instantiation state is not INSTANTIATED')
         return vnf_info
 
     @log_entry_exit(LOG)
@@ -361,7 +488,6 @@ class CiscoNFVManoAdapter(object):
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
 
         vnfr_xml = self.build_vnfr(vnf_instance_id, flavour_id, instantiation_level_id, additional_param)
-        print vnfr_xml
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_xml)
         except NCClientError as e:
@@ -370,7 +496,7 @@ class CiscoNFVManoAdapter(object):
         if '<ok/>' not in netconf_reply.xml:
             raise CiscoNFVManoAdapterError('NSO replied with an error')
 
-        print netconf_reply.xml
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
         lifecycle_operation_occurrence_id = uuid.uuid4()
         lifecycle_operation_occurrence_dict = {
@@ -385,7 +511,6 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None, additional_param=None):
         vnfr_delete_xml = self.build_vnfr_delete(vnf_instance_id, additional_param)
-        print vnfr_delete_xml
 
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_delete_xml)
@@ -395,7 +520,7 @@ class CiscoNFVManoAdapter(object):
         if '<ok/>' not in netconf_reply.xml:
             raise CiscoNFVManoAdapterError('NSO replied with an error')
 
-        print netconf_reply.xml
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
         lifecycle_operation_occurrence_id = uuid.uuid4()
         lifecycle_operation_occurrence_dict = {
