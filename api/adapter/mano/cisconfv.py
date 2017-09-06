@@ -77,6 +77,16 @@ VNFR_DELETE_TEMPLATE = '''
 </config>
 '''
 
+VNF_OPERATE_TEMPLATE = '''
+<serviceAction xmlns="http://www.cisco.com/esc/esc">
+    <actionType>%(action)s</actionType>
+    <tenantName>%(tenant)s</tenantName>
+    <depName>%(deployment_name)s</depName>
+    <serviceName>-</serviceName>
+    <serviceVersion>-</serviceVersion>
+</serviceAction>
+'''
+
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
     A problem occurred in the VNF LifeCycle Validation Cisco NFV MANO adapter API.
@@ -325,6 +335,17 @@ class CiscoNFVManoAdapter(object):
         return vnfr_delete_xml
 
     @log_entry_exit(LOG)
+    def build_vnf_operate(self, vnf_instance_id, action, additional_param):
+        vnf_operate_template_values = {
+            'action': action,
+            'tenant': additional_param['tenant'],
+            'deployment_name': vnf_instance_id
+        }
+
+        vnf_operate_xml = VNF_OPERATE_TEMPLATE % vnf_operate_template_values
+        return vnf_operate_xml
+
+    @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         vnf_instance_id = vnf_instance_name
         self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
@@ -385,3 +406,35 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_delete_id(self, vnf_instance_id):
         self.vnf_vnfd_mapping.pop(vnf_instance_id)
+
+    @log_entry_exit(LOG)
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
+                    additional_param=None):
+        etsi_state_esc_action_mapping = {
+            'start': 'START',
+            'stop': 'STOP'
+        }
+
+        vnf_operate_xml = self.build_vnf_operate(vnf_instance_id, etsi_state_esc_action_mapping[change_state_to],
+                                                 additional_param)
+        print vnf_operate_xml
+
+        try:
+            netconf_reply = self.esc.dispatch(rpc_command=etree.fromstring(vnf_operate_xml))
+        except NCClientError as e:
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('ESC replied with an error')
+
+        print netconf_reply.xml
+
+        lifecycle_operation_occurrence_id = uuid.uuid4()
+        lifecycle_operation_occurrence_dict = {
+            'operation_type': 'vnf_%s' % change_state_to,
+            'tenant_name': additional_param['tenant'],
+            'deployment_name': vnf_instance_id
+        }
+        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+        return lifecycle_operation_occurrence_id
