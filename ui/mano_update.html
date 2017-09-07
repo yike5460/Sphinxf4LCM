@@ -101,10 +101,12 @@
                     <tr><td>Hostname|IP Address:</td><td><input type="text" name="nso_hostname" style="width: 200px" value={{mano['client_config']['nso_hostname']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="nso_username" style="width: 200px"  value={{mano['client_config']['nso_username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="nso_password" style="width: 200px" value={{mano['client_config']['nso_password']}}></td></tr>
+                    <tr><td>NETCONF Port:</td><td><input type="number" name="nso_port" style="width: 200px" value={{mano['client_config']['nso_port']}}></td></tr>
                     <tr><td><h3>Cisco ESC</h3></td><td></td></tr>
                     <tr><td>Hostname|IP Address:</td><td><input type="text" name="esc_hostname" style="width: 200px" value={{mano['client_config']['esc_hostname']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="esc_username" style="width: 200px"  value={{mano['client_config']['esc_username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="esc_password" style="width: 200px" value={{mano['client_config']['esc_password']}}></td></tr>
+                    <tr><td>NETCONF Port:</td><td><input type="number" name="esc_port" style="width: 200px" value={{mano['client_config']['esc_port']}}></td></tr>
                   <% end %>
 
           </table>

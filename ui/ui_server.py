@@ -243,12 +243,14 @@ def mano_validate():
         nso_hostname = request.forms.get('nso_hostname')
         nso_username = request.forms.get('nso_username')
         nso_password = request.forms.get('nso_password')
+        nso_port = request.forms.get('nso_port')
         esc_hostname = request.forms.get('esc_hostname')
         esc_username = request.forms.get('esc_username')
         esc_password = request.forms.get('esc_password')
+        esc_port = request.forms.get('esc_port')
         (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
-                                       nso_password=nso_password, esc_hostname=esc_hostname, esc_username=esc_username,
-                                       esc_password=esc_password)
+                                       nso_password=nso_password, nso_port=nso_port, esc_hostname=esc_hostname,
+                                       esc_username=esc_username, esc_password=esc_password, esc_port=esc_port)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -313,9 +315,11 @@ def mano_delete():
             mano_info['nso_hostname'] = mano_json[mano_name]['client_config']['nso_hostname']
             mano_info['nso_username'] = mano_json[mano_name]['client_config']['nso_username']
             mano_info['nso_password'] = mano_json[mano_name]['client_config']['nso_password']
+            mano_info['nso_port'] = mano_json[mano_name]['client_config']['nso_port']
             mano_info['esc_hostname'] = mano_json[mano_name]['client_config']['esc_hostname']
             mano_info['esc_username'] = mano_json[mano_name]['client_config']['esc_username']
             mano_info['esc_password'] = mano_json[mano_name]['client_config']['esc_password']
+            mano_info['esc_port'] = mano_json[mano_name]['client_config']['esc_port']
         return template('mano_delete.html', mano=mano_info)
     else:
         mano_name = request.forms.get('name')
@@ -489,13 +493,13 @@ def em_validate():
         else:
             identity_api_version = int(request.forms.get('identity_api_version'))
         (name, new_em) = struct_em(type=type, name=name, user_domain_name=user_domain_name, username=username,
-                                     password=password, project_domain_name=project_domain_name,
-                                     project_name=project_name, auth_url=auth_url,
-                                     identity_api_version=identity_api_version)
+                                   password=password, project_domain_name=project_domain_name,
+                                   project_name=project_name, auth_url=auth_url,
+                                   identity_api_version=identity_api_version)
         if request.forms.get('add'):
             if not name:
                 return em_add(em_type=type, warning='Mandatory field missing: name', message=None,
-                               em=new_em, name=name)
+                              em=new_em, name=name)
             requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
@@ -515,6 +519,7 @@ def em_update(warning=None, message=None, em=None, name=None):
         return template('em_update.html', warning=warning, message=message, em=em_json, name=name)
     else:
         return template('em_update.html', warning=warning, message=message, em=em, name=name)
+
 
 @route('/em/delete/', method='POST')
 def em_delete():
@@ -624,7 +629,7 @@ def traffic_validate():
         if request.forms.get('add'):
             if not name:
                 return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
-                                traffic=new_traffic, name=name)
+                                   traffic=new_traffic, name=name)
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
@@ -936,9 +941,11 @@ def struct_mano(type, name, **kwargs):
                 'nso_hostname': kwargs['nso_hostname'],
                 'nso_username': kwargs['nso_username'],
                 'nso_password': kwargs['nso_password'],
+                'nso_port': kwargs['nso_port'],
                 'esc_hostname': kwargs['esc_hostname'],
                 'esc_username': kwargs['esc_username'],
-                'esc_password': kwargs['esc_password']
+                'esc_password': kwargs['esc_password'],
+                'esc_port': kwargs['esc_port']
             }
         }
     return (name, mano)
@@ -976,7 +983,7 @@ def struct_vim(type, name, user_domain_name, username, password, project_domain_
 
 
 def struct_em(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
-               identity_api_version):
+              identity_api_version):
     """
     This is a helper function for building the JSON for a VIM element
     :param type: EM type
