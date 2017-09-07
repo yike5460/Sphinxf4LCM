@@ -79,7 +79,7 @@ class TestCase(object):
         self.vnf_instance_id = None
         self.ns_instance_id = None
         self.vnfm = None
-        self.cleanup_registrations = list()
+        self.cleanup_registrations = dict()
 
     # @classmethod
     # def initialize(cls):
@@ -105,10 +105,13 @@ class TestCase(object):
     def run(self):
         pass
 
-    def register_for_cleanup(self, function_reference, *args, **kwargs):
+    def register_for_cleanup(self, index, function_reference, *args, **kwargs):
         """
-        This method appends a "function" named tuple to the cleanup_registrations list.
+        This method adds a "Function" named tuple to the cleanup_registrations dictionary as a value to the key
+        indicated in the index (the index must be an integer).
         """
+        if type(index) is not int:
+            raise ValueError('Function register_for_cleanup "index" input must be an integer')
         self._LOG.debug('Registering function %s.%s for test cleanup'
                         % (function_reference.__module__, function_reference.__name__))
         if args:
@@ -119,23 +122,25 @@ class TestCase(object):
                 kv_args.append('%s=%s' % (key, value))
             self._LOG.debug('Function will be called with keyword arguments: (%s)' % ', '.join(map(str, kv_args)))
         new_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
-        self.cleanup_registrations.append(new_function)
+        self.cleanup_registrations[index] = new_function
 
-    def unregister_from_cleanup(self, function_reference, *args, **kwargs):
+    def unregister_from_cleanup(self, index):
         """
-        This method removes a "function" named tuple from the cleanup_registrations list.
+        This method removes the "Function" named tuple from the cleanup_registrations dictionary corresponding to key
+        indicated in the index.
         """
-        self._LOG.debug('Unregistering function %s.%s from test cleanup'
+        obsolete_function = self.cleanup_registrations.pop(index)
+        function_reference = obsolete_function.function_reference
+        self._LOG.debug('Unregistered function %s.%s from test cleanup'
                         % (function_reference.__module__, function_reference.__name__))
-        obsolete_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
-        self.cleanup_registrations.remove(obsolete_function)
 
     def cleanup(self):
         """
-        This method calls all the functions that were registered for cleanup in reverse order.
+        This method calls in reverse order all the functions that were registered for cleanup.
         """
         self._LOG.info('Starting main cleanup')
-        for function in reversed(self.cleanup_registrations):
+        for index in reversed(sorted(self.cleanup_registrations.keys())):
+            function = self.cleanup_registrations[index]
             try:
                 function.function_reference(*function.function_args, **function.function_kwargs)
             except Exception as e:
