@@ -115,21 +115,18 @@ class OpenstackVimAdapter(object):
         server_flavor_id = nova_server.flavor['id']
         virtual_compute.flavour_id = server_flavor_id.encode()
 
-        try:
-            server_flavor = self.nova_client.flavors.get(server_flavor_id)
-        except Exception as e:
-            raise OpenstackVimAdapterError(e.message)
+        flavor_details = self.flavor_get(server_flavor_id)
 
         virtual_cpu = VirtualCpu()
-        virtual_cpu.num_virtual_cpu = server_flavor.vcpus
+        virtual_cpu.num_virtual_cpu = flavor_details['vcpus']
         virtual_compute.virtual_cpu = virtual_cpu
 
         virtual_memory = VirtualMemory()
-        virtual_memory.virtual_mem_size = server_flavor.ram
+        virtual_memory.virtual_mem_size = flavor_details['ram']
         virtual_compute.virtual_memory = virtual_memory
 
         virtual_storage = VirtualStorage()
-        virtual_storage.size_of_storage = server_flavor.disk
+        virtual_storage.size_of_storage = flavor_details['disk']
         virtual_compute.virtual_disks = [virtual_storage]
 
         virtual_compute.virtual_network_interface = list()
@@ -175,6 +172,29 @@ class OpenstackVimAdapter(object):
         except Exception as e:
             raise OpenstackVimAdapterError(e.message)
         return nova_servers
+
+    @log_entry_exit(LOG)
+    def server_get(self, server_id):
+        """
+        This function retrieves the details for the server with the given ID.
+
+        :param server_id:   ID of the server to get details for.
+        :return:            Dictionary with server details.
+        """
+        try:
+            server = self.nova_client.servers.get(server_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
+
+        server_details = dict()
+        server_details['flavor_id'] = server.flavor['id'].encode()
+        server_details['hostId'] = server.hostId.encode()
+        server_details['image_id'] = server.image['id'].encode()
+        server_details['name'] = server.name.encode()
+        server_details['status'] = server.status.encode()
+        server_details['user_id'] = server.user_id.encode()
+
+        return server_details
 
     @log_entry_exit(LOG)
     def stack_get(self, stack_id):
@@ -328,3 +348,24 @@ class OpenstackVimAdapter(object):
             if value != -1:
                 setattr(virtual_storage_quota, item, value)
         return virtual_storage_quota
+
+    @log_entry_exit(LOG)
+    def flavor_get(self, flavor_id):
+        """
+        This function retrieves the details for the flavor with the given ID.
+
+        :param flavor_id:   ID of the flavor to get details for.
+        :return:            Dictionary with flavor details.
+        """
+        try:
+            flavor = self.nova_client.flavors.get(flavor_id)
+        except Exception as e:
+            raise OpenstackVimAdapterError(e.message)
+
+        flavor_details = dict()
+        flavor_details['name'] = flavor.name
+        flavor_details['vcpus'] = flavor.vcpus
+        flavor_details['ram'] = flavor.ram
+        flavor_details['disk'] = flavor.disk
+
+        return flavor_details
