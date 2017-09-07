@@ -33,9 +33,7 @@ class TC_VNF_STATE_TERM_demo(TestCase):
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
         # self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        # self.register_for_cleanup(self.traffic.destroy)
-        # TODO; Update register_for_cleanup function to accept an index input parameter to be stored as a key in
-        # dictionary and the function tuple as a value
+        # self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_vnf'] = dict()
@@ -61,10 +59,11 @@ class TC_VNF_STATE_TERM_demo(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
-                                  termination_type='graceful',
+        self.register_for_cleanup(index=20, function_reference=self.mano.vnf_terminate_and_delete,
+                                  vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
                                   additional_param=self.tc_input['mano']['termination_params'])
-        # self.register_for_cleanup(self.mano.wait_for_vnf_stable_state, vnf_instance_id=self.vnf_instance_id)
+        self.register_for_cleanup(index=30, function_reference=self.mano.wait_for_vnf_stable_state,
+                                  vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
@@ -99,7 +98,7 @@ class TC_VNF_STATE_TERM_demo(TestCase):
         #
         # self.traffic.start(return_when_emission_starts=True)
         #
-        # self.register_for_cleanup(self.traffic.stop)
+        # self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate the provided functionality and all traffic goes through
@@ -110,11 +109,14 @@ class TC_VNF_STATE_TERM_demo(TestCase):
         #
         # if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
         #     raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
-        #
-        # if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
-        #     raise TestRunError('Allocated vResources could not be validated')
-        #
-        # self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'],
+                                                       self.vnf_instance_id, self.tc_input['mano']['query_params']):
+            raise TestRunError('Allocated vResources could not be validated')
+
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Stop the low traffic load
@@ -146,7 +148,7 @@ class TC_VNF_STATE_TERM_demo(TestCase):
 
         self.tc_result['events']['terminate_vnf']['duration'] = self.time_record.duration('terminate_vnf')
 
-        # TODO: Update unregister function to accept the index for the function to be removed from cleanup
+        self.unregister_from_cleanup(index=20)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate VNF is terminated and all resources have been released
