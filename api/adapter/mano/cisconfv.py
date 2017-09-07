@@ -193,7 +193,7 @@ class CiscoNFVManoAdapter(object):
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                    'deployments[deployment_name="%s"]/''state_machine/state' %
+                                        'deployments[deployment_name="%s"]/''state_machine/state' %
                                     (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
@@ -211,10 +211,11 @@ class CiscoNFVManoAdapter(object):
                 try:
                     xml = self.nso.get(('xpath',
                                         '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]'
-                                        '/state[name="ncs:ready"]/status' % deployment_name)).data_xml
+                                            '/state[name="ncs:ready"]/status' % deployment_name)).data_xml
                     xml = etree.fromstring(xml)
                     nso_vnf_deployment_state = xml.find(
-                        './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
+                        './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/'
+                            '{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
                     LOG.debug('VNF deployment state reported by NSO: %s' % nso_vnf_deployment_state)
                     if nso_vnf_deployment_state == 'reached':
                         LOG.debug('ESC reports the VNF as un-deployed, but the NSO does not')
@@ -239,7 +240,7 @@ class CiscoNFVManoAdapter(object):
         try:
             xml = self.nso.get(('xpath',
                                 '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
-                                'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
+                                    'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
             xml = etree.fromstring(xml)
             nso_vnf_deployment_state = xml.find(
                      './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
@@ -380,6 +381,7 @@ class CiscoNFVManoAdapter(object):
         else:
             raise CiscoNFVManoAdapterError('The InstantiatedVnfInfo information element cannot be built as the VNF '
                                            'instantiation state is not INSTANTIATED')
+
         return vnf_info
 
     @log_entry_exit(LOG)
@@ -387,6 +389,90 @@ class CiscoNFVManoAdapter(object):
         netconf_reply = self.nso.get(('xpath', '/nfvo/vnfd[id="%s"]' % vnfd_id))
         vnfd_xml = netconf_reply.data_xml
         return vnfd_xml
+
+    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id, additional_param):
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+
+        # Get the VNFR from the NSO
+        vnfr = self.nso.get(('xpath',
+                             '/nfvo/vnfr/esc/vnf-deployment[deployment-name="%s"]/vnfr' % vnf_instance_id)).data_xml
+        vnfr = etree.fromstring(vnfr)
+
+        # Iterate over each VNFC and check that the corresponding flavor name in VNFR and Nova are the same
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+
+            # Get VIM adapter object
+            vim = self.get_vim_helper()
+
+            # Get the name of the flavor associated to this VNFC from Nova
+            server_id = vnfc_resource_info.compute_resource.resource_id
+            server_details = vim.server_get(server_id)
+            server_flavor_id = server_details['flavor_id']
+            flavor_details = vim.flavor_get(server_flavor_id)
+            flavor_name_nova = flavor_details['name'].encode()
+
+            # Get the name of the flavor associated to this VNFC from the VNFR
+            vdu_id = vnfc_resource_info.vdu_id
+            flavor_name_vnfr = vnfr.find(
+                './/{http://tail-f.com/pkg/tailf-nfvo-esc}vnfr/'
+                    '{http://tail-f.com/pkg/tailf-nfvo-esc}vdu[{http://tail-f.com/pkg/tailf-nfvo-esc}id="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-nfvo-esc}flavor-name' % vdu_id).text
+
+            # Check that the the two flavor names are the same
+            if flavor_name_nova != flavor_name_vnfr:
+                return False
+
+            # Get the number of ports reported by Nova for the current VNFC
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            port_dict = vim.port_list(device_id=resource_id)
+            for port_list in port_dict:
+                try:
+                    port_number_nova = len(port_list['ports'])
+                except KeyError:
+                    raise CiscoNFVManoAdapterError(
+                        'Unable to iterate the port list dict returned by Nova for server with ID %s' % resource_id)
+
+            # Get the number of ports in the VNFD for the VDU type that corresponds to the current VNFC type
+            vnfd =  self.get_vnfd(vnfd_id)
+            vnfd = etree.fromstring(vnfd)
+            port_number_vnfd = len(vnfd.findall(
+                './/{http://tail-f.com/pkg/nfvo}vdu[{http://tail-f.com/pkg/nfvo}id="%s"]/'
+                    '{http://tail-f.com/pkg/nfvo}internal-connection-point' % vdu_id))
+
+            # Check that the number of ports reported by Nova for the current VNFC is the same as the number of ports in
+            # the VNFD for the VDU type that corresponds to the current VNFC type
+            if port_number_nova != port_number_vnfd:
+                return False
+
+            # TODO: Check NIC type
+
+        return True
+
+    @log_entry_exit(LOG)
+    def get_allocated_vresources(self, vnf_instance_id, additional_param):
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+
+        vresources = dict()
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vim = self.get_vim_helper()
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+            vresources[resource_id] = dict()
+
+            num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+            virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+            size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+            num_vnics = len(virtual_compute.virtual_network_interface)
+
+            vresources[resource_id]['vCPU'] = num_virtual_cpu
+            vresources[resource_id]['vMemory'] = str(virtual_memory) + ' MB'
+            vresources[resource_id]['vStorage'] = str(size_of_storage) + ' GB'
+            vresources[resource_id]['vNIC'] = str(num_vnics)
+
+        return vresources
 
     @log_entry_exit(LOG)
     def build_vdu_list(self, vdu_params):
@@ -546,7 +632,6 @@ class CiscoNFVManoAdapter(object):
 
         vnf_operate_xml = self.build_vnf_operate(vnf_instance_id, etsi_state_esc_action_mapping[change_state_to],
                                                  additional_param)
-        print vnf_operate_xml
 
         try:
             netconf_reply = self.esc.dispatch(rpc_command=etree.fromstring(vnf_operate_xml))
@@ -556,7 +641,7 @@ class CiscoNFVManoAdapter(object):
         if '<ok/>' not in netconf_reply.xml:
             raise CiscoNFVManoAdapterError('ESC replied with an error')
 
-        print netconf_reply.xml
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
         lifecycle_operation_occurrence_id = uuid.uuid4()
         lifecycle_operation_occurrence_dict = {
@@ -601,3 +686,9 @@ class CiscoNFVManoAdapter(object):
                 raise CiscoNFVManoAdapterError('Cannot create VIM helper for unsupported type: %s' % vim_type)
 
         return self.vim_helper
+
+    @log_entry_exit(LOG)
+    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval=constants):
+        # Since the NSO VNF deployment state is seen as VNF instantiation state, the VNF termination is always safe, no
+        # matter the VNF deployment state in the ESC.
+        return True
