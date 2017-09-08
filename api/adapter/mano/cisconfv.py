@@ -149,7 +149,8 @@ class CiscoNFVManoAdapter(object):
                 xml = etree.fromstring(xml)
                 nso_vnf_deployment_state = xml.find(
                      './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
-                LOG.debug('VNF deployment state reported by NSO: %s' % nso_vnf_deployment_state)
+                LOG.debug('VNF deployment state reported by NSO: "%s"; expected: "%s"'
+                          % (nso_vnf_deployment_state, 'reached'))
             except NCClientError as e:
                 LOG.debug('Error occurred while communicating with the NSO Netconf server')
                 raise CiscoNFVManoAdapterError(e.message)
@@ -171,7 +172,8 @@ class CiscoNFVManoAdapter(object):
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                               './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
-                LOG.debug('VNF deployment state reported by ESC: %s' % esc_vnf_deployment_state)
+                LOG.debug('VNF deployment state reported by ESC: "%s"; expected: "%s"'
+                          % (esc_vnf_deployment_state, 'SERVICE_ACTIVE_STATE'))
             except NCClientError as e:
                 LOG.debug('Error occurred while communicating with the ESC Netconf server')
                 raise CiscoNFVManoAdapterError(e.message)
@@ -198,7 +200,7 @@ class CiscoNFVManoAdapter(object):
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                     './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
-                LOG.debug('VNF deployment state reported by ESC: %s' % esc_vnf_deployment_state)
+                LOG.debug('VNF deployment state reported by ESC: "%s"; expected no state' % esc_vnf_deployment_state)
                 if esc_vnf_deployment_state == 'SERVICE_ERROR_STATE':
                     return constants.OPERATION_FAILED
                 else:
@@ -216,7 +218,7 @@ class CiscoNFVManoAdapter(object):
                     nso_vnf_deployment_state = xml.find(
                         './/{http://tail-f.com/pkg/tailf-nfvo-esc}state/'
                             '{http://tail-f.com/pkg/tailf-nfvo-esc}status').text
-                    LOG.debug('VNF deployment state reported by NSO: %s' % nso_vnf_deployment_state)
+                    LOG.debug('VNF deployment state reported by NSO: "%s"; expected no state' % nso_vnf_deployment_state)
                     if nso_vnf_deployment_state == 'reached':
                         LOG.debug('ESC reports the VNF as un-deployed, but the NSO does not')
                         return constants.OPERATION_PENDING
@@ -225,6 +227,54 @@ class CiscoNFVManoAdapter(object):
                     raise CiscoNFVManoAdapterError(e.message)
                 except AttributeError:
                     return constants.OPERATION_SUCCESS
+
+        if operation_type == 'vnf_stop':
+            # Try to retrieve the VNF deployment name from the ESC.
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                    'deployments[deployment_name="%s"]/''state_machine/state' %
+                                    (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_vnf_deployment_state = xml.find(
+                    './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+                LOG.debug('VNF deployment state reported by ESC: "%s"; expected: "%s"'
+                          % (esc_vnf_deployment_state, 'SERVICE_STOPPED_STATE'))
+                if esc_vnf_deployment_state == 'SERVICE_STOPPED_STATE':
+                    return constants.OPERATION_SUCCESS
+                elif esc_vnf_deployment_state == 'SERVICE_ERROR_STATE':
+                    return constants.OPERATION_FAILED
+                else:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                raise CiscoNFVManoAdapterError(e.message)
+
+        if operation_type == 'vnf_start':
+            # Try to retrieve the VNF deployment name from the ESC.
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                    'deployments[deployment_name="%s"]/''state_machine/state' %
+                                    (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_vnf_deployment_state = xml.find(
+                    './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+                LOG.debug('VNF deployment state reported by ESC: "%s"; expected: "%s"'
+                          % (esc_vnf_deployment_state, 'SERVICE_ACTIVE_STATE'))
+                if esc_vnf_deployment_state == 'SERVICE_ACTIVE_STATE':
+                    return constants.OPERATION_SUCCESS
+                elif esc_vnf_deployment_state  == 'SERVICE_ERROR_STATE':
+                    return constants.OPERATION_FAILED
+                else:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                raise CiscoNFVManoAdapterError(e.message)
 
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
 
