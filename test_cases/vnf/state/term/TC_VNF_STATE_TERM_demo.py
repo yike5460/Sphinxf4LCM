@@ -55,6 +55,9 @@ class TC_VNF_STATE_TERM_demo(TestCase):
                           vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
                           additional_param=self.tc_input['mano']['instantiation_params'])
 
+        if self.vnf_instance_id is None:
+            raise TestRunError('VNF instantiation operation failed')
+
         self.time_record.END('instantiate_vnf')
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
@@ -103,7 +106,7 @@ class TC_VNF_STATE_TERM_demo(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating the provided functionality and all traffic goes through')
+        LOG.info('Validating the provided functionality and all traffic goes through')
         # if not self.traffic.does_traffic_flow(delay_time=5):
         #     raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
         #
