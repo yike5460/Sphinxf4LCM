@@ -570,7 +570,7 @@ class Mano(object):
                                                      additional_param, max_wait_time, poll_interval)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            raise ManoGenericError('VNF instantiation operation failed')
+            return None
         return vnf_instance_id
 
     @log_entry_exit(LOG)
