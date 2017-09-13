@@ -1,4 +1,5 @@
 import collections
+import traceback
 import importlib
 
 from api import ApiError
@@ -173,14 +174,14 @@ class TestCase(object):
             self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.error_info)
         except ApiError as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
+            self._LOG.error('Traceback: %s' % traceback.format_exc())
             self.tc_result['overall_status'] = constants.TEST_ERROR
             self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
-            raise
         except Exception as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
+            self._LOG.error('Traceback: %s' % traceback.format_exc())
             self.tc_result['overall_status'] = constants.TEST_ERROR
             self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
-            raise
         finally:
             try:
                 self.cleanup()
