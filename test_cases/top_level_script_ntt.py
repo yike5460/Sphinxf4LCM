@@ -4,9 +4,19 @@ import logging
 
 from utils.logging_module import configure_logger
 
-from test_cases.vnf.state.term.TC_VNF_STATE_TERM_demo import TC_VNF_STATE_TERM_demo
-from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_demo import TC_VNF_STATE_STOP_demo
-from test_cases.vnf.state.start.TC_VNF_STATE_START_demo import TC_VNF_STATE_START_demo
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_001 import TC_VNF_STATE_INST_001
+from test_cases.vnf.state.inst.TC_VNF_STATE_INST_002 import TC_VNF_STATE_INST_002
+from test_cases.vnf.state.start.TC_VNF_STATE_START_001 import TC_VNF_STATE_START_001
+from test_cases.vnf.state.start.TC_VNF_STATE_START_002 import TC_VNF_STATE_START_002
+from test_cases.vnf.state.start.TC_VNF_STATE_START_003 import TC_VNF_STATE_START_003
+from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_001 import TC_VNF_STATE_STOP_001
+from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_002 import TC_VNF_STATE_STOP_002
+from test_cases.vnf.state.stop.TC_VNF_STATE_STOP_003 import TC_VNF_STATE_STOP_003
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_001 import TC_VNF_STATE_TERM_001
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_002 import TC_VNF_STATE_TERM_002
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_003 import TC_VNF_STATE_TERM_003
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_004 import TC_VNF_STATE_TERM_004
+from test_cases.vnf.state.term.TC_VNF_STATE_TERM_005 import TC_VNF_STATE_TERM_005
 
 # LOG = logging.basicConfig(level=logging.DEBUG)
 
@@ -68,16 +78,49 @@ if __name__ == '__main__':
                                                 'port_speed': 100}}}
 
     # LOG.info('Starting top level script')
-    # LOG.info('Calling test case TC_VNF_STATE_TERM_001')
-    tc_result = TC_VNF_STATE_TERM_demo(tc_input=openstack).execute()
+    tc_result = TC_VNF_STATE_INST_001(tc_input=openstack).execute()
     print tc_result['overall_status']
     print tc_result['error_info']
-    tc_result = TC_VNF_STATE_STOP_demo(tc_input=openstack).execute()
+    tc_result = TC_VNF_STATE_INST_002(tc_input=openstack).execute()
     print tc_result['overall_status']
     print tc_result['error_info']
-    tc_result = TC_VNF_STATE_START_demo(tc_input=openstack).execute()
+
+    tc_result = TC_VNF_STATE_START_001(tc_input=openstack).execute()
     print tc_result['overall_status']
     print tc_result['error_info']
-    print tc_result['events']
+    tc_result = TC_VNF_STATE_START_002(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_START_003(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+
+    tc_result = TC_VNF_STATE_STOP_001(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_STOP_002(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_STOP_003(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+
+    tc_result = TC_VNF_STATE_TERM_001(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_TERM_002(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_TERM_003(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_TERM_004(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+    tc_result = TC_VNF_STATE_TERM_005(tc_input=openstack).execute()
+    print tc_result['overall_status']
+    print tc_result['error_info']
+
+    # print tc_result['events']
     # print tc_result['resources']
     # LOG.info('Exiting top level script')
