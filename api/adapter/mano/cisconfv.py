@@ -318,6 +318,10 @@ class CiscoNFVManoAdapter(object):
         vnfd_id = xml.find(
             './/{http://tail-f.com/pkg/tailf-nfvo-esc}vnfr/{http://tail-f.com/pkg/tailf-nfvo-esc}id').text
 
+        # Get the VNFD XML from the NSO
+        vnfd_xml = self.nso.get(('xpath', '/nfvo/vnfd[id="CSR1kvLuxoft"]')).data_xml
+        vnfd_xml = etree.fromstring(vnfd_xml)
+
         # Build the vnf_info data structure
         vnf_info.vnf_instance_name = vnf_instance_id
         # vnf_info.vnf_instance_description =
@@ -394,6 +398,14 @@ class CiscoNFVManoAdapter(object):
                     for nic_id in nic_id_list:
                         nic_id_text = nic_id.text
 
+                        # Get the internal connection point ID from the VNFD that corresponds to this port ID
+                        cpd_id = vnfd_xml.find('.//{http://tail-f.com/pkg/nfvo}vdu'
+                                                   '[{http://tail-f.com/pkg/nfvo}id="%s"]/'
+                                                   '{http://tail-f.com/pkg/nfvo}internal-connection-point'
+                                                   '[{http://tail-f.com/pkg/tailf-nfvo-esc}interface-id="%s"]/'
+                                                   '{http://tail-f.com/pkg/nfvo}id' % (vm_group_text, nic_id_text))
+                        cpd_id_text = cpd_id.text
+
                         # Get the port ID
                         port_id = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
                                                           '[{http://www.cisco.com/esc/esc}name="%s"]/'
@@ -406,23 +418,23 @@ class CiscoNFVManoAdapter(object):
                                                           % (vm_group_text, vm_id_text, nic_id_text))
                         port_id_text = port_id.text
 
-                        # Get the MAC address
-                        mac_address = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
-                                                              '[{http://www.cisco.com/esc/esc}name="%s"]/'
-                                                              '{http://www.cisco.com/esc/esc}vm_instance'
-                                                              '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
-                                                              '{http://www.cisco.com/esc/esc}interfaces/'
-                                                              '{http://www.cisco.com/esc/esc}interface'
-                                                              '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
-                                                              '{http://www.cisco.com/esc/esc}mac_address'
-                                                              % (vm_group_text, vm_id_text, nic_id_text))
-                        mac_address_text = mac_address.text
+                        # Get the IP address
+                        ip_address = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                             '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                             '{http://www.cisco.com/esc/esc}vm_instance'
+                                                             '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                             '{http://www.cisco.com/esc/esc}interfaces/'
+                                                             '{http://www.cisco.com/esc/esc}interface'
+                                                             '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
+                                                             '{http://www.cisco.com/esc/esc}ip_address'
+                                                             % (vm_group_text, vm_id_text, nic_id_text))
+                        ip_address_text = ip_address.text
 
                         # Build the VnfExtCpInfo data structure
                         vnf_ext_cp_info = VnfExtCpInfo()
                         vnf_ext_cp_info.cp_instance_id = port_id_text
-                        vnf_ext_cp_info.address = [mac_address_text]
-                        vnf_ext_cp_info.cpd_id = nic_id_text
+                        vnf_ext_cp_info.address = [ip_address_text]
+                        vnf_ext_cp_info.cpd_id = cpd_id_text
 
                         # Append the current VnfExtCpInfo element to the VnfExtCpInfo list
                         vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
