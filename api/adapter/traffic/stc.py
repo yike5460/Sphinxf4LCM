@@ -159,7 +159,7 @@ class StcTrafficAdapter(object):
         self.config_port_rate(self.tx_port, constants.traffic_load_percent_mapping[traffic_load])
 
     @log_entry_exit(LOG)
-    def config_traffic_stream(self, dest_mac_addr_list):
+    def config_traffic_stream(self, dest_addr_list):
         # Delete existing modifiers, if any.
         try:
             existing_modifiers = self.stc.get(self.stream_block, 'children-TableModifier')
@@ -170,8 +170,8 @@ class StcTrafficAdapter(object):
         # Create new modifier with the provided destination MAC address list.
         try:
             modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
-            self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
-                            OffsetReference='RAW_STREAM_ETH.dstMac')
+            self.stc.config(handle=modifier, Data=dest_addr_list, RepeatCount=0,
+                            OffsetReference='RAW_STREAM_IPV4.destAddr')
             self.stc.apply()
         except Exception as e:
             raise StcTrafficAdapterError(e.message)
