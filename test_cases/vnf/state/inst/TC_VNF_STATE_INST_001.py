@@ -33,8 +33,8 @@ class TC_VNF_STATE_INST_001(TestCase):
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
         # self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
-        # self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        # self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
+        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_vnf'] = dict()
@@ -114,29 +114,29 @@ class TC_VNF_STATE_INST_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Starting the low traffic load')
-        # self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-        #                        traffic_config=self.tc_input['traffic']['traffic_config'])
-        #
-        # # Configure stream destination MAC address(es)
-        # dest_mac_addr_list = ''
-        # for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-        #     if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
-        #         dest_mac_addr_list += ext_cp_info.address[0] + ' '
-        # self.traffic.config_traffic_stream(dest_mac_addr_list)
-        #
-        # self.traffic.start(return_when_emission_starts=True)
-        #
-        # self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
+        LOG.info('Starting the low traffic load')
+        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        # Configure stream destination IP address(es)
+        dest_addr_list = ''
+        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
+                dest_addr_list += ext_cp_info.address[0] + ' '
+        self.traffic.config_traffic_stream(dest_addr_list)
+
+        self.traffic.start(return_when_emission_starts=True)
+
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate traffic flows
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating traffic flows')
-        # if not self.traffic.does_traffic_flow(delay_time=5):
-        #     raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
-        #
-        # if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
-        #     raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
+        LOG.info('Validating traffic flows')
+        if not self.traffic.does_traffic_flow(delay_time=5):
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
+
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         LOG.info('TC_VNF_STATE_INST_001 execution completed successfully')
