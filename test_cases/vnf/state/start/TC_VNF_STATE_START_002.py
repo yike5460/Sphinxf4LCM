@@ -39,8 +39,8 @@ class TC_VNF_STATE_START_002(TestCase):
 
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        # self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        # self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
+        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_vnf'] = dict()
@@ -97,30 +97,30 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Starting the low traffic load')
-        # self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-        #                        traffic_config=self.tc_input['traffic']['traffic_config'])
-        #
-        # # Configure stream destination MAC address(es)
-        # dest_mac_addr_list = ''
-        # for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-        #     if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
-        #         dest_mac_addr_list += ext_cp_info.address[0] + ' '
-        # self.traffic.config_traffic_stream(dest_mac_addr_list)
-        #
-        # self.traffic.start(return_when_emission_starts=True)
-        #
-        # self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
+        LOG.info('Starting the low traffic load')
+        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        # Configure stream destination address(es)
+        dest_addr_list = ''
+        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
+                dest_addr_list += ext_cp_info.address[0] + ' '
+        self.traffic.config_traffic_stream(dest_addr_list)
+
+        self.traffic.start(return_when_emission_starts=True)
+
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic goes through')
-        # if not self.traffic.does_traffic_flow(delay_time=5):
-        #     raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
-        #
-        # if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
-        #     raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
+        if not self.traffic.does_traffic_flow(delay_time=5):
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
+
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'],
                                                        self.vnf_instance_id, self.tc_input['mano']['query_params']):
@@ -133,8 +133,8 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Stop the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Stopping the low traffic load')
-        # self.traffic.stop()
+        LOG.info('Stopping the low traffic load')
+        self.traffic.stop()
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Stop the VNF
@@ -168,15 +168,15 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Starting the low traffic load')
-        # self.traffic.start(return_when_emission_starts=True)
+        LOG.info('Starting the low traffic load')
+        self.traffic.start(return_when_emission_starts=False)
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Validate no traffic goes through
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating no traffic goes through')
-        # if self.traffic.does_traffic_flow(delay_time=5):
-        #     raise TestRunError('Traffic is flowing', err_details='Traffic flew before VNF was started')
+        LOG.info('Validating no traffic goes through')
+        if self.traffic.does_traffic_flow(delay_time=5):
+            raise TestRunError('Traffic is flowing', err_details='Traffic flew before VNF was started')
 
         # --------------------------------------------------------------------------------------------------------------
         # 10. Start the VNF
@@ -210,22 +210,22 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 12. Calculate the time for activation
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Calculating the time for traffic activation')
-        # self.tc_result['events']['traffic_activation']['duration'] = self.traffic.calculate_activation_time()
+        LOG.info('Calculating the time for traffic activation')
+        self.tc_result['events']['traffic_activation']['duration'] = self.traffic.calculate_activation_time()
 
         # --------------------------------------------------------------------------------------------------------------
         # 13. Validate traffic goes through
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating traffic goes through')
-        #
-        # # Clearing counters as the traffic lost so far influences the results
-        # self.traffic.clear_counters()
-        #
-        # if not self.traffic.does_traffic_flow(delay_time=5):
-        #     raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
-        #
-        # if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
-        #     raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
+        LOG.info('Validating traffic goes through')
+
+        # Clearing counters as the traffic lost so far influences the results
+        self.traffic.clear_counters()
+
+        if not self.traffic.does_traffic_flow(delay_time=5):
+            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
+
+        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         # --------------------------------------------------------------------------------------------------------------
         # 14. Stop the VNF
@@ -239,8 +239,8 @@ class TC_VNF_STATE_START_002(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 15. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating that no traffic flows once stop is completed')
-        # if self.traffic.does_traffic_flow(delay_time=5):
-        #     raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was stopped')
+        LOG.info('Validating that no traffic flows once stop is completed')
+        if self.traffic.does_traffic_flow(delay_time=5):
+            raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was stopped')
 
         LOG.info('TC_VNF_STATE_START_002 execution completed successfully')
