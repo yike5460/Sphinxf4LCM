@@ -111,7 +111,7 @@ if __name__ == '__main__':
                                                        'left_traffic_plen': '24',
                                                        'left_traffic_gw': '172.16.1.10',
                                                        'left_traffic_gw_mac': '00:11:22:33:44:55',
-                                                       'left_cp_name': 'CP2',
+                                                       'ingress_cp_name': 'CP2',
                                                        'right_port_location': '10.3.228.29/1/1',
                                                        'right_traffic_addr': '172.16.2.3',
                                                        'right_traffic_plen': '24',
