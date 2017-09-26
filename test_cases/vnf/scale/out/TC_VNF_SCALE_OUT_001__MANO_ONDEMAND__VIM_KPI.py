@@ -107,12 +107,12 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VIM_KPI(TestCase):
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
-        # Configure stream destination MAC address(es)
-        dest_mac_addr_list = ''
+        # Configure stream destination address(es)
+        dest_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
-                dest_mac_addr_list += ext_cp_info.address[0] + ' '
-        self.traffic.config_traffic_stream(dest_mac_addr_list)
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
+                dest_addr_list += ext_cp_info.address[0] + ' '
+        self.traffic.config_traffic_stream(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
 
@@ -201,15 +201,15 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VIM_KPI(TestCase):
         # Stop the max traffic load.
         self.traffic.stop()
 
-        # Configure stream destination MAC address(es).
-        dest_mac_addr_list = ''
+        # Configure stream destination address(es).
+        dest_addr_list = ''
         for vnf_instance_id in ns_info.vnf_info_id:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
             for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-                if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
-                    dest_mac_addr_list += ext_cp_info.address[0] + ' '
+                if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
+                    dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_mac_addr_list)
+        self.traffic.config_traffic_stream(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the max traffic load.
