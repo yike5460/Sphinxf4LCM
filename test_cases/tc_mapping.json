@@ -94,6 +94,5 @@
   "TC_VNF_STATE_TERM_002":                                  "test_cases.vnf.state.term.TC_VNF_STATE_TERM_002",
   "TC_VNF_STATE_TERM_003":                                  "test_cases.vnf.state.term.TC_VNF_STATE_TERM_003",
   "TC_VNF_STATE_TERM_004":                                  "test_cases.vnf.state.term.TC_VNF_STATE_TERM_004",
-  "TC_VNF_STATE_TERM_005":                                  "test_cases.vnf.state.term.TC_VNF_STATE_TERM_005",
-  "TC_VNF_STATE_TERM_demo":                                 "test_cases.vnf.state.term.TC_VNF_STATE_TERM_demo"
+  "TC_VNF_STATE_TERM_005":                                  "test_cases.vnf.state.term.TC_VNF_STATE_TERM_005"
 }
