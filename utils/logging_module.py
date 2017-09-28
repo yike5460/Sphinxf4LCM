@@ -33,9 +33,7 @@ def configure_logger(logger, file_level=None, log_filename=None, console_level=N
     logger.propagate = propagate
 
     if file_level is not None:
-        # Generate unique logging file name
-        new_log_file_name = '{:%Y_%m_%d_%H_%M_%S}_'.format(datetime.datetime.now()) + str(log_filename)
-        log_file_path = os.path.join(LOG_DIR, new_log_file_name + ".log")
+        log_file_path = os.path.join(LOG_DIR, log_filename)
 
         try:
             os.stat(LOG_DIR)
