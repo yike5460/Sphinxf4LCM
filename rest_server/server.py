@@ -3,8 +3,8 @@ import json
 import logging
 import uuid
 from datetime import datetime
-from threading import Lock
 from multiprocessing import Process, Queue
+from threading import Lock
 
 from bottle import route, request, response, run
 
