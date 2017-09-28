@@ -1,5 +1,5 @@
 # VNFLifeCycleValidation
-VNF Lifecycle Validation
+*VNF Lifecycle Validation*
 This directory includes the work resulted from VNF Lifecycle test automation project by Luxoft
 ___
 
@@ -11,15 +11,17 @@ ___
 2. Login with non-root user with sudo capabilities.
 ___
 
-#Installation
+# Installation
 1. Unpack the *VNF LifeCycle Validation* archive:
-   \# tar zxvf vnflcv.tar.gz
 
+   ```# tar zxvf vnflcv.tar.gz```
 2. Go to the VNF LifeCycle Validation folder:
-   \# cd ./vnflcv
+
+   ```# cd ./vnflcv```
 
 3. Run the deployment script:
-   \# ./deploy.sh
+
+   ```# ./deploy.sh```
 
 4. After all the system upgrades and software installations are performed, conjure-up will be launched. You will be asked for the following inputs:
    - "Where would you like to deploy?"
