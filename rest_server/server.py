@@ -98,8 +98,12 @@ def execute_test(tc_exec_request, tc_input, queue):
     tc_name = tc_exec_request['tc_name']
     tc_class = get_tc_class(tc_name)
 
+    timestamp = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now())
+    log_file_name = '%s_%s.log' % (timestamp, str(tc_name))
+    report_file_name = '%s_%s.txt' % (timestamp, str(tc_name))
+
     root_logger = logging.getLogger()
-    logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=tc_name)
+    logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name)
 
     tc_start_time = datetime.utcnow()
     tc_result = tc_class(tc_input).execute()
@@ -114,6 +118,8 @@ def execute_test(tc_exec_request, tc_input, queue):
     kibana_srv = _read_config('kibana-srv')
     if kibana_srv is not None:
         reporting.kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result)
+
+    reporting.report_test_case(report_file_name, tc_exec_request, tc_input, tc_result)
 
 
 @route('/version')
@@ -144,6 +150,8 @@ def do_exec():
             tc_input[resource_type] = resource_params
 
         tc_input['vnfd_id'] = _read_config('vnfd-id')
+        tc_input['flavour_id'] = _read_config('flavour-id')
+        tc_input['instantiation_level_id'] = _read_config('instantiation-level-id')
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
         if 'vnf' not in tc_input.keys():
             tc_input['vnf'] = dict()
