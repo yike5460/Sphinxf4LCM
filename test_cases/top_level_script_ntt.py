@@ -1,8 +1,7 @@
 #! /usr/bin/env python
 
 import logging
-
-from utils.logging_module import configure_logger
+from datetime import datetime
 
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_001 import TC_VNF_STATE_INST_001
 from test_cases.vnf.state.inst.TC_VNF_STATE_INST_002 import TC_VNF_STATE_INST_002
@@ -17,12 +16,13 @@ from test_cases.vnf.state.term.TC_VNF_STATE_TERM_002 import TC_VNF_STATE_TERM_00
 from test_cases.vnf.state.term.TC_VNF_STATE_TERM_003 import TC_VNF_STATE_TERM_003
 from test_cases.vnf.state.term.TC_VNF_STATE_TERM_004 import TC_VNF_STATE_TERM_004
 from test_cases.vnf.state.term.TC_VNF_STATE_TERM_005 import TC_VNF_STATE_TERM_005
+from utils.logging_module import configure_logger
 
-# LOG = logging.basicConfig(level=logging.DEBUG)
+log_file_name = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now()) + '.log'
 
 # Getting and configuring the RootLogger.
 root_logger = logging.getLogger()
-configure_logger(root_logger, file_level='DEBUG', console_level='INFO', propagate=True)
+configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name, console_level='INFO', propagate=True)
 
 # Logger for the current module.
 LOG = logging.getLogger(__name__)
