@@ -57,14 +57,22 @@ VNF_STATE['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
                                       'RESUME_COMPLETE': VNF_STARTED,
                                       'SUSPEND_COMPLETE': VNF_STOPPED}
 
+# Mapping between Cisco NSO VNF deployment states and ETSI VNF instantiation states
+VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'] = {'reached': VNF_INSTANTIATED,
+                                                   'not-reached': VNF_NOT_INSTANTIATED}
+
+# Mapping between Cisco ESC VNF deployment states and ETSI VNF states
+VNF_STATE['ESC_DEPLOYMENT_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
+                                     'SERVICE_STOPPED_STATE': VNF_STOPPED}
+
 # Test results
 TEST_FAILED = 'FAILED'
 TEST_PASSED = 'PASSED'
 TEST_ERROR = 'ERROR'
 
 # Wait time intervals
-INSTANTIATION_TIME = 300
-OPERATE_TIME = 15
+INSTANTIATION_TIME = 600
+OPERATE_TIME = 300
 POLL_INTERVAL = 5
 SCALE_INTERVAL = 360
 START_TIME = 300

@@ -147,13 +147,13 @@ class TC_VNF_COMPLEX_001(TestCase):
         # Stop the max traffic load.
         self.traffic.stop()
 
-        # Configure stream destination MAC address(es).
-        dest_mac_addr_list = ''
+        # Configure stream destination address(es).
+        dest_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['left_cp_name']:
-                dest_mac_addr_list += ext_cp_info.address[0] + ' '
+            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
+                dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_mac_addr_list)
+        self.traffic.config_traffic_stream(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the max traffic load.

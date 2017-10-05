@@ -19,9 +19,9 @@ class StcTrafficAdapterError(TrafficAdapterError):
 
 
 class StcTrafficAdapter(object):
-    def __init__(self, lab_server_addr, user_name, session_name):
+    def __init__(self, lab_server_addr, user_name, session_name, lab_server_port=80):
         try:
-            self.stc = stchttp.StcHttp(lab_server_addr)
+            self.stc = stchttp.StcHttp(lab_server_addr, port=lab_server_port)
             self.session = self.stc.new_session(user_name=user_name, session_name=session_name, kill_existing=True)
             self.project = self.stc.create(object_type='project')
         except Exception as e:
@@ -119,17 +119,25 @@ class StcTrafficAdapter(object):
         return stream_block
 
     @log_entry_exit(LOG)
-    def create_raw_stream(self, source_port, source_ipv4_addr, dest_ipv4_addr, dest_mac_addr):
+    def create_raw_stream(self, source_port, source_ipv4_addr, dest_ipv4_addr, dest_mac_addr=None, payload=None):
         try:
             stream_block = self.stc.create(object_type='streamBlock', under=source_port)
             self.stc.config(handle=stream_block, frameConfig='')
             self.stc.create(object_type='ethernet:EthernetII', under=stream_block, name='RAW_STREAM_ETH',
                             dstMac=dest_mac_addr)
-            self.stc.create(object_type='ipv4:IPv4', under=stream_block, sourceAddr=source_ipv4_addr,
-                            destAddr=dest_ipv4_addr)
+            self.stc.create(object_type='ipv4:IPv4', under=stream_block, name='RAW_STREAM_IPV4',
+                            sourceAddr=source_ipv4_addr)
+
+            if payload is not None:
+                self.stc.create(object_type=payload, under=stream_block)
+
+            modifier = self.stc.create(object_type='TableModifier', under=stream_block)
+            self.stc.config(handle=modifier, Data=dest_ipv4_addr, RepeatCount=0,
+                            OffsetReference='RAW_STREAM_IPV4.destAddr')
 
             self.stc.apply()
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         return stream_block
@@ -151,7 +159,7 @@ class StcTrafficAdapter(object):
         self.config_port_rate(self.tx_port, constants.traffic_load_percent_mapping[traffic_load])
 
     @log_entry_exit(LOG)
-    def config_traffic_stream(self, dest_mac_addr_list):
+    def config_traffic_stream(self, dest_addr_list):
         # Delete existing modifiers, if any.
         try:
             existing_modifiers = self.stc.get(self.stream_block, 'children-TableModifier')
@@ -162,41 +170,54 @@ class StcTrafficAdapter(object):
         # Create new modifier with the provided destination MAC address list.
         try:
             modifier = self.stc.create(object_type='TableModifier', under=self.stream_block)
-            self.stc.config(handle=modifier, Data=dest_mac_addr_list, RepeatCount=0,
-                            OffsetReference='RAW_STREAM_ETH.dstMac')
+            self.stc.config(handle=modifier, Data=dest_addr_list, RepeatCount=0,
+                            OffsetReference='RAW_STREAM_IPV4.destAddr')
             self.stc.apply()
         except Exception as e:
             raise StcTrafficAdapterError(e.message)
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
-        l_port = self.create_port(port_location=traffic_config['left_port_location'])
-        self.tx_port = l_port
+        if traffic_config['type'] == 'VNF_TERMINATED':
+            gen_port = self.create_port(port_location=traffic_config['port_location'])
+            self.tx_port = gen_port
 
-        l_ipv4_iface = self.create_eth_ipv4_host_iface(address=traffic_config['left_traffic_addr'],
-                                                       plen=traffic_config['left_traffic_plen'],
-                                                       gw=traffic_config['left_traffic_gw'],
-                                                       affiliated_port=l_port)
-
-        r_port = self.create_port(port_location=traffic_config['right_port_location'])
-        self.rx_port = r_port
-
-        r_ipv4_iface = self.create_eth_ipv4_host_iface(address=traffic_config['right_traffic_addr'],
-                                                       plen=traffic_config['right_traffic_plen'],
-                                                       gw=traffic_config['right_traffic_gw'],
-                                                       affiliated_port=r_port)
-
-        dest_mac_addr = traffic_config.get('left_traffic_gw_mac')
-        if dest_mac_addr is None:
             self.arp_needed = True
-            self.stream_block = self.create_ipv4_stream(source_port=l_port, source_ipv4_iface=l_ipv4_iface,
-                                                        dest_ipv4_iface=r_ipv4_iface)
+            self.stream_block = self.create_raw_stream(source_port=gen_port,
+                                                       source_ipv4_addr=traffic_config['traffic_src_addr'],
+                                                       dest_ipv4_addr=traffic_config['traffic_dst_addr'],
+                                                       payload=traffic_config['payload'])
+
+        elif traffic_config['type'] == 'VNF_TRANSIENT':
+            l_port = self.create_port(port_location=traffic_config['left_port_location'])
+            self.tx_port = l_port
+
+            l_ipv4_iface = self.create_eth_ipv4_host_iface(address=traffic_config['left_traffic_addr'],
+                                                           plen=traffic_config['left_traffic_plen'],
+                                                           gw=traffic_config['left_traffic_gw'],
+                                                           affiliated_port=l_port)
+
+            r_port = self.create_port(port_location=traffic_config['right_port_location'])
+            self.rx_port = r_port
+
+            r_ipv4_iface = self.create_eth_ipv4_host_iface(address=traffic_config['right_traffic_addr'],
+                                                           plen=traffic_config['right_traffic_plen'],
+                                                           gw=traffic_config['right_traffic_gw'],
+                                                           affiliated_port=r_port)
+
+            dest_mac_addr = traffic_config.get('left_traffic_gw_mac')
+            if dest_mac_addr is None:
+                self.arp_needed = True
+                self.stream_block = self.create_ipv4_stream(source_port=l_port, source_ipv4_iface=l_ipv4_iface,
+                                                            dest_ipv4_iface=r_ipv4_iface)
+            else:
+                self.arp_needed = False
+                self.stream_block = self.create_raw_stream(source_port=l_port,
+                                                           source_ipv4_addr=traffic_config['left_traffic_addr'],
+                                                           dest_ipv4_addr=traffic_config['right_traffic_addr'],
+                                                           dest_mac_addr=dest_mac_addr)
         else:
-            self.arp_needed = False
-            self.stream_block = self.create_raw_stream(source_port=l_port,
-                                                       source_ipv4_addr=traffic_config['left_traffic_addr'],
-                                                       dest_ipv4_addr=traffic_config['right_traffic_addr'],
-                                                       dest_mac_addr=dest_mac_addr)
+            raise StcTrafficAdapterError('Unknown traffic type: %s' % traffic_config['type'])
 
         self.config_traffic_load(traffic_load)
 
@@ -212,6 +233,7 @@ class StcTrafficAdapter(object):
             self.tx_results = self.stc.get(self.stream_block, 'children-TxStreamResults')
             self.rx_results = self.stc.get(self.stream_block, 'children-RxStreamSummaryResults')
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
     @log_entry_exit(LOG)
@@ -256,7 +278,7 @@ class StcTrafficAdapter(object):
             while self.attempt_to_start_traffic:
                 try:
                     rx_results = self.stc.get(self.rx_results)
-                    rx_frame_rate = int(rx_results['FrameRate'])
+                    rx_frame_rate = int(rx_results['SigFrameRate'])
                     rx_dropped_frame_rate = int(rx_results['DroppedFrameRate'])
 
                     current_timestamp = time.time()
@@ -333,10 +355,10 @@ class StcTrafficAdapter(object):
             raise StcTrafficAdapterError(e.message)
 
         tx_frame_count = int(tx_results['FrameCount'])
-        rx_frame_count = int(rx_results['FrameCount'])
+        rx_frame_count = int(rx_results['SigFrameCount'])
 
         tx_frame_rate = int(tx_results['FrameRate'])
-        rx_frame_rate = int(rx_results['FrameRate'])
+        rx_frame_rate = int(rx_results['SigFrameRate'])
 
         rx_frames_dropped = int(rx_results['DroppedFrameCount'])
         # DroppedFramePercent shows the percent of dropped frames since the stream was started.

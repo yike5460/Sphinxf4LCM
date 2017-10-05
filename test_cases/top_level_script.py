@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+from datetime import datetime
 import logging
 
 from utils.logging_module import configure_logger
@@ -34,13 +35,14 @@ from test_cases.vnf.state.inst.TC_VNF_STATE_INST_007 import TC_VNF_STATE_INST_00
     TC_VNF_STATE_INST_007_003, TC_VNF_STATE_INST_007_004, TC_VNF_STATE_INST_007_005, TC_VNF_STATE_INST_007_006, \
     TC_VNF_STATE_INST_007_007, TC_VNF_STATE_INST_007_008
 
+log_file_name = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now()) + '.log'
+
 # Getting and configuring the RootLogger.
 root_logger = logging.getLogger()
-configure_logger(root_logger, file_level='DEBUG', console_level='INFO', propagate=True)
+configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name, console_level='INFO', propagate=True)
 
 # Logger for the current module.
 LOG = logging.getLogger(__name__)
-
 
 if __name__ == '__main__':
     openstack = {'mano': {'type': 'tacker',
@@ -111,7 +113,7 @@ if __name__ == '__main__':
                                                        'left_traffic_plen': '24',
                                                        'left_traffic_gw': '172.16.1.10',
                                                        'left_traffic_gw_mac': '00:11:22:33:44:55',
-                                                       'left_cp_name': 'CP2',
+                                                       'ingress_cp_name': 'CP2',
                                                        'right_port_location': '10.3.228.29/1/1',
                                                        'right_traffic_addr': '172.16.2.3',
                                                        'right_traffic_plen': '24',

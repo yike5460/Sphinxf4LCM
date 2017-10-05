@@ -50,8 +50,8 @@ class Traffic(object):
         return self.traffic_adapter.config_traffic_load(traffic_load)
 
     @log_entry_exit(LOG)
-    def config_traffic_stream(self, dest_mac_addr_list):
-        return self.traffic_adapter.config_traffic_stream(dest_mac_addr_list)
+    def config_traffic_stream(self, dest_addr_list):
+        return self.traffic_adapter.config_traffic_stream(dest_addr_list)
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
