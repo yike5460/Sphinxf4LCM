@@ -55,9 +55,11 @@ class TC_VNF_STATE_INST_007(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
-                                  termination_type='graceful')
-        self.register_for_cleanup(self.mano.wait_for_vnf_stable_state, vnf_instance_id=self.vnf_instance_id)
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_terminate_and_delete,
+                                  vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
+                                  additional_param=self.tc_input['mano']['termination_params'])
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_vnf_stable_state,
+                                  vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate MANO reports no VNF instance and the error
@@ -139,7 +141,8 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
         if reservation_id is None:
             raise TestRunError('vMemory could not be limited')
 
-        self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)
+        self.register_for_cleanup(index=30, function_reference=self.vim.terminate_compute_resource_reservation,
+                                  reservation_id=reservation_id)
 
 
 class TC_VNF_STATE_INST_007_006(TC_VNF_STATE_INST_007):
@@ -171,7 +174,8 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
         if reservation_id is None:
             raise TestRunError('vStorage could not be limited')
 
-        self.register_for_cleanup(self.vim.terminate_storage_resource_reservation, reservation_id)
+        self.register_for_cleanup(index=30, function_reference=self.vim.terminate_storage_resource_reservation,
+                                  reservation_id=reservation_id)
 
 
 class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
@@ -196,4 +200,5 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
         if reservation_id is None:
             raise TestRunError('vCPU count could not be limited')
 
-        self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)
+        self.register_for_cleanup(index=30, function_reference=self.vim.terminate_compute_resource_reservation,
+                                  reservation_id=reservation_id)

@@ -41,7 +41,7 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(self.traffic.destroy)
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_ns'] = dict()
@@ -72,7 +72,8 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
-        self.register_for_cleanup(self.mano.ns_terminate_and_delete, ns_instance_id=self.ns_instance_id)
+        self.register_for_cleanup(index=20, function_reference=self.mano.ns_terminate_and_delete,
+                                  ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate NS state is INSTANTIATED
@@ -122,7 +123,7 @@ class TC_VNF_SCALE_OUT_003__MANO_MANUAL(TestCase):
 
         self.traffic.start(return_when_emission_starts=True)
 
-        self.register_for_cleanup(self.traffic.stop)
+        self.register_for_cleanup(index=30, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Validate the provided functionality and all traffic goes through

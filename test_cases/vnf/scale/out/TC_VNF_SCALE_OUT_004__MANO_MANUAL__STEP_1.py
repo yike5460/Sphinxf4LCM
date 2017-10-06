@@ -41,7 +41,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
         self.vim = Vim(vendor=self.tc_input['vim']['type'], **self.tc_input['vim']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(self.traffic.destroy)
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_ns'] = dict()
@@ -68,7 +68,8 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         if reservation_id is None:
             raise TestRunError('Compute resources could not be limited')
 
-        self.register_for_cleanup(self.vim.terminate_compute_resource_reservation, reservation_id)
+        self.register_for_cleanup(index=20, function_reference=self.vim.terminate_compute_resource_reservation,
+                                  reservation_id=reservation_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Instantiate the NS
@@ -85,7 +86,8 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
-        self.register_for_cleanup(self.mano.ns_terminate_and_delete, ns_instance_id=self.ns_instance_id)
+        self.register_for_cleanup(index=30, function_reference=self.mano.ns_terminate_and_delete,
+                                  ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate NS state is INSTANTIATED
@@ -135,7 +137,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
 
         self.traffic.start(return_when_emission_starts=True)
 
-        self.register_for_cleanup(self.traffic.stop)
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate the provided functionality and all traffic goes through
