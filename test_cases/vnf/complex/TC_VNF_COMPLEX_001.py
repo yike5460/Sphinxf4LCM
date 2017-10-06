@@ -35,7 +35,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
         self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(self.traffic.destroy)
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_vnf'] = dict()
@@ -69,9 +69,10 @@ class TC_VNF_COMPLEX_001(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                 vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
-                                                 vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                                                 vnf_instance_description=None)
+                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
+                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
+                          vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
+                          additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')

@@ -45,8 +45,10 @@ class TC_VNF_STATE_INST_007(TestCase):
                                           vnfd_id=self.tc_input['vnfd_id'], vnf_instance_description=None,
                                           vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']))
 
-        if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
-                                          flavour_id=None) != constants.OPERATION_FAILED:
+        if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id, flavour_id=self.tc_input['flavour_id'],
+                                          instantiation_level_id=self.tc_input['instantiation_level_id'],
+                                          additional_param=self.tc_input['mano']['instantiation_params']) \
+                != constants.OPERATION_FAILED:
             raise TestRunError('VNF instantiation operation succeeded')
 
         self.time_record.END('instantiate_vnf')
