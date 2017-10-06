@@ -61,7 +61,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__EM_IND(TestCase):
                                                                   ns_name=generate_name(self.tc_input['ns']['name']),
                                                                   ns_description=None, flavour_id=None)
         if self.ns_instance_id is None:
-            raise TestRunError('Unexpected NS instantiation ID', err_details='NS instantiation operation failed')
+            raise TestRunError('NS instantiation operation failed')
 
         self.time_record.END('instantiate_ns')
 

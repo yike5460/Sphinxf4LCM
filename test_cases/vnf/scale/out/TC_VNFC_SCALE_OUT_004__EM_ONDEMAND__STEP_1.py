@@ -82,6 +82,9 @@ class TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_1(TestCase):
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
 
+        if self.vnf_instance_id is None:
+            raise TestRunError('VNF instantiation operation failed')
+
         self.time_record.END('instantiate_vnf')
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')

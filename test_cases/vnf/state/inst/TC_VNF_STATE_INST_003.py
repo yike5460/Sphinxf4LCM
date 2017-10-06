@@ -68,6 +68,9 @@ class TC_VNF_STATE_INST_003(TestCase):
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
 
+        if self.vnf_instance_id is None:
+            raise TestRunError('VNF instantiation operation failed')
+
         self.time_record.END('instantiate_vnf')
 
         self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,

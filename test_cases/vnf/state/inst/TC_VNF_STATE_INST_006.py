@@ -15,7 +15,7 @@ class TC_VNF_STATE_INST_006(TestCase):
     TC_VNF_STATE_INST_006 VNF Instantiation with inactive Element Management
 
     Sequence:
-    1. Deactivate EM if needed
+    1. Deactivate the EM if needed
     2. Instantiate the VNF
     3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     4. Validate the right vResources have been allocated
@@ -42,9 +42,9 @@ class TC_VNF_STATE_INST_006(TestCase):
         LOG.info('Starting TC_VNF_STATE_INST_006')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Deactivate EM if needed
+        # 1. Deactivate the EM if needed
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Deactivating EM')
+        LOG.info('Deactivating the EM')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
@@ -56,6 +56,9 @@ class TC_VNF_STATE_INST_006(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
+
+        if self.vnf_instance_id is None:
+            raise TestRunError('VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 

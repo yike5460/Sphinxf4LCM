@@ -17,7 +17,7 @@ class TC_VNF_STATE_INST_005(TestCase):
     TC_VNF_STATE_INST_005 VNF Instantiation with active Element Management with failed EM configuration
 
     Sequence:
-    1. Start the EM or ensure EM is up and cannot configure the VNF
+    1. Start the EM or ensure the EM is up and cannot configure the VNF
     2. Instantiate the VNF
     3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
     4. Modify the VNF configuration
@@ -53,9 +53,9 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Starting TC_VNF_STATE_INST_005')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1. Start the EM or ensure EM is up and cannot configure the VNF
+        # 1. Start the EM or ensure the EM is up and cannot configure the VNF
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the EM or ensure EM is up and cannot configure the VNF')
+        LOG.info('Starting the EM or ensuring the EM is up and cannot configure the VNF')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
@@ -67,6 +67,9 @@ class TC_VNF_STATE_INST_005(TestCase):
                                                  vnfd_id=self.tc_input['vnfd_id'], flavour_id=None,
                                                  vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
                                                  vnf_instance_description=None)
+
+        if self.vnf_instance_id is None:
+            raise TestRunError('VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
