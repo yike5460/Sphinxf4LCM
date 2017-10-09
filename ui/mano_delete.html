@@ -75,6 +75,7 @@
           <table class="table table-striped">
                 <form action="/mano/delete/" method="post">
                   <% if mano['type'] == 'tacker': %>
+                    <tr><td>vnfd id:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
                     <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" readonly style="width: 200px" value={{mano['user_domain_name']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
@@ -94,6 +95,11 @@
                     <tr><td>Userame:</td><td><input type="text" name="esc_username" readonly style="width: 200px" value={{mano['esc_username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="esc_password" readonly style="width: 200px" value={{mano['esc_password']}}></td></tr>
                     <tr><td>NETCONF Port:</td><td><input type="number" name="esc_port" readonly style="width: 200px" value={{mano['esc_port']}}></td></tr>
+                    <tr><td><h3>Additional Parameters</h3></td><td></td></tr>
+                    <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
+                    <tr><td>Flavor ID:</td><td><input type="text" name="flavor_id" readonly style="width: 200px" value="{{mano[flavor_id]}}"></td></tr>
+                    <tr><td>Instantiation Level ID:</td><td><input type="text" name="instantiation_level_id" readonly style="width: 200px" value="{{mano[instantiation_level_id]}}"></td></tr>
+
                   <% end %>
 
                   <input type="hidden" name="confirmed" value="yes">

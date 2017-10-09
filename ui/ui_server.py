@@ -213,6 +213,7 @@ def mano_validate():
         project_domain_name = request.forms.get('project_domain_name')
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
+        vnfd_id = request.forms.get('vnfd_id')
         if not request.forms.get('identity_api_version'):
             identity_api_version = 0
         else:
@@ -220,7 +221,7 @@ def mano_validate():
         (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
                                        password=password, project_domain_name=project_domain_name,
                                        project_name=project_name, auth_url=auth_url,
-                                       identity_api_version=identity_api_version)
+                                       identity_api_version=identity_api_version, vnfd_id=vnfd_id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -248,9 +249,14 @@ def mano_validate():
         esc_username = request.forms.get('esc_username')
         esc_password = request.forms.get('esc_password')
         esc_port = request.forms.get('esc_port')
+        vnfd_id = request.forms.get('vnfd_id')
+        flavor_id = request.forms.get('flavor_id')
+        instantiation_level__id = request.forms.get('instantiation_level_id')
         (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
                                        nso_password=nso_password, nso_port=nso_port, esc_hostname=esc_hostname,
-                                       esc_username=esc_username, esc_password=esc_password, esc_port=esc_port)
+                                       esc_username=esc_username, esc_password=esc_password, esc_port=esc_port,
+                                       vnfd_id=vnfd_id, flavor_id=flavor_id,
+                                       instantiation_level_id=instantiation_level__id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -311,6 +317,7 @@ def mano_delete():
             mano_info['project_name'] = mano_json[mano_name]['client_config']['project_name']
             mano_info['auth_url'] = mano_json[mano_name]['client_config']['auth_url']
             mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
+            mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
         elif mano_json[mano_name]['type'] == 'cisco':
             mano_info['nso_hostname'] = mano_json[mano_name]['client_config']['nso_hostname']
             mano_info['nso_username'] = mano_json[mano_name]['client_config']['nso_username']
@@ -320,6 +327,7 @@ def mano_delete():
             mano_info['esc_username'] = mano_json[mano_name]['client_config']['esc_username']
             mano_info['esc_password'] = mano_json[mano_name]['client_config']['esc_password']
             mano_info['esc_port'] = mano_json[mano_name]['client_config']['esc_port']
+            mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
         return template('mano_delete.html', mano=mano_info)
     else:
         mano_name = request.forms.get('name')
@@ -932,7 +940,8 @@ def struct_mano(type, name, **kwargs):
                 'project_name': kwargs['project_name'],
                 'auth_url': kwargs['auth_url'],
                 'identity_api_version': kwargs['identity_api_version']
-            }
+            },
+            'vnfd_id': kwargs['vnfd_id']
         }
     elif type == 'cisco':
         mano = {
@@ -946,7 +955,10 @@ def struct_mano(type, name, **kwargs):
                 'esc_username': kwargs['esc_username'],
                 'esc_password': kwargs['esc_password'],
                 'esc_port': kwargs['esc_port']
-            }
+            },
+            'vnfd_id': kwargs['vnfd_id'],
+            'flavor_id': kwargs['flavor_id'],
+            'instantiation_level_id': kwargs['instantiation_level_id']
         }
     return (name, mano)
 
