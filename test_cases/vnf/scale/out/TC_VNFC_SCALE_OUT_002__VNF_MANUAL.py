@@ -37,7 +37,7 @@ class TC_VNFC_SCALE_OUT_002__VNF_MANUAL(TestCase):
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
         self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
         self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(self.traffic.destroy)
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         # Initialize test case result.
         self.tc_result['events']['instantiate_vnf'] = dict()
@@ -70,9 +70,11 @@ class TC_VNFC_SCALE_OUT_002__VNF_MANUAL(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(self.mano.vnf_terminate_and_delete, vnf_instance_id=self.vnf_instance_id,
-                                  termination_type='graceful')
-        self.register_for_cleanup(self.mano.wait_for_vnf_stable_state, vnf_instance_id=self.vnf_instance_id)
+        self.register_for_cleanup(index=20, function_reference=self.mano.vnf_terminate_and_delete,
+                                  vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
+                                  additional_param=self.tc_input['mano']['termination_params'])
+        self.register_for_cleanup(index=30, function_reference=self.mano.wait_for_vnf_stable_state,
+                                  vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
@@ -108,7 +110,7 @@ class TC_VNFC_SCALE_OUT_002__VNF_MANUAL(TestCase):
 
         self.traffic.start(return_when_emission_starts=True)
 
-        self.register_for_cleanup(self.traffic.stop)
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate the provided functionality and all traffic goes through
