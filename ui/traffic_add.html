@@ -71,7 +71,7 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <% if traffic_type == 'stc': %>
+          <% if traffic_type in ['stc-vnf-transient', 'stc-vnf-terminated'] : %>
             <h2>Add new STC Traffic Element </h2>
           <% end %>
           <% if warning != None: %>
@@ -88,7 +88,7 @@
           <% end %>
           <table class="table table-striped">
                 <form action="/traffic/validate/" method="post">
-                  <% if traffic_type == 'stc': %>
+                  <% if traffic_type == 'stc-vnf-transient': %>
                     <% if traffic == None: %>
                     <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
                     <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px"></td></tr>
@@ -105,24 +105,24 @@
                     <tr><td>Right Traffic Prefix Length:</td><td><input type="number" name="right_traffic_plen" style="width: 200px"></td></tr>
                     <tr><td>Right Traffic Gateway:</td><td><input type="text" name="right_traffic_gw" style="width: 200px"></td></tr>
                     <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px"></td></tr>
-                    <% else: %>
-                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px" value={{name}}></td></tr>
-                    <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px" value={{traffic['client_config']['lab_server_addr']}}></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px" value={{traffic['client_config']['user_name']}}></td></tr>
-                    <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px" value={{traffic['client_config']['session_name']}}></td></tr>
-                    <tr><td>Left Port Location:</td><td><input type="text" name="left_port_location" style="width: 200px" value={{traffic['traffic_config']['left_port_location']}}></td></tr>
-                    <tr><td>Left Traffic Address:</td><td><input type="text" name="left_traffic_addr" style="width: 200px" value={{traffic['traffic_config']['left_traffic_addr']}}></td></tr>
-                    <tr><td>Left Traffic Prefix Length:</td><td><input type="number" name="left_traffic_plen" style="width: 200px" value={{traffic['traffic_config']['left_traffic_plen']}}></td></tr>
-                    <tr><td>Left Traffic Gateway:</td><td><input type="text" name="left_traffic_gw" style="width: 200px" value={{traffic['traffic_config']['left_traffic_gw']}}></td></tr>
-                    <tr><td>Left Traffic Gateway MAC:</td><td><input type="text" name="left_traffic_gw_mac" style="width: 200px" value={{traffic['traffic_config']['left_traffic_gw_mac']}}></td></tr>
-                    <tr><td>Left Connection Point Name:</td><td><input type="text" name="left_cp_name" style="width: 200px" value={{traffic['traffic_config']['left_cp_name']}}></td></tr>
-                    <tr><td>Right Port Location:</td><td><input type="text" name="right_port_location" style="width: 200px" value={{traffic['traffic_config']['right_port_location']}}></td></tr>
-                    <tr><td>Right Traffic Address:</td><td><input type="text" name="right_traffic_addr" style="width: 200px" value={{traffic['traffic_config']['right_traffic_addr']}}></td></tr>
-                    <tr><td>Right Traffic Prefix Length:</td><td><input type="number" name="right_traffic_plen" style="width: 200px" value={{traffic['traffic_config']['right_traffic_plen']}}></td></tr>
-                    <tr><td>Right Traffic Gateway:</td><td><input type="text" name="right_traffic_gw" style="width: 200px" value={{traffic['traffic_config']['right_traffic_gw']}}></td></tr>
-                    <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px" value={{traffic['traffic_config']['port_speed']}}></td></tr>
                     <% end %>
                   <% end %>
+
+                  <% if traffic_type == 'stc-vnf-terminated': %>
+                    <% if traffic == None: %>
+                    <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
+                    <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px"></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px"></td></tr>
+                    <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px"></td></tr>
+                    <tr><td>Payload:</td><td><select name="payload" style="width: 200px"><option value=""></option><option value="icmp:IcmpEchoRequest">icmp:IcmpEchoRequest</option></td></tr>
+                    <tr><td>Port Location:</td><td><input type="text" name="port_location" style="width: 200px"></td></tr>
+                    <tr><td>Traffic Source Address:</td><td><input type="text" name="traffic_src_addr" style="width: 200px"></td></tr>
+                    <tr><td>Traffic Destination Address:</td><td><input type="text" name="traffic_dst_addr" style="width: 200px"></td></tr>
+                    <tr><td>Ingress Connection Point Name:</td><td><input type="text" name="ingress_cp_name" style="width: 200px"></td></tr>
+                    <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px"></td></tr>
+                    <% end %>
+                  <% end %>
+
           </table>
             <div class="btn-group navbar-left">
                   <input type="hidden" name="type" value={{traffic_type}}>

@@ -7,7 +7,7 @@ from bottle import route, run, request, template, static_file, redirect
 MANO_TYPES = ['tacker', 'cisco']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
-TRAFFIC_TYPES = ['stc']
+TRAFFIC_TYPES = ['stc-vnf-transient', 'stc-vnf-terminated']
 VNF_TYPES = ['ubuntu']
 
 
@@ -581,8 +581,11 @@ def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=Non
     :param traffic_type: Type of Traffic generation element to be added
 
     """
-
-    return template('traffic_add.html', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
+    if traffic_type == 'stc-vnf-transient':
+        return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
+                    name=name)
+    elif traffic_type == 'stc-vnf-terminated':
+        return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
                     name=name)
 
 
@@ -594,7 +597,9 @@ def traffic_validate():
     """
 
     type = request.forms.get('type')
-    if type == 'stc':
+
+    # The first case is when the VNF has type VNF_TRANSIENT
+    if type == 'stc-vnf-transient':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         user_name = request.forms.get('user_name')
@@ -620,6 +625,7 @@ def traffic_validate():
                 'session_name': session_name,
             },
             'traffic_config': {
+                'type': 'VNF_TRANSIENT',
                 'left_port_location': left_port_location,
                 'left_traffic_addr': left_traffic_addr,
                 'left_traffic_plen': left_traffic_plen,
@@ -641,6 +647,47 @@ def traffic_validate():
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+
+        # The second case is when the VNF has type VNF_TERMINATED
+    if type == 'stc-vnf-terminated':
+        name = request.forms.get('name')
+        lab_server_addr = request.forms.get('lab_server_addr')
+        user_name = request.forms.get('user_name')
+        session_name = request.forms.get('session_name')
+        payload = request.forms.get('payload')
+        port_location = request.forms.get('port_location')
+        traffic_src_addr = request.forms.get('traffic_src_addr')
+        traffic_dst_addr = request.forms.get('traffic_dst_addr')
+        ingress_cp_name = request.forms.get('ingress_cp_name')
+        if not request.forms.get('port_speed'):
+            port_speed = 0
+        else:
+            port_speed = int(request.forms.get('port_speed'))
+        new_traffic = {
+            'client_config': {
+                'lab_server_addr': lab_server_addr,
+                'user_name': user_name,
+                'session_name': session_name,
+            },
+            'traffic_config': {
+                'type': 'VNF_TERMINATED',
+                'payload': payload,
+                'port_location': port_location,
+                'traffic_src_addr': traffic_src_addr,
+                'traffic_dst_addr': traffic_dst_addr,
+                'ingress_cp_name': ingress_cp_name,
+                'port_speed': port_speed
+            },
+            'type': type
+        }
+        if request.forms.get('add'):
+            if not name:
+                return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
+                                   traffic=new_traffic, name=name)
+            requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
+
     return traffic()
 
 
@@ -672,20 +719,31 @@ def traffic_delete():
         traffic_info = OrderedDict()
         traffic_info['name'] = traffic_name
         traffic_info['type'] = traffic_json[traffic_name]['type']
-        traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
-        traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
-        traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
-        traffic_info['left_port_location'] = traffic_json[traffic_name]['traffic_config']['left_port_location']
-        traffic_info['left_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['left_traffic_addr']
-        traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
-        traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
-        traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
-        traffic_info['left_cp_name'] = traffic_json[traffic_name]['traffic_config']['left_cp_name']
-        traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
-        traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
-        traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
-        traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
-        traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
+        if traffic_info['type'] == 'stc-vnf-transient':
+            traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
+            traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
+            traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
+            traffic_info['left_port_location'] = traffic_json[traffic_name]['traffic_config']['left_port_location']
+            traffic_info['left_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['left_traffic_addr']
+            traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
+            traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
+            traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
+            traffic_info['left_cp_name'] = traffic_json[traffic_name]['traffic_config']['left_cp_name']
+            traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
+            traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
+            traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
+            traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
+            traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
+        elif traffic_info['type'] == 'stc-vnf-terminated':
+            traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
+            traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
+            traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
+            traffic_info['payload'] = traffic_json[traffic_name]['traffic_config']['payload']
+            traffic_info['port_location'] = traffic_json[traffic_name]['traffic_config']['port_location']
+            traffic_info['traffic_src_addr'] = traffic_json[traffic_name]['traffic_config']['traffic_src_addr']
+            traffic_info['traffic_dst_addr'] = traffic_json[traffic_name]['traffic_config']['traffic_dst_addr']
+            traffic_info['ingress_cp_name'] = traffic_json[traffic_name]['traffic_config']['ingress_cp_name']
+            traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
         return template('traffic_delete.html', traffic=traffic_info)
     else:
         traffic_name = request.forms.get('name')
@@ -820,11 +878,9 @@ def additional():
     This function displays the additional parameters that a customer must setup.
     """
 
-    vnfd_id = requests.get(url='http://localhost:8080/v1.0/config/vnfd-id')
     scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
     desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
     additional_params = {
-        'vnfd-id': vnfd_id.json(),
         'scaling_policy_name': scaling_policy_name.json(),
         'desired_scale_out_steps': desired_scale_out_steps.json()
     }
@@ -839,7 +895,6 @@ def additional_update():
 
     confirmed = request.forms.get('confirmed')
     if confirmed == 'yes':
-        vnfd_id = request.forms.get('vnfd_id')
         scaling_policy_name = request.forms.get('scaling_policy_name')
         desired_scale_out_steps = request.forms.get('desired_scale_out_steps')
         requests.put(url='http://localhost:8080/v1.0/config/vnfd-id', json=vnfd_id)
@@ -847,11 +902,9 @@ def additional_update():
         requests.put(url='http://localhost:8080/v1.0/config/desired_scale_out_steps', json=desired_scale_out_steps)
         return additional()
     else:
-        vnfd_id = requests.get(url='http://localhost:8080/v1.0/config/vnfd-id')
         scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
         desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
         additional_params = {
-            'vnfd-id': vnfd_id.json(),
             'scaling_policy_name': scaling_policy_name.json(),
             'desired_scale_out_steps': desired_scale_out_steps.json()
         }
