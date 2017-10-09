@@ -262,7 +262,7 @@ class TackerManoAdapter(object):
             raise TackerManoAdapterError(e.message)
         return yaml.load(tacker_show_vnfd)
 
-    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id):
+    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
         vnfd = self.get_vnfd(vnfd_id)
 
@@ -318,7 +318,7 @@ class TackerManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id):
+    def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
 
         vresources = dict()
@@ -407,7 +407,8 @@ class TackerManoAdapter(object):
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
+                    additional_param=None):
         LOG.debug('"VNF Operate" operation is not implemented in OpenStack Tacker client!')
         LOG.debug('As a workaround, we will perform the action of the VIM stack')
 
@@ -606,7 +607,7 @@ class TackerManoAdapter(object):
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None, additional_param=None):
         try:
             self.tacker_client.delete_vnf(vnf_instance_id)
         except tackerclient.common.exceptions.NotFound:
