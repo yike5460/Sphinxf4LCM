@@ -144,6 +144,7 @@ class TestCase(object):
             try:
                 function.function_reference(*function.function_args, **function.function_kwargs)
             except Exception as e:
+                self._LOG.exception(e)
                 raise TestCleanupError(e.message)
         self._LOG.info('Finished main cleanup')
 
@@ -186,7 +187,7 @@ class TestCase(object):
                 self.cleanup()
             except TestCleanupError as e:
                 self._LOG.error('%s cleanup failed' % self.tc_name)
-                self._LOG.debug('Exception message %s' % e.message)
+                self._LOG.exception(e)
             finally:
                 self.collect_timestamps()
                 return self.tc_result
