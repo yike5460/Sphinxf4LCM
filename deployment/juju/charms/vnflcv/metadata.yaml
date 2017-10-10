@@ -1,0 +1,23 @@
+name: vnflcv
+summary: Spirent code for VNF Lifecycle Validation
+maintainer: Spirent
+description: |
+  Spirent code for VNF Lifecycle Validation
+tags:
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - misc
+series:
+  - xenial
+subordinate: false
+provides:
+  restapi:
+    interface: vnflcv-rest
+requires:
+  elasticsearch:
+    interface: "elasticsearch"
+resources:
+  vnflcv-src:
+    type: file
+    filename: vnflcv-src.tar.gz
+    description: Archive containing VNF Lifecycle Validation source code

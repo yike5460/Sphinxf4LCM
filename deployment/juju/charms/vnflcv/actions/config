@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+config_key=$(action-get key)
+config_value=$(action-get value)
+
+status-set maintenance "Sending config to REST server"
+juju-log "Sending config to REST server"
+
+echo -e "\"$config_value\"" | curl -XPUT localhost:8080/v1.0/config/$config_key -d@- -H 'Content-Type: application/json'
+
+status-set active "Ready"

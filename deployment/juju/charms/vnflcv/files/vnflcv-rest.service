@@ -1,0 +1,14 @@
+[Unit]
+Description=VNFLCV REST Server
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/opt/vnflcv/rest_server
+Environment=PYTHONPATH=/opt/vnflcv
+ExecStart=/usr/bin/python ./server.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

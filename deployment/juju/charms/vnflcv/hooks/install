@@ -1,0 +1,48 @@
+#!/bin/bash
+# Here do anything needed to install the service
+# i.e. apt-get install -y foo  or  bzr branch http://myserver/mycode /srv/webroot
+# Make sure this hook exits cleanly and is idempotent, common problems here are
+# failing to account for a debconf question on a dependency, or trying to pull
+# from github without installing git first.
+
+set -e
+
+status-set maintenance "Installing required packages"
+juju-log "Installing required packages"
+
+apt-get update
+apt-get install -y python-pip
+pip install --upgrade pip
+
+archive=""
+while [ -z $archive ]
+do
+        status-set blocked "Waiting for resource: vnflcv-src"
+        sleep 5
+        archive=$(resource-get vnflcv-src || true)
+done
+
+status-set maintenance "Extracting vnflcv archive"
+juju-log "Extracting vnflcv archive"
+mkdir /opt/vnflcv
+tar -xvf $archive -C /opt/vnflcv
+
+status-set maintenance "Installing pip requirements"
+juju-log "Installing pip requirements"
+
+pip install -r /opt/vnflcv/requirements.txt
+
+status-set maintenance "Creating log dir"
+juju-log "Creating log dir"
+mkdir /var/log/vnflcv
+chown ubuntu:ubuntu /var/log/vnflcv
+
+status-set maintenance "Creating systemd service"
+cp $CHARM_DIR/files/*.service /etc/systemd/system/
+
+systemctl daemon-reload
+systemctl enable vnflcv-rest
+systemctl enable vnflcv-ui
+
+# TODO: remove from production
+echo "10.3.228.21 controller" >> /etc/hosts

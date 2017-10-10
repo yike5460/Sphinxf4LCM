@@ -1,0 +1,9 @@
+config:
+  description: Send a key-value config to the vnflcv REST server
+  params:
+    key:
+      type: string
+      description: Config key
+    value:
+      type: string
+      description: Config value

@@ -1,0 +1,14 @@
+[Unit]
+Description=VNFLCV UI Server
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/opt/vnflcv/ui
+Environment=PYTHONPATH=/opt/vnflcv
+ExecStart=/usr/bin/python ./ui_server.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+#!/bin/bash
+# This must be renamed to the name of the relation. The goal here is to
+# affect any change needed by relationships being formed, modified, or broken
+# This script should be idempotent.
+set -e
+
+juju-log $JUJU_REMOTE_UNIT modified its settings
+juju-log Relation members:
+relation-list
+
+es_host=$(relation-get private-address)
+
+echo -e "\"$es_host\"" | curl -XPUT localhost:8080/v1.0/config/kibana-srv -d@- -H 'Content-Type: application/json'
