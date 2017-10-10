@@ -103,8 +103,8 @@ class TC_VNF_STATE_INST_001(TestCase):
         # 5. Validate the right vResources have been allocated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the right vResources have been allocated')
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'],
-                                                       self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
