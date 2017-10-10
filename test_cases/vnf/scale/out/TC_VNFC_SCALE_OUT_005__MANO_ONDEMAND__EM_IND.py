@@ -119,7 +119,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
 
@@ -213,7 +213,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the max traffic load.
@@ -323,7 +323,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the low traffic load.
