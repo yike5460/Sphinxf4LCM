@@ -164,12 +164,12 @@ class TestCase(object):
             self.run()
         except TestSetupError as e:
             self._LOG.error('%s setup failed' % self.tc_name)
-            self._LOG.debug(e.message)
+            self._LOG.exception(e)
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.error_info)
         except TestRunError as e:
             self._LOG.error('%s run failed' % self.tc_name)
-            self._LOG.debug(e.message)
+            self._LOG.exception(e)
             self.tc_result['overall_status'] = constants.TEST_FAILED
             self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.error_info)
         except ApiError as e:
