@@ -880,9 +880,31 @@ def additional():
 
     scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
     desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
+    instantiation_time = requests.get(url='http://localhost:8080/v1.0/config/instantiation_time')
+    operate_time = requests.get(url='http://localhost:8080/v1.0/config/operate_time')
+    poll_interval = requests.get(url='http://localhost:8080/v1.0/config/poll_interval')
+    scale_interval = requests.get(url='http://localhost:8080/v1.0/config/scale_interval')
+    start_time = requests.get(url='http://localhost:8080/v1.0/config/start_time')
+    stop_time = requests.get(url='http://localhost:8080/v1.0/config/stop_time')
+    terminate_time = requests.get(url='http://localhost:8080/v1.0/config/terminate_time')
+    low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/low_traffic_load')
+    normal_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/normal_traffic_load')
+    max_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/max_traffic_load')
+    traffic_tolerance = requests.get(url='http://localhost:8080/v1.0/config/traffic_tolerance')
     additional_params = {
         'scaling_policy_name': scaling_policy_name.json(),
-        'desired_scale_out_steps': desired_scale_out_steps.json()
+        'desired_scale_out_steps': desired_scale_out_steps.json(),
+        'instantiation_time': instantiation_time.json(),
+        'operate_time': operate_time.json(),
+        'poll_interval': poll_interval.json(),
+        'scale_interval': scale_interval.json(),
+        'start_time': start_time.json(),
+        'stop_time': stop_time.json(),
+        'terminate_time': terminate_time.json(),
+        'low_traffic_load': low_traffic_load.json(),
+        'normal_traffic_load': normal_traffic_load.json(),
+        'max_traffic_load': max_traffic_load.json(),
+        'traffic_tolerance': float(traffic_tolerance.json())*100
     }
     return template('additional_params.html', additional_params=additional_params)
 
@@ -897,16 +919,59 @@ def additional_update():
     if confirmed == 'yes':
         scaling_policy_name = request.forms.get('scaling_policy_name')
         desired_scale_out_steps = request.forms.get('desired_scale_out_steps')
-        requests.put(url='http://localhost:8080/v1.0/config/vnfd-id', json=vnfd_id)
+        instantiation_time = request.forms.get('instantiation_time')
+        operate_time = request.forms.get('operate_time')
+        poll_interval = request.forms.get('poll_interval')
+        scale_interval = request.forms.get('scale_interval')
+        start_time = request.forms.get('start_time')
+        stop_time = request.forms.get('stop_time')
+        terminate_time = request.forms.get('terminate_time')
+        low_traffic_load = request.forms.get('low_traffic_load')
+        normal_traffic_load = request.forms.get('normal_traffic_load')
+        max_traffic_load = request.forms.get('max_traffic_load')
+        traffic_tolerance = float(request.forms.get('traffic_tolerance'))/100
         requests.put(url='http://localhost:8080/v1.0/config/scaling_policy_name', json=scaling_policy_name)
         requests.put(url='http://localhost:8080/v1.0/config/desired_scale_out_steps', json=desired_scale_out_steps)
+        requests.put(url='http://localhost:8080/v1.0/config/instantiation_time', json=instantiation_time)
+        requests.put(url='http://localhost:8080/v1.0/config/operate_time', json=operate_time)
+        requests.put(url='http://localhost:8080/v1.0/config/poll_interval', json=poll_interval)
+        requests.put(url='http://localhost:8080/v1.0/config/scale_interval', json=scale_interval)
+        requests.put(url='http://localhost:8080/v1.0/config/start_time', json=start_time)
+        requests.put(url='http://localhost:8080/v1.0/config/stop_time', json=stop_time)
+        requests.put(url='http://localhost:8080/v1.0/config/terminate_time', json=terminate_time)
+        requests.put(url='http://localhost:8080/v1.0/config/low_traffic_load', json=low_traffic_load)
+        requests.put(url='http://localhost:8080/v1.0/config/normal_traffic_load', json=normal_traffic_load)
+        requests.put(url='http://localhost:8080/v1.0/config/max_traffic_load', json=max_traffic_load)
+        requests.put(url='http://localhost:8080/v1.0/config/traffic_tolerance', json=traffic_tolerance)
         return additional()
     else:
         scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
         desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
+        instantiation_time = requests.get(url='http://localhost:8080/v1.0/config/instantiation_time')
+        operate_time = requests.get(url='http://localhost:8080/v1.0/config/operate_time')
+        poll_interval = requests.get(url='http://localhost:8080/v1.0/config/poll_interval')
+        scale_interval = requests.get(url='http://localhost:8080/v1.0/config/scale_interval')
+        start_time = requests.get(url='http://localhost:8080/v1.0/config/start_time')
+        stop_time = requests.get(url='http://localhost:8080/v1.0/config/stop_time')
+        terminate_time = requests.get(url='http://localhost:8080/v1.0/config/terminate_time')
+        low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/low_traffic_load')
+        normal_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/normal_traffic_load')
+        max_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/max_traffic_load')
+        traffic_tolerance = requests.get(url='http://localhost:8080/v1.0/config/traffic_tolerance')
         additional_params = {
             'scaling_policy_name': scaling_policy_name.json(),
-            'desired_scale_out_steps': desired_scale_out_steps.json()
+            'desired_scale_out_steps': desired_scale_out_steps.json(),
+            'instantiation_time': instantiation_time.json(),
+            'operate_time': operate_time.json(),
+            'poll_interval': poll_interval.json(),
+            'scale_interval': scale_interval.json(),
+            'start_time': start_time.json(),
+            'stop_time': stop_time.json(),
+            'terminate_time': terminate_time.json(),
+            'low_traffic_load': low_traffic_load.json(),
+            'normal_traffic_load': normal_traffic_load.json(),
+            'max_traffic_load': max_traffic_load.json(),
+            'traffic_tolerance': float(traffic_tolerance.json())*100
         }
         return template('additional_params_update.html', additional_params=additional_params)
 
