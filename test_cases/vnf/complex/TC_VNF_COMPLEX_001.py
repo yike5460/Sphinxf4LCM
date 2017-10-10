@@ -194,7 +194,9 @@ class TC_VNF_COMPLEX_001(TestCase):
         # Clearing counters so traffic deactivation time is accurate
         self.traffic.clear_counters()
         self.time_record.START('stop_vnf')
-        if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
+        if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop',
+                                      additional_param=self.tc_input['mano']['operate_params']) \
+                != constants.OPERATION_SUCCESS:
             raise TestRunError('MANO could not stop the VNF')
         self.time_record.END('stop_vnf')
 
