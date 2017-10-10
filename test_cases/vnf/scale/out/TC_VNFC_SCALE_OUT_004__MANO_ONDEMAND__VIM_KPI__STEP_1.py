@@ -112,7 +112,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_1(TestCase):
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Start the low traffic load
@@ -217,7 +219,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_1(TestCase):
                                                                      self.tc_input['desired_scale_out_steps']:
             raise TestRunError('VNF scaled out')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_out']['level'] = sp['default_instances'] + self.tc_input['desired_scale_out_steps']
 

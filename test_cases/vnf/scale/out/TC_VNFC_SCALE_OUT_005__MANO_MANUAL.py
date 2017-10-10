@@ -103,7 +103,9 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -165,7 +167,9 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment']:
             raise TestRunError('VNF did not scale out')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
@@ -253,7 +257,9 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['min_instances']:
             raise TestRunError('VNF did not scale in')
 
-        self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_in']['level'] = sp['min_instances']
 

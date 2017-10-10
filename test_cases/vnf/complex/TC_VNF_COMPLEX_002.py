@@ -94,7 +94,9 @@ class TC_VNF_COMPLEX_002(TestCase):
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -155,7 +157,9 @@ class TC_VNF_COMPLEX_002(TestCase):
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['max_instances']:
             raise TestRunError('VNF did not scale out to the max')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_out']['level'] = sp['max_instances']
 

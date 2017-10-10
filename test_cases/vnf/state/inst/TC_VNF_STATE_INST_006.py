@@ -96,7 +96,9 @@ class TC_VNF_STATE_INST_006(TestCase):
                                                        self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Start the low traffic load
