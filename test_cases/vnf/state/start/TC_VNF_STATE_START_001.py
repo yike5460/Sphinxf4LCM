@@ -81,8 +81,8 @@ class TC_VNF_STATE_START_001(TestCase):
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -106,7 +106,7 @@ class TC_VNF_STATE_START_001(TestCase):
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
 
@@ -123,8 +123,8 @@ class TC_VNF_STATE_START_001(TestCase):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'],
-                                                       self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
@@ -154,8 +154,8 @@ class TC_VNF_STATE_START_001(TestCase):
         # 7. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was stopped'
@@ -202,8 +202,8 @@ class TC_VNF_STATE_START_001(TestCase):
         # 12. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was started'

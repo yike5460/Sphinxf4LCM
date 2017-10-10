@@ -97,7 +97,8 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         # Get the instance ID of the VNF inside the NS
         self.vnf_instance_id = ns_info.vnf_info_id[0]
 
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -109,7 +110,9 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Start the low traffic load
@@ -123,7 +126,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
 
@@ -139,7 +142,8 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
@@ -191,7 +195,8 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
 
         self.tc_result['resources']['After scale out'] = dict()
         for vnf_instance_id in ns_info.vnf_info_id:
-            self.tc_result['resources']['After scale out'].update(self.mano.get_allocated_vresources(vnf_instance_id))
+            self.tc_result['resources']['After scale out'].update(
+                self.mano.get_allocated_vresources(vnf_instance_id, self.tc_input['mano']['query_params']))
 
         self.tc_result['scaling_out']['level'] = sp['default_instances'] + sp['increment']
 
@@ -209,12 +214,13 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         # Configure stream destination address(es).
         dest_addr_list = ''
         for vnf_instance_id in ns_info.vnf_info_id:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano']['query_params']})
             for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
                 if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                     dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the max traffic load.
@@ -234,7 +240,8 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validate that MANO has allocated more specialized hardware resources')
         for vnf_instance_id in ns_info.vnf_info_id:
-            if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], vnf_instance_id):
+            if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], vnf_instance_id,
+                                                           self.tc_input['mano']['query_params']):
                 raise TestRunError('Allocated vResources could not be validated',
                                    err_details='Allocated vResources could not be validated for VNF with ID %s'
                                                % vnf_instance_id)
@@ -285,7 +292,9 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         self.tc_result['events']['scale_in_ns']['duration'] = self.time_record.duration('scale_in_ns')
 
         self.vnf_instance_id = ns_info.vnf_info_id[0]
-        self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale in'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_in']['level'] = sp['default_instances']
 
@@ -297,7 +306,8 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validate that MANO has allocated less specialized hardware resources and the previous specialized '
                  'hardware resources have been freed up')
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -316,12 +326,13 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
 
         # Configure stream destination address(es).
         dest_addr_list = ''
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the low traffic load.

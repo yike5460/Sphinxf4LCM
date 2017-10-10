@@ -83,8 +83,8 @@ class TC_VNF_STATE_INST_002(TestCase):
         # 3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -114,8 +114,8 @@ class TC_VNF_STATE_INST_002(TestCase):
         # 6. Validate the right vResources have been allocated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the right vResources have been allocated')
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'],
-                                                       self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(

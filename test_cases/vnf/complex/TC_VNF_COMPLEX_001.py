@@ -91,7 +91,8 @@ class TC_VNF_COMPLEX_001(TestCase):
         # 3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -103,7 +104,9 @@ class TC_VNF_COMPLEX_001(TestCase):
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_out']['traffic_before'] = 'MAX_TRAFFIC_LOAD'
 
@@ -118,7 +121,8 @@ class TC_VNF_COMPLEX_001(TestCase):
         self.time_record.START('scale_out_vnf')
         elapsed_time = 0
         while elapsed_time < constants.SCALE_INTERVAL:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano']['query_params']})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['max_instances']:
                 break
             else:
@@ -132,7 +136,9 @@ class TC_VNF_COMPLEX_001(TestCase):
 
         self.tc_result['events']['scale_out_vnf']['duration'] = self.time_record.duration('scale_out_vnf')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_out']['level'] = sp['max_instances']
 
@@ -159,7 +165,7 @@ class TC_VNF_COMPLEX_001(TestCase):
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
         self.traffic.clear_counters()
 
         # Start the max traffic load.
@@ -177,7 +183,8 @@ class TC_VNF_COMPLEX_001(TestCase):
         # 7. Validate allocated vResources
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating allocated vResources')
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -187,7 +194,9 @@ class TC_VNF_COMPLEX_001(TestCase):
         # Clearing counters so traffic deactivation time is accurate
         self.traffic.clear_counters()
         self.time_record.START('stop_vnf')
-        if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop') != constants.OPERATION_SUCCESS:
+        if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop',
+                                      additional_param=self.tc_input['mano']['operate_params']) \
+                != constants.OPERATION_SUCCESS:
             raise TestRunError('MANO could not stop the VNF')
         self.time_record.END('stop_vnf')
 

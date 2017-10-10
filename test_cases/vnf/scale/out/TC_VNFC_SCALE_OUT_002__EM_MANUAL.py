@@ -80,7 +80,8 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -92,7 +93,9 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
-        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -106,7 +109,7 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
 
@@ -124,7 +127,8 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
 
-        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id):
+        if not self.mano.validate_allocated_vresources(self.tc_input['vnfd_id'], self.vnf_instance_id,
+                                                       self.tc_input['mano']['query_params']):
             raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -148,11 +152,14 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
         # 6. Validate VNF has resized to the max
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['max_instances']:
             raise TestRunError('VNF did not scale out to the max')
 
-        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(self.vnf_instance_id)
+        self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(
+                                                                                  self.vnf_instance_id,
+                                                                                  self.tc_input['mano']['query_params'])
 
         self.tc_result['scaling_out']['level'] = sp['max_instances']
 
@@ -178,7 +185,7 @@ class TC_VNFC_SCALE_OUT_002__EM_MANUAL(TestCase):
             if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
                 dest_addr_list += ext_cp_info.address[0] + ' '
 
-        self.traffic.config_traffic_stream(dest_addr_list)
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
         self.traffic.config_traffic_load('MAX_TRAFFIC_LOAD')
 
         # Start the max traffic load.
