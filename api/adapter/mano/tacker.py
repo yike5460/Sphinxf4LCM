@@ -50,6 +50,8 @@ class TackerManoAdapter(object):
                                                                 user_domain_name=user_domain_name)
 
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
+            self.password = password
+            self.password = password
 
         except Exception as e:
             LOG.error('Unable to create %s instance' % self.__class__.__name__)
@@ -249,7 +251,7 @@ class TackerManoAdapter(object):
         vim_type = vim_details['type']
 
         # TODO: get from config file
-        vim_auth_cred['password'] = 'stack'
+        vim_auth_cred['password'] = self.password
 
         return construct_adapter(vim_type, module_type='vim', **vim_auth_cred)
 
@@ -482,63 +484,56 @@ class TackerManoAdapter(object):
             vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
             try:
                 tacker_list_vnf_resources = self.tacker_client.list_vnf_resources(vnf_instance_id)['resources']
-                for vnf_resource in tacker_list_vnf_resources:
+                scaling_resources = [vnf_resource for vnf_resource in tacker_list_vnf_resources
+                                     if vnf_resource.get('type') == 'OS::Heat::AutoScalingGroup']
+
+                if len(scaling_resources) > 0:
                     # When the VNFD contains scaling policies, Heat will not show the resources (VDUs, CPs, VLs, etc),
                     # but the scaling group.
-                    # In this case, grab the resources from Nova and break out of the loop.
-                    if vnf_resource.get('type').__contains__('Scaling'):
+                    # In this case, grab the resources from Nova
 
-                        # Get the auto scaling group physical resource ID
-                        # ! Assuming the stack contains only one auto scaling group !
-                        stack_resource_list = vim.stack_resource_list(stack_id)
-                        for resource in stack_resource_list:
-                            if resource.resource_type == 'OS::Heat::AutoScalingGroup':
-                                asg_physical_resource_id = resource.physical_resource_id
-                                break
-                        else:
-                            raise TackerManoAdapterError('Heat stack does not contain any scaling group resources')
+                    # Get the auto scaling group physical resource IDs
+                    resource_list = []
+                    for scaling_resource in scaling_resources:
+                        resource_list += vim.stack_resource_list(scaling_resource['id'])
 
-                        # Get all resource names contained by the auto scaling group
-                        asg_resource_list = vim.stack_resource_list(asg_physical_resource_id)
+                    # Get details from Nova for the servers corresponding to each resource belonging to the auto
+                    # scaling group
+                    for resource in resource_list:
+                        resource_name = resource.resource_name
 
-                        # Get details from Nova for the servers corresponding to each resource belonging to the auto
-                        # scaling group
-                        for resource in asg_resource_list:
-                            resource_name = resource.resource_name
+                        # Get the Nova list of servers filtering the servers based on their name.
+                        # The servers' names we are looking for start with ta-...
+                        # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
+                        # The server name we are looking for should match the following pattern
+                        pattern = 'ta-[a-z0-9]{6}-' + resource_name + '-[a-z0-9]{12}-VDU[0-9]+-[a-z0-9]{12}'
+                        server_list = vim.server_list(query_filter={'name': pattern})
+                        if len(server_list) == 0:
+                            raise TackerManoAdapterError('No Nova server name contains string %s' % resource_name)
+                        if len(server_list) != 1:
+                            raise TackerManoAdapterError('More than one Nova server contains string %s'
+                                                         % resource_name)
+                        server = server_list[0]
+                        vnf_resource_id = server.id
 
-                            # Get the Nova list of servers filtering the servers based on their name.
-                            # The servers' names we are looking for start with ta-...
-                            # Example ta-hnrt7a-xvlcnwn2nphm-t5vjqah6itlt-VDU1-jyettvu5bvkg
-                            # The server name we are looking for should match the following pattern
-                            pattern = 'ta-[a-z0-9]{6}-' + resource_name + '-[a-z0-9]{12}-VDU\d+-[a-z0-9]{12}'
-                            server_list = vim.server_list(query_filter={'name': pattern})
-                            if len(server_list) == 0:
-                                raise TackerManoAdapterError('No Nova server name contains string %s' % resource_name)
-                            if len(server_list) != 1:
-                                raise TackerManoAdapterError('More than one Nova server contains string %s'
-                                                             % resource_name)
-                            server = server_list[0]
-                            vnf_resource_id = server.id
+                        # Extract the VDU ID from the server name
+                        match = re.search('VDU\d+', server.name)
+                        vnf_resource_name = match.group()
 
-                            # Extract the VDU ID from the server name
-                            match = re.search('VDU\d+', server.name)
-                            vnf_resource_name = match.group()
+                        # Build the VnfcResourceInfo data structure
+                        vnfc_resource_info = VnfcResourceInfo()
+                        vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
+                        vnfc_resource_info.vdu_id = vnf_resource_name.encode()
 
-                            # Build the VnfcResourceInfo data structure
-                            vnfc_resource_info = VnfcResourceInfo()
-                            vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
-                            vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+                        vnfc_resource_info.compute_resource = ResourceHandle()
+                        vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
+                        vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
 
-                            vnfc_resource_info.compute_resource = ResourceHandle()
-                            vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
-                            vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
-
-                            vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
-
-                        break
-
+                        vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+                else:
                     # Heat provides the resources as expected.
-                    else:
+                    for vnf_resource in tacker_list_vnf_resources:
+
                         vnf_resource_type = vnf_resource.get('type')
                         vnf_resource_id = vnf_resource.get('id')
                         vnf_resource_name = vnf_resource.get('name')
@@ -579,6 +574,7 @@ class TackerManoAdapter(object):
             except tackerclient.common.exceptions.TackerException:
                 return vnf_info
             except Exception as e:
+                LOG.exception(e)
                 raise TackerManoAdapterError(e.message)
 
         # VNF instantiation state is not INSTANTIATED
