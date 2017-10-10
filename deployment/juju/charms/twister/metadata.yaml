@@ -1,0 +1,29 @@
+name: twister
+summary: Encapsulates the Twister framework (client and server)
+maintainer: Spirent
+description: |
+ Encapsulates the Twister framework (client and server)
+tags:
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - misc
+series:
+  - xenial
+subordinate: false
+provides:
+  website:
+    interface: http
+requires:
+  database:
+    interface: mysql
+  rest:
+    interface: vnflcv-rest
+resources:
+  twister-src:
+    type: file
+    filename: twister-src.tar.gz
+    description: "Archive containing Twister source code"
+  db-template:
+    type: file
+    filename: twister_demo.sql
+    description: "Structure for Twister database"

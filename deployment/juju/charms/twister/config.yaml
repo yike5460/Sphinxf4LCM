@@ -1,0 +1,9 @@
+options:
+  username:
+    type: string
+    default: "spirent"
+    description: "Username for logging into the Twister UI"
+  password:
+    type: string
+    default: "spirent"
+    description: "Password for the Twister user"

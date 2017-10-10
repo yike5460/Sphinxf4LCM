@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+service twister-server start
+service twister-client start

@@ -1,0 +1,13 @@
+#!/bin/bash
+# Here put anything that is needed to start the service.
+# Note that currently this is run directly after install
+# i.e. 'service apache2 start'
+
+set -e
+
+service twister-server start
+service twister-client start
+
+status-set active "Ready"
+
+open-port 8000

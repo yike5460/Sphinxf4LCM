@@ -1,0 +1,87 @@
+#!/bin/bash
+# Here do anything needed to install the service
+# i.e. apt-get install -y foo  or  bzr branch http://myserver/mycode /srv/webroot
+# Make sure this hook exits cleanly and is idempotent, common problems here are
+# failing to account for a debconf question on a dependency, or trying to pull
+# from github without installing git first.
+
+set -e
+
+status-set maintenance "Installing required packages"
+juju-log "Installing required packages"
+
+apt-get update 
+apt-get install -y libxml2 libxml2-dev zlibc zlib1g-dev libmysqlclient-dev libxslt1-dev python-dev python-pip  build-essential libssl-dev libffi-dev mysql-client
+
+pip install --upgrade pip
+
+
+status-set maintenance "Creating user for Twister"
+juju-log "Creating user for Twister"
+
+twister_username=$(config-get username)
+twister_password=$(config-get password)
+
+useradd -d /home/$twister_username -m -U $twister_username
+echo "$twister_username:$twister_password" | chpasswd
+echo "$twister_username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+status-set maintenance "Enabling password authentication in SSH"
+juju-log "Enabling password authentication in SSH"
+sed -i "s/PasswordAuthentication.*/PasswordAuthentication yes/g" /etc/ssh/sshd_config
+service ssh restart
+
+archive=""
+while [ -z $archive ]
+do
+	status-set blocked "Waiting for resource: twister-src"
+	sleep 5
+	archive=$(resource-get twister-src || true)
+done
+
+status-set maintenance "Extracting Twister archive"
+juju-log "Extracting Twister archive"
+mkdir /home/$twister_username/twister-src
+tar -xvf $archive -C /home/$twister_username/twister-src
+chown -R $twister_username:$twister_username /home/$twister_username/twister-src
+
+status-set maintenance "Installing Pip requirements"
+juju-log "Installing Pip requirements"
+
+pip install -r /home/$twister_username/twister-src/requirements.txt
+
+
+status-set maintenance "Installing Twister client"
+juju-log "Installing Twister client"
+
+su -c "python /home/$twister_username/twister-src/installer/installer_client.py" $twister_username
+
+
+status-set maintenance "Installing Twister server"
+juju-log "Installing Twister server"
+
+su -c "sudo python /home/$twister_username/twister-src/installer/installer_server.py --default" $twister_username
+
+status-set maintenance "Adding Twister user"
+juju-log "Adding Twister user"
+python /home/$twister_username/twister-src/add_twister_user.py $twister_username
+
+status-set maintenance "Copying custom resources"
+juju-log "Copying custom resources"
+cp -r /home/$twister_username/twister-src/resources/ /home/$twister_username/twister/
+chown -R $twister_username:$twister_username /home/$twister_username/twister/
+echo 0 > /tmp/current
+chown $twister_username:$twister_username /tmp/current
+
+status-set maintenance "Creating systemd services"
+juju-log "Creating systemd services"
+cp -r /home/$twister_username/twister-src/systemd/* /etc/systemd/system/
+sed -i "s/TWISTER_USERNAME/$twister_username/g" /etc/systemd/system/twister-client.service
+
+systemctl daemon-reload
+systemctl enable twister-server
+systemctl enable twister-client
+
+status-set maintenance "Removing demo TCs"
+juju-log "Removing demo TCs"
+rm -rf /home/$twister_username/twister/demo/*

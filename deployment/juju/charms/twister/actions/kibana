@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+twister_username=$(config-get username)
+
+status-set maintenance "Updating reporting templates with frontend IP"
+juju-log maintenance "Updating reporting templates with frontend IP"
+kibana_host=$(action-get kibana)
+sed -i "s/localhost/$kibana_host/" /home/$twister_username/twister/config/templates/*.html
+
+status-set active "Ready"

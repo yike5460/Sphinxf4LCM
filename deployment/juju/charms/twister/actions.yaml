@@ -1,0 +1,8 @@
+kibana:
+  description: Configure Kibana frontend address
+  params:
+    kibana:
+      type: string
+      description: Kibana frontend address
+restart:
+  description: Restart Twister services

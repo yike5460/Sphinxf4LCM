@@ -1,0 +1,38 @@
+#!/bin/bash
+# This must be renamed to the name of the relation. The goal here is to
+# affect any change needed by relationships being formed, modified, or broken
+# This script should be idempotent.
+set -e
+
+juju-log $JUJU_REMOTE_UNIT modified its settings
+juju-log Relation members:
+relation-list
+
+db_user=$(relation-get user)
+db_db=$(relation-get database)
+db_pass=$(relation-get password)
+db_host=$(relation-get private-address)
+if [ -z "$db_db" ]; then
+  juju-log "No database information sent yet. Silently exiting"
+  exit 0
+fi
+
+twister_username=$(config-get username)
+db_template=""
+while [ -z $db_template ]
+do
+        status-set blocked "Waiting for resource: db_template"
+        sleep 5
+	db_template=$(resource-get db-template || true)
+done
+
+status-set maintenance "Importing DB template"
+juju-log "Importing DB template"
+mysql -u $db_user -h $db_host -p$db_pass $db_db < $db_template
+PYTHONPATH=/opt/twister/server TWISTER_PATH=/opt/twister python /home/$twister_username/twister-src/setup_twister_server.py $db_host $db_db $db_user $db_pass $twister_username
+PYTHONPATH=/opt/twister/server TWISTER_PATH=/opt/twister python /home/$twister_username/twister-src/setup_twister_client.py $db_host $db_db $db_user $db_pass $twister_username
+
+service twister-server restart
+service twister-client restart
+
+status-set active "Ready"

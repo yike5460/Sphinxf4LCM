@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import json
+import requests
+import shutil
+import os
+import uuid
+
+
+try:
+    import charmhelpers  # noqa
+except ImportError:
+    import subprocess
+    subprocess.check_call(['apt-get', 'install', '-y', 'python-pip'])
+    subprocess.check_call(['pip', 'install', 'charmhelpers'])
+
+from charmhelpers.core.hookenv import relation_get, relation_id, config
+
+cfg = config()
+
+serveraddr = relation_get('serveraddr')
+twister_username = cfg.get('username')
+
+with open('/etc/hosts', 'a') as hosts_file:
+   hosts_file.write('%s vnflcv\n' % serveraddr)
+
+template_file_path = '/home/%s/twister-src/tc_template.py' % twister_username
+base_wrappers_dir = '/home/%s/twister/demo' % twister_username
+
+server_response = requests.get(url='http://%s:8080/v1.0/tcs' % serveraddr)
+tc_mapping = server_response.json()
+
+tc_reverse_mapping = dict()
+for tc_name, tc_path in tc_mapping.iteritems():
+    tc_reverse_mapping.setdefault(tc_path, []).append(tc_name)
+
+# Generate wrappers
+for tc_path, tc_list in tc_reverse_mapping.items():
+    full_wrappers_dir_path = os.path.join(base_wrappers_dir, tc_path)
+
+    try:
+        os.makedirs(full_wrappers_dir_path)
+    except OSError:
+	pass
+
+    tc_list.sort()
+    for tc_name in tc_list:
+        wrapper_file_path = os.path.join(full_wrappers_dir_path, tc_name + '.py')
+        shutil.copy(template_file_path, wrapper_file_path)
+
+
+def project_dict(project_name):
+    project_json = {'key': 'root',
+                    'title': project_name,
+                    'expanded': True,
+                    'data': {'db_auto_save': 'save',
+                             'db_save_type': 'ts_complete',
+                             'tc_delay': 0,
+                             'script_pre': '/home/%s/twister/resources/runid/incr.sh' % twister_username,
+                             'script_post': '/home/%s/twister/resources/post.py' % twister_username},
+                    'children': []}
+
+    return project_json
+
+
+def suite_dict(title):
+    folder_json = {'title': title,
+                   'expanded': True,
+                   'key': uuid.uuid4().get_hex()[0:6],
+                   'folder': True,
+                   'data': {'repeat': 1,
+                            'suts': ["SUT1.user"],
+                            'enabled': False,
+                            'dependency': [],
+                            'pd': False,
+                            'libs': [],
+                            'configs': [],
+                            'db_fields': {}},
+                    'children': []}
+
+    return folder_json
+
+
+def test_dict(title, path):
+    test_json = {'title': title,
+                 'key':  uuid.uuid4().get_hex()[0:6],
+                 'data': {'repeat': 1,
+                          'mandatory': False,
+                          'enabled': False,
+                          'save_teardown_to_db': False,
+                          'dependency': [],
+                          'runnable': True,
+                          'params': [],
+                          'props': {},
+                          'path': '%s/%s.py' % (path, title),
+                          'configs': [],
+                          'type': ['normal'],
+                          'save_setup_file_to_db': False}}
+
+    return test_json
+
+
+project_json = project_dict('VNF Lifecycle Validation')
+project_json['children'].append(suite_dict('VNF Lifecycle Validation'))
+for tc_path, tc_list in tc_reverse_mapping.items():
+    suite_name = tc_path.replace('/', '_')
+    suite_json = suite_dict(suite_name)
+    for tc_name in tc_list:
+       tc_json = test_dict(tc_name, tc_path)
+       suite_json['children'].append(tc_json)
+    project_json['children'][0]['children'].append(suite_json)
+
+projects_dir = '/home/%s/twister/config/projects' % twister_username
+with open(os.path.join(projects_dir, 'VNF Lifecycle Validation'), 'w') as project_file:
+    json.dump(project_json, project_file, sort_keys=True, indent=2)
+
