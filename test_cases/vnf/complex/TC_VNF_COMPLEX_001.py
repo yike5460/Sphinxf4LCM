@@ -91,7 +91,8 @@ class TC_VNF_COMPLEX_001(TestCase):
         # 3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -118,7 +119,8 @@ class TC_VNF_COMPLEX_001(TestCase):
         self.time_record.START('scale_out_vnf')
         elapsed_time = 0
         while elapsed_time < constants.SCALE_INTERVAL:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano']['query_params']})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['max_instances']:
                 break
             else:

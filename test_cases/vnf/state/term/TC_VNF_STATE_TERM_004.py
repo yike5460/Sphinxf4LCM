@@ -75,8 +75,8 @@ class TC_VNF_STATE_TERM_004(TestCase):
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -154,8 +154,8 @@ class TC_VNF_STATE_TERM_004(TestCase):
         # 8. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was stopped'
@@ -187,8 +187,8 @@ class TC_VNF_STATE_TERM_004(TestCase):
         # 10. Validate VNF is terminated and all resources have been released
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF is terminated and all resources have been released')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
             raise TestRunError('Unexpected status for terminating VNF operation',
                                err_details='VNF terminate operation failed')

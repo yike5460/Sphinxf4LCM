@@ -65,7 +65,8 @@ class TC_VNF_STATE_INST_007(TestCase):
         # 2. Validate MANO reports no VNF instance and the error
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating MANO reports no VNF instance and the error')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
             raise TestRunError(
                              'Unexpected VNF instantiation state',

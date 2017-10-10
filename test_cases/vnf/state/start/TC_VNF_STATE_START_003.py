@@ -82,8 +82,8 @@ class TC_VNF_STATE_START_003(TestCase):
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -157,8 +157,8 @@ class TC_VNF_STATE_START_003(TestCase):
         # 7. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was stopped'
@@ -199,8 +199,8 @@ class TC_VNF_STATE_START_003(TestCase):
         # 11. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was started'
@@ -236,8 +236,8 @@ class TC_VNF_STATE_START_003(TestCase):
         # 14. Validate no scaling has occurred
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no scaling has occurred')
-        vnf_info = self.mano.vnf_query(
-            filter={'vnf_instance_id': self.vnf_instance_id, 'additional_param': self.tc_input['mano']['query_params']})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != initial_instances:
             raise TestRunError('VNF scaling occurred')
 

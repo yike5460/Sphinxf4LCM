@@ -90,7 +90,8 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -158,7 +159,8 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         # 6. Validate VNF has resized
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment']:
             raise TestRunError('VNF did not scale out')
 
@@ -244,7 +246,8 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         # 12. Validate VNF has resized and has decreased its capacity and removed VNFCs
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized and has decreased its capacity and removed VNFCs')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id})
+        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                               'additional_param': self.tc_input['mano']['query_params']})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['min_instances']:
             raise TestRunError('VNF did not scale in')
 
