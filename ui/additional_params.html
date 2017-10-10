@@ -76,6 +76,17 @@
                 <form action="/additional/update/" method="post">
                     <tr><td>Scaling Policy Name:</td><td><input type="text" name="scaling_policy_name" style="width: 200px" readonly value={{additional_params['scaling_policy_name']}}></td></tr>
                     <tr><td>Desired Scale Out Steps:</td><td><input type="number" name="desired_scale_out_steps" style="width: 200px" readonly value={{additional_params['desired_scale_out_steps']}}></td></tr>
+                    <tr><td>Instantiation Time:</td><td><input type="number" name="instantiation_time" style="width: 200px" readonly value={{additional_params['instantiation_time']}}></td></tr>
+                    <tr><td>Operate Time:</td><td><input type="number" name="operate_time" style="width: 200px" readonly value={{additional_params['operate_time']}}></td></tr>
+                    <tr><td>Poll Interval:</td><td><input type="number" name="poll_interval" style="width: 200px" readonly value={{additional_params['poll_interval']}}></td></tr>
+                    <tr><td>Scale Interval:</td><td><input type="number" name="scale_interval" style="width: 200px" readonly value={{additional_params['scale_interval']}}></td></tr>
+                    <tr><td>Start Time:</td><td><input type="number" name="start_time" style="width: 200px" readonly value={{additional_params['start_time']}}></td></tr>
+                    <tr><td>Stop Time:</td><td><input type="number" name="stop_time" style="width: 200px" readonly value={{additional_params['stop_time']}}></td></tr>
+                    <tr><td>Terminate Time:</td><td><input type="number" name="terminate_time" style="width: 200px" readonly value={{additional_params['terminate_time']}}></td></tr>
+                    <tr><td>Low Traffic Load [Mbps]:</td><td><input type="number" name="low_traffic_load" style="width: 200px" readonly value={{additional_params['low_traffic_load']}}></td></tr>
+                    <tr><td>Normal Traffic Load [Mbps]:</td><td><input type="number" name="normal_traffic_load" style="width: 200px" readonly value={{additional_params['normal_traffic_load']}}></td></tr>
+                    <tr><td>Maximum Traffic Load [Mbps]:</td><td><input type="number" name="max_traffic_load" style="width: 200px" readonly value={{additional_params['max_traffic_load']}}></td></tr>
+                    <tr><td>Traffic Tolerance [%]:</td><td><input type="number" name="traffic_tolerance" style="width: 200px" readonly value={{additional_params['traffic_tolerance']}}></td></tr>
           </table>
             <div class="btn-group">
                   <input value="Update" type="submit" class="btn btn-default">
