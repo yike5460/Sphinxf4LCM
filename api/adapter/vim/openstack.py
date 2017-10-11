@@ -67,6 +67,7 @@ class OpenstackVimAdapter(object):
 
         except Exception as e:
             LOG.debug('Unable to create %s instance' % self.__class__.__name__)
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
 
     @log_entry_exit(LOG)
@@ -98,6 +99,7 @@ class OpenstackVimAdapter(object):
         try:
             project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         return project_id.encode()
 
@@ -111,6 +113,7 @@ class OpenstackVimAdapter(object):
         try:
             nova_server = self.nova_client.servers.get(compute_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         server_flavor_id = nova_server.flavor['id']
         virtual_compute.flavour_id = server_flavor_id.encode()
@@ -155,6 +158,7 @@ class OpenstackVimAdapter(object):
         try:
             neutron_ports = self.neutron_client.list_ports(retrieve_all=False, **query_filter)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         return neutron_ports
 
@@ -170,6 +174,7 @@ class OpenstackVimAdapter(object):
         try:
             nova_servers = self.nova_client.servers.list(search_opts=query_filter)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         return nova_servers
 
@@ -184,6 +189,7 @@ class OpenstackVimAdapter(object):
         try:
             server = self.nova_client.servers.get(server_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
 
         server_details = dict()
@@ -204,6 +210,7 @@ class OpenstackVimAdapter(object):
         try:
             stack_state = self.heat_client.stacks.get(stack_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         return stack_state
 
@@ -215,6 +222,7 @@ class OpenstackVimAdapter(object):
         try:
             self.heat_client.actions.resume(stack_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
 
     @log_entry_exit(LOG)
@@ -225,6 +233,7 @@ class OpenstackVimAdapter(object):
         try:
             self.heat_client.actions.suspend(stack_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
 
     @log_entry_exit(LOG)
@@ -238,6 +247,7 @@ class OpenstackVimAdapter(object):
         try:
             stack_resource_list = self.heat_client.resources.list(stack_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         return stack_resource_list
 
@@ -253,6 +263,7 @@ class OpenstackVimAdapter(object):
         try:
             nova_limits = self.nova_client.limits.get().absolute
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         for nova_limit in nova_limits:
             if nova_limit.name == 'totalCoresUsed':
@@ -282,6 +293,7 @@ class OpenstackVimAdapter(object):
         try:
             cinder_limits = self.cinder_client.limits.get().absolute
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         for cinder_limit in cinder_limits:
             if cinder_limit.name == 'totalGigabytesUsed':
@@ -300,6 +312,7 @@ class OpenstackVimAdapter(object):
         try:
             quotas = self.nova_client.quotas.get(tenant_id=project_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         virtual_compute_quota = VirtualComputeQuota()
         virtual_compute_quota.resource_group_id = quotas._info['id'].encode()
@@ -319,6 +332,7 @@ class OpenstackVimAdapter(object):
         try:
             quotas = self.neutron_client.show_quota(project_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         virtual_network_quota = VirtualNetworkQuota()
         virtual_network_quota.resource_group_id = project_id.encode()
@@ -339,6 +353,7 @@ class OpenstackVimAdapter(object):
         try:
             quotas = self.cinder_client.quotas.get(project_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
         virtual_storage_quota = VirtualStorageQuota()
         virtual_storage_quota.resource_group_id = project_id.encode()
@@ -360,6 +375,7 @@ class OpenstackVimAdapter(object):
         try:
             flavor = self.nova_client.flavors.get(flavor_id)
         except Exception as e:
+            LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
 
         flavor_details = dict()

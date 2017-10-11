@@ -25,6 +25,7 @@ class StcTrafficAdapter(object):
             self.session = self.stc.new_session(user_name=user_name, session_name=session_name, kill_existing=True)
             self.project = self.stc.create(object_type='project')
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
         self.tx_results = None
         self.rx_results = None
@@ -79,6 +80,7 @@ class StcTrafficAdapter(object):
             self.stc.config(handle=port, location=port_location)
             self.stc.apply()
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         return port
@@ -99,6 +101,7 @@ class StcTrafficAdapter(object):
 
             self.stc.apply()
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         return ipv4_iface
@@ -114,6 +117,7 @@ class StcTrafficAdapter(object):
 
             self.stc.apply()
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         return stream_block
@@ -132,6 +136,7 @@ class StcTrafficAdapter(object):
 
             self.stc.apply()
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         return stream_block
@@ -198,6 +203,7 @@ class StcTrafficAdapter(object):
                             LoadUnit='PERCENT_LINE_RATE', SchedulingMode='PORT_BASED')
             self.stc.apply()
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
     @log_entry_exit(LOG)
@@ -289,6 +295,7 @@ class StcTrafficAdapter(object):
                     try:
                         resolution_status = self.stc.perform(command='ArpNdStart')['ArpNdState']
                     except Exception as e:
+                        LOG.exception(e)
                         raise StcTrafficAdapterError(e.message)
                 LOG.debug('Address resolution status: %s' % resolution_status)
 
@@ -299,6 +306,7 @@ class StcTrafficAdapter(object):
             try:
                 self.stc.perform(command='StreamBlockStart')
             except Exception as e:
+                LOG.exception(e)
                 raise StcTrafficAdapterError(e.message)
             self.emission_started = True
 
@@ -355,6 +363,7 @@ class StcTrafficAdapter(object):
                 try:
                     self.stc.perform(command='StreamBlockStop')
                 except Exception as e:
+                    LOG.exception(e)
                     raise StcTrafficAdapterError(e.message)
                 self.emission_started = False
 
@@ -375,6 +384,7 @@ class StcTrafficAdapter(object):
         try:
             rx_frame_rate = int(self.stc.get(self.rx_results)['FrameRate'])
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
         LOG.debug('RX frame rate is: %d' % rx_frame_rate)
         return rx_frame_rate > 0
@@ -389,6 +399,7 @@ class StcTrafficAdapter(object):
             tx_results = self.stc.get(self.tx_results)
             rx_results = self.stc.get(self.rx_results)
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         tx_frame_count = int(tx_results['FrameCount'])
@@ -444,6 +455,7 @@ class StcTrafficAdapter(object):
             tx_results = self.stc.get(self.tx_results)
             rx_results = self.stc.get(self.rx_results)
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         rx_frame_count = float(rx_results['FrameCount'])
@@ -461,6 +473,7 @@ class StcTrafficAdapter(object):
             tx_results = self.stc.get(self.tx_results)
             rx_results = self.stc.get(self.rx_results)
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
 
         rx_frame_count = float(rx_results['FrameCount'])
@@ -477,6 +490,7 @@ class StcTrafficAdapter(object):
         try:
             self.stc.perform(command='ResultsClearAll')
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
         self.service_disruption_length = 0
 
@@ -488,4 +502,5 @@ class StcTrafficAdapter(object):
             self.stc.delete(handle=self.project)
             self.stc.end_session(end_tcsession=self.session)
         except Exception as e:
+            LOG.exception(e)
             raise StcTrafficAdapterError(e.message)

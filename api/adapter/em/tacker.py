@@ -45,6 +45,7 @@ class TackerEmAdapter(object):
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
         except Exception as e:
             LOG.error('Unable to create %s instance' % self.__class__.__name__)
+            LOG.exception(e)
             raise TackerEmAdapterError(e.message)
 
     @log_entry_exit(LOG)
@@ -62,6 +63,7 @@ class TackerEmAdapter(object):
                 # exception because the VNF can no longer be found
                 return constants.OPERATION_SUCCESS
             except Exception as e:
+                LOG.exception(e)
                 raise TackerEmAdapterError(e.message)
 
             tacker_status = tacker_show_vnf['vnf']['status']
@@ -85,6 +87,7 @@ class TackerEmAdapter(object):
                 self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
             except Exception as e:
                 LOG.error('Invalid VNF configuration')
+                LOG.exception(e)
                 raise TackerEmAdapterError(e.message)
 
         # Poll on the VNF status until it reaches one of the final states
@@ -114,6 +117,7 @@ class TackerEmAdapter(object):
         try:
             vim_details = self.tacker_client.show_vim(vim_id)['vim']
         except Exception as e:
+            LOG.exception(e)
             raise TackerEmAdapterError(e.message)
         vim_auth_cred = vim_details['auth_cred']
         vim_type = vim_details['type']
