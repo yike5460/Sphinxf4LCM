@@ -19,8 +19,6 @@ class TC_VNF_STATE_INST_007(TestCase):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano', 'vim', 'vnfd_id', 'scaling_policy_name')
-
     def setup(self):
         LOG.info('Starting setup for %s' % self.tc_name)
 
@@ -119,6 +117,8 @@ class TC_VNF_STATE_INST_007_004(TC_VNF_STATE_INST_007):
     2. Validate MANO reports no VNF instance and the error
     """
 
+    required_elements = ('mano', 'vim', 'vnfd_id')
+
 
 class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     """
@@ -128,6 +128,8 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
     """
+
+    required_elements = ('mano', 'vim', 'vnfd_id')
 
     def setup(self):
         super(TC_VNF_STATE_INST_007_005, self).setup()
@@ -165,11 +167,13 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
     2. Validate MANO reports no VNF instance and the error
     """
 
+    required_elements = ('mano', 'vim', 'vnfd_id')
+
     def setup(self):
         super(TC_VNF_STATE_INST_007_007, self).setup()
 
         LOG.debug('Ensuring NFVI has not enough vStorage for the VNF to be instantiated')
-        reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(self.tc_input['vnfd_id'],  self.vim,
+        reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(self.tc_input['vnfd_id'], self.vim,
                                                                                  self.tc_input['scaling_policy_name'])
 
         if reservation_id is None:
@@ -187,6 +191,8 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
     """
+
+    required_elements = ('mano', 'vim', 'vnfd_id')
 
     def setup(self):
         super(TC_VNF_STATE_INST_007_008, self).setup()

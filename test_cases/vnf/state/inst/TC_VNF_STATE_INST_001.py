@@ -32,7 +32,7 @@ class TC_VNF_STATE_INST_001(TestCase):
 
         # Create objects needed by the test.
         self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        # self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
+        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
         self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
         self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
@@ -88,16 +88,16 @@ class TC_VNF_STATE_INST_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate configuration has been applied to the VNF
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating configuration file has been applied to the VNF')
-        # if not self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
-        #     raise TestRunError('Configuration has not been applied to the VNF')
+        LOG.info('Validating configuration file has been applied to the VNF')
+        if not self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
+            raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Validating license has been applied to the VNF')
-        # if not self.vnf.license_applied(**self.tc_input['vnf']['credentials']):
-        #     raise TestRunError('License has not been applied to the VNF')
+        LOG.info('Validating license has been applied to the VNF')
+        if not self.vnf.license_applied(**self.tc_input['vnf']['credentials']):
+            raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Validate the right vResources have been allocated
