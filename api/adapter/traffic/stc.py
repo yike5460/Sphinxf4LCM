@@ -237,10 +237,10 @@ class StcTrafficAdapter(object):
             self.tx_port = gen_port
 
             self.stream_block = self.create_raw_ipv4_stream_with_dest_ipv4_modifier(
-                source_port=gen_port,
-                source_ipv4_addr=traffic_config['traffic_src_addr'],
-                dest_ipv4_addr=traffic_config['traffic_dst_addr'],
-                payload=traffic_config['payload'])
+                                                                    source_port=gen_port,
+                                                                    source_ipv4_addr=traffic_config['traffic_src_addr'],
+                                                                    dest_ipv4_addr=traffic_config['traffic_dst_addr'],
+                                                                    payload=traffic_config['payload'])
 
         elif traffic_config['type'] == 'VNF_TRANSIENT':
             l_port = self.create_port(port_location=traffic_config['left_port_location'])
@@ -255,10 +255,10 @@ class StcTrafficAdapter(object):
                                                            affiliated_port=r_port)
 
             self.stream_block = self.create_raw_ipv4_stream_with_dest_mac_modifier(
-                source_port=l_port,
-                source_ipv4_addr=traffic_config['left_traffic_addr'],
-                dest_ipv4_addr=traffic_config['right_traffic_addr'],
-                dest_mac_addr=traffic_config['left_traffic_gw_mac'])
+                                                                   source_port=l_port,
+                                                                   source_ipv4_addr=traffic_config['left_traffic_addr'],
+                                                                   dest_ipv4_addr=traffic_config['right_traffic_addr'],
+                                                                   dest_mac_addr=traffic_config['left_traffic_gw_mac'])
         else:
             raise StcTrafficAdapterError('Unknown traffic type: %s' % traffic_config['type'])
 
