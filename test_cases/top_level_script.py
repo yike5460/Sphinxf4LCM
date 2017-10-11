@@ -15,6 +15,7 @@ from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_003__MANO_MANUAL import TC_VNFC_
 from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1 import TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1
 from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX import TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX
 from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1 import TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1
+from test_cases.vnf.scale.out.TC_VNFC_SCALE_OUT_005__MANO_MANUAL import TC_VNFC_SCALE_OUT_005__MANO_MANUAL
 from test_cases.vnf.state.start.TC_VNF_STATE_START_001 import TC_VNF_STATE_START_001
 from test_cases.vnf.state.start.TC_VNF_STATE_START_002 import TC_VNF_STATE_START_002
 from test_cases.vnf.state.start.TC_VNF_STATE_START_003 import TC_VNF_STATE_START_003
@@ -46,35 +47,41 @@ LOG = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     openstack = {'mano': {'type': 'tacker',
-                                 'client_config': {'auth_url': 'http://controller:35357/v3',
-                                                   'username': 'admin',
-                                                   'password': 'stack',
-                                                   'identity_api_version': '3',
-                                                   'project_name': 'admin',
-                                                   'project_domain_name': 'default',
-                                                   'user_domain_name': 'default'}},
+                          'client_config': {'auth_url': 'http://controller:35357/v3',
+                                            'username': 'admin',
+                                            'password': 'stack',
+                                            'identity_api_version': '3',
+                                            'project_name': 'admin',
+                                            'project_domain_name': 'default',
+                                            'user_domain_name': 'default'},
+                          'instantiation_params': {},
+                          'query_params': {},
+                          'termination_params': {},
+                          'operate_params': {}},
                  'vim': {'type': 'openstack',
-                                'client_config': {'auth_url': 'http://controller:35357/v3',
-                                                  'username': 'admin',
-                                                  'password': 'stack',
-                                                  'identity_api_version': '3',
-                                                  'project_name': 'admin',
-                                                  'project_domain_name': 'default',
-                                                  'user_domain_name': 'default'}},
+                         'client_config': {'auth_url': 'http://controller:35357/v3',
+                                           'username': 'admin',
+                                           'password': 'stack',
+                                           'identity_api_version': '3',
+                                           'project_name': 'admin',
+                                           'project_domain_name': 'default',
+                                           'user_domain_name': 'default'}},
                  'em': {'type': 'tacker',
-                               'client_config': {'auth_url': 'http://controller:35357/v3',
-                                                 'username': 'admin',
-                                                 'password': 'stack',
-                                                 'identity_api_version': '3',
-                                                 'project_name': 'admin',
-                                                 'project_domain_name': 'default',
-                                                 'user_domain_name': 'default'}},
+                        'client_config': {'auth_url': 'http://controller:35357/v3',
+                                          'username': 'admin',
+                                          'password': 'stack',
+                                          'identity_api_version': '3',
+                                          'project_name': 'admin',
+                                          'project_domain_name': 'default',
+                                          'user_domain_name': 'default'}},
                  'nsd_id': 'c0870bda-e5f3-477c-be22-0d791f8bb828',
                  'ns': {'name': 'test_ns'},
+                 'flavour_id': None,
+                 'instantiation_level_id': None,
                  # VNFD with IP and MAC
                  # 'vnfd_id': 'c849dc0f-c5b2-4164-b883-b630a0d0812b',
                  # VNFD with SP
-                 # 'vnfd_id': 'c0870bda-e5f3-477c-be22-0d791f8bb828',
+                 'vnfd_id': 'c0870bda-e5f3-477c-be22-0d791f8bb828',
                  # VNFD with max SP
                  # 'vnfd_id': 'b40f227f-2f0d-4eb6-ba53-df54bd525529',
                  # VNF that requires EM
@@ -94,7 +101,7 @@ if __name__ == '__main__':
                  # VNFD with SP & alarm scaling
                  # 'vnfd_id': '8e451832-349e-4589-893f-7339f5c05fbb',
                  # VNFD with exceeding SP step 1
-                 'vnfd_id': '3f7a41e6-d0d3-4afe-9f14-d7d619a89e6a',
+                 # 'vnfd_id': '3f7a41e6-d0d3-4afe-9f14-d7d619a89e6a',
                  # VNFD with exceeding SP step max
                  # 'vnfd_id': '3404c2de-3a31-434b-bacf-62c913a6322f',
                  'vnf': {'type': 'ubuntu',
@@ -105,20 +112,21 @@ if __name__ == '__main__':
                          'config': '/home/mdragomir/Downloads/owrt_forward.yaml'},
                          # 'config': '/home/mdragomir/Downloads/owrt_empty_config.yaml'},
                  'traffic': {'type': 'stc',
-                                    'client_config': {'lab_server_addr': '10.3.228.13',
-                                                      'user_name': 'mdragomir',
-                                                      'session_name': 'automation'},
-                                    'traffic_config': {'left_port_location': '10.3.228.28/1/1',
-                                                       'left_traffic_addr': '172.16.1.3',
-                                                       'left_traffic_plen': '24',
-                                                       'left_traffic_gw': '172.16.1.10',
-                                                       'left_traffic_gw_mac': '00:11:22:33:44:55',
-                                                       'ingress_cp_name': 'CP2',
-                                                       'right_port_location': '10.3.228.29/1/1',
-                                                       'right_traffic_addr': '172.16.2.3',
-                                                       'right_traffic_plen': '24',
-                                                       'right_traffic_gw': '0.0.0.0',
-                                                       'port_speed': 100}},
+                             'client_config': {'lab_server_addr': '10.3.228.13',
+                                               'user_name': 'mdragomir',
+                                               'session_name': 'automation'},
+                             'traffic_config': {'type': 'VNF_TRANSIENT',
+                                                'left_port_location': '10.3.228.28/1/1',
+                                                'left_traffic_addr': '172.16.1.3',
+                                                'left_traffic_plen': '24',
+                                                'left_traffic_gw': '172.16.1.10',
+                                                'left_traffic_gw_mac': '00:11:22:33:44:55',
+                                                'ingress_cp_name': 'CP2',
+                                                'right_port_location': '10.3.228.29/1/1',
+                                                'right_traffic_addr': '172.16.2.3',
+                                                'right_traffic_plen': '24',
+                                                'right_traffic_gw': '0.0.0.0',
+                                                'port_speed': 100}},
                  'scaling_policy_name': 'SP1',
                  'scaling': {'aspect': 'VDU1',
                              'increment': 1,
@@ -138,7 +146,6 @@ if __name__ == '__main__':
                  'fault': {'injection_command': 'vim_command_to_stop_vnf',
                            'recovery_source': 'vnfm'}}
 
-    configure_logger(LOG, file_level='DEBUG', console_level='INFO')
     LOG.info('Starting top level script')
     # Use VNFD with config
     # LOG.info('Calling test case TC_VNF_STATE_INST_001')
@@ -206,30 +213,25 @@ if __name__ == '__main__':
     # LOG.info('Calling test case TC_VNF_STATE_STOP_003')
     # TC_VNF_STATE_STOP_003(tc_input=openstack).execute()
 
-    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_001_1')
-    # TC_VNFC_SCALE_OUT_001_1(tc_input=openstack).execute()
-
     # Use VNFD with SP
     # LOG.info('Calling test case TC_VNFC_SCALE_OUT_001__MANO_MANUAL')
     # TC_VNFC_SCALE_OUT_001__MANO_MANUAL(tc_input=openstack).execute()
+    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_003__MANO_MANUAL')
+    # TC_VNFC_SCALE_OUT_003__MANO_MANUAL(tc_input=openstack).execute()
+    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_005__MANO_MANUAL')
+    # TC_VNFC_SCALE_OUT_005__MANO_MANUAL(tc_input=openstack).execute()
 
     # Use VNFD with max SP
     # LOG.info('Calling test case TC_VNFC_SCALE_OUT_002__MANO_MANUAL')
     # TC_VNFC_SCALE_OUT_002__MANO_MANUAL(tc_input=openstack).execute()
-    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_003__MANO_MANUAL')
-    # TC_VNFC_SCALE_OUT_003__MANO_MANUAL(tc_input=openstack).execute()
-
-    # Use VNFD with SP
-    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_001__MANO_MANUAL')
-    # TC_VNFC_SCALE_OUT_001__MANO_MANUAL(tc_input=openstack).execute()
 
     # Use VNFD with exceeding SP step max
     # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX')
     # TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(tc_input=openstack).execute()
 
     # Use VNFD with exceeding SP step 1
-    LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1')
-    TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(tc_input=openstack).execute()
+    # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1')
+    # TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(tc_input=openstack).execute()
     # LOG.info('Calling test case TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1')
     # TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(tc_input=openstack).execute()
 
