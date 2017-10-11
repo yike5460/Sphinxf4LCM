@@ -586,11 +586,6 @@ class TackerManoAdapter(object):
                 LOG.exception(e)
                 raise TackerManoAdapterError(e.message)
 
-        # VNF instantiation state is not INSTANTIATED
-        else:
-            raise TackerManoAdapterError('The InstantiatedVnfInfo information element cannot be built as the VNF '
-                                         'instantiation state is not INSTANTIATED')
-
         return vnf_info
 
     @log_entry_exit(LOG)
