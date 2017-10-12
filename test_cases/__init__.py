@@ -12,6 +12,7 @@ class TestExecutionError(Exception):
     """
     Generic exception for test execution.
     """
+
     def __init__(self, message, err_details=None):
         if err_details is None:
             err_details = message
@@ -40,10 +41,18 @@ class TestCleanupError(TestExecutionError):
     pass
 
 
+class TestRequirementsError(TestExecutionError):
+    """
+    A problem occurred during the test initialization.
+    """
+    pass
+
+
 class TestMeta(type):
     """
     Meta class that adds the logger object to the class dictionary of the class that is an instance of this meta class.
     """
+
     def __new__(meta, name, bases, class_dict):
         if bases != (object,):
             originating_module = importlib.import_module(class_dict['__module__'])
@@ -95,7 +104,7 @@ class TestCase(object):
         try:
             for element in self.required_elements:
                 if self.tc_input.get(element) is None:
-                    raise TestSetupError('Missing required element: %s' % element)
+                    raise TestRequirementsError('Missing required element: %s' % element)
         except AttributeError:
             self._LOG.debug('No required elements for this test case')
 
@@ -154,14 +163,37 @@ class TestCase(object):
         """
         self.tc_result['timestamps'].update(self.time_record.dump_data())
 
+    def build_objects(self):
+        """
+        This method creates the objects needed for test execution.
+        """
+        self._LOG.debug('Building objects for %s' % self.__class__.__name__)
+        for element in self.REQUIRED_OBJECTS:
+            try:
+                module_name = 'api.generic.' + element
+                module_object = importlib.import_module(module_name)
+                class_name = getattr(module_object, element.capitalize())
+                setattr(self, element, class_name(vendor=self.tc_input[element]['type'],
+                                                  **self.tc_input[element]['client_config']))
+            except Exception as e:
+                self._LOG.exception(e)
+                raise TestRequirementsError('Unable to build object for %s' % element)
+        self._LOG.debug('Finished building objects for %s' % self.__class__.__name__)
+
     def execute(self):
         """
         This method implements the test case execution logic.
         """
         try:
             self.check_requirements()
+            self.build_objects()
             self.setup()
             self.run()
+        except TestRequirementsError as e:
+            self._LOG.error('%s missing requirements' % self.tc_name)
+            self._LOG.exception(e)
+            self.tc_result['overall_status'] = constants.TEST_ERROR
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.error_info)
         except TestSetupError as e:
             self._LOG.error('%s setup failed' % self.tc_name)
             self._LOG.exception(e)
