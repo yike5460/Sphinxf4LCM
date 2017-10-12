@@ -4,6 +4,8 @@ from collections import OrderedDict
 import requests
 from bottle import route, run, request, template, static_file, redirect
 
+from api.generic import constants
+
 MANO_TYPES = ['tacker', 'cisco']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
@@ -583,10 +585,10 @@ def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=Non
     """
     if traffic_type == 'stc-vnf-transient':
         return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
-                    name=name)
+                        name=name)
     elif traffic_type == 'stc-vnf-terminated':
         return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
-                    name=name)
+                        name=name)
 
 
 @route('/traffic/validate/', method='POST')
@@ -648,7 +650,7 @@ def traffic_validate():
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
 
-        # The second case is when the VNF has type VNF_TERMINATED
+            # The second case is when the VNF has type VNF_TERMINATED
     if type == 'stc-vnf-terminated':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
@@ -791,7 +793,7 @@ def vnf_data():
     password = request.forms.get('password')
     config = request.forms.get('config')
     new_vnf = {
-        'credentials': {
+        'client_config': {
             'mgmt_ip_addr': mgmt_ip_addr,
             'password': password,
             'username': username
@@ -825,9 +827,9 @@ def vnf_update():
         vnf_info = OrderedDict()
         vnf_info['type'] = vnf_json[vnf_name]['type']
         vnf_info['instance_name'] = vnf_json[vnf_name]['instance_name']
-        vnf_info['mgmt_ip_addr'] = vnf_json[vnf_name]['credentials']['mgmt_ip_addr']
-        vnf_info['username'] = vnf_json[vnf_name]['credentials']['username']
-        vnf_info['password'] = vnf_json[vnf_name]['credentials']['password']
+        vnf_info['mgmt_ip_addr'] = vnf_json[vnf_name]['client_config']['mgmt_ip_addr']
+        vnf_info['username'] = vnf_json[vnf_name]['client_config']['username']
+        vnf_info['password'] = vnf_json[vnf_name]['client_config']['password']
         vnf_info['config'] = vnf_json[vnf_name]['config']
         return template('vnf_update.html', vnf=vnf_info, vnf_name=vnf_name)
     else:
@@ -835,11 +837,11 @@ def vnf_update():
         vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
         vnf_json = vnf_data.json()
         vnf_type = vnf_json[vnf_name]['type']
-        vnf_to_add = {'credentials': {},
+        vnf_to_add = {'client_config': {},
                       'type': vnf_type,
                       'instance_name': request.forms.get('instance_name'),
                       'config': request.forms.get('config')}
-        vnf_to_add['credentials'] = {
+        vnf_to_add['client_config'] = {
             'mgmt_ip_addr': request.forms.get('mgmt_ip_addr'),
             'username': request.forms.get('username'),
             'password': request.forms.get('password'),
@@ -862,9 +864,9 @@ def vnf_delete():
         vnf_info['type'] = vnf_json[vnf_name]['type']
         vnf_info['instance_name'] = vnf_name
         vnf_info['config'] = vnf_json[vnf_name]['config']
-        vnf_info['mgmt_ip_addr'] = vnf_json[vnf_name]['credentials']['mgmt_ip_addr']
-        vnf_info['username'] = vnf_json[vnf_name]['credentials']['username']
-        vnf_info['password'] = vnf_json[vnf_name]['credentials']['password']
+        vnf_info['mgmt_ip_addr'] = vnf_json[vnf_name]['client_config']['mgmt_ip_addr']
+        vnf_info['username'] = vnf_json[vnf_name]['client_config']['username']
+        vnf_info['password'] = vnf_json[vnf_name]['client_config']['password']
         return template('vnf_delete.html', vnf=vnf_info)
     else:
         vnf_name = request.forms.get('instance_name')
@@ -877,34 +879,44 @@ def additional():
     """
     This function displays the additional parameters that a customer must setup.
     """
-
+    set_default_additional()
     scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
     desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
-    instantiation_time = requests.get(url='http://localhost:8080/v1.0/config/instantiation_time')
-    operate_time = requests.get(url='http://localhost:8080/v1.0/config/operate_time')
-    poll_interval = requests.get(url='http://localhost:8080/v1.0/config/poll_interval')
-    scale_interval = requests.get(url='http://localhost:8080/v1.0/config/scale_interval')
-    start_time = requests.get(url='http://localhost:8080/v1.0/config/start_time')
-    stop_time = requests.get(url='http://localhost:8080/v1.0/config/stop_time')
-    terminate_time = requests.get(url='http://localhost:8080/v1.0/config/terminate_time')
-    low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/low_traffic_load')
-    normal_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/normal_traffic_load')
-    max_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/max_traffic_load')
-    traffic_tolerance = requests.get(url='http://localhost:8080/v1.0/config/traffic_tolerance')
+    vnf_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT')
+    vnf_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT')
+    vnf_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT')
+    vnf_stop_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STOP_TIMEOUT')
+    vnf_start_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_START_TIMEOUT')
+    vnf_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT')
+    vnf_stable_state_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STABLE_STATE_TIMEOUT')
+    ns_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_INSTANTIATE_TIMEOUT')
+    ns_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_OUT_TIMEOUT')
+    ns_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_IN_TIMEOUT')
+    ns_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_TERMINATE_TIMEOUT')
+    poll_interval = requests.get(url='http://localhost:8080/v1.0/config/POLL_INTERVAL')
+    low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/LOW_TRAFFIC_LOAD')
+    normal_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/NORMAL_TRAFFIC_LOAD')
+    max_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/MAX_TRAFFIC_LOAD')
+    traffic_tolerance = requests.get(url='http://localhost:8080/v1.0/config/TRAFFIC_TOLERANCE')
     additional_params = {
         'scaling_policy_name': scaling_policy_name.json(),
         'desired_scale_out_steps': desired_scale_out_steps.json(),
-        'instantiation_time': instantiation_time.json(),
-        'operate_time': operate_time.json(),
-        'poll_interval': poll_interval.json(),
-        'scale_interval': scale_interval.json(),
-        'start_time': start_time.json(),
-        'stop_time': stop_time.json(),
-        'terminate_time': terminate_time.json(),
-        'low_traffic_load': low_traffic_load.json(),
-        'normal_traffic_load': normal_traffic_load.json(),
-        'max_traffic_load': max_traffic_load.json(),
-        'traffic_tolerance': float(traffic_tolerance.json())*100
+        'VNF_INSTANTIATE_TIMEOUT': vnf_instantiate_timeout.json(),
+        'VNF_SCALE_OUT_TIMEOUT': vnf_scale_out_timeout.json(),
+        'VNF_SCALE_IN_TIMEOUT': vnf_scale_in_timeout.json(),
+        'VNF_STOP_TIMEOUT': vnf_stop_timeout.json(),
+        'VNF_START_TIMEOUT': vnf_start_timeout.json(),
+        'VNF_TERMINATE_TIMEOUT': vnf_terminate_timeout.json(),
+        'VNF_STABLE_STATE_TIMEOUT': vnf_stable_state_timeout.json(),
+        'NS_INSTANTIATE_TIMEOUT': ns_instantiate_timeout.json(),
+        'NS_SCALE_OUT_TIMEOUT': ns_scale_out_timeout.json(),
+        'NS_SCALE_IN_TIMEOUT': ns_scale_in_timeout.json(),
+        'NS_TERMINATE_TIMEOUT': ns_terminate_timeout.json(),
+        'POLL_INTERVAL': poll_interval.json(),
+        'LOW_TRAFFIC_LOAD': low_traffic_load.json(),
+        'NORMAL_TRAFFIC_LOAD': normal_traffic_load.json(),
+        'MAX_TRAFFIC_LOAD': max_traffic_load.json(),
+        'TRAFFIC_TOLERANCE': float(traffic_tolerance.json()) * 100
     }
     return template('additional_params.html', additional_params=additional_params)
 
@@ -918,60 +930,80 @@ def additional_update():
     confirmed = request.forms.get('confirmed')
     if confirmed == 'yes':
         scaling_policy_name = request.forms.get('scaling_policy_name')
-        desired_scale_out_steps = request.forms.get('desired_scale_out_steps')
-        instantiation_time = request.forms.get('instantiation_time')
-        operate_time = request.forms.get('operate_time')
-        poll_interval = request.forms.get('poll_interval')
-        scale_interval = request.forms.get('scale_interval')
-        start_time = request.forms.get('start_time')
-        stop_time = request.forms.get('stop_time')
-        terminate_time = request.forms.get('terminate_time')
-        low_traffic_load = request.forms.get('low_traffic_load')
-        normal_traffic_load = request.forms.get('normal_traffic_load')
-        max_traffic_load = request.forms.get('max_traffic_load')
-        traffic_tolerance = float(request.forms.get('traffic_tolerance'))/100
+        desired_scale_out_steps = int(request.forms.get('desired_scale_out_steps'))
+        vnf_instantiate_timeout = int(request.forms.get('vnf_instantiate_timeout'))
+        vnf_scale_out_timeout = int(request.forms.get('vnf_scale_out_timeout'))
+        vnf_scale_in_timeout = int(request.forms.get('vnf_scale_in_timeout'))
+        vnf_stop_timeout = int(request.forms.get('vnf_stop_timeout'))
+        vnf_start_timeout = int(request.forms.get('vnf_start_timeout'))
+        vnf_terminate_timeout = int(request.forms.get('vnf_terminate_timeout'))
+        vnf_stable_state_timeout = int(request.forms.get('vnf_stable_state_timeout'))
+        ns_instantiate_timeout = int(request.forms.get('ns_instantiate_timeout'))
+        ns_scale_out_timeout = int(request.forms.get('ns_scale_out_timeout'))
+        ns_scale_in_timeout = int(request.forms.get('ns_scale_in_timeout'))
+        ns_terminate_timeout = int(request.forms.get('ns_terminate_timeout'))
+        poll_interval = int(request.forms.get('poll_interval'))
+        low_traffic_load = int(request.forms.get('low_traffic_load'))
+        normal_traffic_load = int(request.forms.get('normal_traffic_load'))
+        max_traffic_load = int(request.forms.get('max_traffic_load'))
+        traffic_tolerance = float(request.forms.get('traffic_tolerance')) / 100
         requests.put(url='http://localhost:8080/v1.0/config/scaling_policy_name', json=scaling_policy_name)
         requests.put(url='http://localhost:8080/v1.0/config/desired_scale_out_steps', json=desired_scale_out_steps)
-        requests.put(url='http://localhost:8080/v1.0/config/instantiation_time', json=instantiation_time)
-        requests.put(url='http://localhost:8080/v1.0/config/operate_time', json=operate_time)
-        requests.put(url='http://localhost:8080/v1.0/config/poll_interval', json=poll_interval)
-        requests.put(url='http://localhost:8080/v1.0/config/scale_interval', json=scale_interval)
-        requests.put(url='http://localhost:8080/v1.0/config/start_time', json=start_time)
-        requests.put(url='http://localhost:8080/v1.0/config/stop_time', json=stop_time)
-        requests.put(url='http://localhost:8080/v1.0/config/terminate_time', json=terminate_time)
-        requests.put(url='http://localhost:8080/v1.0/config/low_traffic_load', json=low_traffic_load)
-        requests.put(url='http://localhost:8080/v1.0/config/normal_traffic_load', json=normal_traffic_load)
-        requests.put(url='http://localhost:8080/v1.0/config/max_traffic_load', json=max_traffic_load)
-        requests.put(url='http://localhost:8080/v1.0/config/traffic_tolerance', json=traffic_tolerance)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT', json=vnf_instantiate_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT', json=vnf_scale_out_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT', json=vnf_scale_in_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_STOP_TIMEOUT', json=vnf_stop_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_START_TIMEOUT', json=vnf_start_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT', json=vnf_terminate_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_STABLE_STATE_TIMEOUT', json=vnf_stable_state_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/NS_INSTANTIATE_TIMEOUT', json=ns_instantiate_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/NS_SCALE_OUT_TIMEOUT', json=ns_scale_out_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/NS_SCALE_IN_TIMEOUT', json=ns_scale_in_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/NS_TERMINATE_TIMEOUT', json=ns_terminate_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/POLL_INTERVAL', json=poll_interval)
+        requests.put(url='http://localhost:8080/v1.0/config/LOW_TRAFFIC_LOAD', json=low_traffic_load)
+        requests.put(url='http://localhost:8080/v1.0/config/NORMAL_TRAFFIC_LOAD', json=normal_traffic_load)
+        requests.put(url='http://localhost:8080/v1.0/config/MAX_TRAFFIC_LOAD', json=max_traffic_load)
+        requests.put(url='http://localhost:8080/v1.0/config/TRAFFIC_TOLERANCE', json=traffic_tolerance)
         return additional()
     else:
         scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
         desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
-        instantiation_time = requests.get(url='http://localhost:8080/v1.0/config/instantiation_time')
-        operate_time = requests.get(url='http://localhost:8080/v1.0/config/operate_time')
-        poll_interval = requests.get(url='http://localhost:8080/v1.0/config/poll_interval')
-        scale_interval = requests.get(url='http://localhost:8080/v1.0/config/scale_interval')
-        start_time = requests.get(url='http://localhost:8080/v1.0/config/start_time')
-        stop_time = requests.get(url='http://localhost:8080/v1.0/config/stop_time')
-        terminate_time = requests.get(url='http://localhost:8080/v1.0/config/terminate_time')
-        low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/low_traffic_load')
-        normal_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/normal_traffic_load')
-        max_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/max_traffic_load')
-        traffic_tolerance = requests.get(url='http://localhost:8080/v1.0/config/traffic_tolerance')
+        vnf_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT')
+        vnf_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT')
+        vnf_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT')
+        vnf_stop_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STOP_TIMEOUT')
+        vnf_start_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_START_TIMEOUT')
+        vnf_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT')
+        vnf_stable_state_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STABLE_STATE_TIMEOUT')
+        ns_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_INSTANTIATE_TIMEOUT')
+        ns_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_OUT_TIMEOUT')
+        ns_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_IN_TIMEOUT')
+        ns_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_TERMINATE_TIMEOUT')
+        poll_interval = requests.get(url='http://localhost:8080/v1.0/config/POLL_INTERVAL')
+        low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/LOW_TRAFFIC_LOAD')
+        normal_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/NORMAL_TRAFFIC_LOAD')
+        max_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/MAX_TRAFFIC_LOAD')
+        traffic_tolerance = requests.get(url='http://localhost:8080/v1.0/config/TRAFFIC_TOLERANCE')
         additional_params = {
             'scaling_policy_name': scaling_policy_name.json(),
             'desired_scale_out_steps': desired_scale_out_steps.json(),
-            'instantiation_time': instantiation_time.json(),
-            'operate_time': operate_time.json(),
-            'poll_interval': poll_interval.json(),
-            'scale_interval': scale_interval.json(),
-            'start_time': start_time.json(),
-            'stop_time': stop_time.json(),
-            'terminate_time': terminate_time.json(),
-            'low_traffic_load': low_traffic_load.json(),
-            'normal_traffic_load': normal_traffic_load.json(),
-            'max_traffic_load': max_traffic_load.json(),
-            'traffic_tolerance': float(traffic_tolerance.json())*100
+            'VNF_INSTANTIATE_TIMEOUT': vnf_instantiate_timeout.json(),
+            'VNF_SCALE_OUT_TIMEOUT': vnf_scale_out_timeout.json(),
+            'VNF_SCALE_IN_TIMEOUT': vnf_scale_in_timeout.json(),
+            'VNF_STOP_TIMEOUT': vnf_stop_timeout.json(),
+            'VNF_START_TIMEOUT': vnf_start_timeout.json(),
+            'VNF_TERMINATE_TIMEOUT': vnf_terminate_timeout.json(),
+            'VNF_STABLE_STATE_TIMEOUT': vnf_stable_state_timeout.json(),
+            'NS_INSTANTIATE_TIMEOUT': ns_instantiate_timeout.json(),
+            'NS_SCALE_OUT_TIMEOUT': ns_scale_out_timeout.json(),
+            'NS_SCALE_IN_TIMEOUT': ns_scale_in_timeout.json(),
+            'NS_TERMINATE_TIMEOUT': ns_terminate_timeout.json(),
+            'POLL_INTERVAL': poll_interval.json(),
+            'LOW_TRAFFIC_LOAD': low_traffic_load.json(),
+            'NORMAL_TRAFFIC_LOAD': normal_traffic_load.json(),
+            'MAX_TRAFFIC_LOAD': max_traffic_load.json(),
+            'TRAFFIC_TOLERANCE': float(traffic_tolerance.json()) * 100
         }
         return template('additional_params_update.html', additional_params=additional_params)
 
@@ -1032,6 +1064,23 @@ def all_img(font):
     return static_file(font,
                        root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/fonts/")))
 
+
+def set_default_additional():
+    timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_OUT_TIMEOUT', 'VNF_SCALE_IN_TIMEOUT', 'VNF_START_TIMEOUT',
+              'VNF_STOP_TIMEOUT', 'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT', 'NS_INSTANTIATE_TIMEOUT',
+              'NS_SCALE_OUT_TIMEOUT', 'NS_SCALE_IN_TIMEOUT', 'NS_TERMINATE_TIMEOUT', 'POLL_INTERVAL',
+              'TRAFFIC_TOLERANCE']
+    traffic_load_values = ['LOW_TRAFFIC_LOAD', 'NORMAL_TRAFFIC_LOAD', 'MAX_TRAFFIC_LOAD']
+    for item in timers:
+        config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
+        if config.json().encode() == 'None':
+            default_value = getattr(constants, item)
+            requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
+    for item in traffic_load_values:
+        config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
+        if config.json().encode() == 'None':
+            default_value = getattr(constants, 'traffic_load_percent_mapping')[item]
+            requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
 
 def struct_mano(type, name, **kwargs):
     """
