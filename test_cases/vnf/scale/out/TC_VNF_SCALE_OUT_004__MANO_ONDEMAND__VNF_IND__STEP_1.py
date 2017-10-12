@@ -150,7 +150,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VNF_IND__STEP_1(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
-        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
@@ -200,14 +200,14 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VNF_IND__STEP_1(TestCase):
                                                                        notification_type=VnfLifecycleChangeNotification,
                                                                        notification_pattern={'status': 'STARTED',
                                                                                              'operation': 'NS_SCALE.*'},
-                                                                       timeout=constants.SCALE_INTERVAL)
+                                                                       timeout=constants.NS_SCALE_OUT_TIMEOUT)
             if notification_info is None:
                 raise TestRunError('Could not validate that NS scale out started')
             notification_info = self.mano.search_in_notification_queue(notification_queue=notification_queue,
                                                                        notification_type=VnfLifecycleChangeNotification,
                                                                        notification_pattern={'status': 'SUCCESS|FAILED',
                                                                                              'operation': 'NS_SCALE.*'},
-                                                                       timeout=constants.SCALE_INTERVAL)
+                                                                       timeout=constants.NS_SCALE_OUT_TIMEOUT)
             if notification_info is None:
                 raise TestRunError('Could not validate that NS scale out finished')
 

@@ -41,9 +41,8 @@ class DummyManoAdapter(object):
         return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
-    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
-                                      max_wait_time=constants.INSTANTIATION_TIME,
-                                      poll_interval=constants.POLL_INTERVAL):
+    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states, max_wait_time,
+                                      poll_interval):
         operation_pending = True
         elapsed_time = 0
 

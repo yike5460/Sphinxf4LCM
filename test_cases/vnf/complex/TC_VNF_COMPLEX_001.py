@@ -120,7 +120,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         # - the time it takes the VNF to scale out
         self.time_record.START('scale_out_vnf')
         elapsed_time = 0
-        while elapsed_time < constants.SCALE_INTERVAL:
+        while elapsed_time < constants.VNF_SCALE_OUT_TIMEOUT:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
                                                    'additional_param': self.tc_input['mano']['query_params']})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['max_instances']:
@@ -128,7 +128,7 @@ class TC_VNF_COMPLEX_001(TestCase):
             else:
                 time.sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.SCALE_INTERVAL:
+            if elapsed_time == constants.VNF_SCALE_OUT_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('VNF has not scaled out to the maximum')
 
@@ -174,7 +174,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
-        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Max traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_after'] = 'MAX_TRAFFIC_LOAD'

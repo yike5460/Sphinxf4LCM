@@ -126,7 +126,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
-        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
@@ -167,7 +167,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         # - the time it takes the VNF to scale out
         self.time_record.START('scale_out_vnf')
         elapsed_time = 0
-        while elapsed_time < constants.SCALE_INTERVAL:
+        while elapsed_time < constants.VNF_SCALE_OUT_TIMEOUT:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
                                                    'additional_param': self.tc_input['mano']['query_params']})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances'] + sp['increment']:
@@ -175,7 +175,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
             else:
                 time.sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.SCALE_INTERVAL:
+            if elapsed_time == constants.VNF_SCALE_OUT_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('VNF has not resized to the next level')
 
@@ -221,7 +221,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
-        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Max traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_after'] = 'MAX_TRAFFIC_LOAD'
@@ -258,7 +258,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         # - the time it takes the VNF to scale in
         self.time_record.START('scale_in_vnf')
         elapsed_time = 0
-        while elapsed_time < constants.SCALE_INTERVAL:
+        while elapsed_time < constants.VNF_SCALE_IN_TIMEOUT:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
                                                    'additional_param': self.tc_input['mano']['query_params']})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances']:
@@ -266,7 +266,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
             else:
                 time.sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.SCALE_INTERVAL:
+            if elapsed_time == constants.VNF_SCALE_IN_TIMEOUT:
                 self.tc_result['scaling_in']['status'] = 'Fail'
                 raise TestRunError('VNF has not decreased the VNFCs')
 
@@ -313,7 +313,7 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         if not self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
-        if self.traffic.any_traffic_loss(tolerance=constants.traffic_tolerance):
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_in']['traffic_after'] = 'LOW_TRAFFIC_LOAD'

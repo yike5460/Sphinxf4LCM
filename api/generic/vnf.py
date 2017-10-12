@@ -69,9 +69,8 @@ class Vnf(object):
             return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
-    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states,
-                                      max_wait_time=constants.INSTANTIATION_TIME,
-                                      poll_interval=constants.POLL_INTERVAL):
+    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states, max_wait_time,
+                                      poll_interval):
         """
         This function polls the status of an operation until it reaches a final state or time is up.
 
@@ -124,7 +123,7 @@ class Vnf(object):
 
     @log_entry_exit(LOG)
     def scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None,
-                   max_wait_time=constants.SCALE_INTERVAL, poll_interval=constants.POLL_INTERVAL):
+                   poll_interval=constants.POLL_INTERVAL):
         """
         This function synchronously scales the VNF horizontally (out/in).
 
@@ -136,8 +135,6 @@ class Vnf(object):
                                     Defaults to 1.
         :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
                                     to the VNF being scaled.
-        :param max_wait_time:       Maximum interval of time in seconds to wait for the scaling operation to reach a
-                                    final state.
         :param poll_interval:       Interval of time in seconds between consecutive polls on the scaling operation
                                     result.
         :return:                    Operation status.
@@ -145,8 +142,12 @@ class Vnf(object):
         lifecycle_operation_occurrence_id = self.scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                        additional_param)
 
+        scale_timeouts = {'out': constants.VNF_SCALE_OUT_TIMEOUT,
+                          'in': constants.VNF_SCALE_IN_TIMEOUT}
+
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+                                                              max_wait_time=scale_timeouts[scale_type],
+                                                              poll_interval=poll_interval)
 
         return operation_status
