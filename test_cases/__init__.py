@@ -190,7 +190,7 @@ class TestCase(object):
         """
         try:
             self.check_requirements()
-            self.build_objects()
+            self.build_apis()
             self.initialize_events()
             self.setup()
             self.run()
@@ -227,5 +227,4 @@ class TestCase(object):
                 self._LOG.exception(e)
             finally:
                 self.collect_timestamps()
-                print self.tc_result['events']
                 return self.tc_result
