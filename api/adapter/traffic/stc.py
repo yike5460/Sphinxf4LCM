@@ -22,11 +22,13 @@ class StcTrafficAdapter(object):
     def __init__(self, lab_server_addr, user_name, session_name, lab_server_port=80):
         try:
             self.stc = stchttp.StcHttp(lab_server_addr, port=lab_server_port)
-            self.session = self.stc.new_session(user_name=user_name, session_name=session_name, kill_existing=True)
-            self.project = self.stc.create(object_type='project')
         except Exception as e:
             LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
+        self.user_name = user_name
+        self.session_name = session_name
+        self.session = None
+        self.project = None
         self.tx_results = None
         self.rx_results = None
         self.tx_port = None
@@ -42,6 +44,16 @@ class StcTrafficAdapter(object):
 
         self._service_disruption_length = None
         self._service_disruption_lock = Lock()
+
+    @log_entry_exit(LOG)
+    def create_session(self):
+        try:
+            self.session = self.stc.new_session(user_name=self.user_name, session_name=self.session_name,
+                                                kill_existing=True)
+            self.project = self.stc.create(object_type='project')
+        except Exception as e:
+            LOG.exception(e)
+            raise StcTrafficAdapterError(e.message)
 
     @property
     def attempt_to_start_traffic(self):
@@ -232,6 +244,9 @@ class StcTrafficAdapter(object):
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
+
+        self.create_session()
+
         if traffic_config['type'] == 'VNF_TERMINATED':
             gen_port = self.create_port(port_location=traffic_config['port_location'])
             self.tx_port = gen_port
