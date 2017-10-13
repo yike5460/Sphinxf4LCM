@@ -14,13 +14,13 @@ class CirrosVnfAdapterError(VnfAdapterError):
 
 
 class CirrosVnfAdapter(object):
-    def __init__(self):
+    def __init__(self, **kwargs):
         pass
 
     @log_entry_exit(LOG)
-    def config_applied(self, **credentials):
+    def config_applied(self, **client_config):
         return True
 
     @log_entry_exit(LOG)
-    def license_applied(self, **credentials):
+    def license_applied(self, **client_config):
         return True

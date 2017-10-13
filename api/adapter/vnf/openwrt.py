@@ -14,7 +14,7 @@ class OpenwrtVnfAdapterError(VnfAdapterError):
 
 
 class OpenwrtVnfAdapter(object):
-    def __init__(self):
+    def __init__(self, **kwargs):
         pass
 
     @log_entry_exit(LOG)
