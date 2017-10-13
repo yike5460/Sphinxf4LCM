@@ -1,0 +1,7 @@
+{
+  "mano": "api.generic.mano.Mano",
+  "em": "api.generic.em.Em",
+  "vnf": "api.generic.vnf.Vnf",
+  "vim": "api.generic.vim.Vim",
+  "traffic": "api.generic.traffic.Traffic"
+}

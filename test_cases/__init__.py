@@ -2,7 +2,7 @@ import collections
 import importlib
 
 from api import ApiError
-from api.generic import constants
+from api.generic import constants, construct_generic
 from utils import timestamps
 
 Function = collections.namedtuple('Function', 'function_reference function_args function_kwargs')
@@ -115,11 +115,8 @@ class TestCase(object):
         self._LOG.debug('Building objects for %s' % self.__class__.__name__)
         for element in self.REQUIRED_APIS:
             try:
-                module_name = 'api.generic.' + element
-                module_object = importlib.import_module(module_name)
-                class_name = getattr(module_object, element.capitalize())
-                setattr(self, element, class_name(vendor=self.tc_input[element]['type'],
-                                                  **self.tc_input[element]['client_config']))
+                setattr(self, element, construct_generic(vendor=self.tc_input[element]['type'], module_type=element,
+                                                         **self.tc_input[element]['client_config']))
             except Exception as e:
                 self._LOG.exception(e)
                 raise TestRequirementsError(

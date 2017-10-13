@@ -42,14 +42,15 @@ log_file_name = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now()) + '.log'
 root_logger = logging.getLogger()
 configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name, console_level='INFO', propagate=True)
 
+print root_logger
 # Logger for the current module.
 LOG = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     openstack = {'mano': {'type': 'tacker',
-                          'client_config': {'auth_url': 'http://controller:35357/v3',
+                          'client_config': {'auth_url': 'http://10.3.228.230:35357/v3',
                                             'username': 'admin',
-                                            'password': 'stack',
+                                            'password': 'admin',
                                             'identity_api_version': '3',
                                             'project_name': 'admin',
                                             'project_domain_name': 'default',
@@ -59,17 +60,17 @@ if __name__ == '__main__':
                           'termination_params': {},
                           'operate_params': {}},
                  'vim': {'type': 'openstack',
-                         'client_config': {'auth_url': 'http://controller:35357/v3',
+                         'client_config': {'auth_url': 'http://10.3.228.202:35357/v3',
                                            'username': 'admin',
-                                           'password': 'stack',
+                                           'password': 'admin',
                                            'identity_api_version': '3',
                                            'project_name': 'admin',
                                            'project_domain_name': 'default',
                                            'user_domain_name': 'default'}},
                  'em': {'type': 'tacker',
-                        'client_config': {'auth_url': 'http://controller:35357/v3',
+                        'client_config': {'auth_url': 'http://10.3.228.230:35357/v3',
                                           'username': 'admin',
-                                          'password': 'stack',
+                                          'password': 'admin',
                                           'identity_api_version': '3',
                                           'project_name': 'admin',
                                           'project_domain_name': 'default',
@@ -81,7 +82,7 @@ if __name__ == '__main__':
                  # VNFD with IP and MAC
                  # 'vnfd_id': 'c849dc0f-c5b2-4164-b883-b630a0d0812b',
                  # VNFD with SP
-                 'vnfd_id': 'c0870bda-e5f3-477c-be22-0d791f8bb828',
+                 'vnfd_id': 'a1eff079-d75e-4b9b-84b0-c5a0fcd6fc58',
                  # VNFD with max SP
                  # 'vnfd_id': 'b40f227f-2f0d-4eb6-ba53-df54bd525529',
                  # VNF that requires EM
@@ -113,16 +114,16 @@ if __name__ == '__main__':
                          # 'config': '/home/mdragomir/Downloads/owrt_empty_config.yaml'},
                  'traffic': {'type': 'stc',
                              'client_config': {'lab_server_addr': '10.3.228.13',
-                                               'user_name': 'mdragomir',
+                                               'user_name': 'cudroiu',
                                                'session_name': 'automation'},
                              'traffic_config': {'type': 'VNF_TRANSIENT',
-                                                'left_port_location': '10.3.228.28/1/1',
+                                                'left_port_location': '10.3.228.231/1/1',
                                                 'left_traffic_addr': '172.16.1.3',
                                                 'left_traffic_plen': '24',
                                                 'left_traffic_gw': '172.16.1.10',
                                                 'left_traffic_gw_mac': '00:11:22:33:44:55',
                                                 'ingress_cp_name': 'CP2',
-                                                'right_port_location': '10.3.228.29/1/1',
+                                                'right_port_location': '10.3.228.232/1/1',
                                                 'right_traffic_addr': '172.16.2.3',
                                                 'right_traffic_plen': '24',
                                                 'right_traffic_gw': '0.0.0.0',
@@ -208,8 +209,8 @@ if __name__ == '__main__':
     # Use VNFD with IP and MAC
     # LOG.info('Calling test case TC_VNF_STATE_STOP_001')
     # TC_VNF_STATE_STOP_001(tc_input=openstack).execute()
-    # LOG.info('Calling test case TC_VNF_STATE_STOP_002')
-    # TC_VNF_STATE_STOP_002(tc_input=openstack).execute()
+    LOG.info('Calling test case TC_VNF_STATE_STOP_002')
+    TC_VNF_STATE_STOP_002(tc_input=openstack).execute()
     # LOG.info('Calling test case TC_VNF_STATE_STOP_003')
     # TC_VNF_STATE_STOP_003(tc_input=openstack).execute()
 
