@@ -103,7 +103,7 @@ class TestCase(object):
         """
         try:
             for element in self.REQUIRED_ELEMENTS:
-                if self.tc_input.get(element) is None:
+                if element not in self.tc_input.keys():
                     raise TestRequirementsError('Missing required element: %s' % element)
         except AttributeError:
             self._LOG.debug('No required elements for this test case')
@@ -122,7 +122,8 @@ class TestCase(object):
                                                   **self.tc_input[element]['client_config']))
             except Exception as e:
                 self._LOG.exception(e)
-                raise TestRequirementsError('Unable to build object for %s' % element)
+                raise TestRequirementsError(
+                                         'Unable to build object for %s %s' % (self.tc_input[element]['type'], element))
         self._LOG.debug('Finished building objects for %s' % self.__class__.__name__)
 
     def initialize_events(self):
