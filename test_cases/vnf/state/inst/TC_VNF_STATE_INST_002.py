@@ -1,9 +1,6 @@
 import logging
 
 from api.generic import constants
-from api.generic.mano import Mano
-from api.generic.traffic import Traffic
-from api.generic.vnf import Vnf
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -25,24 +22,12 @@ class TC_VNF_STATE_INST_002(TestCase):
     7. Validate traffic flows
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id')
-
-    def setup(self):
-        LOG.info('Starting setup for TC_VNF_STATE_INST_002')
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
-        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_vnf'] = dict()
-
-        LOG.info('Finished setup for TC_VNF_STATE_INST_002')
+    REQUIRED_APIS = ('mano', 'vnf', 'traffic')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'flavour_id', 'instantiation_level_id')
+    TESTCASE_EVENTS = ('instantiate_vnf',)
 
     def run(self):
-        LOG.info('Starting TC_VNF_STATE_INST_002')
+        LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
         # 1. Start the low traffic load
@@ -50,6 +35,8 @@ class TC_VNF_STATE_INST_002(TestCase):
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
 
         self.traffic.start(return_when_emission_starts=False)
 
@@ -61,10 +48,10 @@ class TC_VNF_STATE_INST_002(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
-                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                          vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
-                          additional_param=self.tc_input['mano']['instantiation_params'])
+                                           vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
+                                           vnf_instance_name=generate_name(self.tc_name), vnf_instance_description=None,
+                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
+                                           additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
@@ -100,14 +87,14 @@ class TC_VNF_STATE_INST_002(TestCase):
         # 4. Validate configuration has been applied to the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating configuration file has been applied to the VNF')
-        if not self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
+        if not self.vnf.config_applied(**self.tc_input['vnf']['client_config']):
             raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating license has been applied to the VNF')
-        if not self.vnf.license_applied(**self.tc_input['vnf']['credentials']):
+        if not self.vnf.license_applied(**self.tc_input['vnf']['client_config']):
             raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -132,4 +119,4 @@ class TC_VNF_STATE_INST_002(TestCase):
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
-        LOG.info('TC_VNF_STATE_INST_002 execution completed successfully')
+        LOG.info('%s execution completed successfully' % self.tc_name)

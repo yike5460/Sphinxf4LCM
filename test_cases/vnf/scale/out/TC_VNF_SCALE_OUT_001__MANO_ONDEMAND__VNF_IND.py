@@ -2,8 +2,6 @@ import logging
 import time
 
 from api.generic import constants
-from api.generic.mano import Mano
-from api.generic.traffic import Traffic
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -29,25 +27,12 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND(TestCase):
     9. Validate increased capacity without loss
     """
 
-    required_elements = ('mano', 'traffic', 'nsd_id', 'scaling_policy_name')
-
-    def setup(self):
-        LOG.info('Starting setup for TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND')
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_ns'] = dict()
-        self.tc_result['events']['scale_out_ns'] = dict()
-        self.tc_result['events']['service_disruption'] = dict()
-
-        LOG.info('Finished setup for TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND')
+    REQUIRED_APIS = ('mano', 'traffic')
+    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name')
+    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption')
 
     def run(self):
-        LOG.info('Starting TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND')
+        LOG.info('Starting %s' % self.tc_name)
 
         # Get scaling policy properties
         sp = self.mano.get_nsd_scaling_properties(self.tc_input['nsd_id'], self.tc_input['scaling_policy_name'])
@@ -58,7 +43,7 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND(TestCase):
         LOG.info('Instantiating the NS')
         self.time_record.START('instantiate_ns')
         self.ns_instance_id = self.mano.ns_create_and_instantiate(nsd_id=self.tc_input['nsd_id'],
-                                                                  ns_name=generate_name(self.tc_input['ns']['name']),
+                                                                  ns_name=generate_name(self.tc_name),
                                                                   ns_description=None, flavour_id=None)
         if self.ns_instance_id is None:
             raise TestRunError('NS instantiation operation failed')
@@ -67,7 +52,7 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND(TestCase):
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
-        self.register_for_cleanup(index=20, function_reference=self.mano.ns_terminate_and_delete,
+        self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -111,6 +96,8 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND(TestCase):
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        self.register_for_cleanup(index=20, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = ''
@@ -231,4 +218,4 @@ class TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND(TestCase):
 
         self.tc_result['scaling_out']['traffic_after'] = 'MAX_TRAFFIC_LOAD'
 
-        LOG.info('TC_VNF_SCALE_OUT_001__MANO_ONDEMAND__VNF_IND execution completed successfully')
+        LOG.info('%s execution completed successfully' % self.tc_name)

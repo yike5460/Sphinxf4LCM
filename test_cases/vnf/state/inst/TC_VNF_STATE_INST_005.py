@@ -1,10 +1,6 @@
 import logging
 
 from api.generic import constants
-from api.generic.em import Em
-from api.generic.mano import Mano
-from api.generic.traffic import Traffic
-from api.generic.vnf import Vnf
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -30,27 +26,12 @@ class TC_VNF_STATE_INST_005(TestCase):
     11. Calculate the instantiation time
     """
 
-    required_elements = ('mano', 'em', 'traffic', 'vnfd_id')
-
-    def setup(self):
-        LOG.info('Starting setup for TC_VNF_STATE_INST_005')
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.em = Em(vendor=self.tc_input['em']['type'], **self.tc_input['em']['client_config'])
-        self.vnf = Vnf(vendor=self.tc_input['vnf']['type'])
-        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_vnf'] = dict()
-        self.tc_result['events']['update_vnf'] = dict()
-        self.tc_result['events']['instantiate_update_vnf'] = dict()
-
-        LOG.info('Finished setup for TC_VNF_STATE_INST_005')
+    REQUIRED_APIS = ('mano', 'em', 'vnf', 'traffic')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'flavour_id', 'instantiation_level_id')
+    TESTCASE_EVENTS = ('instantiate_vnf', 'update_vnf', 'instantiate_update_vnf')
 
     def run(self):
-        LOG.info('Starting TC_VNF_STATE_INST_005')
+        LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
         # 1. Start the EM or ensure the EM is up and cannot configure the VNF
@@ -64,20 +45,20 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
-                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                          vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
-                          additional_param=self.tc_input['mano']['instantiation_params'])
+                                           vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
+                                           vnf_instance_name=generate_name(self.tc_name), vnf_instance_description=None,
+                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
+                                           additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
-        self.register_for_cleanup(index=20, function_reference=self.mano.vnf_terminate_and_delete,
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_terminate_and_delete,
                                   vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
                                   additional_param=self.tc_input['mano']['termination_params'])
-        self.register_for_cleanup(index=30, function_reference=self.mano.wait_for_vnf_stable_state,
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_vnf_stable_state,
                                   vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -143,15 +124,15 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Validating configuration has NOT been applied by the EM to the VNF')
         # The function that checks if the config has been applied is a stub function and always returns True.
         # The commented if statement is the correct line. Also adding a line so that the test does not fail.
-        # if self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
-        if not self.vnf.config_applied(**self.tc_input['vnf']['credentials']):
+        # if self.vnf.config_applied(**self.tc_input['vnf']['client_config']):
+        if not self.vnf.config_applied(**self.tc_input['vnf']['client_config']):
             raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating license has been applied to the VNF')
-        if not self.vnf.license_applied(**self.tc_input['vnf']['credentials']):
+        if not self.vnf.license_applied(**self.tc_input['vnf']['client_config']):
             raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -160,6 +141,8 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = ''
@@ -188,4 +171,4 @@ class TC_VNF_STATE_INST_005(TestCase):
         self.tc_result['events']['instantiate_update_vnf']['duration'] = self.time_record.delta('instantiate_vnf.START',
                                                                                                 'update_vnf.END')
 
-        LOG.info('TC_VNF_STATE_INST_005 execution completed successfully')
+        LOG.info('%s execution completed successfully' % self.tc_name)

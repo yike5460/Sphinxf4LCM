@@ -1,10 +1,6 @@
 import logging
 
 from api.generic import constants
-from api.generic.em import Em
-from api.generic.mano import Mano
-from api.generic.traffic import Traffic
-from api.generic.vim import Vim
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -30,27 +26,12 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX(TestCase):
     9. Validate all traffic goes through
     """
 
-    required_elements = ('mano', 'em', 'vim', 'traffic', 'vnfd_id', 'scaling_policy_name')
-
-    def setup(self):
-        LOG.info('Starting setup for TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX')
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.em = Em(vendor=self.tc_input['em']['type'], **self.tc_input['em']['client_config'])
-        self.vim = Vim(vendor=self.tc_input['vim']['type'], **self.tc_input['vim']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_vnf'] = dict()
-        self.tc_result['events']['scale_out_vnf'] = dict()
-        self.tc_result['events']['service_disruption'] = dict()
-
-        LOG.info('Finished setup for TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX')
+    REQUIRED_APIS = ('mano', 'em', 'vim', 'traffic')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name', 'flavour_id', 'instantiation_level_id')
+    TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'service_disruption')
 
     def run(self):
-        LOG.info('Starting TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX')
+        LOG.info('Starting %s' % self.tc_name)
 
         # Get scaling policy properties
         sp = self.mano.get_vnfd_scaling_properties(self.tc_input['vnfd_id'], self.tc_input['scaling_policy_name'])
@@ -66,7 +47,7 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX(TestCase):
         if reservation_id is None:
             raise TestRunError('Compute resources could not be limited')
 
-        self.register_for_cleanup(index=20, function_reference=self.vim.terminate_compute_resource_reservation,
+        self.register_for_cleanup(index=10, function_reference=self.vim.terminate_compute_resource_reservation,
                                   reservation_id=reservation_id)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -75,10 +56,10 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
-                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                          vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
-                          additional_param=self.tc_input['mano']['instantiation_params'])
+                                           vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
+                                           vnf_instance_name=generate_name(self.tc_name), vnf_instance_description=None,
+                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
+                                           additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
@@ -87,10 +68,10 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(index=30, function_reference=self.mano.vnf_terminate_and_delete,
+        self.register_for_cleanup(index=20, function_reference=self.mano.vnf_terminate_and_delete,
                                   vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
                                   additional_param=self.tc_input['mano']['termination_params'])
-        self.register_for_cleanup(index=40, function_reference=self.mano.wait_for_vnf_stable_state,
+        self.register_for_cleanup(index=30, function_reference=self.mano.wait_for_vnf_stable_state,
                                   vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -120,6 +101,8 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX(TestCase):
         LOG.info('Starting the low traffic load')
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        self.register_for_cleanup(index=40, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = ''
@@ -200,4 +183,4 @@ class TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX(TestCase):
 
         self.tc_result['scaling_out']['traffic_after'] = 'LOW_TRAFFIC_LOAD'
 
-        LOG.info('TC_VNFC_SCALE_OUT_004__EM_MANUAL__STEP_MAX execution completed successfully')
+        LOG.info('%s execution completed successfully' % self.tc_name)

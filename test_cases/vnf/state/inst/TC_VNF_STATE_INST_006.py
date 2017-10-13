@@ -1,8 +1,6 @@
 import logging
 
 from api.generic import constants
-from api.generic.mano import Mano
-from api.generic.traffic import Traffic
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -23,23 +21,12 @@ class TC_VNF_STATE_INST_006(TestCase):
     6. Validate no traffic flows
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id')
-
-    def setup(self):
-        LOG.info('Starting setup for TC_VNF_STATE_INST_006')
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_vnf'] = dict()
-
-        LOG.info('Finished setup for TC_VNF_STATE_INST_006')
+    REQUIRED_APIS = ('mano', 'traffic')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'flavour_id', 'instantiation_level_id')
+    TESTCASE_EVENTS = ('instantiate_vnf',)
 
     def run(self):
-        LOG.info('Starting TC_VNF_STATE_INST_006')
+        LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
         # 1. Deactivate the EM if needed
@@ -53,10 +40,10 @@ class TC_VNF_STATE_INST_006(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
-                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                          vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
-                          additional_param=self.tc_input['mano']['instantiation_params'])
+                                           vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
+                                           vnf_instance_name=generate_name(self.tc_name), vnf_instance_description=None,
+                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
+                                           additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
@@ -65,10 +52,10 @@ class TC_VNF_STATE_INST_006(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
 
-        self.register_for_cleanup(index=20, function_reference=self.mano.vnf_terminate_and_delete,
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_terminate_and_delete,
                                   vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
                                   additional_param=self.tc_input['mano']['termination_params'])
-        self.register_for_cleanup(index=30, function_reference=self.mano.wait_for_vnf_stable_state,
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_vnf_stable_state,
                                   vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -107,6 +94,8 @@ class TC_VNF_STATE_INST_006(TestCase):
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
+        self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
+
         # Configure stream destination address(es)
         dest_addr_list = ''
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
@@ -125,4 +114,4 @@ class TC_VNF_STATE_INST_006(TestCase):
         if self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is flowing', err_details='Low traffic flew')
 
-        LOG.info('TC_VNF_STATE_INST_006 execution completed successfully')
+        LOG.info('%s execution completed successfully' % self.tc_name)

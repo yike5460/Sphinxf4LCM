@@ -2,8 +2,6 @@ import logging
 import time
 
 from api.generic import constants
-from api.generic.mano import Mano
-from api.generic.traffic import Traffic
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -27,27 +25,12 @@ class TC_VNF_COMPLEX_001(TestCase):
     9. Validate that no traffic flows once stop is completed
     """
 
-    required_elements = ('mano', 'traffic', 'vnfd_id', 'scaling_policy_name')
-
-    def setup(self):
-        LOG.info('Starting setup for TC_VNF_COMPLEX_001')
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.traffic = Traffic(self.tc_input['traffic']['type'], **self.tc_input['traffic']['client_config'])
-        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_vnf'] = dict()
-        self.tc_result['events']['scale_out_vnf'] = dict()
-        self.tc_result['events']['stop_vnf'] = dict()
-        self.tc_result['events']['traffic_activation'] = dict()
-        self.tc_result['events']['traffic_deactivation'] = dict()
-
-        LOG.info('Finished setup for TC_VNF_COMPLEX_001')
+    REQUIRED_APIS = ('mano', 'traffic')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name', 'flavour_id', 'instantiation_level_id')
+    TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'stop_vnf', 'traffic_activation', 'traffic_deactivation')
 
     def run(self):
-        LOG.info('Starting TC_VNF_COMPLEX_001')
+        LOG.info('Starting %s' % self.tc_name)
 
         # Get scaling policy properties
         sp = self.mano.get_vnfd_scaling_properties(self.tc_input['vnfd_id'], self.tc_input['scaling_policy_name'])
@@ -59,6 +42,8 @@ class TC_VNF_COMPLEX_001(TestCase):
         self.traffic.configure(traffic_load='MAX_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
+        self.register_for_cleanup(index=10, function_reference=self.traffic.destroy)
+
         self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(index=20, function_reference=self.traffic.stop)
@@ -69,10 +54,10 @@ class TC_VNF_COMPLEX_001(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                          vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
-                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']),
-                          vnf_instance_description=None, instantiation_level_id=self.tc_input['instantiation_level_id'],
-                          additional_param=self.tc_input['mano']['instantiation_params'])
+                                           vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
+                                           vnf_instance_name=generate_name(self.tc_name), vnf_instance_description=None,
+                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
+                                           additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
@@ -211,4 +196,4 @@ class TC_VNF_COMPLEX_001(TestCase):
         if self.traffic.does_traffic_flow(delay_time=5):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was stopped')
 
-        LOG.info('TC_VNF_COMPLEX_001 execution completed successfully')
+        LOG.info('%s execution completed successfully' % self.tc_name)

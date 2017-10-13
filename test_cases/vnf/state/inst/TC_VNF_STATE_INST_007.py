@@ -19,17 +19,9 @@ class TC_VNF_STATE_INST_007(TestCase):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    def setup(self):
-        LOG.info('Starting setup for %s' % self.tc_name)
-
-        # Create objects needed by the test.
-        self.mano = Mano(vendor=self.tc_input['mano']['type'], **self.tc_input['mano']['client_config'])
-        self.vim = Vim(vendor=self.tc_input['vim']['type'], **self.tc_input['vim']['client_config'])
-
-        # Initialize test case result.
-        self.tc_result['events']['instantiate_vnf'] = dict()
-
-        LOG.info('Finished setup for %s' % self.tc_name)
+    REQUIRED_APIS = ('mano', 'vim')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'flavour_id', 'instantiation_level_id')
+    TESTCASE_EVENTS = ('instantiate_vnf',)
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -39,9 +31,8 @@ class TC_VNF_STATE_INST_007(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
-        self.vnf_instance_id = self.mano.vnf_create_id(
-                                          vnfd_id=self.tc_input['vnfd_id'], vnf_instance_description=None,
-                                          vnf_instance_name=generate_name(self.tc_input['vnf']['instance_name']))
+        self.vnf_instance_id = self.mano.vnf_create_id(vnfd_id=self.tc_input['vnfd_id'], vnf_instance_description=None,
+                                                       vnf_instance_name=generate_name(self.tc_name))
 
         if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id, flavour_id=self.tc_input['flavour_id'],
                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
@@ -117,8 +108,6 @@ class TC_VNF_STATE_INST_007_004(TC_VNF_STATE_INST_007):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano', 'vim', 'vnfd_id')
-
 
 class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     """
@@ -129,11 +118,7 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano', 'vim', 'vnfd_id')
-
     def setup(self):
-        super(TC_VNF_STATE_INST_007_005, self).setup()
-
         LOG.debug('Ensuring NFVI has not enough vMemory for the VNF to be instantiated')
         reservation_id = self.mano.limit_compute_resources_for_vnf_instantiation(
                                                                vnfd_id=self.tc_input['vnfd_id'],
@@ -167,11 +152,7 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano', 'vim', 'vnfd_id')
-
     def setup(self):
-        super(TC_VNF_STATE_INST_007_007, self).setup()
-
         LOG.debug('Ensuring NFVI has not enough vStorage for the VNF to be instantiated')
         reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(self.tc_input['vnfd_id'], self.vim,
                                                                                  self.tc_input['scaling_policy_name'])
@@ -192,11 +173,7 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
     2. Validate MANO reports no VNF instance and the error
     """
 
-    required_elements = ('mano', 'vim', 'vnfd_id')
-
     def setup(self):
-        super(TC_VNF_STATE_INST_007_008, self).setup()
-
         LOG.debug('Ensuring NFVI has not enough vCPUs for the VNF to be instantiated')
         reservation_id = self.mano.limit_compute_resources_for_vnf_instantiation(
                                                                vnfd_id=self.tc_input['vnfd_id'],
