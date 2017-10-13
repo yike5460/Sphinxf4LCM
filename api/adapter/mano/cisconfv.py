@@ -332,7 +332,7 @@ class CiscoNFVManoAdapter(object):
             './/{http://tail-f.com/pkg/tailf-nfvo-esc}vnfr/{http://tail-f.com/pkg/tailf-nfvo-esc}id').text
 
         # Get the VNFD XML from the NSO
-        vnfd_xml = self.nso.get(('xpath', '/nfvo/vnfd[id="CSR1kvLuxoft"]')).data_xml
+        vnfd_xml = self.nso.get(('xpath', '/nfvo/vnfd[id="%s"]' % vnfd_id)).data_xml
         vnfd_xml = etree.fromstring(vnfd_xml)
 
         # Build the vnf_info data structure
@@ -465,8 +465,11 @@ class CiscoNFVManoAdapter(object):
         vnfd_xml = netconf_reply.data_xml
         return vnfd_xml
 
-    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id, additional_param):
+    def validate_allocated_vresources(self, vnf_instance_id, additional_param):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+        vnfd = etree.fromstring(vnfd)
 
         # Get the VNFR from the NSO
         vnfr = self.nso.get(('xpath',
@@ -508,8 +511,6 @@ class CiscoNFVManoAdapter(object):
                         'Unable to iterate the port list dict returned by Nova for server with ID %s' % resource_id)
 
             # Get the number of ports in the VNFD for the VDU type that corresponds to the current VNFC type
-            vnfd =  self.get_vnfd(vnfd_id)
-            vnfd = etree.fromstring(vnfd)
             port_number_vnfd = len(vnfd.findall(
                 './/{http://tail-f.com/pkg/nfvo}vdu[{http://tail-f.com/pkg/nfvo}id="%s"]/'
                     '{http://tail-f.com/pkg/nfvo}internal-connection-point' % vdu_id))

@@ -269,8 +269,9 @@ class TackerManoAdapter(object):
             raise TackerManoAdapterError(e.message)
         return yaml.load(tacker_show_vnfd)
 
-    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id, additional_param=None):
+    def validate_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:

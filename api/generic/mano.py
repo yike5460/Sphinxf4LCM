@@ -173,17 +173,16 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id, additional_param=None):
+    def validate_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This function checks that the virtual resources allocated to the VNF match the ones in the VNFD.
 
-        :param vnfd_id:             Identifier of the VNFD.
         :param vnf_instance_id:     Identifier of the VNF instance.
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
 
-        return self.mano_adapter.validate_allocated_vresources(vnfd_id, vnf_instance_id, additional_param)
+        return self.mano_adapter.validate_allocated_vresources(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):

@@ -61,7 +61,7 @@ class DummyManoAdapter(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def validate_allocated_vresources(self, vnfd_id, vnf_instance_id):
+    def validate_allocated_vresources(self, vnf_instance_id):
         return True
 
     @log_entry_exit(LOG)
