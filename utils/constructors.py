@@ -1,7 +1,7 @@
 import json
 import os
 
-vendor_mapping_file_name = 'constructors.json'
+vendor_mapping_file_name = 'vendor_construct.json'
 _vendor_constructor_mapping = None
 
 generic_mapping_file_name = 'generic_construct.json'
