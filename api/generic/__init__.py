@@ -1,6 +1,6 @@
 import importlib
 from api import ApiError
-from utils.constructors import get_generic_constructor_mapping
+from utils.constructor.mapping import get_constructor_mapping
 
 
 class ApiGenericError(ApiError):
@@ -19,9 +19,9 @@ def construct_generic(vendor, module_type, **kwargs):
     :param kwargs:      Additional key-value pairs.
     :return:            The constructor for the specified vendor and module type.
     """
-    generic_constructor_mapping = get_generic_constructor_mapping()
+    generic_constructor_mapping = get_constructor_mapping(type='generic')
     if module_type not in generic_constructor_mapping:
-        raise ApiGenericError('Unable to find generic adapter for %s"' % module_type)
+        raise ApiGenericError('Unable to find generic adapter for %s' % module_type)
 
     module_name, constructor_name = generic_constructor_mapping[module_type].rsplit('.', 1)
 
