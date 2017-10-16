@@ -1,6 +1,6 @@
 import importlib
 from api import ApiError
-from api.generic.generic_construct import get_generic_constructor_mapping
+from utils.constructors import get_generic_constructor_mapping
 
 
 class ApiGenericError(ApiError):

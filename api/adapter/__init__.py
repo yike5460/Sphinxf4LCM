@@ -1,7 +1,7 @@
 import importlib
 
 from api import ApiError
-from api.adapter.constructors import get_vendor_constructor_mapping
+from utils.constructors import get_vendor_constructor_mapping
 
 
 class ApiAdapterError(ApiError):
