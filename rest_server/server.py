@@ -10,6 +10,7 @@ from bottle import route, request, response, run
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
+from utils.constructors.mapping import get_constructor_mapping
 
 execution_queues = dict()
 execution_processes = dict()
@@ -17,8 +18,6 @@ tc_results = dict()
 tc_inputs = dict()
 
 # TODO: move mapping logic in test_cases module
-mapping_file_path = '../test_cases/tc_mapping.json'
-tc_name_module_mapping = None
 
 config_file_path = 'config.json'
 
@@ -78,12 +77,7 @@ def get_tc_class(tc_name):
     """
     This function returns the test class for the specified test case name.
     """
-    global tc_name_module_mapping
-
-    if tc_name_module_mapping is None:
-        with open(mapping_file_path, 'r') as mapping_file:
-            tc_name_module_mapping = json.load(mapping_file)
-
+    tc_name_module_mapping = get_constructor_mapping('tc')
     tc_module_name = tc_name_module_mapping[tc_name]
     tc_module = importlib.import_module(tc_module_name)
     tc_class = getattr(tc_module, tc_name)
