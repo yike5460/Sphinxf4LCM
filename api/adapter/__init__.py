@@ -1,7 +1,5 @@
-import importlib
-
 from api import ApiError
-from utils.constructors.mapping import get_constructor_mapping
+from utils.constructors.mapping import get_constructor_class
 
 
 class ApiAdapterError(ApiError):
@@ -20,23 +18,6 @@ def construct_adapter(vendor, module_type, **kwargs):
     :param kwargs:      Additional key-value pairs.
     :return:            The constructor for the specified vendor and module type.
     """
-    vendor_constructor_mapping = get_constructor_mapping(type='adapter')
-    if module_type not in vendor_constructor_mapping:
-        raise ApiAdapterError('Unable to find module %s for vendor "%s"' % (module_type, vendor))
-
-    if vendor not in vendor_constructor_mapping[module_type]:
-        raise ApiAdapterError('Unable to find constructor for vendor "%s"' % vendor)
-
-    module_name, constructor_name = vendor_constructor_mapping[module_type][vendor].rsplit('.', 1)
-
-    try:
-        module = importlib.import_module(module_name)
-    except ImportError:
-        raise ApiAdapterError('Unable to import module %s' % module_name)
-
-    try:
-        constructor = getattr(module, constructor_name)
-    except AttributeError:
-        raise ApiAdapterError('Unable to find constructor %s in module %s' % (constructor_name, module_name))
+    constructor = get_constructor_class(map='adapter', path=module_type + '.' + vendor)
 
     return constructor(**kwargs)

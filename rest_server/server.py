@@ -1,4 +1,3 @@
-import importlib
 import json
 import logging
 import uuid
@@ -10,17 +9,14 @@ from bottle import route, request, response, run
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
-from utils.constructors.mapping import get_constructor_mapping
+from utils.constructors.mapping import get_constructor_mapping, get_constructor_class
 
 execution_queues = dict()
 execution_processes = dict()
 tc_results = dict()
 tc_inputs = dict()
 
-# TODO: move mapping logic in test_cases module
-
 config_file_path = 'config.json'
-
 
 lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
 lock = dict()
@@ -77,10 +73,7 @@ def get_tc_class(tc_name):
     """
     This function returns the test class for the specified test case name.
     """
-    tc_name_module_mapping = get_constructor_mapping('tc')
-    tc_module_name = tc_name_module_mapping[tc_name]
-    tc_module = importlib.import_module(tc_module_name)
-    tc_class = getattr(tc_module, tc_name)
+    tc_class = get_constructor_class(map='tc', path=tc_name)
 
     return tc_class
 
@@ -226,13 +219,7 @@ def get_tcs():
     Example: "TC_VNF_STATE_TERM_003": "vnf/state/term"
     """
     tc_list = dict()
-
-    global tc_name_module_mapping
-
-    if tc_name_module_mapping is None:
-        with open(mapping_file_path, 'r') as mapping_file:
-            tc_name_module_mapping = json.load(mapping_file)
-
+    tc_name_module_mapping = get_constructor_mapping('tc')
     for tc_name, tc_module_name in tc_name_module_mapping.items():
         tc_path = tc_module_name.rsplit('.', 1)[0].split('.', 1)[1].replace('.', '/')
         tc_list[tc_name] = tc_path
