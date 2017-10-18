@@ -99,14 +99,18 @@ class TestCase(object):
 
     def check_requirements(self):
         """
-        This method verifies that the test case instance tc_input dictionary contains all the required elements, if any.
+        This method verifies that the test case instance tc_input dictionary contains all the required items, if any.
         """
         try:
-            for element in self.REQUIRED_ELEMENTS:
+            required_items = self.REQUIRED_APIS + self.REQUIRED_ELEMENTS
+            missing_items = list()
+            for element in required_items:
                 if element not in self.tc_input.keys():
-                    raise TestRequirementsError('Missing required element: %s' % element)
+                    missing_items.append(element)
+            if len(missing_items) > 0:
+                raise TestRequirementsError('Missing required item(s) from test case input: %s' % missing_items)
         except AttributeError:
-            self._LOG.debug('No required elements for this test case')
+            self._LOG.debug('No items required as input for this test case')
 
     def build_apis(self):
         """
