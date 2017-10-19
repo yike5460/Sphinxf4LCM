@@ -42,10 +42,15 @@ class TC_VNFC_SCALE_OUT_002__MANO_ONDEMAND__VNF_IND(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                           vnfd_id=self.tc_input['vnfd_id'], flavour_id=self.tc_input['flavour_id'],
-                                           vnf_instance_name=generate_name(self.tc_name), vnf_instance_description=None,
-                                           instantiation_level_id=self.tc_input['instantiation_level_id'],
-                                           additional_param=self.tc_input['mano']['instantiation_params'])
+                                                 vnfd_id=self.tc_input['vnfd_id'],
+                                                 flavour_id=self.tc_input.get('flavour_id'),
+                                                 vnf_instance_name=generate_name(self.tc_name),
+                                                 vnf_instance_description=self.tc_input.get('vnf_instance_description'),
+                                                 instantiation_level_id=self.tc_input.get('instantiation_level_id'),
+                                                 ext_virtual_link=self.tc_input.get('ext_virtual_link'),
+                                                 ext_managed_virtual_link=self.tc_input.get('ext_managed_virtual_link'),
+                                                 localization_language=self.tc_input.get('localization_language'),
+                                                 additional_param=self.tc_input['mano']['instantiation_params'])
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
