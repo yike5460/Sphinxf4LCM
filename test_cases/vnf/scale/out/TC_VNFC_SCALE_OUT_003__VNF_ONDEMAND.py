@@ -73,7 +73,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_ONDEMAND(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                               'additional_param': self.tc_input['mano']['query_params']})
+                                               'additional_param': self.tc_input['mano'].get('query_params')})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -143,7 +143,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_ONDEMAND(TestCase):
         elapsed_time = 0
         while elapsed_time < constants.VNF_SCALE_OUT_TIMEOUT:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano']['query_params']})
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances'] + sp['increment']:
                 break
             else:
@@ -219,7 +219,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_ONDEMAND(TestCase):
         elapsed_time = 0
         while elapsed_time < constants.VNF_SCALE_IN_TIMEOUT:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano']['query_params']})
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances']:
                 break
             else:

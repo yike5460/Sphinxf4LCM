@@ -92,7 +92,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VNF_IND__STEP_1(TestCase):
         self.vnf_instance_id = ns_info.vnf_info_id[0]
 
         vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                               'additional_param': self.tc_input['mano']['query_params']})
+                                               'additional_param': self.tc_input['mano'].get('query_params')})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
