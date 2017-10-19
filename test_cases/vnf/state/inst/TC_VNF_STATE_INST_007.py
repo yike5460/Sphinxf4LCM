@@ -31,11 +31,17 @@ class TC_VNF_STATE_INST_007(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
-        self.vnf_instance_id = self.mano.vnf_create_id(vnfd_id=self.tc_input['vnfd_id'], vnf_instance_description=None,
-                                                       vnf_instance_name=generate_name(self.tc_name))
+        self.vnf_instance_id = self.mano.vnf_create_id(
+                                                 vnfd_id=self.tc_input['vnfd_id'],
+                                                 vnf_instance_name=generate_name(self.tc_name),
+                                                 vnf_instance_description=self.tc_input.get('vnf_instance_description'))
 
-        if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id, flavour_id=self.tc_input['flavour_id'],
-                                          instantiation_level_id=self.tc_input['instantiation_level_id'],
+        if self.mano.vnf_instantiate_sync(vnf_instance_id=self.vnf_instance_id,
+                                          flavour_id=self.tc_input.get('flavour_id'),
+                                          instantiation_level_id=self.tc_input.get('instantiation_level_id'),
+                                          ext_virtual_link=self.tc_input.get('ext_virtual_link'),
+                                          ext_managed_virtual_link=self.tc_input.get('ext_managed_virtual_link'),
+                                          localization_language=self.tc_input.get('localization_language'),
                                           additional_param=self.tc_input['mano']['instantiation_params']) \
                 != constants.OPERATION_FAILED:
             raise TestRunError('VNF instantiation operation succeeded')
