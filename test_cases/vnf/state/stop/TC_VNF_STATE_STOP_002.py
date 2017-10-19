@@ -121,7 +121,9 @@ class TC_VNF_STATE_STOP_002(TestCase):
         self.traffic.clear_counters()
         self.time_record.START('stop_vnf')
         if self.mano.vnf_operate_sync(self.vnf_instance_id, change_state_to='stop',
-                                      additional_param=self.tc_input['mano']['operate_params']) \
+                                      stop_type=self.tc_input.get('stop_type'),
+                                      graceful_stop_timeout=self.tc_input.get('graceful_stop_timeout'),
+                                      additional_param=self.tc_input['mano'].get('operate_params')) \
                 != constants.OPERATION_SUCCESS:
             raise TestRunError('MANO could not stop the VNF')
         self.time_record.END('stop_vnf')
