@@ -26,7 +26,7 @@ class TC_VNF_COMPLEX_001(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
-    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name', 'flavour_id', 'instantiation_level_id')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name')
     TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'stop_vnf', 'traffic_activation', 'traffic_deactivation')
 
     def run(self):

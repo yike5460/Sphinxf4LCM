@@ -35,7 +35,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
-    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name', 'flavour_id', 'instantiation_level_id')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name')
     TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'service_disruption', 'scale_in_vnf')
 
     def run(self):

@@ -27,7 +27,7 @@ class TC_VNF_STATE_INST_005(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'em', 'vnf', 'traffic')
-    REQUIRED_ELEMENTS = ('vnfd_id', 'flavour_id', 'instantiation_level_id')
+    REQUIRED_ELEMENTS = ('vnfd_id',)
     TESTCASE_EVENTS = ('instantiate_vnf', 'update_vnf', 'instantiate_update_vnf')
 
     def run(self):

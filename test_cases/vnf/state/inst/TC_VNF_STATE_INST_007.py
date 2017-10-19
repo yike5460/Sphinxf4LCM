@@ -20,7 +20,7 @@ class TC_VNF_STATE_INST_007(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'vim')
-    REQUIRED_ELEMENTS = ('vnfd_id', 'flavour_id', 'instantiation_level_id')
+    REQUIRED_ELEMENTS = ('vnfd_id',)
     TESTCASE_EVENTS = ('instantiate_vnf',)
 
     def run(self):
