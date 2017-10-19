@@ -85,8 +85,8 @@ class TC_VNF_COMPLEX_003(TestCase):
                                            constants.VNF_STARTED)
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
-                                                                                  self.vnf_instance_id,
-                                                                                  self.tc_input['mano']['query_params'])
+                                                                              self.vnf_instance_id,
+                                                                              self.tc_input['mano'].get('query_params'))
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
@@ -149,8 +149,8 @@ class TC_VNF_COMPLEX_003(TestCase):
             raise TestRunError('VNF did not scale out to the max')
 
         self.tc_result['resources']['After scale out'] = self.mano.get_allocated_vresources(
-                                                                                  self.vnf_instance_id,
-                                                                                  self.tc_input['mano']['query_params'])
+                                                                              self.vnf_instance_id,
+                                                                              self.tc_input['mano'].get('query_params'))
 
         self.tc_result['scaling_out']['level'] = sp['max_instances']
 

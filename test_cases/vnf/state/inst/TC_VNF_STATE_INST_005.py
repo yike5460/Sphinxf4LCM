@@ -120,8 +120,8 @@ class TC_VNF_STATE_INST_005(TestCase):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
-                                                                                  self.vnf_instance_id,
-                                                                                  self.tc_input['mano']['query_params'])
+                                                                              self.vnf_instance_id,
+                                                                              self.tc_input['mano'].get('query_params'))
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate configuration has NOT been applied by the EM to the VNF
