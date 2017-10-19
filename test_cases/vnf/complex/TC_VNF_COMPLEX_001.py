@@ -174,7 +174,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         # 7. Validate allocated vResources
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating allocated vResources')
-        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------

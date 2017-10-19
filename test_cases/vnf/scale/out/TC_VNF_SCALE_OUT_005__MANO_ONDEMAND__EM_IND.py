@@ -130,7 +130,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
-        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
@@ -229,7 +229,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validate that MANO has allocated more specialized hardware resources')
         for vnf_instance_id in ns_info.vnf_info_id:
-            if not self.mano.validate_allocated_vresources(vnf_instance_id, self.tc_input['mano']['query_params']):
+            if not self.mano.validate_allocated_vresources(vnf_instance_id, self.tc_input['mano'].get('query_params')):
                 raise TestRunError('Allocated vResources could not be validated',
                                    err_details='Allocated vResources could not be validated for VNF with ID %s'
                                                % vnf_instance_id)
@@ -296,7 +296,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validate that MANO has allocated less specialized hardware resources and the previous specialized '
                  'hardware resources have been freed up')
-        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------

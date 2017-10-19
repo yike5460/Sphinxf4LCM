@@ -121,7 +121,7 @@ class TC_VNF_SCALE_OUT_002__MANO_MANUAL(TestCase):
 
         self.tc_result['scaling_out']['traffic_before'] = 'LOW_TRAFFIC_LOAD'
 
-        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano']['query_params']):
+        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------
