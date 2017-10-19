@@ -73,7 +73,8 @@ class TC_VNF_COMPLEX_001(TestCase):
 
         self.register_for_cleanup(index=30, function_reference=self.mano.vnf_terminate_and_delete,
                                   vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
-                                  additional_param=self.tc_input['mano']['termination_params'])
+                                  graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=40, function_reference=self.mano.wait_for_vnf_stable_state,
                                   vnf_instance_id=self.vnf_instance_id)
 

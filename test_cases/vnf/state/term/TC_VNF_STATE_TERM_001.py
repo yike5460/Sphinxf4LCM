@@ -55,7 +55,8 @@ class TC_VNF_STATE_TERM_001(TestCase):
 
         self.register_for_cleanup(index=10, function_reference=self.mano.vnf_terminate_and_delete,
                                   vnf_instance_id=self.vnf_instance_id, termination_type='graceful',
-                                  additional_param=self.tc_input['mano']['termination_params'])
+                                  graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_vnf_stable_state,
                                   vnf_instance_id=self.vnf_instance_id)
 
@@ -134,7 +135,8 @@ class TC_VNF_STATE_TERM_001(TestCase):
         self.traffic.clear_counters()
         self.time_record.START('terminate_vnf')
         if self.mano.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful',
-                                        additional_param=self.tc_input['mano']['termination_params']) != \
+                                        graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
+                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for terminating VNF operation',
                                err_details='VNF terminate operation failed')
