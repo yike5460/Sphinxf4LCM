@@ -60,7 +60,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
                                                  ext_virtual_link=self.tc_input.get('ext_virtual_link'),
                                                  ext_managed_virtual_link=self.tc_input.get('ext_managed_virtual_link'),
                                                  localization_language=self.tc_input.get('localization_language'),
-                                                 additional_param=self.tc_input['mano']['instantiation_params'])
+                                                 additional_param=self.tc_input['mano'].get('instantiation_params'))
 
         if self.vnf_instance_id is None:
             raise TestRunError('VNF instantiation operation failed')
