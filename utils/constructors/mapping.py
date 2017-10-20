@@ -51,7 +51,7 @@ def get_tc_constructor_class(tc_name):
     module_info = get_constructor_mapping('tc')
     module_name = module_info[tc_name]
     constructor_name = tc_name
-    constructor = get_class(module_name=module_name, constructor_name=constructor_name)
+    constructor = get_class(module_name, constructor_name)
     return constructor
 
 
