@@ -1,5 +1,5 @@
 from api import ApiError
-from utils.constructors.mapping import get_constructor_class
+from utils.constructors.mapping import get_adapter_constructor_class
 
 
 class ApiAdapterError(ApiError):
@@ -18,6 +18,6 @@ def construct_adapter(vendor, module_type, **kwargs):
     :param kwargs:      Additional key-value pairs.
     :return:            The constructor for the specified vendor and module type.
     """
-    constructor = get_constructor_class(map='adapter', path=module_type + '.' + vendor)
+    constructor = get_adapter_constructor_class(vendor, module_type)
 
     return constructor(**kwargs)
