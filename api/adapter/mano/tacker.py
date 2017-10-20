@@ -610,7 +610,8 @@ class TackerManoAdapter(object):
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None, additional_param=None):
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
+                      additional_param=None):
         try:
             self.tacker_client.delete_vnf(vnf_instance_id)
         except tackerclient.common.exceptions.NotFound:

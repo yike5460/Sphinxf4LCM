@@ -672,7 +672,8 @@ class CiscoNFVManoAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None, additional_param=None):
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
+                      additional_param=None):
         vnfr_delete_xml = self.build_vnfr_delete(vnf_instance_id, additional_param)
 
         try:

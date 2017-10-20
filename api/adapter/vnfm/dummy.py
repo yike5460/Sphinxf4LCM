@@ -87,7 +87,7 @@ class DummyVnfmAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_type=None):
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None):
         lifecycle_operation_occurrence_id = 'vnf_vnf_terminate_operation_id'
 
         return lifecycle_operation_occurrence_id
