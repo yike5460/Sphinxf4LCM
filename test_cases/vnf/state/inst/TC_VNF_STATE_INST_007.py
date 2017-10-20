@@ -128,10 +128,10 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vMemory for the VNF to be instantiated')
         reservation_id = self.mano.limit_compute_resources_for_vnf_instantiation(
-                                                               vnfd_id=self.tc_input['vnfd_id'],
-                                                               generic_vim_object=self.vim, limit_vcpus=False,
-                                                               limit_vc_instances=False,
-                                                               scaling_policy_name=self.tc_input['scaling_policy_name'])
+                                                           vnfd_id=self.tc_input['vnfd_id'],
+                                                           generic_vim_object=self.vim, limit_vcpus=False,
+                                                           limit_vc_instances=False,
+                                                           scaling_policy_name=self.tc_input.get('scaling_policy_name'))
 
         if reservation_id is None:
             raise TestRunError('vMemory could not be limited')
@@ -161,8 +161,9 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
 
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vStorage for the VNF to be instantiated')
-        reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(self.tc_input['vnfd_id'], self.vim,
-                                                                                 self.tc_input['scaling_policy_name'])
+        reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(
+                                                                               self.tc_input['vnfd_id'], self.vim,
+                                                                               self.tc_input.get('scaling_policy_name'))
 
         if reservation_id is None:
             raise TestRunError('vStorage could not be limited')
@@ -183,10 +184,10 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vCPUs for the VNF to be instantiated')
         reservation_id = self.mano.limit_compute_resources_for_vnf_instantiation(
-                                                               vnfd_id=self.tc_input['vnfd_id'],
-                                                               generic_vim_object=self.vim, limit_vmem=False,
-                                                               limit_vc_instances=False,
-                                                               scaling_policy_name=self.tc_input['scaling_policy_name'])
+                                                           vnfd_id=self.tc_input['vnfd_id'],
+                                                           generic_vim_object=self.vim, limit_vmem=False,
+                                                           limit_vc_instances=False,
+                                                           scaling_policy_name=self.tc_input.get('scaling_policy_name'))
 
         if reservation_id is None:
             raise TestRunError('vCPU count could not be limited')
