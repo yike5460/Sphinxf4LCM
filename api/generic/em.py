@@ -22,12 +22,20 @@ class Em(object):
     Class of generic functions representing operations exposed by the EM towards the Test Interface as defined by
     ETSI GS NFV-TST 002 v1.1.1 (2016-10).
     """
-    def __init__(self, vendor=None, **kwargs):
+    def __init__(self, vendor, generic_config, adapter_config):
         """
         Construct the EM object corresponding to the specified vendor.
         """
-        self.vendor = vendor
-        self.em_adapter = construct_adapter(vendor, module_type='em', **kwargs)
+        self.set_generic_config(**generic_config)
+        self.em_adapter = construct_adapter(vendor, module_type='em', **adapter_config)
+
+    def set_generic_config(self,
+                           VNF_SCALE_OUT_TIMEOUT=constants.VNF_SCALE_OUT_TIMEOUT,
+                           VNF_SCALE_IN_TIMEOUT=constants.VNF_SCALE_IN_TIMEOUT,
+                           POLL_INTERVAL=constants.POLL_INTERVAL):
+        self.VNF_SCALE_OUT_TIMEOUT=VNF_SCALE_OUT_TIMEOUT
+        self.VNF_SCALE_IN_TIMEOUT=VNF_SCALE_IN_TIMEOUT
+        self.POLL_INTERVAL=POLL_INTERVAL
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -118,8 +126,7 @@ class Em(object):
         return self.em_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)
-    def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None,
-                       poll_interval=constants.POLL_INTERVAL):
+    def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         """
         This function synchronously scales a VNF horizontally (out/in).
 
@@ -131,19 +138,17 @@ class Em(object):
                                     Defaults to 1.
         :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
                                     to the VNF being scaled.
-        :param poll_interval:       Interval of time in seconds between consecutive polls on the scaling operation
-                                    result.
         :return:                    Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                            additional_param)
 
-        scale_timeouts = {'out': constants.VNF_SCALE_OUT_TIMEOUT,
-                          'in': constants.VNF_SCALE_IN_TIMEOUT}
+        scale_timeouts = {'out': self.VNF_SCALE_OUT_TIMEOUT,
+                          'in': self.VNF_SCALE_IN_TIMEOUT}
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
                                                               max_wait_time=scale_timeouts[scale_type],
-                                                              poll_interval=poll_interval)
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status

@@ -19,9 +19,9 @@ class Traffic(object):
     """
     Class of functions used to control the test traffic.
     """
-    def __init__(self, vendor=None, **kwargs):
+    def __init__(self, vendor, adapter_config, **kwargs):
         self.vendor = vendor
-        self.traffic_adapter = construct_adapter(vendor, module_type='traffic', **kwargs)
+        self.traffic_adapter = construct_adapter(vendor, module_type='traffic', **adapter_config)
 
     @log_entry_exit(LOG)
     def any_traffic_loss(self, delay_time=0, tolerance=0):

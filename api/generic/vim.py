@@ -22,12 +22,12 @@ class Vim(object):
     ETSI GS NFV-IFA 005 v2.1.1 (2016-04).
     """
 
-    def __init__(self, vendor=None, **kwargs):
+    def __init__(self, vendor, adapter_config, **kwargs):
         """
         Construct the VIM object corresponding to the specified vendor.
         """
         self.vendor = vendor
-        self.vim_adapter = construct_adapter(vendor, module_type='vim', **kwargs)
+        self.vim_adapter = construct_adapter(vendor, module_type='vim', **adapter_config)
 
     @log_entry_exit(LOG)
     def get_resource_group_id(self):
