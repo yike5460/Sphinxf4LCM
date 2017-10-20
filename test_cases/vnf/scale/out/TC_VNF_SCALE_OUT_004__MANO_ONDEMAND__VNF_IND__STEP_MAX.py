@@ -48,8 +48,9 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VNF_IND__STEP_MAX(TestCase):
         LOG.info('Ensure NFVI has not enough vResources for the NS to be scaled out')
         # Reserving only compute resources is enough for limiting the NFVI resources
         reservation_id = self.mano.limit_compute_resources_for_ns_scaling(
-                               nsd_id=self.tc_input['nsd_id'], scaling_policy_name=self.tc_input['scaling_policy_name'],
-                               desired_scale_out_steps=0, generic_vim_object=self.vim)
+                                                               nsd_id=self.tc_input['nsd_id'],
+                                                               scaling_policy_name=self.tc_input['scaling_policy_name'],
+                                                               desired_scale_out_steps=0, generic_vim_object=self.vim)
         if reservation_id is None:
             raise TestRunError('Compute resources could not be limited')
 
