@@ -159,7 +159,9 @@ class TC_VNF_SCALE_OUT_005__MANO_MANUAL(TestCase):
         scale_ns_data.scale_ns_by_steps_data.number_of_steps = sp['increment']
 
         self.time_record.START('scale_out_ns')
-        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data) \
+        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data,
+                                   scale_vnf_data=self.tc_input.get('scale_vnf_data'),
+                                   scale_time=self.tc_input.get('scale_time')) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_out']['status'] = 'Fail'
             raise TestRunError('MANO could not scale out the NS')
@@ -257,7 +259,9 @@ class TC_VNF_SCALE_OUT_005__MANO_MANUAL(TestCase):
         scale_ns_data.scale_ns_by_steps_data.scaling_direction = 'scale_in'
 
         self.time_record.START('scale_in_ns')
-        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data) \
+        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data,
+                                   scale_vnf_data=self.tc_input.get('scale_vnf_data'),
+                                   scale_time=self.tc_input.get('scale_time')) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_out']['status'] = 'Fail'
             raise TestRunError('MANO could not scale in the NS')
