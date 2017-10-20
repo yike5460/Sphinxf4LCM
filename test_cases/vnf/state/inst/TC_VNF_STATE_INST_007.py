@@ -162,8 +162,9 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vStorage for the VNF to be instantiated')
         reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(
-                                                                               self.tc_input['vnfd_id'], self.vim,
-                                                                               self.tc_input.get('scaling_policy_name'))
+                                                           vnfd_id=self.tc_input['vnfd_id'],
+                                                           generic_vim_object=self.vim,
+                                                           scaling_policy_name=self.tc_input.get('scaling_policy_name'))
 
         if reservation_id is None:
             raise TestRunError('vStorage could not be limited')
