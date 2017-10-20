@@ -102,7 +102,9 @@ class TC_VNF_STATE_INST_004(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Modifying the VNF configuration')
         self.time_record.START('update_vnf')
-        if self.em.modify_vnf_configuration(self.vnf_instance_id, self.tc_input['vnf']['config']) != \
+        if self.em.modify_vnf_configuration(self.vnf_instance_id, vnf_configuration_data=self.tc_input['vnf']['config'],
+                                            ext_virtual_link=self.tc_input.get('ext_virtual_link'),
+                                            vnfc_configuration_data=self.tc_input.get('vnfc_configuration_data')) != \
                 constants.OPERATION_SUCCESS:
             raise TestRunError('EM could not modify the VNF configuration')
 
