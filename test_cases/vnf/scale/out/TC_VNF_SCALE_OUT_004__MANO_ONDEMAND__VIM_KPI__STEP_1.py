@@ -82,7 +82,8 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_1(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
         self.register_for_cleanup(index=20, function_reference=self.mano.ns_terminate_and_delete,
-                                  ns_instance_id=self.ns_instance_id)
+                                  ns_instance_id=self.ns_instance_id,
+                                  terminate_time=self.tc_input.get('terminate_time'))
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate NS state is INSTANTIATED
