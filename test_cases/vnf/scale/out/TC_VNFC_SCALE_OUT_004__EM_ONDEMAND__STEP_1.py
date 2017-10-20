@@ -45,11 +45,10 @@ class TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Ensuring NFVI has vResources so that the VNF can be scaled out only desired_scale_out_steps times')
         # Reserving only compute resources is enough for limiting the NFVI resources
-        reservation_id = self.mano.limit_compute_resources_for_vnf_scaling(
-                                                                          self.tc_input['vnfd_id'],
-                                                                          self.tc_input['scaling_policy_name'],
-                                                                          self.tc_input['desired_scale_out_steps'],
-                                                                          self.vim)
+        reservation_id = self.mano.limit_compute_resources_for_vnf_scaling(self.tc_input['vnfd_id'],
+                                                                           self.tc_input['scaling_policy_name'],
+                                                                           self.tc_input['desired_scale_out_steps'],
+                                                                           self.vim)
         if reservation_id is None:
             raise TestRunError('Compute resources could not be limited')
 
