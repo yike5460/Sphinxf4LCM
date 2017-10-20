@@ -9,7 +9,7 @@ from api.generic import constants
 MANO_TYPES = ['tacker', 'cisco']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
-TRAFFIC_TYPES = ['stc-vnf-transient', 'stc-vnf-terminated']
+TRAFFIC_TYPES = ['stc']
 VNF_TYPES = ['ubuntu']
 
 
@@ -252,12 +252,12 @@ def mano_validate():
         esc_password = request.forms.get('esc_password')
         esc_port = request.forms.get('esc_port')
         vnfd_id = request.forms.get('vnfd_id')
-        flavor_id = request.forms.get('flavor_id')
+        flavour_id = request.forms.get('flavour_id')
         instantiation_level__id = request.forms.get('instantiation_level_id')
         (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
                                        nso_password=nso_password, nso_port=nso_port, esc_hostname=esc_hostname,
                                        esc_username=esc_username, esc_password=esc_password, esc_port=esc_port,
-                                       vnfd_id=vnfd_id, flavor_id=flavor_id,
+                                       vnfd_id=vnfd_id, flavour_id=flavour_id,
                                        instantiation_level_id=instantiation_level__id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
@@ -330,6 +330,8 @@ def mano_delete():
             mano_info['esc_password'] = mano_json[mano_name]['client_config']['esc_password']
             mano_info['esc_port'] = mano_json[mano_name]['client_config']['esc_port']
             mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
+            mano_info['flavour_id'] = mano_json[mano_name]['flavour_id']
+            mano_info['instantiation_level_id'] = mano_json[mano_name]['instantiation_level_id']
         return template('mano_delete.html', mano=mano_info)
     else:
         mano_name = request.forms.get('name')
@@ -583,12 +585,8 @@ def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=Non
     :param traffic_type: Type of Traffic generation element to be added
 
     """
-    if traffic_type == 'stc-vnf-transient':
-        return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
-                        name=name)
-    elif traffic_type == 'stc-vnf-terminated':
-        return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
-                        name=name)
+    return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
+                    name=name)
 
 
 @route('/traffic/validate/', method='POST')
@@ -601,7 +599,7 @@ def traffic_validate():
     type = request.forms.get('type')
 
     # The first case is when the VNF has type VNF_TRANSIENT
-    if type == 'stc-vnf-transient':
+    if type == 'VNF_TRANSIENT':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         user_name = request.forms.get('user_name')
@@ -640,7 +638,7 @@ def traffic_validate():
                 'right_traffic_gw': right_traffic_gw,
                 'port_speed': port_speed
             },
-            'type': type
+            'type': 'stc'
         }
         if request.forms.get('add'):
             if not name:
@@ -651,7 +649,7 @@ def traffic_validate():
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
 
             # The second case is when the VNF has type VNF_TERMINATED
-    if type == 'stc-vnf-terminated':
+    if type == 'VNF_TERMINATED':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         user_name = request.forms.get('user_name')
@@ -680,7 +678,7 @@ def traffic_validate():
                 'ingress_cp_name': ingress_cp_name,
                 'port_speed': port_speed
             },
-            'type': type
+            'type': 'stc'
         }
         if request.forms.get('add'):
             if not name:
@@ -720,8 +718,8 @@ def traffic_delete():
         traffic_json = traffic_data.json()
         traffic_info = OrderedDict()
         traffic_info['name'] = traffic_name
-        traffic_info['type'] = traffic_json[traffic_name]['type']
-        if traffic_info['type'] == 'stc-vnf-transient':
+        traffic_info['type'] = traffic_json[traffic_name]['traffic_config']['type']
+        if traffic_info['type'] == 'VNF_TRANSIENT':
             traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
             traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
             traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
@@ -736,7 +734,7 @@ def traffic_delete():
             traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
             traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
             traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
-        elif traffic_info['type'] == 'stc-vnf-terminated':
+        elif traffic_info['type'] == 'VNF_TERMINATED':
             traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
             traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
             traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
@@ -1124,7 +1122,7 @@ def struct_mano(type, name, **kwargs):
                 'esc_port': kwargs['esc_port']
             },
             'vnfd_id': kwargs['vnfd_id'],
-            'flavor_id': kwargs['flavor_id'],
+            'flavour_id': kwargs['flavour_id'],
             'instantiation_level_id': kwargs['instantiation_level_id']
         }
     return (name, mano)
