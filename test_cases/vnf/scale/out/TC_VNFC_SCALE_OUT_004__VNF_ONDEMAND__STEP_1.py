@@ -31,7 +31,7 @@ class TC_VNFC_SCALE_OUT_004__VNF_ONDEMAND__STEP_1(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'vim', 'traffic')
-    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name')
+    REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name', 'desired_scale_out_steps')
     TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'service_disruption')
 
     def run(self):

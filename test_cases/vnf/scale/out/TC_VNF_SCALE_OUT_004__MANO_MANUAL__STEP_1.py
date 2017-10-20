@@ -30,7 +30,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'vim', 'traffic')
-    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name')
+    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name', 'desired_scale_out_steps')
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption')
 
     def run(self):
