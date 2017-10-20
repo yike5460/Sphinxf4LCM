@@ -24,13 +24,40 @@ class Mano(object):
     """
     Class of generic functions representing operations exposed by the MANO.
     """
-    def __init__(self, vendor=None, **kwargs):
+
+    def __init__(self, vendor, generic_config, adapter_config):
         """
         Construct the Mano object corresponding to the specified vendor.
         """
-        self.vendor = vendor
-        self.mano_adapter = construct_adapter(vendor, module_type='mano', **kwargs)
+        self.set_generic_config(**generic_config)
+        self.mano_adapter = construct_adapter(vendor, module_type='mano', **adapter_config)
         self.notification_queues = dict()
+
+    def set_generic_config(self,
+                           VNF_INSTANTIATE_TIMEOUT=constants.VNF_INSTANTIATE_TIMEOUT,
+                           VNF_SCALE_OUT_TIMEOUT=constants.VNF_SCALE_OUT_TIMEOUT,
+                           VNF_SCALE_IN_TIMEOUT=constants.VNF_SCALE_IN_TIMEOUT,
+                           VNF_STOP_TIMEOUT=constants.VNF_STOP_TIMEOUT,
+                           VNF_START_TIMEOUT=constants.VNF_START_TIMEOUT,
+                           VNF_TERMINATE_TIMEOUT=constants.VNF_TERMINATE_TIMEOUT,
+                           VNF_STABLE_STATE_TIMEOUT=constants.VNF_STABLE_STATE_TIMEOUT,
+                           NS_INSTANTIATE_TIMEOUT=constants.NS_INSTANTIATE_TIMEOUT,
+                           NS_SCALE_OUT_TIMEOUT=constants.NS_SCALE_OUT_TIMEOUT,
+                           NS_SCALE_IN_TIMEOUT=constants.NS_SCALE_IN_TIMEOUT,
+                           NS_TERMINATE_TIMEOUT=constants.NS_TERMINATE_TIMEOUT,
+                           POLL_INTERVAL=constants.POLL_INTERVAL):
+        self.VNF_INSTANTIATE_TIMEOUT = VNF_INSTANTIATE_TIMEOUT
+        self.VNF_SCALE_OUT_TIMEOUT = VNF_SCALE_OUT_TIMEOUT
+        self.VNF_SCALE_IN_TIMEOUT = VNF_SCALE_IN_TIMEOUT
+        self.VNF_STOP_TIMEOUT = VNF_STOP_TIMEOUT
+        self.VNF_START_TIMEOUT = VNF_START_TIMEOUT
+        self.VNF_TERMINATE_TIMEOUT = VNF_TERMINATE_TIMEOUT
+        self.VNF_STABLE_STATE_TIMEOUT = VNF_STABLE_STATE_TIMEOUT
+        self.NS_INSTANTIATE_TIMEOUT = NS_INSTANTIATE_TIMEOUT
+        self.NS_SCALE_OUT_TIMEOUT = NS_SCALE_OUT_TIMEOUT
+        self.NS_SCALE_IN_TIMEOUT = NS_SCALE_IN_TIMEOUT
+        self.NS_TERMINATE_TIMEOUT = NS_TERMINATE_TIMEOUT
+        self.POLL_INTERVAL = POLL_INTERVAL
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -232,9 +259,7 @@ class Mano(object):
     def ns_create_and_instantiate(self, nsd_id, ns_name, ns_description, flavour_id, sap_data=None, pnf_info=None,
                                   vnf_instance_data=None, nested_ns_instance_data=None, location_constraints=None,
                                   additional_param_for_ns=None, additional_param_for_vnf=None, start_time=None,
-                                  ns_instantiation_level_id=None, additional_affinity_or_anti_affinity_rule=None,
-                                  max_wait_time=constants.NS_INSTANTIATE_TIMEOUT,
-                                  poll_interval=constants.POLL_INTERVAL):
+                                  ns_instantiation_level_id=None, additional_affinity_or_anti_affinity_rule=None):
         """
         This function creates an NS instance ID and synchronously instantiates an NS.
 
@@ -260,10 +285,6 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-        :param max_wait_time:                               Maximum interval of time in seconds to wait for the
-                                                            instantiation operation to reach a final state.
-        :param poll_interval:                               Interval of time in seconds between consecutive polls on the
-                                                            instantiation operation status.
         :return:                                            NS instantiation operation status.
         """
         ns_instance_id = self.ns_create_id(nsd_id, ns_name, ns_description)
@@ -272,8 +293,8 @@ class Mano(object):
                                                     nested_ns_instance_data, location_constraints,
                                                     additional_param_for_ns, additional_param_for_vnf, start_time,
                                                     ns_instantiation_level_id,
-                                                    additional_affinity_or_anti_affinity_rule, max_wait_time,
-                                                    poll_interval)
+                                                    additional_affinity_or_anti_affinity_rule,
+                                                    poll_interval=self.POLL_INTERVAL)
 
         if operation_status != constants.OPERATION_SUCCESS:
             raise ManoGenericError('NS instantiation operation failed')
@@ -336,8 +357,7 @@ class Mano(object):
     def ns_instantiate_sync(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
                             nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                             additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
-                            additional_affinity_or_anti_affinity_rule=None,
-                            max_wait_time=constants.NS_INSTANTIATE_TIMEOUT, poll_interval=constants.POLL_INTERVAL):
+                            additional_affinity_or_anti_affinity_rule=None):
         """
         This function performs a synchronous NS instantiation, i.e. instantiates an NS and then polls the operation
         status until the operation reaches a final state.
@@ -362,11 +382,6 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-
-        :param max_wait_time:                               Maximum interval of time in seconds to wait for the
-                                                            instantiation operation to reach a final state.
-        :param poll_interval:                               Interval of time in seconds between consecutive polls on the
-                                                            instantiation operation status.
         :return:                                            Operation status.
         """
 
@@ -379,7 +394,8 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+                                                              max_wait_time=self.NS_INSTANTIATE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -425,8 +441,7 @@ class Mano(object):
         return self.mano_adapter.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data, scale_time)
 
     @log_entry_exit(LOG)
-    def ns_scale_sync(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None,
-                      poll_interval=constants.POLL_INTERVAL):
+    def ns_scale_sync(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
         """
         This function synchronously scales an NS instance.
 
@@ -438,30 +453,29 @@ class Mano(object):
                                 NS instance. Shall be present when scale_type = 'scale_vnf'.
         :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
                                 timestamp.
-        :param poll_interval:   Interval of time in seconds between consecutive polls on the scaling operation result.
         :return:                Operation status.
         """
 
         lifecycle_operation_occurrence_id = self.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data,
                                                           scale_time)
 
-        ns_scale_timeouts = {'ns_scale_out': constants.NS_SCALE_OUT_TIMEOUT,
-                             'ns_scale_in': constants.NS_SCALE_IN_TIMEOUT}
-        vnf_scale_timeouts = {'vnf_scale_out': constants.VNF_SCALE_OUT_TIMEOUT,
-                              'vnf_scale_in': constants.VNF_SCALE_IN_TIMEOUT}
+        ns_scale_timeouts = {'ns_scale_out': self.NS_SCALE_OUT_TIMEOUT,
+                             'ns_scale_in': self.NS_SCALE_IN_TIMEOUT}
+        vnf_scale_timeouts = {'vnf_scale_out': self.VNF_SCALE_OUT_TIMEOUT,
+                              'vnf_scale_in': self.VNF_SCALE_IN_TIMEOUT}
 
         if scale_type == 'scale_ns':
             scaling_direction = scale_ns_data.scale_ns_by_steps_data.scaling_direction
             operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                                   final_states=constants.OPERATION_FINAL_STATES,
                                                                   max_wait_time=ns_scale_timeouts[scaling_direction],
-                                                                  poll_interval=poll_interval)
+                                                                  poll_interval=self.POLL_INTERVAL)
         else:
             scaling_direction = scale_vnf_data.type == 'scale_out'
             operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                                   final_states=constants.OPERATION_FINAL_STATES,
                                                                   max_wait_time=vnf_scale_timeouts[scaling_direction],
-                                                                  poll_interval=poll_interval)
+                                                                  poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -482,21 +496,17 @@ class Mano(object):
         return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time)
 
     @log_entry_exit(LOG)
-    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None,
-                                max_wait_time=constants.NS_TERMINATE_TIMEOUT, poll_interval=constants.POLL_INTERVAL):
+    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None):
         """
         This function synchronously terminates an NS and deletes its instance ID.
 
         :param ns_instance_id:  Identifier of the NS instance to terminate.
         :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
                                 automatically at this timestamp.
-        :param max_wait_time:   Maximum interval of time in seconds to wait for the termination operation to reach a
-                                final state.
-        :param poll_interval:   Interval of time in seconds between consecutive polls on the terminate operation status.
         :return:                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
 
-        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, max_wait_time, poll_interval)
+        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, poll_interval=self.POLL_INTERVAL)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
@@ -506,17 +516,13 @@ class Mano(object):
         self.ns_delete_id(ns_instance_id)
 
     @log_entry_exit(LOG)
-    def ns_terminate_sync(self, ns_instance_id, terminate_time=None, max_wait_time=constants.NS_TERMINATE_TIMEOUT,
-                          poll_interval=constants.POLL_INTERVAL):
+    def ns_terminate_sync(self, ns_instance_id, terminate_time=None):
         """
         This function synchronously terminates an NS.
 
         :param ns_instance_id:  Identifier of the NS instance to terminate.
         :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
                                 automatically at this timestamp.
-        :param max_wait_time:   Maximum interval of time in seconds to wait for the termination operation to reach a
-                                final state.
-        :param poll_interval:   Interval of time in seconds between consecutive polls on the terminate operation status.
         :return:                Operation status.
         """
 
@@ -524,7 +530,8 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+                                                              max_wait_time=constants.NS_TERMINATE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -549,9 +556,7 @@ class Mano(object):
     @log_entry_exit(LOG)
     def vnf_create_and_instantiate(self, vnfd_id, flavour_id, vnf_instance_name=None, vnf_instance_description=None,
                                    instantiation_level_id=None, ext_virtual_link=None, ext_managed_virtual_link=None,
-                                   localization_language=None, additional_param=None,
-                                   max_wait_time=constants.VNF_INSTANTIATE_TIMEOUT,
-                                   poll_interval=constants.POLL_INTERVAL):
+                                   localization_language=None, additional_param=None):
         """
         This function creates a VNF instance ID and synchronously instantiates a VNF.
 
@@ -569,17 +574,13 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :param max_wait_time:               Maximum interval of time in seconds to wait for the instantiation operation
-                                            to reach a final state.
-        :param poll_interval:               Interval of time in seconds between consecutive polls on the instantiation
-                                            operation status.
         :return:                            VNF instantiation operation status.
         """
         vnf_instance_id = self.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
         LOG.debug('VNF instance ID: %s' % vnf_instance_id)
         operation_status = self.vnf_instantiate_sync(vnf_instance_id, flavour_id, instantiation_level_id,
                                                      ext_virtual_link, ext_managed_virtual_link, localization_language,
-                                                     additional_param, max_wait_time, poll_interval)
+                                                     additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
             return None
@@ -625,8 +626,7 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def vnf_instantiate_sync(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
-                             ext_managed_virtual_link=None, localization_language=None, additional_param=None,
-                             max_wait_time=constants.VNF_INSTANTIATE_TIMEOUT, poll_interval=constants.POLL_INTERVAL):
+                             ext_managed_virtual_link=None, localization_language=None, additional_param=None):
         """
         This function performs a synchronous VNF instantiation, i.e. instantiates a VNF and then polls the operation
         status until the operation reaches a final state.
@@ -642,10 +642,6 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :param max_wait_time:               Maximum interval of time in seconds to wait for the instantiation operation
-                                            to reach a final state.
-        :param poll_interval:               Interval of time in seconds between consecutive polls on the instantiation
-                                            operation status.
         :return:                            Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id,
@@ -654,7 +650,8 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+                                                              max_wait_time=self.VNF_INSTANTIATE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -682,7 +679,7 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def vnf_operate_sync(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
-                         additional_param=None, poll_interval=constants.POLL_INTERVAL):
+                         additional_param=None):
         """
         This function performs a synchronous change of a VNF state.
 
@@ -694,20 +691,18 @@ class Mano(object):
                                         graceful stop, before stopping the VNF.
         :param additional_param:        Additional parameters passed by the NFVO as input to the Operate VNF operation,
                                         specific to the VNF being operated.
-        :param poll_interval:           Interval of time in seconds between consecutive polls on the operate operation
-                                        result.
         :return:                        Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type,
                                                              graceful_stop_timeout, additional_param)
 
-        operate_timeouts = {'start': constants.VNF_START_TIMEOUT,
-                            'stop': constants.VNF_STOP_TIMEOUT}
+        operate_timeouts = {'start': self.VNF_START_TIMEOUT,
+                            'stop': self.VNF_STOP_TIMEOUT}
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
                                                               max_wait_time=operate_timeouts[change_state_to],
-                                                              poll_interval=poll_interval)
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -773,8 +768,7 @@ class Mano(object):
                                                     additional_param)
 
     @log_entry_exit(LOG)
-    def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None,
-                       poll_interval=constants.POLL_INTERVAL):
+    def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         """
         This function synchronously scales a VNF horizontally (out/in).
 
@@ -786,20 +780,18 @@ class Mano(object):
                                     Defaults to 1.
         :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific
                                     to the VNF being scaled.
-        :param poll_interval:       Interval of time in seconds between consecutive polls on the scaling operation
-                                    result.
         :return:                    Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                            additional_param)
 
-        scale_timeouts = {'out': constants.VNF_SCALE_OUT_TIMEOUT,
-                          'in': constants.VNF_SCALE_IN_TIMEOUT}
+        scale_timeouts = {'out': self.VNF_SCALE_OUT_TIMEOUT,
+                          'in': self.VNF_SCALE_IN_TIMEOUT}
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
                                                               max_wait_time=scale_timeouts[scale_type],
-                                                              poll_interval=poll_interval)
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -827,8 +819,7 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def vnf_terminate_and_delete(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
-                                 additional_param=None, max_wait_time=constants.VNF_TERMINATE_TIMEOUT,
-                                 poll_interval=constants.POLL_INTERVAL):
+                                 additional_param=None):
         """
         This function synchronously terminates a VNF and deletes its instance ID.
 
@@ -839,14 +830,10 @@ class Mano(object):
                                                 resources.
         :param additional_param:                Additional parameters passed by the NFVO as input to the Terminate VNF
                                                 operation, specific to the VNF being terminated.
-        :param max_wait_time:                   Maximum interval of time in seconds to wait for the termination
-                                                operation to reach a final state.
-        :param poll_interval:                   Interval of time in seconds between consecutive polls on the terminate
-                                                operation status.
         :return:                                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
         operation_status = self.vnf_terminate_sync(vnf_instance_id, termination_type, graceful_termination_timeout,
-                                                   additional_param, max_wait_time, poll_interval)
+                                                   additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
@@ -857,8 +844,7 @@ class Mano(object):
 
     @log_entry_exit(LOG)
     def vnf_terminate_sync(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
-                           additional_param=None, max_wait_time=constants.VNF_TERMINATE_TIMEOUT,
-                           poll_interval=constants.POLL_INTERVAL):
+                           additional_param=None):
         """
         This function synchronously terminates a VNF.
 
@@ -869,10 +855,6 @@ class Mano(object):
                                                 resources.
         :param additional_param:                Additional parameters passed by the NFVO as input to the Terminate VNF
                                                 operation, specific to the VNF being terminated.
-        :param max_wait_time:                   Maximum interval of time in seconds to wait for the terminate operation
-                                                to reach a final state.
-        :param poll_interval:                   Interval of time in seconds between consecutive polls on the terminate
-                                                operation status.
         :return:                                Operation status.
         """
         lifecycle_operation_occurrence_id = self.vnf_terminate(vnf_instance_id, termination_type,
@@ -880,7 +862,8 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=max_wait_time, poll_interval=poll_interval)
+                                                              max_wait_time=self.VNF_TERMINATE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
 
         return operation_status
 
@@ -950,15 +933,13 @@ class Mano(object):
         return self.search_in_notification_queue(notification_queue, notification_type, notification_pattern, timeout)
 
     @log_entry_exit(LOG)
-    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time=constants.VNF_STABLE_STATE_TIMEOUT,
-                                  poll_interval=constants.POLL_INTERVAL):
+    def wait_for_vnf_stable_state(self, vnf_instance_id):
         """
         This function waits for the VNF with the specified ID to be in a stable state. This is useful when an operation
         requires the VNF to be in a particular state.
 
         :param vnf_instance_id: Identifier of the VNF instance.
-        :param max_wait_time:   Maximum interval of time in seconds to wait for the operation to reach a final state.
-        :param poll_interval:   Interval of time in seconds between consecutive polls.
         :return:                True if the VNF reached one of the final states, False otherwise.
         """
-        return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time, poll_interval)
+        return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
+                                                           poll_interval=self.POLL_INTERVAL)
