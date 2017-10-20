@@ -9,7 +9,7 @@ from bottle import route, request, response, run
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
-from utils.constructors.mapping import get_constructor_mapping, get_constructor_class
+from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
 
 execution_queues = dict()
 execution_processes = dict()
@@ -69,21 +69,12 @@ def _delete_config(key):
         json.dump(config, config_file, sort_keys=True, indent=2)
 
 
-def get_tc_class(tc_name):
-    """
-    This function returns the test class for the specified test case name.
-    """
-    tc_class = get_constructor_class(map='tc', path=tc_name)
-
-    return tc_class
-
-
 def execute_test(tc_exec_request, tc_input, queue):
     """
     This function is used as a process target and it starts the execution of a test case.
     """
     tc_name = tc_exec_request['tc_name']
-    tc_class = get_tc_class(tc_name)
+    tc_class = get_tc_constructor_class(tc_name)
 
     timestamp = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now())
     log_file_name = '%s_%s.log' % (timestamp, str(tc_name))
@@ -134,16 +125,20 @@ def do_exec():
         tc_input = dict()
         for resource_type, resource_name in _read_resource('env', active_env).items():
             resource_params = _read_resource(resource_type, resource_name)
-            tc_input[resource_type] = resource_params
+            tc_input[resource_type] = dict()
+            tc_input[resource_type]['type'] = resource_params['type']
+            tc_input[resource_type]['adapter_config'] = resource_params['client_config']
+            if resource_type == 'traffic':
+                tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
+            if resource_type == 'mano':
+                tc_input['vnfd_id'] = resource_params['vnfd_id']
+                tc_input['flavour_id'] = resource_params.get('flavour_id')
+                tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
 
-        tc_input['vnfd_id'] = _read_config('vnfd-id')
-        tc_input['flavour_id'] = _read_config('flavour-id')
-        tc_input['instantiation_level_id'] = _read_config('instantiation-level-id')
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
         if 'vnf' not in tc_input.keys():
             tc_input['vnf'] = dict()
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
-
     execution_id = str(uuid.uuid4())
     queue = Queue()
     execution_process = Process(target=execute_test, args=(tc_exec_request, tc_input, queue))
