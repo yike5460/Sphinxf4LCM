@@ -66,6 +66,9 @@ class TestCase(object):
     """
     __metaclass__ = TestMeta
 
+    REQUIRED_APIS = []
+    REQUIRED_ELEMENTS = []
+
     def __init__(self, tc_input):
         self.tc_input = tc_input
         self.tc_name = type(self).__name__
@@ -101,16 +104,13 @@ class TestCase(object):
         """
         This method verifies that the test case instance tc_input dictionary contains all the required items, if any.
         """
-        try:
-            required_items = self.REQUIRED_APIS + self.REQUIRED_ELEMENTS
-            missing_items = list()
-            for element in required_items:
-                if element not in self.tc_input.keys():
-                    missing_items.append(element)
-            if len(missing_items) > 0:
-                raise TestRequirementsError('Missing required item(s) from test case input: %s' % missing_items)
-        except AttributeError:
-            self._LOG.debug('No items required as input for this test case')
+        required_items = self.REQUIRED_APIS + self.REQUIRED_ELEMENTS
+        missing_items = list()
+        for element in required_items:
+            if element not in self.tc_input.keys():
+                missing_items.append(element)
+        if len(missing_items) > 0:
+            raise TestRequirementsError('Missing required item(s) from test case input: %s' % missing_items)
 
     def build_apis(self):
         """
@@ -118,13 +118,10 @@ class TestCase(object):
         """
         self._LOG.debug('Building objects for %s' % self.__class__.__name__)
         for element in self.REQUIRED_APIS:
-            try:
-                setattr(self, element, construct_generic(vendor=self.tc_input[element]['type'], module_type=element,
-                                                         **self.tc_input[element]['client_config']))
-            except Exception as e:
-                self._LOG.exception(e)
-                raise TestRequirementsError(
-                                         'Unable to build object for %s %s' % (self.tc_input[element]['type'], element))
+            setattr(self, element, construct_generic(vendor=self.tc_input[element]['type'], module_type=element,
+                                                     adapter_config=self.tc_input[element].get('adapter_config', {}),
+                                                     generic_config=self.tc_input[element].get('generic_config', {})))
+
         self._LOG.debug('Finished building objects for %s' % self.__class__.__name__)
 
     def initialize_events(self):
