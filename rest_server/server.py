@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import uuid
 from datetime import datetime
 from multiprocessing import Process, Queue
@@ -16,7 +17,8 @@ execution_processes = dict()
 tc_results = dict()
 tc_inputs = dict()
 
-config_file_path = 'config.json'
+json_file_path = '/etc/vnflcv'
+config_file_name = 'config.json'
 
 lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
 lock = dict()
@@ -28,6 +30,7 @@ def _read_config(key):
     """
     This function returns the content of the JSON config file.
     """
+    config_file_path = os.path.join(json_file_path, config_file_name)
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
@@ -41,6 +44,7 @@ def _write_config(key, value):
     """
     This function adds the specified key and value to the JSON config file.
     """
+    config_file_path = os.path.join(json_file_path, config_file_name)
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
@@ -57,6 +61,7 @@ def _delete_config(key):
     """
     This function deletes the specified key from the JSON config file.
     """
+    config_file_path = os.path.join(json_file_path, config_file_name)
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
@@ -136,6 +141,8 @@ def do_exec():
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
+
+        # TODO: remove
         if 'vnf' not in tc_input.keys():
             tc_input['vnf'] = dict()
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
@@ -227,9 +234,9 @@ def _read_resources(resource):
     This function returns the contents of the JSON resource file corresponding to the specified resource.
     Example: if resource is 'mano', the function will return the contents of the file mano.json.
     """
-    resource_file_name = '%s.json' % resource
+    resource_file_path = os.path.join(json_file_path, '%s.json' % resource)
     try:
-        with open(resource_file_name, 'r') as resource_file:
+        with open(resource_file_path, 'r') as resource_file:
             all_resources = json.load(resource_file)
     except IOError:
         all_resources = {}
@@ -252,8 +259,8 @@ def _write_resources(resource, all_resources):
     """
     This function creates a JSON resource file containing the specified resources.
     """
-    resource_file_name = '%s.json' % resource
-    with open(resource_file_name, 'w') as resource_file:
+    resource_file_path = os.path.join(json_file_path, '%s.json' % resource)
+    with open(resource_file_path, 'w') as resource_file:
         json.dump(all_resources, resource_file, sort_keys=True, indent=2)
 
 
