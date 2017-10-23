@@ -31,7 +31,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'vim', 'traffic')
-    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name')
+    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name', 'desired_scale_out_steps')
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption')
 
     def run(self):
@@ -45,10 +45,11 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Ensuring NFVI has vResources so that the NS can be scaled out only desired_scale_out_steps times')
         # Reserving only compute resources is enough for limiting the NFVI resources
-        reservation_id = self.mano.limit_compute_resources_for_ns_scaling(self.tc_input['nsd_id'],
-                                                                          self.tc_input['scaling_policy_name'],
-                                                                          self.tc_input['desired_scale_out_steps'],
-                                                                          self.vim)
+        reservation_id = self.mano.limit_compute_resources_for_ns_scaling(
+                                                       nsd_id=self.tc_input['nsd_id'],
+                                                       scaling_policy_name=self.tc_input['scaling_policy_name'],
+                                                       desired_scale_out_steps=self.tc_input['desired_scale_out_steps'],
+                                                       generic_vim_object=self.vim)
         if reservation_id is None:
             raise TestRunError('Compute resources could not be limited')
 
@@ -60,9 +61,19 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the NS')
         self.time_record.START('instantiate_ns')
-        self.ns_instance_id = self.mano.ns_create_and_instantiate(nsd_id=self.tc_input['nsd_id'],
-                                                                  ns_name=generate_name(self.tc_name),
-                                                                  ns_description=None, flavour_id=None)
+        self.ns_instance_id = self.mano.ns_create_and_instantiate(
+               nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
+               ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
+               sap_data=self.tc_input.get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
+               vnf_instance_data=self.tc_input.get('vnf_instance_data'),
+               nested_ns_instance_data=self.tc_input.get('nested_ns_instance_data'),
+               location_constraints=self.tc_input.get('location_constraints'),
+               additional_param_for_ns=self.tc_input.get('additional_param_for_ns'),
+               additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
+               start_time=self.tc_input.get('start_time'),
+               ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
+               additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
+
         if self.ns_instance_id is None:
             raise TestRunError('NS instantiation operation failed')
 
@@ -71,7 +82,8 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
         self.register_for_cleanup(index=20, function_reference=self.mano.ns_terminate_and_delete,
-                                  ns_instance_id=self.ns_instance_id)
+                                  ns_instance_id=self.ns_instance_id,
+                                  terminate_time=self.tc_input.get('terminate_time'))
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate NS state is INSTANTIATED

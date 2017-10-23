@@ -46,9 +46,19 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Instantiating the NS')
         self.time_record.START('instantiate_ns')
-        self.ns_instance_id = self.mano.ns_create_and_instantiate(nsd_id=self.tc_input['nsd_id'],
-                                                                  ns_name=generate_name(self.tc_name),
-                                                                  ns_description=None, flavour_id=None)
+        self.ns_instance_id = self.mano.ns_create_and_instantiate(
+               nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
+               ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
+               sap_data=self.tc_input.get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
+               vnf_instance_data=self.tc_input.get('vnf_instance_data'),
+               nested_ns_instance_data=self.tc_input.get('nested_ns_instance_data'),
+               location_constraints=self.tc_input.get('location_constraints'),
+               additional_param_for_ns=self.tc_input.get('additional_param_for_ns'),
+               additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
+               start_time=self.tc_input.get('start_time'),
+               ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
+               additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
+
         if self.ns_instance_id is None:
             raise TestRunError('NS instantiation operation failed')
 
@@ -57,7 +67,8 @@ class TC_VNF_SCALE_OUT_003__MANO_ONDEMAND__VNF_IND(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
-                                  ns_instance_id=self.ns_instance_id)
+                                  ns_instance_id=self.ns_instance_id,
+                                  terminate_time=self.tc_input.get('terminate_time'))
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate NS state is INSTANTIATED
