@@ -609,7 +609,7 @@ def traffic_validate():
         left_traffic_plen = request.forms.get('left_traffic_plen')
         left_traffic_gw = request.forms.get('left_traffic_gw')
         left_traffic_gw_mac = request.forms.get('left_traffic_gw_mac')
-        left_cp_name = request.forms.get('left_cp_name')
+        ingress_cp_name = request.forms.get('ingress_cp_name')
         right_port_location = request.forms.get('right_port_location')
         right_traffic_addr = request.forms.get('right_traffic_addr')
         right_traffic_plen = request.forms.get('right_traffic_plen')
@@ -631,7 +631,7 @@ def traffic_validate():
                 'left_traffic_plen': left_traffic_plen,
                 'left_traffic_gw': left_traffic_gw,
                 'left_traffic_gw_mac': left_traffic_gw_mac,
-                'left_cp_name': left_cp_name,
+                'ingress_cp_name': ingress_cp_name,
                 'right_port_location': right_port_location,
                 'right_traffic_addr': right_traffic_addr,
                 'right_traffic_plen': right_traffic_plen,
@@ -728,7 +728,7 @@ def traffic_delete():
             traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
             traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
             traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
-            traffic_info['left_cp_name'] = traffic_json[traffic_name]['traffic_config']['left_cp_name']
+            traffic_info['ingress_cp_name'] = traffic_json[traffic_name]['traffic_config']['ingress_cp_name']
             traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
             traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
             traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
