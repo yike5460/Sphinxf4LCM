@@ -131,15 +131,15 @@ class TC_VNF_STATE_INST_005(TestCase):
         LOG.info('Validating configuration has NOT been applied by the EM to the VNF')
         # The function that checks if the config has been applied is a stub function and always returns True.
         # The commented if statement is the correct line. Also adding a line so that the test does not fail.
-        # if self.vnf.config_applied(**self.tc_input['vnf']['client_config']):
-        if not self.vnf.config_applied(**self.tc_input['vnf']['client_config']):
+        # if self.vnf.config_applied():
+        if not self.vnf.config_applied():
             raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating license has been applied to the VNF')
-        if not self.vnf.license_applied(**self.tc_input['vnf']['client_config']):
+        if not self.vnf.license_applied():
             raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
