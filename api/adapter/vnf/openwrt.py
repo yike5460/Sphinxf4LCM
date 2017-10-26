@@ -18,12 +18,12 @@ class OpenwrtVnfAdapter(object):
         pass
 
     @log_entry_exit(LOG)
-    def config_applied(self, **credentials):
+    def config_applied(self):
 
         return True
 
     @log_entry_exit(LOG)
-    def license_applied(self, **credentials):
+    def license_applied(self):
 
         return True
 

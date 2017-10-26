@@ -129,14 +129,14 @@ class TC_VNF_STATE_INST_003(TestCase):
         # 7. Validate configuration has been applied by the EM to the VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating configuration has been applied by the EM to the VNF')
-        if not self.vnf.config_applied(**self.tc_input['vnf']['client_config']):
+        if not self.vnf.config_applied():
             raise TestRunError('Configuration has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate license has been applied to the VNF (if applicable)
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating license has been applied to the VNF')
-        if not self.vnf.license_applied(**self.tc_input['vnf']['client_config']):
+        if not self.vnf.license_applied():
             raise TestRunError('License has not been applied to the VNF')
 
         # --------------------------------------------------------------------------------------------------------------

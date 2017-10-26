@@ -18,9 +18,9 @@ class UbuntuVnfAdapter(object):
         pass
 
     @log_entry_exit(LOG)
-    def config_applied(self, **client_config):
+    def config_applied(self):
         return True
 
     @log_entry_exit(LOG)
-    def license_applied(self, **client_config):
+    def license_applied(self):
         return True
