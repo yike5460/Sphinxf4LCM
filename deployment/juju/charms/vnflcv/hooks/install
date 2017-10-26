@@ -37,6 +37,11 @@ juju-log "Creating log dir"
 mkdir /var/log/vnflcv
 chown ubuntu:ubuntu /var/log/vnflcv
 
+status-set maintenance "Creating conf dir"
+juju-log "Creating conf dir"
+mkdir /etc/vnflcv
+chown ubuntu:ubuntu /etc/vnflcv
+
 status-set maintenance "Creating systemd service"
 cp $CHARM_DIR/files/*.service /etc/systemd/system/
 
