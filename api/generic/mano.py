@@ -212,6 +212,22 @@ class Mano(object):
         return self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        """
+        This function checks that the virtual resources allocated to the NS match the ones in the NSD.
+
+        :param ns_instance_id:      Identifier of the NS instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if the allocated resources are as expected, False otherwise.
+        """
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        for vnf_instance_id in ns_info.vnf_info_id:
+            if not self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param):
+                LOG.debug('Could not validate allocated vresources for VNF with ID %s' % vnf_instance_id)
+                return False
+        return True
+
+    @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
