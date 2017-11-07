@@ -118,7 +118,8 @@ class TC_VNF_STATE_START_003(TestCase):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
-        if not self.mano.validate_allocated_vresources(self.vnf_instance_id, self.tc_input['mano'].get('query_params')):
+        if not self.mano.validate_vnf_allocated_vresources(self.vnf_instance_id,
+                                                           self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
