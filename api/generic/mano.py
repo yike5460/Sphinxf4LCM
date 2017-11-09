@@ -309,8 +309,7 @@ class Mano(object):
                                                     nested_ns_instance_data, location_constraints,
                                                     additional_param_for_ns, additional_param_for_vnf, start_time,
                                                     ns_instantiation_level_id,
-                                                    additional_affinity_or_anti_affinity_rule,
-                                                    poll_interval=self.POLL_INTERVAL)
+                                                    additional_affinity_or_anti_affinity_rule)
 
         if operation_status != constants.OPERATION_SUCCESS:
             raise ManoGenericError('NS instantiation operation failed')
@@ -522,7 +521,7 @@ class Mano(object):
         :return:                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
 
-        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, poll_interval=self.POLL_INTERVAL)
+        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
