@@ -108,6 +108,19 @@ class TackerManoAdapter(object):
 
             return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
 
+        if resource_type == 'ns':
+            try:
+                tacker_ns_status = self.tacker_client.show_ns(resource_id)['ns']['status']
+            except tackerclient.common.exceptions.TackerClientException:
+                # Temporary workaround. When ns_terminate() is called, declare the NS as terminated if Tacker raises
+                # the TackerClientException exception
+                return constants.OPERATION_SUCCESS
+            except Exception as e:
+                LOG.exception(e)
+                raise TackerManoAdapterError(e.message)
+
+            return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
+
     @log_entry_exit(LOG)
     def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
@@ -399,7 +412,7 @@ class TackerManoAdapter(object):
 
         try:
             vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
-            LOG.debug('Response from vnfm:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
+            LOG.debug('Response from VNFM:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
         except Exception as e:
             LOG.exception(e)
             raise TackerManoAdapterError(e.message)
@@ -619,9 +632,7 @@ class TackerManoAdapter(object):
             # of the cleanup procedure)
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
         except Exception as e:
-
             raise TackerManoAdapterError(e.message)
-
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -743,3 +754,40 @@ class TackerManoAdapter(object):
 
         LOG.debug('VNF with ID %s did not reach a stable state after %s' % (vnf_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def ns_create_id(self, nsd_id, ns_name, ns_description):
+        ns_dict = {'ns': {'nsd_id': nsd_id,
+                          'name': ns_name}}
+
+        try:
+            ns_instance = self.tacker_client.create_ns(body=ns_dict)
+            LOG.debug('Response from NFVO:\n%s' % json.dumps(ns_instance, indent=4, separators=(',', ': ')))
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+        return ns_instance['ns']['id']
+
+    @log_entry_exit(LOG)
+    def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
+                       nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
+                       additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
+                       additional_affinity_or_anti_affinity_rule=None):
+        LOG.debug('"NS Instantiate" operation is not implemented in OpenStack Tacker client!')
+        LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "NS Instance Id"')
+        return 'ns', ns_instance_id
+
+    def ns_terminate(self, ns_instance_id, terminate_time=None):
+        try:
+            self.tacker_client.delete_ns(ns_instance_id)
+        except tackerclient.common.exceptions.NotFound:
+            # Treat the case when the NS termination is attempted multiple times (ex. during test execution and as part
+            # of the cleanup procedure)
+            LOG.debug('NS with instance ID %s could not be found' % ns_instance_id)
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
+        return 'ns', ns_instance_id
+
+    @log_entry_exit(LOG)
+    def ns_delete_id(self, ns_instance_id):
+        LOG.debug('"NS Delete ID" operation is not implemented in OpenStack Tacker client!')
