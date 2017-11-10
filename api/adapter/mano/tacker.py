@@ -723,7 +723,7 @@ class TackerManoAdapter(object):
         return vnf_events
 
     @log_entry_exit(LOG)
-    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval=constants):
+    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval):
 
         if vnf_instance_id is None:
             raise TackerManoAdapterError('VNF instance ID is absent')
@@ -780,7 +780,7 @@ class TackerManoAdapter(object):
     def ns_terminate(self, ns_instance_id, terminate_time=None):
         try:
             self.tacker_client.delete_ns(ns_instance_id)
-        except tackerclient.common.exceptions.NotFound:
+        except tackerclient.common.exceptions.TackerClientException:
             # Treat the case when the NS termination is attempted multiple times (ex. during test execution and as part
             # of the cleanup procedure)
             LOG.debug('NS with instance ID %s could not be found' % ns_instance_id)
@@ -791,3 +791,32 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_delete_id(self, ns_instance_id):
         LOG.debug('"NS Delete ID" operation is not implemented in OpenStack Tacker client!')
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
+
+        if ns_instance_id is None:
+            raise TackerManoAdapterError('NS instance ID is absent')
+
+        stable_states = ['ACTIVE', 'ERROR', 'NOTFOUND']
+        elapsed_time = 0
+
+        while elapsed_time < max_wait_time:
+            try:
+                ns_status = self.tacker_client.show_ns(ns_instance_id)['ns']['status']
+            except tackerclient.common.exceptions.TackerClientException:
+                ns_status = 'NOTFOUND'
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
+            LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
+            if ns_status in stable_states:
+                return True
+            else:
+                LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
+                LOG.debug('Sleeping %s seconds' % poll_interval)
+                time.sleep(poll_interval)
+                elapsed_time += poll_interval
+                LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
+
+        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
+        return False
