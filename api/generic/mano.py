@@ -45,6 +45,7 @@ class Mano(object):
                            NS_SCALE_OUT_TIMEOUT=constants.NS_SCALE_OUT_TIMEOUT,
                            NS_SCALE_IN_TIMEOUT=constants.NS_SCALE_IN_TIMEOUT,
                            NS_TERMINATE_TIMEOUT=constants.NS_TERMINATE_TIMEOUT,
+                           NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
                            POLL_INTERVAL=constants.POLL_INTERVAL):
         self.VNF_INSTANTIATE_TIMEOUT = VNF_INSTANTIATE_TIMEOUT
         self.VNF_SCALE_OUT_TIMEOUT = VNF_SCALE_OUT_TIMEOUT
@@ -57,6 +58,7 @@ class Mano(object):
         self.NS_SCALE_OUT_TIMEOUT = NS_SCALE_OUT_TIMEOUT
         self.NS_SCALE_IN_TIMEOUT = NS_SCALE_IN_TIMEOUT
         self.NS_TERMINATE_TIMEOUT = NS_TERMINATE_TIMEOUT
+        self.NS_STABLE_STATE_TIMEOUT = NS_STABLE_STATE_TIMEOUT
         self.POLL_INTERVAL = POLL_INTERVAL
 
     @log_entry_exit(LOG)
@@ -958,3 +960,15 @@ class Mano(object):
         """
         return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
                                                            poll_interval=self.POLL_INTERVAL)
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id):
+        """
+        This function waits for the NS with the specified ID to be in a stable state. This is useful when an operation
+        requires the NS to be in a particular state.
+
+        :param ns_instance_id:  Identifier of the NS instance.
+        :return:                True if the NS reached one of the final states, False otherwise.
+        """
+        return self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
+                                                          poll_interval=self.POLL_INTERVAL)
