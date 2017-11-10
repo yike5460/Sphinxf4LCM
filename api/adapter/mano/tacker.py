@@ -51,7 +51,6 @@ class TackerManoAdapter(object):
 
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
             self.password = password
-            self.password = password
 
         except Exception as e:
             LOG.error('Unable to create %s instance' % self.__class__.__name__)
@@ -282,6 +281,7 @@ class TackerManoAdapter(object):
             raise TackerManoAdapterError(e.message)
         return yaml.load(tacker_show_vnfd)
 
+    @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
         vnfd_id = vnf_info.vnfd_id
@@ -777,6 +777,7 @@ class TackerManoAdapter(object):
         LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "NS Instance Id"')
         return 'ns', ns_instance_id
 
+    @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None):
         try:
             self.tacker_client.delete_ns(ns_instance_id)
