@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -eu
+
+. $CONJURE_UP_SPELLSDIR/sdk/common.sh
+
+TWISTER_URL="http://$PUBLICIP:8000/"
+KIBANA_URL="http://$PUBLICIP:5601/"
+KIBANA_SRV=$PUBLICIP
+
+juju run-action vnflcv/0 config key=twister-url value=$TWISTER_URL &> /dev/null
+juju run-action vnflcv/0 config key=kibana-url value=$KIBANA_URL &> /dev/null
+juju run-action twister/0 kibana kibana=$KIBANA_SRV &> /dev/null
+
+setResult "This deployment will be reachable at $PUBLICIP"
+exit 0
