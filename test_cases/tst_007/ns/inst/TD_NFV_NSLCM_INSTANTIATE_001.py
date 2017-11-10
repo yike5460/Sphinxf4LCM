@@ -1,5 +1,6 @@
 import logging
 
+from api.generic import constants
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -24,7 +25,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
     9. Verify that the NS is successfully instantiated by running the end-to-end functional test
     """
 
-    REQUIRED_APIS = ('mano', 'traffic')
+    REQUIRED_APIS = ('mano',)
     REQUIRED_ELEMENTS = ('nsd_id',)
     TESTCASE_EVENTS = ('instantiate_ns',)
 
@@ -59,6 +60,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'))
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
+                                  ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that the software images have been successfully added to the image repository managed by the VIM
