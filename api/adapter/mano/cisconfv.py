@@ -88,6 +88,7 @@ VNF_OPERATE_TEMPLATE = '''
 </serviceAction>
 '''
 
+
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
     A problem occurred in the VNF LifeCycle Validation Cisco NFV MANO adapter API.
