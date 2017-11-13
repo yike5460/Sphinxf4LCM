@@ -9,7 +9,9 @@
 OPTS=`getopt -o vhns: --long source-dir:,twister-dir:,destination-dir:,help -n 'parse-options' -- "$@"`
 
 function usage () {
-    echo "Missing arguments: $1"
+    if [ ! -z $1 ]; then
+        echo "Missing arguments: $1"
+    fi
     echo "usage: create_archive --source-dir vnflcv_dir --twister-dir twister-dir --destination-dir destination_dir"
     echo "  vnflcv_dir        path where VNF LifeCycle Validation source files can be found"
     echo "  twister_dir       path where Twister source files are to be found"
@@ -25,7 +27,7 @@ while true; do
     --source-dir ) VNFLCV_DIR=$2; shift; shift ;;
     --twister-dir ) TWISTER_DIR=$2; shift; shift ;;
     --destination-dir ) DESTINATION_DIR=$2; shift; shift ;;
-    -h | --help ) usage "hai ca ma ca avem un argument"; exit 1;;
+    -h | --help ) usage; exit 1;;
     * ) break ;;
     -- ) shift; break ;;
   esac
