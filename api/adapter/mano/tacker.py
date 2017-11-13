@@ -14,7 +14,7 @@ from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
-    VnfLifecycleChangeNotification
+    VnfLifecycleChangeNotification, NsInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -821,6 +821,98 @@ class TackerManoAdapter(object):
 
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def ns_query(self, filter, attribute_selector=None):
+        ns_instance_id = filter['ns_instance_id']
+        ns_info = NsInfo()
+        ns_info.ns_instance_id = ns_instance_id.encode()
+
+        try:
+            tacker_show_ns = self.tacker_client.show_ns(ns_instance_id)['ns']
+        except tackerclient.common.exceptions.TackerClientException:
+            ns_info.ns_state = constants.NS_NOT_INSTANTIATED
+            return ns_info
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+
+        ns_info.ns_name = tacker_show_ns['name'].encode()
+        ns_info.description = tacker_show_ns['description'].encode()
+        ns_info.nsd_id = tacker_show_ns['nsd_id'].encode()
+        ns_info.ns_state = constants.NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'][tacker_show_ns['status']]
+
+        # Build the VnfInfo data structure for each VNF that is part of the NS
+        ns_info.vnf_info = list()
+        vnf_ids = tacker_show_ns['vnf_ids']
+        vnf_ids_str = str(vnf_ids).replace("'", '"')
+        vnf_ids_dict = json.loads(vnf_ids_str)
+        for vnf_name in vnf_ids_dict.keys():
+            vnf_instance_id = vnf_ids_dict[vnf_name]
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            ns_info.vnf_info.append(vnf_info)
+
+        return ns_info
+
+    @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+
+        for vnf_info in ns_info.vnf_info:
+            vnfd_id = vnf_info.vnfd_id
+            vnfd = self.get_vnfd(vnfd_id)
+
+            for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+                vim_id = vnfc_resource_info.compute_resource.vim_id
+                vim = self.get_vim_helper(vim_id)
+
+                resource_id = vnfc_resource_info.compute_resource.resource_id
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+                expected_num_virtual_cpu = \
+                    vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                        'nfv_compute']['properties']['num_cpus']
+                expected_virtual_memory = \
+                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                            'nfv_compute']['properties']['mem_size'].split(' ')[0])
+                expected_size_of_storage = \
+                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                            'nfv_compute']['properties']['disk_size'].split(' ')[0])
+
+                expected_vnic_type = dict()
+                for node in vnfd['topology_template']['node_templates'].keys():
+                    if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
+                        expected_vnic_type[node] = vnfd['topology_template']['node_templates'][node]['properties'].get(
+                            'type', 'normal')
+
+                actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+                actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+                actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+
+                if actual_num_virtual_cpu != expected_num_virtual_cpu or \
+                                actual_virtual_memory != expected_virtual_memory or \
+                                actual_size_of_storage != expected_size_of_storage:
+                    LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s'
+                              % (expected_num_virtual_cpu, actual_num_virtual_cpu))
+                    LOG.debug('Expected %s vMemory, actual vMemory: %s'
+                              % (expected_virtual_memory, actual_virtual_memory))
+                    LOG.debug('Expected %s vStorage, actual vStorage: %s'
+                              % (expected_size_of_storage, actual_size_of_storage))
+                    return False
+
+                for vnic in virtual_compute.virtual_network_interface:
+                    actual_vnic_type = vnic.type_virtual_nic
+
+                    # Find the name of the CP that has a cp_instance_id that matches the resource_id of this vnic
+                    for ext_cp in vnf_info.instantiated_vnf_info.ext_cp_info:
+                        if ext_cp.cp_instance_id == vnic.resource_id:
+                            cp_name = ext_cp.cpd_id
+                            break
+
+                    if expected_vnic_type.get(cp_name, '') != actual_vnic_type:
+                        return False
+
+        return True
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
