@@ -827,7 +827,6 @@ class Mano(object):
                                                 resources.
         :param additional_param:                Additional parameters passed by the NFVO as input to the Terminate VNF
                                                 operation, specific to the VNF being terminated.
-                                                operation, specific to the VNF being terminated.
         :return:                                Identifier of the VNF lifecycle operation occurrence.
         """
 
