@@ -821,3 +821,20 @@ class TackerManoAdapter(object):
 
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
+        vnf_ids = self.tacker_client.show_ns(ns_instance_id)['ns']['vnf_ids']
+
+        # Transform unicode to dict
+        vnf_ids_str = str(vnf_ids).replace("'", '"')
+        vnf_ids_dict = json.loads(vnf_ids_str)
+
+        for vnf_name in vnf_ids_dict.keys():
+            vnf_instance_id = vnf_ids_dict[vnf_name]
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            vnfd_id = vnf_info.vnfd_id
+            vnfd = self.get_vnfd(vnfd_id)
+            if 'tosca.nodes.nfv.%s' % vnf_name not in vnfd['node_types'].keys():
+                return False
+        return True
