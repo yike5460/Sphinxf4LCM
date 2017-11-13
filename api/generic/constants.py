@@ -14,6 +14,7 @@ VNF_NOT_INSTANTIATED = 'NOT_INSTANTIATED'
 
 # ETSI NS instantiation states
 NS_INSTANTIATED = 'INSTANTIATED'
+NS_NOT_INSTANTIATED = 'NOT_INSTANTIATED'
 
 # ETSI VNF states
 VNF_STARTED = 'STARTED'
@@ -55,6 +56,13 @@ VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
                                                   'PENDING_SCALE_OUT': VNF_INSTANTIATED,
                                                   'PENDING_SCALE_IN': VNF_INSTANTIATED,
                                                   'PENDING_DELETE': VNF_NOT_INSTANTIATED}
+
+# Mapping between OpenStack NS states and ETSI NS instantiation states
+NS_INSTANTIATION_STATE = dict()
+NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'] = {'ACTIVE': NS_INSTANTIATED,
+                                                'ERROR': NS_NOT_INSTANTIATED,
+                                                'PENDING_CREATE': NS_NOT_INSTANTIATED,
+                                                'PENDING_DELETE': NS_NOT_INSTANTIATED}
 
 
 # Mapping between OpenStack Heat stack states and ETSI VNF states
