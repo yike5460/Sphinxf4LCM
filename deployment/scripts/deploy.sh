@@ -73,4 +73,9 @@ echo "================================================" >> /var/log/vnflcv/vnflc
 /bin/date >> /var/log/vnflcv/vnflcv-deployment.log
 echo "6. Running conjure-up" >> /var/log/vnflcv/vnflcv-deployment.log
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/snap/bin/conjure-up .
+if [ "$1" == "--headless" ]
+then
+    /snap/bin/conjure-up $(dirname $0) localhost
+else
+    /snap/bin/conjure-up $(dirname $0)
+fi
