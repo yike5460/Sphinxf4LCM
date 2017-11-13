@@ -972,3 +972,16 @@ class Mano(object):
         """
         return self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
                                                           poll_interval=self.POLL_INTERVAL)
+
+    @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param):
+        """
+        This function verifies that the VNF instance(s) that are part of the NS with the provided instance ID have been
+        deployed according to the NSD.
+
+        :param ns_instance_id:      Identifier of the NS instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if the VNF instance(s) have been deployed according to the NSD, False
+                                    otherwise.
+        """
+        return self.mano_adapter.verify_vnf_nsd_mapping(ns_instance_id, additional_param)
