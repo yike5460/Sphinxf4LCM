@@ -81,6 +81,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 4. Verify that the VNF instance(s) have been deployed according to the NSD
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance(s) have been deployed according to the NSD')
+        if not self.mano.verify_vnf_nsd_mapping(self.ns_instance_id, self.tc_input['mano'].get('query_params')):
+            raise TestRunError('VNF instance(s) have not been deployed according to the NSD')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the VNF instance(s) are reachable via the management network
