@@ -45,6 +45,7 @@ class Mano(object):
                            NS_SCALE_OUT_TIMEOUT=constants.NS_SCALE_OUT_TIMEOUT,
                            NS_SCALE_IN_TIMEOUT=constants.NS_SCALE_IN_TIMEOUT,
                            NS_TERMINATE_TIMEOUT=constants.NS_TERMINATE_TIMEOUT,
+                           NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
                            POLL_INTERVAL=constants.POLL_INTERVAL):
         self.VNF_INSTANTIATE_TIMEOUT = VNF_INSTANTIATE_TIMEOUT
         self.VNF_SCALE_OUT_TIMEOUT = VNF_SCALE_OUT_TIMEOUT
@@ -57,6 +58,7 @@ class Mano(object):
         self.NS_SCALE_OUT_TIMEOUT = NS_SCALE_OUT_TIMEOUT
         self.NS_SCALE_IN_TIMEOUT = NS_SCALE_IN_TIMEOUT
         self.NS_TERMINATE_TIMEOUT = NS_TERMINATE_TIMEOUT
+        self.NS_STABLE_STATE_TIMEOUT = NS_STABLE_STATE_TIMEOUT
         self.POLL_INTERVAL = POLL_INTERVAL
 
     @log_entry_exit(LOG)
@@ -212,6 +214,17 @@ class Mano(object):
         return self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        """
+        This function checks that the virtual resources allocated to the NS match the ones in the NSD.
+
+        :param ns_instance_id:      Identifier of the NS instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if the allocated resources are as expected, False otherwise.
+        """
+        return self.mano_adapter.validate_ns_allocated_vresources(ns_instance_id, additional_param)
+
+    @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
@@ -293,8 +306,7 @@ class Mano(object):
                                                     nested_ns_instance_data, location_constraints,
                                                     additional_param_for_ns, additional_param_for_vnf, start_time,
                                                     ns_instantiation_level_id,
-                                                    additional_affinity_or_anti_affinity_rule,
-                                                    poll_interval=self.POLL_INTERVAL)
+                                                    additional_affinity_or_anti_affinity_rule)
 
         if operation_status != constants.OPERATION_SUCCESS:
             raise ManoGenericError('NS instantiation operation failed')
@@ -506,7 +518,7 @@ class Mano(object):
         :return:                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
 
-        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, poll_interval=self.POLL_INTERVAL)
+        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
@@ -810,7 +822,6 @@ class Mano(object):
                                                 resources.
         :param additional_param:                Additional parameters passed by the NFVO as input to the Terminate VNF
                                                 operation, specific to the VNF being terminated.
-                                                operation, specific to the VNF being terminated.
         :return:                                Identifier of the VNF lifecycle operation occurrence.
         """
 
@@ -943,3 +954,28 @@ class Mano(object):
         """
         return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
                                                            poll_interval=self.POLL_INTERVAL)
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id):
+        """
+        This function waits for the NS with the specified ID to be in a stable state. This is useful when an operation
+        requires the NS to be in a particular state.
+
+        :param ns_instance_id:  Identifier of the NS instance.
+        :return:                True if the NS reached one of the final states, False otherwise.
+        """
+        return self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
+                                                          poll_interval=self.POLL_INTERVAL)
+
+    @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param):
+        """
+        This function verifies that the VNF instance(s) that are part of the NS with the provided instance ID have been
+        deployed according to the NSD.
+
+        :param ns_instance_id:      Identifier of the NS instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if the VNF instance(s) have been deployed according to the NSD, False
+                                    otherwise.
+        """
+        return self.mano_adapter.verify_vnf_nsd_mapping(ns_instance_id, additional_param)

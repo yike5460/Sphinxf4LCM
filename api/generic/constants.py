@@ -14,6 +14,7 @@ VNF_NOT_INSTANTIATED = 'NOT_INSTANTIATED'
 
 # ETSI NS instantiation states
 NS_INSTANTIATED = 'INSTANTIATED'
+NS_NOT_INSTANTIATED = 'NOT_INSTANTIATED'
 
 # ETSI VNF states
 VNF_STARTED = 'STARTED'
@@ -41,6 +42,12 @@ OPERATION_STATUS['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': OPERATION_SUCCES
                                              'SUSPEND_IN_PROGRESS': OPERATION_PENDING,
                                              'SUSPEND_FAILED': OPERATION_FAILED}
 
+# Mapping between operation results and OpenStack NS states
+OPERATION_STATUS['OPENSTACK_NS_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
+                                          'ERROR': OPERATION_FAILED,
+                                          'PENDING_CREATE': OPERATION_PENDING,
+                                          'PENDING_DELETE': OPERATION_PENDING}
+
 # Mapping between OpenStack VNF states and ETSI VNF instantiation states
 VNF_INSTANTIATION_STATE = dict()
 VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
@@ -49,6 +56,13 @@ VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
                                                   'PENDING_SCALE_OUT': VNF_INSTANTIATED,
                                                   'PENDING_SCALE_IN': VNF_INSTANTIATED,
                                                   'PENDING_DELETE': VNF_NOT_INSTANTIATED}
+
+# Mapping between OpenStack NS states and ETSI NS instantiation states
+NS_INSTANTIATION_STATE = dict()
+NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'] = {'ACTIVE': NS_INSTANTIATED,
+                                                'ERROR': NS_NOT_INSTANTIATED,
+                                                'PENDING_CREATE': NS_NOT_INSTANTIATED,
+                                                'PENDING_DELETE': NS_NOT_INSTANTIATED}
 
 
 # Mapping between OpenStack Heat stack states and ETSI VNF states
@@ -82,6 +96,7 @@ NS_INSTANTIATE_TIMEOUT = 600
 NS_SCALE_OUT_TIMEOUT = 360
 NS_SCALE_IN_TIMEOUT = 360
 NS_TERMINATE_TIMEOUT = 300
+NS_STABLE_STATE_TIMEOUT = 360
 POLL_INTERVAL = 5
 
 # Traffic parameters

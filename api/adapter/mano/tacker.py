@@ -14,7 +14,7 @@ from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
-    VnfLifecycleChangeNotification
+    VnfLifecycleChangeNotification, NsInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -50,7 +50,6 @@ class TackerManoAdapter(object):
                                                                 user_domain_name=user_domain_name)
 
             self.tacker_client = TackerClient(api_version='1.0', session=self.keystone_client.session)
-            self.password = password
             self.password = password
 
         except Exception as e:
@@ -107,6 +106,19 @@ class TackerManoAdapter(object):
             stack_status = heat_stack.stack_status
 
             return constants.OPERATION_STATUS['OPENSTACK_STACK_STATE'][stack_status]
+
+        if resource_type == 'ns':
+            try:
+                tacker_ns_status = self.tacker_client.show_ns(resource_id)['ns']['status']
+            except tackerclient.common.exceptions.TackerClientException:
+                # Temporary workaround. When ns_terminate() is called, declare the NS as terminated if Tacker raises
+                # the TackerClientException exception
+                return constants.OPERATION_SUCCESS
+            except Exception as e:
+                LOG.exception(e)
+                raise TackerManoAdapterError(e.message)
+
+            return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
     @log_entry_exit(LOG)
     def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
@@ -269,6 +281,7 @@ class TackerManoAdapter(object):
             raise TackerManoAdapterError(e.message)
         return yaml.load(tacker_show_vnfd)
 
+    @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
         vnfd_id = vnf_info.vnfd_id
@@ -399,7 +412,7 @@ class TackerManoAdapter(object):
 
         try:
             vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
-            LOG.debug('Response from vnfm:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
+            LOG.debug('Response from VNFM:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
         except Exception as e:
             LOG.exception(e)
             raise TackerManoAdapterError(e.message)
@@ -619,9 +632,7 @@ class TackerManoAdapter(object):
             # of the cleanup procedure)
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
         except Exception as e:
-
             raise TackerManoAdapterError(e.message)
-
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -712,7 +723,7 @@ class TackerManoAdapter(object):
         return vnf_events
 
     @log_entry_exit(LOG)
-    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval=constants):
+    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval):
 
         if vnf_instance_id is None:
             raise TackerManoAdapterError('VNF instance ID is absent')
@@ -743,3 +754,179 @@ class TackerManoAdapter(object):
 
         LOG.debug('VNF with ID %s did not reach a stable state after %s' % (vnf_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def ns_create_id(self, nsd_id, ns_name, ns_description):
+        ns_dict = {'ns': {'nsd_id': nsd_id,
+                          'name': ns_name}}
+
+        try:
+            ns_instance = self.tacker_client.create_ns(body=ns_dict)
+            LOG.debug('Response from NFVO:\n%s' % json.dumps(ns_instance, indent=4, separators=(',', ': ')))
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+        return ns_instance['ns']['id']
+
+    @log_entry_exit(LOG)
+    def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
+                       nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
+                       additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
+                       additional_affinity_or_anti_affinity_rule=None):
+        LOG.debug('"NS Instantiate" operation is not implemented in OpenStack Tacker client!')
+        LOG.debug('Instead of "Lifecycle Operation Occurrence Id", will just return the "NS Instance Id"')
+        return 'ns', ns_instance_id
+
+    @log_entry_exit(LOG)
+    def ns_terminate(self, ns_instance_id, terminate_time=None):
+        try:
+            self.tacker_client.delete_ns(ns_instance_id)
+        except tackerclient.common.exceptions.TackerClientException:
+            # Treat the case when the NS termination is attempted multiple times (ex. during test execution and as part
+            # of the cleanup procedure)
+            LOG.debug('NS with instance ID %s could not be found' % ns_instance_id)
+        except Exception as e:
+            raise TackerManoAdapterError(e.message)
+        return 'ns', ns_instance_id
+
+    @log_entry_exit(LOG)
+    def ns_delete_id(self, ns_instance_id):
+        LOG.debug('"NS Delete ID" operation is not implemented in OpenStack Tacker client!')
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
+
+        if ns_instance_id is None:
+            raise TackerManoAdapterError('NS instance ID is absent')
+
+        stable_states = ['ACTIVE', 'ERROR', 'NOTFOUND']
+        elapsed_time = 0
+
+        while elapsed_time < max_wait_time:
+            try:
+                ns_status = self.tacker_client.show_ns(ns_instance_id)['ns']['status']
+            except tackerclient.common.exceptions.TackerClientException:
+                ns_status = 'NOTFOUND'
+            except Exception as e:
+                raise TackerManoAdapterError(e.message)
+            LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
+            if ns_status in stable_states:
+                return True
+            else:
+                LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
+                LOG.debug('Sleeping %s seconds' % poll_interval)
+                time.sleep(poll_interval)
+                elapsed_time += poll_interval
+                LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
+
+        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
+        return False
+
+    @log_entry_exit(LOG)
+    def ns_query(self, filter, attribute_selector=None):
+        ns_instance_id = filter['ns_instance_id']
+        ns_info = NsInfo()
+        ns_info.ns_instance_id = ns_instance_id.encode()
+
+        try:
+            tacker_show_ns = self.tacker_client.show_ns(ns_instance_id)['ns']
+        except tackerclient.common.exceptions.TackerClientException:
+            ns_info.ns_state = constants.NS_NOT_INSTANTIATED
+            return ns_info
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+
+        ns_info.ns_name = tacker_show_ns['name'].encode()
+        ns_info.description = tacker_show_ns['description'].encode()
+        ns_info.nsd_id = tacker_show_ns['nsd_id'].encode()
+        ns_info.ns_state = constants.NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'][tacker_show_ns['status']]
+
+        # Build the VnfInfo data structure for each VNF that is part of the NS
+        ns_info.vnf_info = list()
+        vnf_ids = tacker_show_ns['vnf_ids']
+        vnf_ids_str = str(vnf_ids).replace("'", '"')
+        vnf_ids_dict = json.loads(vnf_ids_str)
+        for vnf_name in vnf_ids_dict.keys():
+            vnf_instance_id = vnf_ids_dict[vnf_name]
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            ns_info.vnf_info.append(vnf_info)
+
+        return ns_info
+
+    @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+
+        for vnf_info in ns_info.vnf_info:
+            vnfd_id = vnf_info.vnfd_id
+            vnfd = self.get_vnfd(vnfd_id)
+
+            for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+                vim_id = vnfc_resource_info.compute_resource.vim_id
+                vim = self.get_vim_helper(vim_id)
+
+                resource_id = vnfc_resource_info.compute_resource.resource_id
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+                expected_num_virtual_cpu = \
+                    vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                        'nfv_compute']['properties']['num_cpus']
+                expected_virtual_memory = \
+                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                            'nfv_compute']['properties']['mem_size'].split(' ')[0])
+                expected_size_of_storage = \
+                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                            'nfv_compute']['properties']['disk_size'].split(' ')[0])
+
+                expected_vnic_type = dict()
+                for node in vnfd['topology_template']['node_templates'].keys():
+                    if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
+                        expected_vnic_type[node] = vnfd['topology_template']['node_templates'][node]['properties'].get(
+                            'type', 'normal')
+
+                actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+                actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+                actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+
+                if actual_num_virtual_cpu != expected_num_virtual_cpu or \
+                                actual_virtual_memory != expected_virtual_memory or \
+                                actual_size_of_storage != expected_size_of_storage:
+                    LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s'
+                              % (expected_num_virtual_cpu, actual_num_virtual_cpu))
+                    LOG.debug('Expected %s vMemory, actual vMemory: %s'
+                              % (expected_virtual_memory, actual_virtual_memory))
+                    LOG.debug('Expected %s vStorage, actual vStorage: %s'
+                              % (expected_size_of_storage, actual_size_of_storage))
+                    return False
+
+                for vnic in virtual_compute.virtual_network_interface:
+                    actual_vnic_type = vnic.type_virtual_nic
+
+                    # Find the name of the CP that has a cp_instance_id that matches the resource_id of this vnic
+                    for ext_cp in vnf_info.instantiated_vnf_info.ext_cp_info:
+                        if ext_cp.cp_instance_id == vnic.resource_id:
+                            cp_name = ext_cp.cpd_id
+                            break
+
+                    if expected_vnic_type.get(cp_name, '') != actual_vnic_type:
+                        return False
+
+        return True
+
+    @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
+        vnf_ids = self.tacker_client.show_ns(ns_instance_id)['ns']['vnf_ids']
+
+        # Transform unicode to dict
+        vnf_ids_str = str(vnf_ids).replace("'", '"')
+        vnf_ids_dict = json.loads(vnf_ids_str)
+
+        for vnf_name in vnf_ids_dict.keys():
+            vnf_instance_id = vnf_ids_dict[vnf_name]
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            vnfd_id = vnf_info.vnfd_id
+            vnfd = self.get_vnfd(vnfd_id)
+            if 'tosca.nodes.nfv.%s' % vnf_name not in vnfd['node_types'].keys():
+                return False
+        return True
