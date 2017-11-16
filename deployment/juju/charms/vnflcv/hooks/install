@@ -30,7 +30,7 @@ tar -xvf $archive -C /opt/vnflcv
 status-set maintenance "Installing pip requirements"
 juju-log "Installing pip requirements"
 
-pip install -r /opt/vnflcv/requirements.txt
+pip install -r /opt/vnflcv/requirements.txt --no-cache-dir
 
 status-set maintenance "Creating log dir"
 juju-log "Creating log dir"
