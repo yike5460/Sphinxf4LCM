@@ -59,7 +59,9 @@ echo "================================================" >> /var/log/vnflcv/vnflc
 echo "5. Initializing lxd" >> /var/log/vnflcv/vnflcv-deployment.log
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
 /snap/bin/lxd init --auto >> /var/log/vnflcv/vnflcv-deployment.log
-/snap/bin/lxc network create lxdbr0 ipv4.address=auto ipv4.nat=true ipv6.address=none ipv6.nat=false >> /var/log/vnflcv/vnflcv-deployment.log
+OIF=$(ip route get 8.8.8.8 | grep dev | cut -f 5 -d ' ')
+OIF_MTU=$(cat /sys/class/net/${OIF}/mtu)
+/snap/bin/lxc network create lxdbr0 bridge.mtu=${OIF_MTU} ipv4.address=auto ipv4.nat=true ipv6.address=none ipv6.nat=false >> /var/log/vnflcv/vnflcv-deployment.log
 
 # Install conjure-up
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
