@@ -123,13 +123,9 @@ class TackerManoAdapter(object):
         if resource_type == 'vnf-list':
             try:
                 for vnf in resource_id:
-                    tacker_vnf_status = self.tacker_client.show_vnf(vnf)['vnf']['status']
-                    if constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][
-                        tacker_vnf_status] == constants.OPERATION_FAILED:
-                        return constants.OPERATION_FAILED
-                    elif constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][
-                        tacker_vnf_status] == constants.OPERATION_PENDING:
-                        return constants.OPERATION_PENDING
+                    tacker_vnf_status = self.get_operation_status(('vnf', vnf))
+                    if tacker_vnf_status in [ constants.OPERATION_FAILED, constants.OPERATION_PENDING ]:
+                        return tacker_vnf_status
                 return constants.OPERATION_SUCCESS
             except tackerclient.common.exceptions.NotFound:
                 return constants.OPERATION_FAILED
@@ -629,8 +625,6 @@ class TackerManoAdapter(object):
         #   "policy" : "<scaling-policy-name>"}
         try:
             body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
-            print vnf_instance_id
-            print body
             self.tacker_client.scale_vnf(vnf_instance_id, body)
         except tackerclient.common.exceptions.NotFound as e:
             LOG.debug('Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s"' %

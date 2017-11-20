@@ -42,8 +42,6 @@ class Mano(object):
                            VNF_TERMINATE_TIMEOUT=constants.VNF_TERMINATE_TIMEOUT,
                            VNF_STABLE_STATE_TIMEOUT=constants.VNF_STABLE_STATE_TIMEOUT,
                            NS_INSTANTIATE_TIMEOUT=constants.NS_INSTANTIATE_TIMEOUT,
-                           NS_SCALE_OUT_TIMEOUT=constants.NS_SCALE_OUT_TIMEOUT,
-                           NS_SCALE_IN_TIMEOUT=constants.NS_SCALE_IN_TIMEOUT,
                            NS_SCALE_TIMEOUT=constants.NS_SCALE_TIMEOUT,
                            NS_TERMINATE_TIMEOUT=constants.NS_TERMINATE_TIMEOUT,
                            NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
@@ -56,8 +54,6 @@ class Mano(object):
         self.VNF_TERMINATE_TIMEOUT = VNF_TERMINATE_TIMEOUT
         self.VNF_STABLE_STATE_TIMEOUT = VNF_STABLE_STATE_TIMEOUT
         self.NS_INSTANTIATE_TIMEOUT = NS_INSTANTIATE_TIMEOUT
-        self.NS_SCALE_OUT_TIMEOUT = NS_SCALE_OUT_TIMEOUT
-        self.NS_SCALE_IN_TIMEOUT = NS_SCALE_IN_TIMEOUT
         self.NS_SCALE_TIMEOUT = NS_SCALE_TIMEOUT
         self.NS_TERMINATE_TIMEOUT = NS_TERMINATE_TIMEOUT
         self.NS_STABLE_STATE_TIMEOUT = NS_STABLE_STATE_TIMEOUT
