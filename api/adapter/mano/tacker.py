@@ -123,8 +123,8 @@ class TackerManoAdapter(object):
         if resource_type == 'vnf-list':
             vnf_status_list = []
             for vnf in resource_id:
-                tacker_vnf_status = self.get_operation_status(('vnf', vnf))
-                vnf_status_list.append(tacker_vnf_status)
+                vnf_operation_status = self.get_operation_status(('vnf', vnf))
+                vnf_status_list.append(vnf_operation_status)
             if constants.OPERATION_FAILED in vnf_status_list:
                 return constants.OPERATION_FAILED
             elif constants.OPERATION_PENDING in vnf_status_list:
@@ -845,8 +845,8 @@ class TackerManoAdapter(object):
                 vnf_list.append(vnf_instance_id)
                 try:
                     self.vnf_scale(vnf_instance_id, scale_type=scale_data.type,
-                                aspect_id=scale_data.scale_by_step_data.aspect_id,
-                                additional_param=scale_data.scale_by_step_data.additional_param)
+                                   aspect_id=scale_data.scale_by_step_data.aspect_id,
+                                   additional_param=scale_data.scale_by_step_data.additional_param)
                 except Exception as e:
                     LOG.exception(e)
                     raise TackerManoAdapterError(e.message)
