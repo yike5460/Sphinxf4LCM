@@ -120,6 +120,18 @@ class TackerManoAdapter(object):
 
             return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
+        if resource_type == 'vnf-list':
+            vnf_status_list = []
+            for vnf in resource_id:
+                vnf_operation_status = self.get_operation_status(('vnf', vnf))
+                vnf_status_list.append(vnf_operation_status)
+            if constants.OPERATION_FAILED in vnf_status_list:
+                return constants.OPERATION_FAILED
+            elif constants.OPERATION_PENDING in vnf_status_list:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_SUCCESS
+
     @log_entry_exit(LOG)
     def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
@@ -821,6 +833,24 @@ class TackerManoAdapter(object):
 
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
+        if scale_type == 'SCALE_NS':
+            raise NotImplementedError
+        elif scale_type == 'SCALE_VNF':
+            vnf_list = []
+            for scale_data in scale_vnf_data:
+                vnf_instance_id = scale_data.vnf_instance_id
+                vnf_list.append(vnf_instance_id)
+                try:
+                    self.vnf_scale(vnf_instance_id, scale_type=scale_data.type,
+                                   aspect_id=scale_data.scale_by_step_data.aspect_id,
+                                   additional_param=scale_data.scale_by_step_data.additional_param)
+                except Exception as e:
+                    LOG.exception(e)
+                    raise TackerManoAdapterError(e.message)
+            return 'vnf-list', vnf_list
 
     @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):
