@@ -121,19 +121,16 @@ class TackerManoAdapter(object):
             return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
         if resource_type == 'vnf-list':
-            try:
-                for vnf in resource_id:
-                    tacker_vnf_status = self.get_operation_status(('vnf', vnf))
-                    if tacker_vnf_status in [ constants.OPERATION_FAILED, constants.OPERATION_PENDING ]:
-                        return tacker_vnf_status
-                return constants.OPERATION_SUCCESS
-            except tackerclient.common.exceptions.NotFound:
+            vnf_status_list = []
+            for vnf in resource_id:
+                tacker_vnf_status = self.get_operation_status(('vnf', vnf))
+                vnf_status_list.append(tacker_vnf_status)
+            if constants.OPERATION_FAILED in vnf_status_list:
                 return constants.OPERATION_FAILED
-            except tackerclient.common.exceptions.TackerClientException:
+            elif constants.OPERATION_PENDING in vnf_status_list:
                 return constants.OPERATION_PENDING
-            except Exception as e:
-                LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+            else:
+                return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
     def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
