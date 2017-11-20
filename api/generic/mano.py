@@ -44,6 +44,7 @@ class Mano(object):
                            NS_INSTANTIATE_TIMEOUT=constants.NS_INSTANTIATE_TIMEOUT,
                            NS_SCALE_OUT_TIMEOUT=constants.NS_SCALE_OUT_TIMEOUT,
                            NS_SCALE_IN_TIMEOUT=constants.NS_SCALE_IN_TIMEOUT,
+                           NS_SCALE_TIMEOUT=constants.NS_SCALE_TIMEOUT,
                            NS_TERMINATE_TIMEOUT=constants.NS_TERMINATE_TIMEOUT,
                            NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
                            POLL_INTERVAL=constants.POLL_INTERVAL):
@@ -57,6 +58,7 @@ class Mano(object):
         self.NS_INSTANTIATE_TIMEOUT = NS_INSTANTIATE_TIMEOUT
         self.NS_SCALE_OUT_TIMEOUT = NS_SCALE_OUT_TIMEOUT
         self.NS_SCALE_IN_TIMEOUT = NS_SCALE_IN_TIMEOUT
+        self.NS_SCALE_TIMEOUT = NS_SCALE_TIMEOUT
         self.NS_TERMINATE_TIMEOUT = NS_TERMINATE_TIMEOUT
         self.NS_STABLE_STATE_TIMEOUT = NS_STABLE_STATE_TIMEOUT
         self.POLL_INTERVAL = POLL_INTERVAL
@@ -470,25 +472,10 @@ class Mano(object):
 
         lifecycle_operation_occurrence_id = self.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data,
                                                           scale_time)
-
-        ns_scale_timeouts = {'ns_scale_out': self.NS_SCALE_OUT_TIMEOUT,
-                             'ns_scale_in': self.NS_SCALE_IN_TIMEOUT}
-        vnf_scale_timeouts = {'vnf_scale_out': self.VNF_SCALE_OUT_TIMEOUT,
-                              'vnf_scale_in': self.VNF_SCALE_IN_TIMEOUT}
-
-        if scale_type == 'scale_ns':
-            scaling_direction = scale_ns_data.scale_ns_by_steps_data.scaling_direction
-            operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
-                                                                  final_states=constants.OPERATION_FINAL_STATES,
-                                                                  max_wait_time=ns_scale_timeouts[scaling_direction],
-                                                                  poll_interval=self.POLL_INTERVAL)
-        else:
-            scaling_direction = scale_vnf_data.type == 'scale_out'
-            operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
-                                                                  final_states=constants.OPERATION_FINAL_STATES,
-                                                                  max_wait_time=vnf_scale_timeouts[scaling_direction],
-                                                                  poll_interval=self.POLL_INTERVAL)
-
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=self.NS_SCALE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
         return operation_status
 
     @log_entry_exit(LOG)
