@@ -438,3 +438,17 @@ class Vim(object):
         """
 
         return self.vim_adapter.terminate_storage_resource_reservation(reservation_id)
+
+    @log_entry_exit(LOG)
+    def query_image(self, image_id):
+        """
+        This operation allows querying information about a specific software image in the image repository managed by
+        the VIM.
+
+        This function was written in accordance with section 7.2.4 of ETSI NFV-IFA 005 v2.3.1 (2017-08).
+
+        :param image_id:    The identifier of the software image to be queried.
+        :return:            The information of the software image matching the query.
+        """
+
+        return self.vim_adapter.query_image(image_id)
