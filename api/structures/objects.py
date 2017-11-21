@@ -735,3 +735,7 @@ class VnfIndicator(InformationElementWithExternalSchema):
 
 class Vnfd(InformationElementWithExternalSchema):
     pass
+
+
+class SoftwareImageInformation(InformationElementWithExternalSchema):
+    pass
