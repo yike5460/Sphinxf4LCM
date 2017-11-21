@@ -930,3 +930,27 @@ class TackerManoAdapter(object):
             if 'tosca.nodes.nfv.%s' % vnf_name not in vnfd['node_types'].keys():
                 return False
         return True
+
+    @log_entry_exit(LOG)
+    def get_ns_ingress_cp_addr_list(self, ns_instance_id, ingress_cp_list):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        vnf_ids = self.tacker_client.show_ns(ns_instance_id)['ns']['vnf_ids']
+
+        # Transform unicode to dict
+        vnf_ids_str = str(vnf_ids).replace("'", '"')
+        vnf_ids_dict = json.loads(vnf_ids_str)
+
+        dest_addr_list = ''
+        for ingress_cp in ingress_cp_list:
+            vnf_name = ingress_cp.split(':')[0]
+            cp_name = ingress_cp.split(':')[1]
+
+            for vnf_info in ns_info.vnf_info:
+                # Check if this VNF instance ID is <vnf_name>
+                if vnf_info.vnf_instance_id == vnf_ids_dict[vnf_name]:
+                    for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
+                        # Check if this CP ID is <cp_name>
+                        if ext_cp_info.cpd_id == cp_name:
+                            dest_addr_list += ext_cp_info.address[0] + ' '
+
+        return dest_addr_list
