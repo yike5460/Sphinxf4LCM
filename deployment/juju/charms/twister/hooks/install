@@ -48,7 +48,7 @@ chown -R $twister_username:$twister_username /home/$twister_username/twister-src
 status-set maintenance "Installing Pip requirements"
 juju-log "Installing Pip requirements"
 
-pip install -r /home/$twister_username/twister-src/requirements.txt --no-cache-dir
+pip install -r /home/$twister_username/twister-src/requirements.txt
 
 
 status-set maintenance "Installing Twister client"
