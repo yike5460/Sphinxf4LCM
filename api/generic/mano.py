@@ -979,3 +979,15 @@ class Mano(object):
                                     otherwise.
         """
         return self.mano_adapter.verify_vnf_nsd_mapping(ns_instance_id, additional_param)
+
+    @log_entry_exit(LOG)
+    def get_ns_ingress_cp_addr_list(self, ns_instance_id, ingress_cp_list):
+        """
+        This function goes through each VNF inside the NS with the provided instance ID and retrieves the destination
+        address(es) for each connection point in the ingress_cp_list.
+
+        :param ns_instance_id:  Identifier of the NS instance.
+        :param ingress_cp_list: List of connection points for which to get the corresponding address(es).
+        :return:                List of addresses.
+        """
+        return self.mano_adapter.get_ns_ingress_cp_addr_list(ns_instance_id, ingress_cp_list)
