@@ -4,7 +4,7 @@ import os_client_config
 
 from api.adapter.vim import VimAdapterError
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
-    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, ReservedVirtualCompute, ReservedVirtualStorage
+    VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, SoftwareImageInformation
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ class OpenstackVimAdapter(object):
 
         compute_id = filter['compute_id']
         virtual_compute.compute_id = compute_id
-
+        # TODO: call server_get
         try:
             nova_server = self.nova_client.servers.get(compute_id)
         except Exception as e:
@@ -144,6 +144,8 @@ class OpenstackVimAdapter(object):
                 virtual_network_interface.mac_address = port['mac_address'].encode()
                 virtual_network_interface.acceleration_capability = list()
                 virtual_compute.virtual_network_interface.append(virtual_network_interface)
+
+        virtual_compute.vc_image_id = nova_server.image['id'].encode()
 
         return virtual_compute
 
@@ -385,3 +387,21 @@ class OpenstackVimAdapter(object):
         flavor_details['disk'] = flavor.disk
 
         return flavor_details
+
+    @log_entry_exit(LOG)
+    def query_image(self, image_id):
+        try:
+            image = self.nova_client.images.get(image_id)
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenstackVimAdapterError(e.message)
+
+        software_image_information = SoftwareImageInformation()
+        software_image_information.id = image_id
+        software_image_information.name = image.name.encode()
+        software_image_information.created_at = image.created.encode()
+        software_image_information.updated_at = image.updated.encode()
+        software_image_information.min_disk = image.minDisk
+        software_image_information.min_ram = image.minRam
+
+        return software_image_information
