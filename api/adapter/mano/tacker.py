@@ -941,15 +941,15 @@ class TackerManoAdapter(object):
         vnf_ids_dict = json.loads(vnf_ids_str)
 
         dest_addr_list = ''
+        # Expecting the ingress_cp_list to look like this ['VNF1:CP2', 'VNF2:CP2', ...]
         for ingress_cp in ingress_cp_list:
-            vnf_name = ingress_cp.split(':')[0]
-            cp_name = ingress_cp.split(':')[1]
+            vnf_name, cp_name = ingress_cp.split(':')
 
             for vnf_info in ns_info.vnf_info:
-                # Check if this VNF instance ID is <vnf_name>
+                # Check if the VNF instance ID from this VnfInfo matches the one for the current <vnf_name>
                 if vnf_info.vnf_instance_id == vnf_ids_dict[vnf_name]:
                     for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-                        # Check if this CP ID is <cp_name>
+                        # Check if the ID of this CP matches the current <cp_name>
                         if ext_cp_info.cpd_id == cp_name:
                             dest_addr_list += ext_cp_info.address[0] + ' '
 
