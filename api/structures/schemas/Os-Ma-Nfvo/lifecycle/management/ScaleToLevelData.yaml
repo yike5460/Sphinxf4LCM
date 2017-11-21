@@ -17,7 +17,5 @@ ScaleToLevelData:
 
     additional_param:
       description: Additional parameters passed by the NFVO as input to the scaling process, specific to the VNF instance being scaled
-      type: List
+      type: Mapping
       required: false
-      constraints:
-        entry_type: Mapping

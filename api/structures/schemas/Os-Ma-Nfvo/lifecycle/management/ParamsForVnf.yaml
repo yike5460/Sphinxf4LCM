@@ -10,7 +10,5 @@ ParamsForVnf:
 
     additional_param:
       description: Additional parameters that are to be applied per VNF instance
-      type: List
+      type: Mapping
       required: false
-      constraints:
-        entry_type: Mapping

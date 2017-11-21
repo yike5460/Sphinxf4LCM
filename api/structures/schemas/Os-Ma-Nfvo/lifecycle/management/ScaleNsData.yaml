@@ -29,10 +29,8 @@ ScaleNsData:
 
     additional_param_for_ns:
       description: Allows the OSS/BSS to provide additional parameter(s) at the NS level necessary for the NS scaling
-      type: List
+      type: Mapping
       required: false
-      constraints:
-        entry_type: Mapping
 
     additional_param_for_vnf:
       description: Allows the OSS/BSS to provide additional parameter(s) per VNF instance
