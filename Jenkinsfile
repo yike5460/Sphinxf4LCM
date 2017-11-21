@@ -23,8 +23,13 @@ node {
 	}
 
 	stage('Deploy') {
-		timeout(time: 40, unit: 'MINUTES') {
-			sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr vnflcv/deploy.sh --headless"
+		try {
+			timeout(time: 40, unit: 'MINUTES') {
+				sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr vnflcv/deploy.sh --headless"
+			}
+		} finally {
+			sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr cat .cache/conjure-up/conjure-up.log"
+			sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr /snap/bin/juju status"
 		}
 	}
 
@@ -38,6 +43,7 @@ node {
 	stage('Run') {
 		executionid = sh(script: "curl -XPOST http://$ipaddr:8080/v1.0/exec -H 'Content-Type: Application/json' -d @/tmp/vnflcv/tc_exec.json | jq -r '.execution_id' | tr -d '\n'", returnStdout: true)
 		sh "curl http://$ipaddr:8080/v1.0/wait/$executionid"
+		sh "curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | python -mjson.tool"
 		sh "test \$(curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | jq -r '.tc_result|.overall_status') = PASSED"
 	}
 
