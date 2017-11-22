@@ -109,15 +109,9 @@ class OpenstackVimAdapter(object):
 
         compute_id = filter['compute_id']
         virtual_compute.compute_id = compute_id
-        # TODO: call server_get
-        try:
-            nova_server = self.nova_client.servers.get(compute_id)
-        except Exception as e:
-            LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
-        server_flavor_id = nova_server.flavor['id']
-        virtual_compute.flavour_id = server_flavor_id.encode()
-
+        server_details = self.server_get(compute_id)
+        server_flavor_id = server_details['flavor_id']
+        virtual_compute.flavour_id = server_flavor_id
         flavor_details = self.flavor_get(server_flavor_id)
 
         virtual_cpu = VirtualCpu()
@@ -145,7 +139,7 @@ class OpenstackVimAdapter(object):
                 virtual_network_interface.acceleration_capability = list()
                 virtual_compute.virtual_network_interface.append(virtual_network_interface)
 
-        virtual_compute.vc_image_id = nova_server.image['id'].encode()
+        virtual_compute.vc_image_id = server_details['image_id']
 
         return virtual_compute
 
