@@ -215,6 +215,10 @@ class TimeStamp(String):
     TYPE = str
 
 
+class TimeDuration(Number):
+    TYPE = int
+
+
 class SchemaLoader(type):
     def __new__(meta, name, bases, class_dict):
         if bases != (InformationElement,):
@@ -734,4 +738,8 @@ class VnfIndicator(InformationElementWithExternalSchema):
 
 
 class Vnfd(InformationElementWithExternalSchema):
+    pass
+
+
+class OperateVnfData(InformationElementWithExternalSchema):
     pass
