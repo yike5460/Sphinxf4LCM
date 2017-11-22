@@ -68,6 +68,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the software images have been successfully added to the image repository managed by '
                  'the VIM')
+        if not self.mano.verify_ns_sw_images(self.ns_instance_id, self.tc_input['mano'].get('query_params')):
+            raise TestRunError('Not all VNFCs use the correct images')
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Verify that the requested resources have been allocated by the VIM according to the descriptors
@@ -105,7 +107,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 8. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                             'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
