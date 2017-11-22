@@ -294,46 +294,52 @@ class TackerManoAdapter(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            expected_num_virtual_cpu = \
+            # Get expected values
+            expected_num_vcpus = \
                 vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities']['nfv_compute'][
                     'properties']['num_cpus']
-            expected_virtual_memory = \
+            expected_vmemory_size = \
                 int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
                         'nfv_compute']['properties']['mem_size'].split(' ')[0])
-            expected_size_of_storage = \
+            expected_vstorage_size = \
                 int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
                         'nfv_compute']['properties']['disk_size'].split(' ')[0])
-
-            expected_vnic_type = dict()
+            expected_num_vnics = 0
+            expected_vnic_types = dict()
             for node in vnfd['topology_template']['node_templates'].keys():
                 if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
-                    expected_vnic_type[node] = vnfd['topology_template']['node_templates'][node]['properties'].get(
-                        'type', 'normal')
+                    expected_num_vnics += 1
+                    expected_vnic_types[node] = \
+                        vnfd['topology_template']['node_templates'][node]['properties'].get('type', 'normal')
 
-            actual_num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            actual_virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            actual_size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+            # Get actual values
+            actual_num_vcpus = virtual_compute.virtual_cpu.num_virtual_cpu
+            actual_vmemory_size = virtual_compute.virtual_memory.virtual_mem_size
+            actual_vstorage_size = virtual_compute.virtual_disks[0].size_of_storage
+            actual_num_vnics = len(virtual_compute.virtual_network_interface)
 
-            if actual_num_virtual_cpu != expected_num_virtual_cpu or \
-                            actual_virtual_memory != expected_virtual_memory or \
-                            actual_size_of_storage != expected_size_of_storage:
-                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s'
-                          % (expected_num_virtual_cpu, actual_num_virtual_cpu))
-                LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_virtual_memory, actual_virtual_memory))
-                LOG.debug('Expected %s vStorage, actual vStorage: %s'
-                          % (expected_size_of_storage, actual_size_of_storage))
+            # Compare actual values with expected values for number of vCPUs, vMemory vStorage and number of vNICs
+            if actual_num_vcpus != expected_num_vcpus or \
+                            actual_vmemory_size != expected_vmemory_size or \
+                            actual_vstorage_size != expected_vstorage_size or \
+                            actual_num_vnics != expected_num_vnics:
+                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_vcpus, actual_num_vcpus))
+                LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_vmemory_size, actual_vmemory_size))
+                LOG.debug('Expected %s vStorage, actual vStorage: %s' % (expected_vstorage_size, actual_vstorage_size))
+                LOG.debug('Expected %s vNICs, actual number if vNICs: %s' % (expected_num_vnics, actual_num_vnics))
                 return False
 
+            # Compare expected vNIC types with actual vNIC types
             for vnic in virtual_compute.virtual_network_interface:
                 actual_vnic_type = vnic.type_virtual_nic
 
-                # Find the name of the CP that has a cp_instance_id that matches the resource_id of this vnic
+                # Find the name of the CP that has a cp_instance_id that matches the resource_id of this vNIC
                 for ext_cp in vnf_info.instantiated_vnf_info.ext_cp_info:
                     if ext_cp.cp_instance_id == vnic.resource_id:
                         cp_name = ext_cp.cpd_id
                         break
 
-                if expected_vnic_type.get(cp_name, '') != actual_vnic_type:
+                if expected_vnic_types.get(cp_name, '') != actual_vnic_type:
                     return False
 
         return True
