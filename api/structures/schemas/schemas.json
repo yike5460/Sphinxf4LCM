@@ -58,7 +58,7 @@
   "ScaleByStepData":                          "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleByStepData.yaml",
   "ScaleToLevelData":                         "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleToLevelData.yaml",
   "ScaleVnfData":                             "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleVnfData.yaml",
-  "OperateVnfData":                            "schemas/Os-Ma-Nfvo/lifecycle/management/OperateVnfData.yaml",
+  "OperateVnfData":                           "schemas/Os-Ma-Nfvo/lifecycle/management/OperateVnfData.yaml",
   "VnfLocationConstraint":                    "schemas/Os-Ma-Nfvo/lifecycle/management/VnfLocationConstraint.yaml",
   "ParamsForVnf":                             "schemas/Os-Ma-Nfvo/lifecycle/management/ParamsForVnf.yaml",
   "ScaleNsToLevelData":                       "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleNsToLevelData.yaml",

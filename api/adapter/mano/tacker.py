@@ -120,29 +120,30 @@ class TackerManoAdapter(object):
 
             return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
-        if resource_type == 'vnf-list':
-            vnf_status_list = []
-            for vnf in resource_id:
-                vnf_operation_status = self.get_operation_status(('vnf', vnf))
-                vnf_status_list.append(vnf_operation_status)
-            if constants.OPERATION_FAILED in vnf_status_list:
-                return constants.OPERATION_FAILED
-            elif constants.OPERATION_PENDING in vnf_status_list:
-                return constants.OPERATION_PENDING
-            else:
-                return constants.OPERATION_SUCCESS
+        if resource_type in ['vnf-list', 'stack-list']:
+            return self.get_operation_group_status(lifecycle_operation_occurrence_id)
 
-        if resource_type == 'stack-list':
-            vnf_status_list = []
-            for vnf in resource_id:
-                vnf_operation_status = self.get_operation_status(('stack', vnf))
-                vnf_status_list.append(vnf_operation_status)
-            if constants.OPERATION_FAILED in vnf_status_list:
-                return constants.OPERATION_FAILED
-            elif constants.OPERATION_PENDING in vnf_status_list:
-                return constants.OPERATION_PENDING
-            else:
-                return constants.OPERATION_SUCCESS
+    @log_entry_exit(LOG)
+    def get_operation_group_status(self, lifecycle_operation_occurrence_id):
+        """
+        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of a
+        group of VNF instance IDs.
+        """
+        resource_type, resource_id = lifecycle_operation_occurrence_id
+        resource_type_mapping = {
+            'vnf-list': 'vnf',
+            'stack-list': 'stack'
+        }
+        vnf_status_list = []
+        for vnf in resource_id:
+            vnf_operation_status = self.get_operation_status((resource_type_mapping[resource_type], vnf))
+            vnf_status_list.append(vnf_operation_status)
+        if constants.OPERATION_FAILED in vnf_status_list:
+            return constants.OPERATION_FAILED
+        elif constants.OPERATION_PENDING in vnf_status_list:
+            return constants.OPERATION_PENDING
+        else:
+            return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
     def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
@@ -855,13 +856,9 @@ class TackerManoAdapter(object):
             for scale_data in scale_vnf_data:
                 vnf_instance_id = scale_data.vnf_instance_id
                 vnf_list.append(vnf_instance_id)
-                try:
-                    self.vnf_scale(vnf_instance_id, scale_type=scale_data.type,
-                                   aspect_id=scale_data.scale_by_step_data.aspect_id,
-                                   additional_param=scale_data.scale_by_step_data.additional_param)
-                except Exception as e:
-                    LOG.exception(e)
-                    raise TackerManoAdapterError(e.message)
+                self.vnf_scale(vnf_instance_id, scale_type=scale_data.type,
+                               aspect_id=scale_data.scale_by_step_data.aspect_id,
+                               additional_param=scale_data.scale_by_step_data.additional_param)
             return 'vnf-list', vnf_list
 
     @log_entry_exit(LOG)
@@ -880,12 +877,7 @@ class TackerManoAdapter(object):
                 stop_type = update_data.stop_type
                 graceful_stop_timeout = update_data.graceful_stop_timeout
                 additional_param = update_data.additional_param
-                try:
-                    self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout,
-                                     additional_param)
-                except Exception as e:
-                    LOG.exception(e)
-                    raise TackerManoAdapterError(e.message)
+                self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout, additional_param)
             return 'stack-list', vnf_list
 
     @log_entry_exit(LOG)
