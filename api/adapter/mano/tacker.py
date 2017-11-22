@@ -960,3 +960,30 @@ class TackerManoAdapter(object):
                             dest_addr_list += ext_cp_info.address[0] + ' '
 
         return dest_addr_list
+
+    @log_entry_exit(LOG)
+    def verify_vnf_sw_images(self, vnf_info):
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            # Get image name from the VNFD for the VDU ID of the current VNFC
+            vdu_id = vnfc_resource_info.vdu_id
+            image_name_vnfd = vnfd['topology_template']['node_templates'][vdu_id]['properties']['image']
+
+            # Get image name from VIM for the current VNFC
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            image_id = virtual_compute.vc_image_id
+            image_details = vim.query_image(image_id)
+            image_name_vim = image_details.name
+
+            # The two image names should be identical
+            if image_name_vnfd != image_name_vim:
+                LOG.error('Unexpected image for VNFC %s, VDU type %s' % (resource_id, vdu_id))
+                LOG.error('Expected image name: %s; actual image name: %s' % (image_name_vnfd, image_name_vim))
+                return False
+
+        return True
