@@ -991,3 +991,33 @@ class Mano(object):
         :return:                List of addresses.
         """
         return self.mano_adapter.get_ns_ingress_cp_addr_list(ns_instance_id, ingress_cp_list)
+
+    @log_entry_exit(LOG)
+    def verify_vnf_sw_images(self, vnf_instance_id, additional_param=None):
+        """
+        This function verifies that each VNFC part of the VNF with the given instance ID uses the image indicated in the
+        VNFD at the corresponding VDU.
+
+        :param vnf_instance_id:     Identifier of the VNF instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if all VNFCs use the correct images, False otherwise.
+        """
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        return self.mano_adapter.verify_vnf_sw_images(vnf_info)
+
+    @log_entry_exit(LOG)
+    def verify_ns_sw_images(self, ns_instance_id, additional_param=None):
+        """
+        This function verifies that each VNFC in each VNF of the NS with the given instance ID uses the image indicated
+        in the corresponding VNFD at the corresponding VDU.
+
+        :param ns_instance_id:      Identifier of the NS instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if all VNFCs use the correct images, False otherwise.
+        """
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        for vnf_info in ns_info.vnf_info:
+            if not self.mano_adapter.verify_vnf_sw_images(vnf_info):
+                LOG.error('Not all VNFCs in VNF with instance ID %s use the correct images' % vnf_info.vnf_instance_id)
+                return False
+        return True
