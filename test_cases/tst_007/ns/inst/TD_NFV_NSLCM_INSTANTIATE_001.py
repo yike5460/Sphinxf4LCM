@@ -89,19 +89,22 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the VNF instance(s) are reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
+        # LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
+        # TODO
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the VNF instance(s) have been configured according to the VNFD(s) by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance(s) have been configured according to the VNFD(s) by querying the '
-                 'VNFM')
+        # LOG.info('Verifying that the VNF instance(s) have been configured according to the VNFD(s) by querying the '
+        #          'VNFM')
+        # TODO
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the '
-                 'descriptors')
+        # LOG.info('Verifying that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the '
+        #          'descriptors')
+        # TODO
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the NFVO indicates NS instantiation operation result as successful
