@@ -130,10 +130,8 @@ class TackerManoAdapter(object):
         group of VNF instance IDs.
         """
         resource_type, resource_id = lifecycle_operation_occurrence_id
-        resource_type_mapping = {
-            'vnf-list': 'vnf',
-            'stack-list': 'stack'
-        }
+        resource_type_mapping = {'vnf-list': 'vnf',
+                                 'stack-list': 'stack'}
         vnf_status_list = []
         for vnf in resource_id:
             vnf_operation_status = self.get_operation_status((resource_type_mapping[resource_type], vnf))

@@ -563,6 +563,7 @@ class Mano(object):
         Only one type of update shall be allowed per operation.
 
         This function was written in accordance with section 7.3.5 of ETSI GS NFV-IFA 013 v2.3.1 (2017-08).
+
         :param ns_instance_id:                      Identifier of the NS instance being updated.
         :param update_type:                         Specifies the type of update. This parameter determines also which
                                                     one of the following parameter is present in the operation. Possible
@@ -572,16 +573,18 @@ class Mano(object):
                                                     - InstantiateVnf (instantiating new VNF(s)),
                                                     - ChangeVnfDf (Changing VNF DF),
                                                     - OperateVnf (changing VNF state),
-                                                    - ModifyVnfInformation (modifying VNF information and/or the configurable
-                                                    properties of VNF instance(s)),
-                                                    - ChangeExtVnfConnectivity (changing the external connectivity of VNF instance(s))
+                                                    - ModifyVnfInformation (modifying VNF information and/or the
+                                                    configurable properties of VNF instance(s)),
+                                                    - ChangeExtVnfConnectivity (changing the external connectivity of
+                                                    VNF instance(s))
                                                     - AddSap (adding SAP(s)),
                                                     - RemoveSap (removing SAP(s)),
                                                     - AddNestedNs      (adding existing NS instance(s) as nested NS(s)),
                                                     - RemoveNestedNs      (removing existing nested NS instance(s)),
-                                                    - AssocNewNsdVersion (associating a new NSD version to the NS instance),
-                                                    - MoveVnf (moving VNF instance(s) from one origin NS instance to a another target
-                                                    NS instance),
+                                                    - AssocNewNsdVersion (associating a new NSD version to the NS
+                                                    instance),
+                                                    - MoveVnf (moving VNF instance(s) from one origin NS instance to a
+                                                    another target NS instance),
                                                     - AddVnffg (adding VNFFG(s)),
                                                     - RemoveVnffg      (removing VNFFG(s)),
                                                     - UpdateVnffg      (updating VNFFG(s)),
@@ -656,7 +659,7 @@ class Mano(object):
                                                     of allowed values.
         :param add_vnf_instance:                    Specify an existing VNF instance to be added to the NS instance.
                                                     This parameter shall be present only if updateType=AddVnf.
-        :param remove_vnf_instance:                 Specify an existing VNF instance to be removed from the NS instance.
+        :param remove_vnf_instance_id:              Specify an existing VNF instance to be removed from the NS instance.
                                                     The parameter contains the identifier(s) of the VNF instances to be
                                                     removed. This parameter shall be present only if
                                                     updateType=RemoveVnf.
