@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu
+
+. $CONJURE_UP_SPELLSDIR/sdk/common.sh
+
+juju run-action kibanaspirent/0 load-dashboard dashboard=vnflcv &> /dev/null
+
+setResult "Dashboards loaded."
+exit 0

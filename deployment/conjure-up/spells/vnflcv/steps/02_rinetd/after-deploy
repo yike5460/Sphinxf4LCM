@@ -3,14 +3,6 @@ set -eu
 
 . $CONJURE_UP_SPELLSDIR/sdk/common.sh
 
-RESOURCES_PATH=$(realpath $(scriptPath)/../resources/)
-
-juju attach twister twister-src=$RESOURCES_PATH/twister_src.tar.gz
-juju attach twister db-template=$RESOURCES_PATH/twister_demo.sql
-juju attach vnflcv vnflcv-src=$RESOURCES_PATH/vnflcv.tar.gz
-
-juju wait -m $JUJU_CONTROLLER:$JUJU_MODEL
-
 TWISTER_ADDR=$(unitAddress twister)
 VNFLCV_ADDR=$(unitAddress vnflcv)
 KIBANA_ADDR=$(unitAddress kibanaspirent)
@@ -32,8 +24,5 @@ EOF
 
 sudo service rinetd restart &> /dev/null
 
-juju run-action kibanaspirent/0 load-dashboard dashboard=vnflcv &> /dev/null
-juju run-action twister/0 restart &> /dev/null
-
-exposeResult "Applications Ready" 0 "true"
-
+setResult "Rinetd successfully configured."
+exit 0
