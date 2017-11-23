@@ -1,0 +1,13 @@
+#!/bin/bash
+set -eu
+
+. $CONJURE_UP_SPELLSDIR/sdk/common.sh
+
+RESOURCES_PATH=$(realpath $(scriptPath)/../../resources/)
+
+juju attach twister twister-src=$RESOURCES_PATH/twister_src.tar.gz
+juju attach twister db-template=$RESOURCES_PATH/twister_demo.sql
+juju attach vnflcv vnflcv-src=$RESOURCES_PATH/vnflcv.tar.gz
+
+setResult "Resources attached."
+exit 0
