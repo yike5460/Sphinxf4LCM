@@ -982,8 +982,8 @@ class TackerManoAdapter(object):
 
             # The two image names should be identical
             if image_name_vnfd != image_name_vim:
-                LOG.error('Unexpected image for VNFC %s, VDU type %s' % (resource_id, vdu_id))
-                LOG.error('Expected image name: %s; actual image name: %s' % (image_name_vnfd, image_name_vim))
+                LOG.debug('Unexpected image for VNFC %s, VDU type %s' % (resource_id, vdu_id))
+                LOG.debug('Expected image name: %s; actual image name: %s' % (image_name_vnfd, image_name_vim))
                 return False
 
         return True
