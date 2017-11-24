@@ -547,10 +547,7 @@ class TackerManoAdapter(object):
                         server_list = vim.server_list(query_filter={'name': pattern})
                         if len(server_list) == 0:
                             raise TackerManoAdapterError('No Nova server name contains string %s' % resource_name)
-                        # if len(server_list) != 1:
-                        #     raise TackerManoAdapterError('More than one Nova server contains string %s'
-                        #                                  % resource_name)
-                        # server = server_list[0]
+
                         for server in server_list:
                             vnf_resource_id = server.id
 
