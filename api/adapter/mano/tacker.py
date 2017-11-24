@@ -348,6 +348,7 @@ class TackerManoAdapter(object):
                     LOG.debug('For VNFC with id %s actual vNIC types do not match the expected ones' % resource_id)
                     LOG.debug('Expected "%s" type for the vNIC corresponding to CP %s, actual type: %s' %
                               (expected_vnic_type, cp_name, actual_vnic_type))
+                    return False
 
         return True
 
