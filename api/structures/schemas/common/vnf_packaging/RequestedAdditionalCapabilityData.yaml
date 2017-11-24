@@ -25,7 +25,5 @@ RequestedAdditionalCapabilityData:
 
     target_performance_parameters:
       description: Identifies specific attributes, dependent on the requested additional capability type.
-      type: List
+      type: Mapping
       required: true
-      constraints:
-        entry_type: Mapping

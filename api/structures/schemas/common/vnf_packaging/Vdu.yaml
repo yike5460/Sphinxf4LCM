@@ -39,10 +39,8 @@ Vdu:
 
     boot_order:
       description: The key indicates the boot index (lowest index defines highest boot priority). The Value references a descriptor from which a valid boot device is created e.g. VirtualStorageDesc from which a VirtualStorage instance is created.
-      type: List
+      type: Mapping
       required: false
-      constraints:
-        entry_type: Mapping
 
     sw_image_desc:
       description: Describes the software image which is directly loaded on the virtualisation container realizing this Vdu.

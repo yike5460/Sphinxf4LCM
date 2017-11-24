@@ -33,6 +33,7 @@
   "ReservedVirtualStorage":                   "schemas/Or-Vi/vresources/storage/ReservedVirtualStorage.yaml",
   "StoragePoolReservation":                   "schemas/Or-Vi/vresources/storage/StoragePoolReservation.yaml",
   "VirtualStorageData":                       "schemas/Or-Vi/vresources/storage/VirtualStorageData.yaml",
+  "SoftwareImageInformation":                 "schemas/Or-Vi/swimage/SoftwareImageInformation.yaml",
   "ExtManagedVirtualLinkInfo":                "schemas/Or-Vnfm/lifecycle/management/ExtManagedVirtualLinkInfo.yaml",
   "ExtVirtualLinkInfo":                       "schemas/Or-Vnfm/lifecycle/management/ExtVirtualLinkInfo.yaml",
   "InstantiatedVnfInfo":                      "schemas/Or-Vnfm/lifecycle/management/InstantiatedVnfInfo.yaml",

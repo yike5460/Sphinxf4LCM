@@ -1,0 +1,74 @@
+# This structure was written in accordance with section 8.2.2 of ETSI GS NFV-IFA 005 - v2.3.1 (2017-08).
+
+SoftwareImageInformation:
+  description: This information element represents Software Image Information.
+  attributes:
+    id:
+      description: The identifier of this software image.
+      type: Identifier
+      required: true
+
+    name:
+      description: The name of this software image.
+      type: String
+      required: true
+
+    provider:
+      description: The provider of this software image.
+      type: String
+      required: true
+
+    version:
+      description: The version of this software image.
+      type: String
+      required: true
+
+    checksum:
+      description: The checksum of the software image file.
+      type: String
+      required: true
+
+    container_format:
+      description: The container format indicates whether the software image is in a file format that also contains metadata about the actual software.
+      type: String
+      required: true
+
+    disk_format:
+      description: The disk format of a software image is the format of the underlying disk image.
+      type: String
+      required: true
+
+    created_at:
+      description: The created time of this software image.
+      type: String
+      required: true
+
+    updated_at:
+      description: The updated time of this software image.
+      type: String
+      required: true
+
+    min_disk:
+      description: The minimal Disk for this software image.
+      type: Integer
+      required: true
+
+    min_ram:
+      description: The minimal RAM for this software image.
+      type: Integer
+      required: true
+
+    size:
+      description: The size of this software image.
+      type: String
+      required: true
+
+    status:
+      description: The status of this software image.
+      type: String
+      required: true
+
+    user_metadata:
+      description: User-defined metadata.
+      type: Mapping
+      required: false
