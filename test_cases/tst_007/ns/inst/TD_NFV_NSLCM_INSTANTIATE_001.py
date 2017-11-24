@@ -136,7 +136,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
 
         self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
-        if not self.traffic.does_traffic_flow(delay_time=15):
+        if not self.traffic.does_traffic_flow(delay_time=60):
             raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
