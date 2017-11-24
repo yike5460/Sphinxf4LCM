@@ -1,0 +1,35 @@
+# This structure was written in accordance with section 8.3.4.16 of ETSI GS NFV-IFA 013 - v2.3.1 (2017-08).
+
+OperateVnfData:
+  description: The OperateVnfData information element specifies the VNF instance for which the operational state needs to be changed and the requested new state.
+  attributes:
+    vnf_instance_id:
+      description: Identifier of the VNF instance
+      type: Identifier
+      required: true
+
+    change_state_to:
+      description: The desired state to change the VNF to. Allowed values are start, stop
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ start, stop ]
+
+    stop_type:
+      description: It signals whether forceful or graceful stop is requested. Allowed values are forceful and graceful. In case of forceful stop, the VNF is stopped immediately. Note that if the VNF is still in service, this may adversely impact network service, and therefore, operator policies apply to determine if forceful stop is allowed in the particular situation. In case of graceful stop, the VNFM first arranges to take the VNF out of service (by means out of scope of the present specification, e.g. involving interaction with EM, if required). Once this is successful, or after a timeout, the VNFM stops the VNF. Only applicable when changing state to stop.
+      type: Enum
+      required: false
+      constraints:
+        entry_type: String
+        valid_values: [ forceful, graceful ]
+
+    graceful_stop_timeout:
+      description: The time interval to wait for the VNF to be taken out of service during graceful stop, before stopping the VNF. If not given, it is expected that the VNFM waits for the successful taking out of service of the VNF, no matter how long it takes, before stopping the VNF. See note. Minimum timeout or timeout range are specified by the VNF vendor (e.g. defined in the VNFD or communicated by other means). The parameter is not relevant in case of forceful stop.
+      type: TimeDuration
+      required: false
+
+    additional_param:
+      description: Additional parameters passed by the OSS/BSS as input to the Operate VNF operation, specific to the VNF being operated, as declared in the VNFD
+      type: Mapping
+      required: false

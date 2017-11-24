@@ -1,0 +1,10 @@
+title: Public IP
+description: |
+  Configure the public IP used to reach this VM. It could be an IP address configured on the VM itself, a floating IP from OpenStack, a public IP used for DNAT etc.
+viewable: True
+required: True
+additional-input:
+  - label: Public IP address
+    key: PUBLICIP
+    type: text
+    default: ""

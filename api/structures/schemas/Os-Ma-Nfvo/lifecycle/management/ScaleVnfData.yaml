@@ -14,7 +14,7 @@ ScaleVnfData:
       required: true
       constraints:
         entry_type: String
-        valid_values: [ scale_out, scale_in, scale_up, scale_down, scale_to_instantiation_level, scale_to_level ]
+        valid_values: [ out, in, up, down, to_instantiation_level, to_level ]
 
     scale_to_level_data:
       description: Provides the information needed when scaling to a given level

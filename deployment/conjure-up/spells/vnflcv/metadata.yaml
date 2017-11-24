@@ -1,0 +1,8 @@
+cloud-whitelist:
+- localhost
+friendly-name: Spirent VNF LifeCycle Validation
+bundle-name: vnflcv
+options-whitelist:
+  twister:
+  - username
+  - kibana

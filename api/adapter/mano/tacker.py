@@ -120,6 +120,29 @@ class TackerManoAdapter(object):
 
             return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
+        if resource_type in ['vnf-list', 'stack-list']:
+            return self.get_operation_group_status(lifecycle_operation_occurrence_id)
+
+    @log_entry_exit(LOG)
+    def get_operation_group_status(self, lifecycle_operation_occurrence_id):
+        """
+        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of a
+        group of VNF instance IDs.
+        """
+        resource_type, resource_id = lifecycle_operation_occurrence_id
+        resource_type_mapping = {'vnf-list': 'vnf',
+                                 'stack-list': 'stack'}
+        vnf_status_list = []
+        for vnf in resource_id:
+            vnf_operation_status = self.get_operation_status((resource_type_mapping[resource_type], vnf))
+            vnf_status_list.append(vnf_operation_status)
+        if constants.OPERATION_FAILED in vnf_status_list:
+            return constants.OPERATION_FAILED
+        elif constants.OPERATION_PENDING in vnf_status_list:
+            return constants.OPERATION_PENDING
+        else:
+            return constants.OPERATION_SUCCESS
+
     @log_entry_exit(LOG)
     def get_vnfd_scaling_properties(self, vnfd_id, scaling_policy_name):
         vnfd = self.get_vnfd(vnfd_id)
@@ -833,6 +856,39 @@ class TackerManoAdapter(object):
 
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
+        if scale_type == 'SCALE_NS':
+            raise NotImplementedError
+        elif scale_type == 'SCALE_VNF':
+            vnf_list = []
+            for scale_data in scale_vnf_data:
+                vnf_instance_id = scale_data.vnf_instance_id
+                vnf_list.append(vnf_instance_id)
+                self.vnf_scale(vnf_instance_id, scale_type=scale_data.type,
+                               aspect_id=scale_data.scale_by_step_data.aspect_id,
+                               additional_param=scale_data.scale_by_step_data.additional_param)
+            return 'vnf-list', vnf_list
+
+    @log_entry_exit(LOG)
+    def ns_update(self, ns_instance_id, update_type, add_vnf_instance=None, remove_vnf_instance_id=None,
+                  instantiate_vnf_data=None, change_vnf_flavour_data=None, operate_vnf_data=None,
+                  modify_vnf_info_data=None, change_ext_vnf_connectivity_data=None, add_sap=None, remove_sap_id=None,
+                  add_nested_ns_id=None, remove_nested_ns_id=None, assoc_new_nsd_version_data=None,
+                  move_vnf_instance_data=None, add_vnffg=None, remove_vnffg_id=None, update_vnffg=None,
+                  change_ns_flavour_data=None, update_time=None):
+        if update_type == 'OperateVnf':
+            vnf_list = []
+            for update_data in operate_vnf_data:
+                vnf_instance_id = update_data.vnf_instance_id
+                vnf_list.append(vnf_instance_id)
+                change_state_to = update_data.change_state_to
+                stop_type = update_data.stop_type
+                graceful_stop_timeout = update_data.graceful_stop_timeout
+                additional_param = update_data.additional_param
+                self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout, additional_param)
+            return 'stack-list', vnf_list
 
     @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):

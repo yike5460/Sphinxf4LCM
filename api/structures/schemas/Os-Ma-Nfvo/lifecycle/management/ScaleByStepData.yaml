@@ -9,7 +9,7 @@ ScaleByStepData:
       required: true
       constraints:
         entry_type: String
-        valid_values: [ scale_out, scale_in, scale_up, scale_down ]
+        valid_values: [ out, in, up, down ]
 
     aspect_id:
       description: Identifier of (reference to) the aspect of the VNF that is requested to be scaled, as declared in the VNFD

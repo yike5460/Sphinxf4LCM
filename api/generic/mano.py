@@ -42,8 +42,8 @@ class Mano(object):
                            VNF_TERMINATE_TIMEOUT=constants.VNF_TERMINATE_TIMEOUT,
                            VNF_STABLE_STATE_TIMEOUT=constants.VNF_STABLE_STATE_TIMEOUT,
                            NS_INSTANTIATE_TIMEOUT=constants.NS_INSTANTIATE_TIMEOUT,
-                           NS_SCALE_OUT_TIMEOUT=constants.NS_SCALE_OUT_TIMEOUT,
-                           NS_SCALE_IN_TIMEOUT=constants.NS_SCALE_IN_TIMEOUT,
+                           NS_SCALE_TIMEOUT=constants.NS_SCALE_TIMEOUT,
+                           NS_UPDATE_TIMEOUT=constants.NS_UPDATE_TIMEOUT,
                            NS_TERMINATE_TIMEOUT=constants.NS_TERMINATE_TIMEOUT,
                            NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
                            POLL_INTERVAL=constants.POLL_INTERVAL):
@@ -55,8 +55,8 @@ class Mano(object):
         self.VNF_TERMINATE_TIMEOUT = VNF_TERMINATE_TIMEOUT
         self.VNF_STABLE_STATE_TIMEOUT = VNF_STABLE_STATE_TIMEOUT
         self.NS_INSTANTIATE_TIMEOUT = NS_INSTANTIATE_TIMEOUT
-        self.NS_SCALE_OUT_TIMEOUT = NS_SCALE_OUT_TIMEOUT
-        self.NS_SCALE_IN_TIMEOUT = NS_SCALE_IN_TIMEOUT
+        self.NS_SCALE_TIMEOUT = NS_SCALE_TIMEOUT
+        self.NS_UPDATE_TIMEOUT = NS_UPDATE_TIMEOUT
         self.NS_TERMINATE_TIMEOUT = NS_TERMINATE_TIMEOUT
         self.NS_STABLE_STATE_TIMEOUT = NS_STABLE_STATE_TIMEOUT
         self.POLL_INTERVAL = POLL_INTERVAL
@@ -470,25 +470,10 @@ class Mano(object):
 
         lifecycle_operation_occurrence_id = self.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data,
                                                           scale_time)
-
-        ns_scale_timeouts = {'ns_scale_out': self.NS_SCALE_OUT_TIMEOUT,
-                             'ns_scale_in': self.NS_SCALE_IN_TIMEOUT}
-        vnf_scale_timeouts = {'vnf_scale_out': self.VNF_SCALE_OUT_TIMEOUT,
-                              'vnf_scale_in': self.VNF_SCALE_IN_TIMEOUT}
-
-        if scale_type == 'scale_ns':
-            scaling_direction = scale_ns_data.scale_ns_by_steps_data.scaling_direction
-            operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
-                                                                  final_states=constants.OPERATION_FINAL_STATES,
-                                                                  max_wait_time=ns_scale_timeouts[scaling_direction],
-                                                                  poll_interval=self.POLL_INTERVAL)
-        else:
-            scaling_direction = scale_vnf_data.type == 'scale_out'
-            operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
-                                                                  final_states=constants.OPERATION_FINAL_STATES,
-                                                                  max_wait_time=vnf_scale_timeouts[scaling_direction],
-                                                                  poll_interval=self.POLL_INTERVAL)
-
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=self.NS_SCALE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
         return operation_status
 
     @log_entry_exit(LOG)
@@ -543,6 +528,196 @@ class Mano(object):
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
                                                               max_wait_time=constants.NS_TERMINATE_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
+
+        return operation_status
+
+    @log_entry_exit(LOG)
+    def ns_update(self, ns_instance_id, update_type, add_vnf_instance=None, remove_vnf_instance_id=None,
+                  instantiate_vnf_data=None, change_vnf_flavour_data=None, operate_vnf_data=None,
+                  modify_vnf_info_data=None, change_ext_vnf_connectivity_data=None, add_sap=None, remove_sap_id=None,
+                  add_nested_ns_id=None, remove_nested_ns_id=None, assoc_new_nsd_version_data=None,
+                  move_vnf_instance_data=None, add_vnffg=None, remove_vnffg_id=None, update_vnffg=None,
+                  change_ns_flavour_data=None, update_time=None):
+        """
+        This function updates an NS instance. This operation is also used to embed VNF LCM operations in support of
+        fine grained NS LCM approach. See the informative message flows in annex C. Actions that can be performed with
+        an update include:
+        - Adding existing VNF instances to the NS instance.
+        - Removing VNF instances from the NS instance.
+        - Instantiating new VNF instances and adding them to the NS instance.
+        - Changing the DF of VNF instances belonging to the NS instance.
+        - Changing the operational state of a VNF instance belonging to the NS instance.
+        - Modifying information data and/or the configurable properties of a VNF instance belonging to the NS instance.
+        - Changing the external connectivity of a VNF instance belonging to the NS instance.
+        - Adding SAPs to the NS instance.
+        - Removing SAPs from the NS instance.
+        - Adding existing NS instances to the NS instance.
+        - Removing nested NS instances from the NS instance.
+        - Associate a new NSD version to the NS instance.
+        - Moving VNF instances from one NS instance to another NS instance.
+        - Adding VNFFGs to the NS instance.
+        - Removing VNFFGs from the NS instance.
+        - Update VNFFGs of the NS instance.
+        - Changing the DF of the NS instance.
+        Only one type of update shall be allowed per operation.
+
+        This function was written in accordance with section 7.3.5 of ETSI GS NFV-IFA 013 v2.3.1 (2017-08).
+
+        :param ns_instance_id:                      Identifier of the NS instance being updated.
+        :param update_type:                         Specifies the type of update. This parameter determines also which
+                                                    one of the following parameter is present in the operation. Possible
+                                                    values are:
+                                                    - AddVnf (adding existing VNF instance(s)),
+                                                    - RemoveVnf (removing VNF instance(s)),
+                                                    - InstantiateVnf (instantiating new VNF(s)),
+                                                    - ChangeVnfDf (Changing VNF DF),
+                                                    - OperateVnf (changing VNF state),
+                                                    - ModifyVnfInformation (modifying VNF information and/or the
+                                                    configurable properties of VNF instance(s)),
+                                                    - ChangeExtVnfConnectivity (changing the external connectivity of
+                                                    VNF instance(s))
+                                                    - AddSap (adding SAP(s)),
+                                                    - RemoveSap (removing SAP(s)),
+                                                    - AddNestedNs      (adding existing NS instance(s) as nested NS(s)),
+                                                    - RemoveNestedNs      (removing existing nested NS instance(s)),
+                                                    - AssocNewNsdVersion (associating a new NSD version to the NS
+                                                    instance),
+                                                    - MoveVnf (moving VNF instance(s) from one origin NS instance to a
+                                                    another target NS instance),
+                                                    - AddVnffg (adding VNFFG(s)),
+                                                    - RemoveVnffg      (removing VNFFG(s)),
+                                                    - UpdateVnffg      (updating VNFFG(s)),
+                                                    - ChangeNsDf (changing NS DF).
+        :param add_vnf_instance:                    Specify an existing VNF instance to be added to the NS instance.
+                                                    This parameter shall be present only if updateType=AddVnf.
+        :param remove_vnf_instance_id:              Specify an existing VNF instance to be removed from the NS instance.
+                                                    The parameter contains the identifier(s) of the VNF instances to be
+                                                    removed. This parameter shall be present only if
+                                                    updateType=RemoveVnf.
+        :param instantiate_vnf_data:                Specify the new VNF to be instantiated. This parameter can be used
+                                                    e.g. for the bottom-up NS creation. This parameter shall be present
+                                                    only if updateType=InstantiateVnf.
+        :param change_vnf_flavour_data:             Specify the new DF of the VNF instance to be changed to. This
+                                                    parameter shall be present only if updateType=ChangeVnfDf.
+        :param operate_vnf_data:                    Specify the state of the VNF instance to be changed. This parameter
+                                                    shall be present only if updateType=OperateVnf.
+        :param modify_vnf_info_data:                Specify the VNF Information parameters and/or the configurable
+                                                    properties of VNF instance to be modified. This parameter shall be
+                                                    present only if updateType=ModifyVnfInformation.
+        :param change_ext_vnf_connectivity_data:    Specify the new external connectivity data of the VNF instance to
+                                                    be changed. This parameter shall be present only if
+                                                    updateType=ChangeExtVnfConnectivity.
+        :param add_sap:                             Specify a new SAP to be added to the NS instance. This parameter
+                                                    shall be present only if updateType=AddSap.
+        :param remove_sap_id:                       Specify an existing SAP to be removed from the NS instance. The
+                                                    parameter shall be present only if updateType=RemoveSap.
+        :param add_nested_ns_id:                    Specify an existing nested NS instance to be added to (nested
+                                                    within) the NS instance. This parameter shall be present only if
+                                                    updateType=AddNestedNs.
+        :param remove_nested_ns_id:                 Specify an existing nested NS instance to be removed from the NS
+                                                    instance. The parameter shall be present only if
+                                                    updateType=RemoveVnfNestedNs.
+        :param assoc_new_nsd_version_data:          Specify the new NSD to be used for the NS instance. This parameter
+                                                    shall be present only if updateType=AssocNewNsdVersion.
+        :param move_vnf_instance_data:              Specify existing VNF instance to be moved from one NS instance to
+                                                    another NS instance. This parameter shall be present only if
+                                                    updateType=MoveVnf.
+        :param add_vnffg:                           Specify the new VNFFG to be created to the NS Instance. This
+                                                    parameter shall be present only if updateType=AddVnffg.
+        :param remove_vnffg_id:                     Identifier of an existing VNFFG to be removed from the NS Instance.
+                                                    This parameter shall be present only if updateType=RemoveVnffg.
+        :param update_vnffg:                        Specify the new VNFFG Information data to be updated for a VNFFG of
+                                                    the NS Instance. This parameter shall be present only if
+                                                    updateType=UpdateVnffg.
+        :param change_ns_flavour_data:              Specifies the new DF to be applied to the NS instance. It shall be
+                                                    present only if updateType=ChangeNsDf.
+        :param update_time:                         Timestamp indicating the update time of the NS, i.e. the NS will be
+                                                    updated at this timestamp. Cardinality "0" indicates the NS update
+                                                    takes place immediately.
+        :return:                                    Identifier of the NS lifecycle operation occurrence.
+        """
+        return self.mano_adapter.ns_update(ns_instance_id, update_type, add_vnf_instance, remove_vnf_instance_id,
+                                           instantiate_vnf_data, change_vnf_flavour_data, operate_vnf_data,
+                                           modify_vnf_info_data, change_ext_vnf_connectivity_data, add_sap,
+                                           remove_sap_id, add_nested_ns_id, remove_nested_ns_id,
+                                           assoc_new_nsd_version_data, move_vnf_instance_data, add_vnffg,
+                                           remove_vnffg_id, update_vnffg, change_ns_flavour_data, update_time)
+
+    @log_entry_exit(LOG)
+    def ns_update_sync(self, ns_instance_id, update_type, add_vnf_instance=None, remove_vnf_instance_id=None,
+                       instantiate_vnf_data=None, change_vnf_flavour_data=None, operate_vnf_data=None,
+                       modify_vnf_info_data=None, change_ext_vnf_connectivity_data=None, add_sap=None,
+                       remove_sap_id=None, add_nested_ns_id=None, remove_nested_ns_id=None,
+                       assoc_new_nsd_version_data=None, move_vnf_instance_data=None, add_vnffg=None,
+                       remove_vnffg_id=None, update_vnffg=None, change_ns_flavour_data=None, update_time=None):
+        """
+        This function synchronously updates an NS instance.
+
+        :param ns_instance_id:                      Identifier of the instance of the NS.
+        :param update_type:                         Specifies the type of update. See function ns_update for explanation
+                                                    of allowed values.
+        :param add_vnf_instance:                    Specify an existing VNF instance to be added to the NS instance.
+                                                    This parameter shall be present only if updateType=AddVnf.
+        :param remove_vnf_instance_id:              Specify an existing VNF instance to be removed from the NS instance.
+                                                    The parameter contains the identifier(s) of the VNF instances to be
+                                                    removed. This parameter shall be present only if
+                                                    updateType=RemoveVnf.
+        :param instantiate_vnf_data:                Specify the new VNF to be instantiated. This parameter can be used
+                                                    e.g. for the bottom-up NS creation. This parameter shall be present
+                                                    only if updateType=InstantiateVnf.
+        :param change_vnf_flavour_data:             Specify the new DF of the VNF instance to be changed to. This
+                                                    parameter shall be present only if updateType=ChangeVnfDf.
+        :param operate_vnf_data:                    Specify the state of the VNF instance to be changed. This parameter
+                                                    shall be present only if updateType=OperateVnf.
+        :param modify_vnf_info_data:                Specify the VNF Information parameters and/or the configurable
+                                                    properties of VNF instance to be modified. This parameter shall
+                                                    be present only if updateType=ModifyVnfInformation.
+        :param change_ext_vnf_connectivity_data:    Specify the new external connectivity data of the VNF instance to be
+                                                    changed. This parameter shall be present only if
+                                                    updateType=ChangeExtVnfConnectivity.
+        :param add_sap:                             Specify a new SAP to be added to the NS instance. This parameter
+                                                    shall be present only if updateType=AddSap.
+        :param remove_sap_id:                       Specify an existing SAP to be removed from the NS instance. The
+                                                    parameter shall be present only if updateType=RemoveSap.
+        :param add_nested_ns_id:                    Specify an existing nested NS instance to be added to (nested
+                                                    within) the NS instance. This parameter shall be present only if
+                                                    updateType=AddNestedNs.
+        :param remove_nested_ns_id:                 Specify an existing nested NS instance to be removed from the NS
+                                                    instance. The parameter shall be present only if
+                                                    updateType=RemoveVnfNestedNs.
+        :param assoc_new_nsd_version_data:          Specify the new NSD to be used for the NS instance. This parameter
+                                                    shall be present only if updateType=AssocNewNsdVersion.
+        :param move_vnf_instance_data:              Specify existing VNF instance to be moved from one NS instance to
+                                                    another NS instance. This parameter shall be present only if
+                                                    updateType=MoveVnf.
+        :param add_vnffg:                           Specify the new VNFFG to be created to the NS Instance. This
+                                                    parameter shall be present only if updateType=AddVnffg.
+        :param remove_vnffg_id:                     Identifier of an existing VNFFG to be removed from the NS Instance.
+                                                    This parameter shall be present only if updateType=RemoveVnffg.
+        :param update_vnffg:                        Specify the new VNFFG Information data to be updated for a VNFFG of
+                                                    the NS Instance. This parameter shall be present only if
+                                                    updateType=UpdateVnffg.
+        :param change_ns_flavour_data:              Specifies the new DF to be applied to the NS instance. It shall be
+                                                    present only if updateType=ChangeNsDf.
+        :param update_time:                         Timestamp indicating the update time of the NS, i.e. the NS will be
+                                                    updated at this timestamp. Cardinality "0" indicates the NS update
+                                                    takes place immediately.
+        :return:                                    Operation status.
+        """
+
+        lifecycle_operation_occurrence_id = self.ns_update(ns_instance_id, update_type, add_vnf_instance,
+                                                           remove_vnf_instance_id, instantiate_vnf_data,
+                                                           change_vnf_flavour_data, operate_vnf_data,
+                                                           modify_vnf_info_data, change_ext_vnf_connectivity_data,
+                                                           add_sap, remove_sap_id, add_nested_ns_id,
+                                                           remove_nested_ns_id, assoc_new_nsd_version_data,
+                                                           move_vnf_instance_data, add_vnffg, remove_vnffg_id,
+                                                           update_vnffg, change_ns_flavour_data, update_time)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=self.NS_UPDATE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status

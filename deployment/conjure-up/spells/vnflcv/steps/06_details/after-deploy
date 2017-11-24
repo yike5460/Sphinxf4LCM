@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -eu
+
+. "$CONJURE_UP_SPELLSDIR/sdk/common.sh"
+
+DETAILS=$(cat << EOF
+
+Environment:
+http://$PUBLICIP:8081/
+
+Test Execution:
+http://$PUBLICIP:8000/
+
+Analytics:
+http://$PUBLICIP:5601/
+EOF
+)
+
+setResult "$DETAILS"
+exit 0

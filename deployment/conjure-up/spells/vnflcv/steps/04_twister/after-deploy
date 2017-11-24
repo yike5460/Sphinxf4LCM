@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu
+
+. $CONJURE_UP_SPELLSDIR/sdk/common.sh
+
+juju run-action twister/0 restart &> /dev/null
+
+setResult "Twister refreshed."
+exit 0
