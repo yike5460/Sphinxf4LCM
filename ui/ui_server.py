@@ -4,8 +4,6 @@ from collections import OrderedDict
 import requests
 from bottle import route, run, request, template, static_file, redirect
 
-from api.generic import constants
-
 MANO_TYPES = ['tacker', 'cisco']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
@@ -888,8 +886,7 @@ def additional():
     vnf_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT')
     vnf_stable_state_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STABLE_STATE_TIMEOUT')
     ns_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_INSTANTIATE_TIMEOUT')
-    ns_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_OUT_TIMEOUT')
-    ns_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_IN_TIMEOUT')
+    ns_scale_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_TIMEOUT')
     ns_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_TERMINATE_TIMEOUT')
     poll_interval = requests.get(url='http://localhost:8080/v1.0/config/POLL_INTERVAL')
     low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/LOW_TRAFFIC_LOAD')
@@ -907,8 +904,7 @@ def additional():
         'VNF_TERMINATE_TIMEOUT': vnf_terminate_timeout.json(),
         'VNF_STABLE_STATE_TIMEOUT': vnf_stable_state_timeout.json(),
         'NS_INSTANTIATE_TIMEOUT': ns_instantiate_timeout.json(),
-        'NS_SCALE_OUT_TIMEOUT': ns_scale_out_timeout.json(),
-        'NS_SCALE_IN_TIMEOUT': ns_scale_in_timeout.json(),
+        'NS_SCALE_TIMEOUT': ns_scale_timeout.json(),
         'NS_TERMINATE_TIMEOUT': ns_terminate_timeout.json(),
         'POLL_INTERVAL': poll_interval.json(),
         'LOW_TRAFFIC_LOAD': low_traffic_load.json(),
@@ -937,8 +933,7 @@ def additional_update():
         vnf_terminate_timeout = int(request.forms.get('vnf_terminate_timeout'))
         vnf_stable_state_timeout = int(request.forms.get('vnf_stable_state_timeout'))
         ns_instantiate_timeout = int(request.forms.get('ns_instantiate_timeout'))
-        ns_scale_out_timeout = int(request.forms.get('ns_scale_out_timeout'))
-        ns_scale_in_timeout = int(request.forms.get('ns_scale_in_timeout'))
+        ns_scale_timeout = int(request.forms.get('ns_scale_timeout'))
         ns_terminate_timeout = int(request.forms.get('ns_terminate_timeout'))
         poll_interval = int(request.forms.get('poll_interval'))
         low_traffic_load = int(request.forms.get('low_traffic_load'))
@@ -955,8 +950,7 @@ def additional_update():
         requests.put(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT', json=vnf_terminate_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_STABLE_STATE_TIMEOUT', json=vnf_stable_state_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/NS_INSTANTIATE_TIMEOUT', json=ns_instantiate_timeout)
-        requests.put(url='http://localhost:8080/v1.0/config/NS_SCALE_OUT_TIMEOUT', json=ns_scale_out_timeout)
-        requests.put(url='http://localhost:8080/v1.0/config/NS_SCALE_IN_TIMEOUT', json=ns_scale_in_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/NS_SCALE_TIMEOUT', json=ns_scale_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/NS_TERMINATE_TIMEOUT', json=ns_terminate_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/POLL_INTERVAL', json=poll_interval)
         requests.put(url='http://localhost:8080/v1.0/config/LOW_TRAFFIC_LOAD', json=low_traffic_load)
@@ -975,8 +969,7 @@ def additional_update():
         vnf_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT')
         vnf_stable_state_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STABLE_STATE_TIMEOUT')
         ns_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_INSTANTIATE_TIMEOUT')
-        ns_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_OUT_TIMEOUT')
-        ns_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_IN_TIMEOUT')
+        ns_scale_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_SCALE_TIMEOUT')
         ns_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/NS_TERMINATE_TIMEOUT')
         poll_interval = requests.get(url='http://localhost:8080/v1.0/config/POLL_INTERVAL')
         low_traffic_load = requests.get(url='http://localhost:8080/v1.0/config/LOW_TRAFFIC_LOAD')
@@ -994,8 +987,7 @@ def additional_update():
             'VNF_TERMINATE_TIMEOUT': vnf_terminate_timeout.json(),
             'VNF_STABLE_STATE_TIMEOUT': vnf_stable_state_timeout.json(),
             'NS_INSTANTIATE_TIMEOUT': ns_instantiate_timeout.json(),
-            'NS_SCALE_OUT_TIMEOUT': ns_scale_out_timeout.json(),
-            'NS_SCALE_IN_TIMEOUT': ns_scale_in_timeout.json(),
+            'NS_SCALE_TIMEOUT': ns_scale_timeout.json(),
             'NS_TERMINATE_TIMEOUT': ns_terminate_timeout.json(),
             'POLL_INTERVAL': poll_interval.json(),
             'LOW_TRAFFIC_LOAD': low_traffic_load.json(),
@@ -1064,20 +1056,30 @@ def all_img(font):
 
 
 def set_default_additional():
-    timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_OUT_TIMEOUT', 'VNF_SCALE_IN_TIMEOUT', 'VNF_START_TIMEOUT',
-              'VNF_STOP_TIMEOUT', 'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT', 'NS_INSTANTIATE_TIMEOUT',
-              'NS_SCALE_OUT_TIMEOUT', 'NS_SCALE_IN_TIMEOUT', 'NS_TERMINATE_TIMEOUT', 'POLL_INTERVAL',
-              'TRAFFIC_TOLERANCE']
-    traffic_load_values = ['LOW_TRAFFIC_LOAD', 'NORMAL_TRAFFIC_LOAD', 'MAX_TRAFFIC_LOAD']
-    for item in timers:
+    timers = {'VNF_INSTANTIATE_TIMEOUT': 600,
+              'VNF_SCALE_OUT_TIMEOUT': 360,
+              'VNF_SCALE_IN_TIMEOUT':360,
+              'VNF_START_TIMEOUT': 300,
+              'VNF_STOP_TIMEOUT': 300,
+              'VNF_TERMINATE_TIMEOUT': 300,
+              'VNF_STABLE_STATE_TIMEOUT': 360,
+              'NS_INSTANTIATE_TIMEOUT': 600,
+              'NS_SCALE_TIMEOUT': 360,
+              'NS_TERMINATE_TIMEOUT': 300,
+              'POLL_INTERVAL': 5,
+              'TRAFFIC_TOLERANCE': 1}
+    traffic_load_values = {'LOW_TRAFFIC_LOAD': 1,
+                           'NORMAL_TRAFFIC_LOAD': 3,
+                           'MAX_TRAFFIC_LOAD': 5}
+    for item in timers.keys():
         config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
         if config.json().encode() == 'None':
-            default_value = getattr(constants, item)
+            default_value = timers[item]
             requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
     for item in traffic_load_values:
         config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
         if config.json().encode() == 'None':
-            default_value = getattr(constants, 'traffic_load_percent_mapping')[item]
+            default_value = traffic_load_values[item]
             requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
 
 def struct_mano(type, name, **kwargs):
