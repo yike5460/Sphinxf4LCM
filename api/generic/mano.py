@@ -1161,7 +1161,7 @@ class Mano(object):
         This function goes through each VNF with the provided instance ID and retrieves the destination address(es) for
         each connection point in the ingress_cp_list.
 
-        :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list need
+        :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list needs
                                     to be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
                                     Expected format: ['CP1', 'CP2', ...]
@@ -1176,15 +1176,15 @@ class Mano(object):
         return dest_addr_list
 
     @log_entry_exit(LOG)
-    def get_ns_ingress_cp_addr_list(self, ns_instance_id, ingress_cp_list, additional_param=None):
+    def get_ns_ingress_cp_addr_list(self, ns_info, ingress_cp_list):
         """
         This function goes through each VNF inside the NS with the provided instance ID and retrieves the destination
         address(es) for each connection point in the ingress_cp_list.
 
-        :param ns_instance_id:      Identifier of the NS instance.
+        :param ns_info:             NsInfo information element for the NS for which the ingress CP address list needs to
+                                    be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
                                     Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
-        :param additional_param:    Additional parameters used for filtering.
         :return:                    List of addresses.
         """
         # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
@@ -1201,7 +1201,6 @@ class Mano(object):
             ns_ingress_cps[vnf_name].append(cp_name)
 
         # Build the list with the destination addresses
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         dest_addr_list = ''
         for vnf_info in ns_info.vnf_info:
             if vnf_info.vnf_product_name in ns_ingress_cps.keys():
