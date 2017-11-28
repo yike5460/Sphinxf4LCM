@@ -1165,7 +1165,7 @@ class Mano(object):
                                     to be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
                                     Expected format: ['CP1', 'CP2', ...]
-        :return:                    List of addresses.
+        :return:                    String with space-separated addresses.
         """
         dest_addr_list = ''
 
@@ -1185,7 +1185,7 @@ class Mano(object):
                                     be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
                                     Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
-        :return:                    List of addresses.
+        :return:                    String with space-separated addresses.
         """
         # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
         # values lists with CPs whose addresses need to be retrieved
