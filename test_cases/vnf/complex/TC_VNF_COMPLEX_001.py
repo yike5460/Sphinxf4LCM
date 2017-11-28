@@ -151,12 +151,11 @@ class TC_VNF_COMPLEX_001(TestCase):
         self.traffic.stop()
 
         # Configure stream destination address(es).
-        dest_addr_list = ''
-        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
-                dest_addr_list += ext_cp_info.address[0] + ' '
-
+        dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
+                                                          vnf_info,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
+
         self.traffic.clear_counters()
 
         # Start the max traffic load.

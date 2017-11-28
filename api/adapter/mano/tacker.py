@@ -305,6 +305,16 @@ class TackerManoAdapter(object):
         return yaml.load(tacker_show_vnfd)
 
     @log_entry_exit(LOG)
+    def get_nsd(self, nsd_id):
+        # TODO: translate to ETSI NSD
+        try:
+            tacker_show_nsd = self.tacker_client.show_nsd(nsd_id)['nsd']['attributes']['nsd']
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+        return yaml.load(tacker_show_nsd)
+
+    @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
         vnfd_id = vnf_info.vnfd_id
@@ -918,6 +928,7 @@ class TackerManoAdapter(object):
         for vnf_name in vnf_ids_dict.keys():
             vnf_instance_id = vnf_ids_dict[vnf_name]
             vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            vnf_info.vnf_product_name = vnf_name.encode()
             ns_info.vnf_info.append(vnf_info)
 
         return ns_info
@@ -999,44 +1010,27 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        vnf_ids = self.tacker_client.show_ns(ns_instance_id)['ns']['vnf_ids']
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        nsd_id = ns_info.nsd_id
+        nsd = self.get_nsd(nsd_id)
+        for vnf_info in ns_info.vnf_info:
+            # Get the VNF product name
+            vnf_name = vnf_info.vnf_product_name
 
-        # Transform unicode to dict
-        vnf_ids_str = str(vnf_ids).replace("'", '"')
-        vnf_ids_dict = json.loads(vnf_ids_str)
+            # Get the node type from the NSD that corresponds to the above VNF name
+            node_type = nsd['topology_template']['node_templates'].get(vnf_name, {}).get('type')
+            if node_type is None:
+                LOG.debug('NSD with ID %s does not have a node template named "%s"' % (nsd_id, vnf_name))
+                return False
 
-        for vnf_name in vnf_ids_dict.keys():
-            vnf_instance_id = vnf_ids_dict[vnf_name]
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            # Check if the above node type is defined in the VNFD after which the VNF with the above name has been
+            # deployed after
             vnfd_id = vnf_info.vnfd_id
             vnfd = self.get_vnfd(vnfd_id)
-            if 'tosca.nodes.nfv.%s' % vnf_name not in vnfd['node_types'].keys():
+            if node_type not in vnfd['node_types'].keys():
+                LOG.debug('VNFD with ID %s does not define the node type "%s"' % (vnfd_id, node_type))
                 return False
         return True
-
-    @log_entry_exit(LOG)
-    def get_ns_ingress_cp_addr_list(self, ns_instance_id, ingress_cp_list):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
-        vnf_ids = self.tacker_client.show_ns(ns_instance_id)['ns']['vnf_ids']
-
-        # Transform unicode to dict
-        vnf_ids_str = str(vnf_ids).replace("'", '"')
-        vnf_ids_dict = json.loads(vnf_ids_str)
-
-        dest_addr_list = ''
-        # Expecting the ingress_cp_list to look like this ['VNF1:CP2', 'VNF2:CP2', ...]
-        for ingress_cp in ingress_cp_list:
-            vnf_name, cp_name = ingress_cp.split(':')
-
-            for vnf_info in ns_info.vnf_info:
-                # Check if the VNF instance ID from this VnfInfo matches the one for the current <vnf_name>
-                if vnf_info.vnf_instance_id == vnf_ids_dict[vnf_name]:
-                    for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-                        # Check if the ID of this CP matches the current <cp_name>
-                        if ext_cp_info.cpd_id == cp_name:
-                            dest_addr_list += ext_cp_info.address[0] + ' '
-
-        return dest_addr_list
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info):

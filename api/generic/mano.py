@@ -1156,16 +1156,56 @@ class Mano(object):
         return self.mano_adapter.verify_vnf_nsd_mapping(ns_instance_id, additional_param)
 
     @log_entry_exit(LOG)
-    def get_ns_ingress_cp_addr_list(self, ns_instance_id, ingress_cp_list):
+    def get_vnf_ingress_cp_addr_list(self, vnf_info, ingress_cp_list):
+        """
+        This function goes through each VNF with the provided instance ID and retrieves the destination address(es) for
+        each connection point in the ingress_cp_list.
+
+        :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list needs
+                                    to be retrieved.
+        :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
+                                    Expected format: ['CP1', 'CP2', ...]
+        :return:                    String with space-separated addresses.
+        """
+        dest_addr_list = ''
+
+        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
+            if ext_cp_info.cpd_id in ingress_cp_list:
+                dest_addr_list += ext_cp_info.address[0] + ' '
+
+        return dest_addr_list
+
+    @log_entry_exit(LOG)
+    def get_ns_ingress_cp_addr_list(self, ns_info, ingress_cp_list):
         """
         This function goes through each VNF inside the NS with the provided instance ID and retrieves the destination
         address(es) for each connection point in the ingress_cp_list.
 
-        :param ns_instance_id:  Identifier of the NS instance.
-        :param ingress_cp_list: List of connection points for which to get the corresponding address(es).
-        :return:                List of addresses.
+        :param ns_info:             NsInfo information element for the NS for which the ingress CP address list needs to
+                                    be retrieved.
+        :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
+                                    Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
+        :return:                    String with space-separated addresses.
         """
-        return self.mano_adapter.get_ns_ingress_cp_addr_list(ns_instance_id, ingress_cp_list)
+        # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
+        # values lists with CPs whose addresses need to be retrieved
+        # Example:
+        # ingress_cp_list = ['VNF1:CP1', 'VNF2:CP2', 'VNF1:CP3']
+        # ns_ingress_cps = {'VNF1': ['CP1', 'CP3'],
+        #                   'VNF2': ['CP2']}
+        ns_ingress_cps = dict()
+        for ingress_cp in ingress_cp_list:
+            vnf_name, cp_name = ingress_cp.split(':')
+            if vnf_name not in ns_ingress_cps.keys():
+                ns_ingress_cps[vnf_name] = list()
+            ns_ingress_cps[vnf_name].append(cp_name)
+
+        # Build the list with the destination addresses
+        dest_addr_list = ''
+        for vnf_info in ns_info.vnf_info:
+            if vnf_info.vnf_product_name in ns_ingress_cps.keys():
+                dest_addr_list += self.get_vnf_ingress_cp_addr_list(vnf_info, ns_ingress_cps[vnf_info.vnf_product_name])
+        return dest_addr_list
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_instance_id, additional_param=None):

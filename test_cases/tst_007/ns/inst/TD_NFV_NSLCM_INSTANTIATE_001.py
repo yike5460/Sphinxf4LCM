@@ -128,7 +128,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
-                                                          self.ns_instance_id,
+                                                          ns_info,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 

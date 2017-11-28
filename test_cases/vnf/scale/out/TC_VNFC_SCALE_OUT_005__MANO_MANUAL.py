@@ -107,10 +107,9 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
-        dest_addr_list = ''
-        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
-                dest_addr_list += ext_cp_info.address[0] + ' '
+        dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
+                                                          vnf_info,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
@@ -176,12 +175,11 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         self.traffic.stop()
 
         # Configure stream destination address(es).
-        dest_addr_list = ''
-        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
-                dest_addr_list += ext_cp_info.address[0] + ' '
-
+        dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
+                                                          vnf_info,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
+
         self.traffic.config_traffic_load('NORMAL_TRAFFIC_LOAD')
 
         # Start the normal traffic load.
@@ -282,12 +280,11 @@ class TC_VNFC_SCALE_OUT_005__MANO_MANUAL(TestCase):
         self.traffic.stop()
 
         # Configure stream destination address(es).
-        dest_addr_list = ''
-        for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id == self.tc_input['traffic']['traffic_config']['ingress_cp_name']:
-                dest_addr_list += ext_cp_info.address[0] + ' '
-
+        dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
+                                                          vnf_info,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
+
         self.traffic.clear_counters()
 
         # Start the low traffic load.
