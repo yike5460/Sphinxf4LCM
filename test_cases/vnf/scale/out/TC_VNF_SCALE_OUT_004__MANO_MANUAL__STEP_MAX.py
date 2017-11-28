@@ -164,7 +164,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_MAX(TestCase):
         scale_ns_data.scale_ns_by_steps_data.number_of_steps = sp['increment']
 
         self.time_record.START('scale_out_ns')
-        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data,
+        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='SCALE_NS', scale_ns_data=scale_ns_data,
                                    scale_time=self.tc_input.get('scale_time')) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_out']['status'] = 'Fail'

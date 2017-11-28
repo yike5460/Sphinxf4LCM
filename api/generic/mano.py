@@ -439,11 +439,11 @@ class Mano(object):
         This function was written in accordance with section 7.3.4 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
 
         :param ns_instance_id:  Identifier of the instance of the NS.
-        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'scale_ns, 'scale_vnf'.
+        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'SCALE_NS, 'SCALE_VNF'.
         :param scale_ns_data:   Provides the necessary information to scale the referenced NS instance. It shall be
-                                present when scale_type = 'scale_ns'.
+                                present when scale_type = 'SCALE_NS'.
         :param scale_vnf_data:  Provides the information to scale a given VNF instance that is part of the referenced
-                                NS instance. Shall be present when scale_type = 'scale_vnf'.
+                                NS instance. Shall be present when scale_type = 'SCALE_VNF'.
         :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
                                 timestamp.
         :return:                Identifier of the NS lifecycle operation occurrence.
@@ -458,11 +458,11 @@ class Mano(object):
         This function synchronously scales an NS instance.
 
         :param ns_instance_id:  Identifier of the instance of the NS.
-        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'scale_ns, 'scale_vnf'.
+        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'SCALE_NS, 'SCALE_VNF'.
         :param scale_ns_data:   Provides the necessary information to scale the referenced NS instance. It shall be
-                                present when scale_type = 'scale_ns'.
+                                present when scale_type = 'SCALE_NS'.
         :param scale_vnf_data:  Provides the information to scale a given VNF instance that is part of the referenced
-                                NS instance. Shall be present when scale_type = 'scale_vnf'.
+                                NS instance. Shall be present when scale_type = 'SCALE_VNF'.
         :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
                                 timestamp.
         :return:                Operation status.
