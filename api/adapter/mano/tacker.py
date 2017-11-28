@@ -305,6 +305,16 @@ class TackerManoAdapter(object):
         return yaml.load(tacker_show_vnfd)
 
     @log_entry_exit(LOG)
+    def get_nsd(self, nsd_id):
+        # TODO: translate to ETSI NSD
+        try:
+            tacker_show_nsd = self.tacker_client.show_nsd(nsd_id)['nsd']['attributes']['nsd']
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+        return yaml.load(tacker_show_nsd)
+
+    @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
         vnfd_id = vnf_info.vnfd_id
@@ -1001,10 +1011,24 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        nsd_id = ns_info.nsd_id
+        nsd = self.get_nsd(nsd_id)
         for vnf_info in ns_info.vnf_info:
+            # Get the VNF product name
+            vnf_name = vnf_info.vnf_product_name
+
+            # Get the node type from the NSD that corresponds to the above VNF name
+            node_type = nsd['topology_template']['node_templates'].get(vnf_name, {}).get('type')
+            if node_type is None:
+                LOG.debug('NSD with ID %s does not have a node template named "%s"' % (nsd_id, vnf_name))
+                return False
+
+            # Check if the above node type is defined in the VNFD after which the VNF with the above name has been
+            # deployed after
             vnfd_id = vnf_info.vnfd_id
             vnfd = self.get_vnfd(vnfd_id)
-            if 'tosca.nodes.nfv.%s' % vnf_info.vnf_product_name not in vnfd['node_types'].keys():
+            if node_type not in vnfd['node_types'].keys():
+                LOG.debug('VNFD with ID %s does not define the node type "%s"' % (vnfd_id, node_type))
                 return False
         return True
 
