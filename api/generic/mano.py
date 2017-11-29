@@ -225,6 +225,32 @@ class Mano(object):
         return self.mano_adapter.validate_ns_allocated_vresources(ns_instance_id, additional_param)
 
     @log_entry_exit(LOG)
+    def validate_ns_released_vresources(self, ns_info, additional_param=None):
+        """
+        This functions validates that the resources allocated to an NS instance have been released.
+
+        :param ns_info:             NsInfo structure holding information about the NS instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if the resources have been released, False otherwise.
+        """
+        for vnf_info in ns_info.vnf_info:
+            if not self.validate_vnf_released_vresources(vnf_info, additional_param):
+                return False
+        return True
+
+    @log_entry_exit(LOG)
+    def validate_vnf_released_vresources(self, vnf_info, additional_param=None):
+        """
+        This functions validates that the resources allocated to a VNF instance have been released.
+
+        :param vnf_info:            VnfInfo structure holding information about the VNF instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    True if the resources have been released, False otherwise.
+        """
+
+        return self.mano_adapter.validate_vnf_released_vresources(vnf_info, additional_param)
+
+    @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
