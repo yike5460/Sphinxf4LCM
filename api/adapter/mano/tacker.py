@@ -1006,7 +1006,6 @@ class TackerManoAdapter(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
             try:
                 vc = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-                print vc
             except Exception as e:
                 LOG.exception(e)
             else:
