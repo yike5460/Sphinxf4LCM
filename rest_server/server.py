@@ -136,9 +136,10 @@ def do_exec():
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
             if resource_type == 'mano':
-                tc_input['vnfd_id'] = resource_params['vnfd_id']
+                tc_input['vnfd_id'] = resource_params.get('vnfd_id')
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
+                tc_input['nsd_id'] = resource_params.get('nsd_id')
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
 

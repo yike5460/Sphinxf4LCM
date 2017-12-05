@@ -134,6 +134,7 @@ class TC_VNF_STATE_TERM_002(TestCase):
         self.tc_result['events']['traffic_deactivation']['duration'] = self.traffic.calculate_deactivation_time()
 
         self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF is terminated and all resources have been released

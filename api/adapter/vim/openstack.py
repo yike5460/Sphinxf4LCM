@@ -140,7 +140,7 @@ class OpenstackVimAdapter(object):
                 virtual_compute.virtual_network_interface.append(virtual_network_interface)
 
         virtual_compute.vc_image_id = server_details['image_id']
-
+        # TODO: What should the function return when the specified resources are not found?
         return virtual_compute
 
     @log_entry_exit(LOG)
