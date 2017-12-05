@@ -176,6 +176,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         self.tc_result['events']['terminate_vnf']['duration'] = self.time_record.duration('terminate_vnf')
 
         self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
 
         # --------------------------------------------------------------------------------------------------------------
         # 9. Validate VNF is terminated and all resources have been released

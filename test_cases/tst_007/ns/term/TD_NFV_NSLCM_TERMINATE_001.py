@@ -1,9 +1,9 @@
 import logging
+from time import sleep
 
 from api.generic import constants
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
-from time import sleep
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -35,17 +35,17 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         LOG.info('Triggering NS instantiation on the NFVO')
         self.time_record.START('instantiate_ns')
         self.ns_instance_id = self.mano.ns_create_and_instantiate(
-            nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
-            ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
-            sap_data=self.tc_input.get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
-            vnf_instance_data=self.tc_input.get('vnf_instance_data'),
-            nested_ns_instance_data=self.tc_input.get('nested_ns_instance_data'),
-            location_constraints=self.tc_input.get('location_constraints'),
-            additional_param_for_ns=self.tc_input.get('additional_param_for_ns'),
-            additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
-            start_time=self.tc_input.get('start_time'),
-            ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
-            additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
+               nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
+               ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
+               sap_data=self.tc_input.get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
+               vnf_instance_data=self.tc_input.get('vnf_instance_data'),
+               nested_ns_instance_data=self.tc_input.get('nested_ns_instance_data'),
+               location_constraints=self.tc_input.get('location_constraints'),
+               additional_param_for_ns=self.tc_input.get('additional_param_for_ns'),
+               additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
+               start_time=self.tc_input.get('start_time'),
+               ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
+               additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
         if self.ns_instance_id is None:
             raise TestRunError('NS instantiation operation failed')
@@ -79,9 +79,13 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id) != constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='NS termination operation failed')
+
         self.time_record.END('terminate_ns')
+
         self.tc_result['events']['terminate_ns']['duration'] = self.time_record.duration('terminate_ns')
+
         self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
@@ -89,8 +93,8 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         LOG.info('Sleeping 5 seconds to allow MANO to finalize termination of resources')
         sleep(5)
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_instance in ns_info.vnf_info:
-            vnf_instance_id = vnf_instance.vnf_instance_id
+        for vnf_info in ns_info.vnf_info:
+            vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
@@ -113,5 +117,5 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
                                              'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError(
-                'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s' % (
-                self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info.ns_state))
+                'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s'
+                % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info.ns_state))

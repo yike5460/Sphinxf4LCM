@@ -998,18 +998,17 @@ class TackerManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_released_vresources(self, vnf_info, additional_param):
+    def validate_vnf_released_vresources(self, vnf_info):
         result = True
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
             try:
-                vc = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-            except Exception as e:
-                LOG.exception(e)
-            else:
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
                 result = False
+            except Exception as e:
+                LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
         return result
 
     @log_entry_exit(LOG)
