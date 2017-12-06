@@ -119,6 +119,10 @@ def do_exec():
     Request mapped function that starts the execution of a test case in a new process.
     """
     tc_exec_request = request.json
+    timeout_timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_OUT_TIMEOUT', 'VNF_SCALE_IN_TIMEOUT', 'VNF_STOP_TIMEOUT',
+                      'VNF_START_TIMEOUT', 'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT',
+                      'NS_INSTANTIATE_TIMEOUT', 'NS_SCALE_TIMEOUT', 'NS_UPDATE_TIMEOUT', 'NS_TERMINATE_TIMEOUT',
+                      'NS_STABLE_STATE_TIMEOUT', 'POLL_INTERVAL']
 
     tc_input = tc_exec_request.get('tc_input')
     if tc_input is None:
@@ -140,6 +144,9 @@ def do_exec():
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
                 tc_input['nsd_id'] = resource_params.get('nsd_id')
+                tc_input[resource_type]['generic_config'] = dict()
+                for timeout_timer in timeout_timers:
+                    tc_input[resource_type]['generic_config'][timeout_timer] = _read_config(timeout_timer)
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
 
