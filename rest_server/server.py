@@ -142,6 +142,7 @@ def do_exec():
                 tc_input['nsd_id'] = resource_params.get('nsd_id')
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
+        tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')
 
         # TODO: remove
         if 'vnf' not in tc_input.keys():
