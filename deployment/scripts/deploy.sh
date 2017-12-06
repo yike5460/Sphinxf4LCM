@@ -68,7 +68,7 @@ echo "================================================" >> /var/log/vnflcv/vnflc
 /bin/date >> /var/log/vnflcv/vnflcv-deployment.log
 echo "6. Installing conjure-up" >> /var/log/vnflcv/vnflcv-deployment.log
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-sudo /usr/bin/snap install conjure-up --classic --edge >> /var/log/vnflcv/vnflcv-deployment.log
+sudo /usr/bin/snap install conjure-up --classic >> /var/log/vnflcv/vnflcv-deployment.log
 
 # Run conjure-up
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
