@@ -19,8 +19,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
     2. Verify that the NS is instantiated
     3. Trigger the NFVO to stop the target VNF instance inside the NS
     4. Trigger the NFVO to start the target VNF instance inside the NS instance
-    5. Verify that the compute resources allocated to the target VNF instance have been started by querying the VIM
-    6. Verify that the VNF instace operational state on the VNFM is indicated as "started"
+    5. Verify that the VNF instace operational state on the VNFM is indicated as "started"
+    6. Verify that the compute resources allocated to the target VNF instance have been started by querying the VIM
     7. Verify that the NFVO shows no "operate VNF" operation errors
     8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running the
     end-to-end functional test
@@ -115,36 +115,61 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.tc_result['events']['ns_update_start_vnf']['duration'] = self.time_record.duration('ns_update_start_vnf')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Verify that the compute resources allocated to the target VNF instance have been started by querying the
+        # 5. Verify that the VNF instance operational state on the VNFM is indicated as "started"
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as started')
+        vnf_info_list = list()
+        for vnf_data in operate_vnf_data_list:
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_data.vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info_list.append(vnf_info)
+            if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+                raise TestRunError('Target VNF %s was not started' % vnf_info.vnf_product_name)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 6. Verify that the compute resources allocated to the target VNF instance have been started by querying the
         # VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
                  ' querying the VIM')
-        for vnf_data in operate_vnf_data_list:
-            if not self.mano.validate_vnf_allocated_vresources(vnf_data.vnf_instance_id,
-                                                               self.tc_input['mano'].get('query_params')):
-                raise TestRunError('Target VNF %s vresources have not been allocated by the VIM' %
-                                   vnf_data.vnf_instance_id)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 6. Verify that the VNF instance operational state on the VNFM is indicated as "started"
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as started')
-        for vnf_data in operate_vnf_data_list:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_data.vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
-            if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
-                raise TestRunError('Target VNF %s was not instantiated' % vnf_data.vnf_instance_id)
+        for vnf_info in vnf_info_list:
+            if not self.mano.validate_vnf_vresource_state(vnf_info):
+                raise TestRunError('Target VNF %s vresources have not been started by the VIM' %
+                                   vnf_info.vnf_product_name)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the NFVO shows no "operate VNF" operation errors
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Verifying that the NFVO shows no "operate VNF" operation errors')
-        # TODO
+        LOG.info('Verifying that the NFVO shows no "operate VNF" operation errors')
+        LOG.info('Verification implicitly validated above (when checking VNF instance operational state on the VNFM is '
+                 'started)')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running
         # the end-to-end functional test
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the NS functionality that utilizes the standard VNF instance operates successfully by'
+        LOG.info('Verifying that the NS functionality that utilizes the started VNF instance operates successfully by'
                  ' running the end-to-end functional test')
+        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
+
+        # Configure stream destination address(es)
+        dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
+                                                          ns_info,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
+
+        self.traffic.start(return_when_emission_starts=True)
+
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
+
+        if not self.traffic.does_traffic_flow(delay_time=60):
+            raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
+
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
+            raise TestRunError('Traffic is flowing with packet loss',
+                               err_details='Normal traffic flew with packet loss')
+
+        LOG.info('%s execution completed successfully' % self.tc_name)

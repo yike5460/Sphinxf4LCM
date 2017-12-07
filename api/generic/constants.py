@@ -79,6 +79,10 @@ VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'] = {'reached': VNF_INSTANTIATED,
 VNF_STATE['ESC_DEPLOYMENT_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
                                      'SERVICE_STOPPED_STATE': VNF_STOPPED}
 
+# Mapping between ETSI VirtualCompute operational state and ETSI VNF states
+VNF_STATE['VIRTUAL_COMPUTE_OPERATIONAL_STATE'] = {'ENABLED': VNF_STARTED,
+                                                  'DISABLED': VNF_STOPPED}
+
 # Test results
 TEST_FAILED = 'FAILED'
 TEST_PASSED = 'PASSED'

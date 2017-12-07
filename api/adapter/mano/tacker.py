@@ -965,9 +965,9 @@ class TackerManoAdapter(object):
                     if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
                         for req in vnfd['topology_template']['node_templates'][node]['requirements']:
                             if req.get('virtualBinding', '')['node'] == vnfc_resource_info.vdu_id:
-                                    expected_num_vnics += 1
-                                    expected_vnic_types[node] = vnfd['topology_template']['node_templates'][node][
-                                        'properties'].get('type', 'normal')
+                                expected_num_vnics += 1
+                                expected_vnic_types[node] = vnfd['topology_template']['node_templates'][node][
+                                    'properties'].get('type', 'normal')
 
                 # Get actual values
                 actual_num_vcpus = virtual_compute.virtual_cpu.num_virtual_cpu
@@ -1020,6 +1020,25 @@ class TackerManoAdapter(object):
                 result = False
             except Exception as e:
                 LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
+        return result
+
+    @log_entry_exit(LOG)
+    def validate_vnf_vresource_state(self, vnf_info):
+        result = True
+        vnf_state = vnf_info.instantiated_vnf_info.vnf_state
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            try:
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                if vnf_state != constants.VNF_STATE['VIRTUAL_COMPUTE_OPERATIONAL_STATE'][
+                    virtual_compute.operational_state]:
+                    result = False
+                    break
+            except Exception as e:
+                LOG.debug('Resource ID %s corresponding to VNF %s not found in VIM' %
+                          (resource_id, vnf_info.vnf_product_name))
         return result
 
     @log_entry_exit(LOG)
