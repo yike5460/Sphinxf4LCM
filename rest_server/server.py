@@ -146,7 +146,9 @@ def do_exec():
                 tc_input['nsd_id'] = resource_params.get('nsd_id')
                 tc_input[resource_type]['generic_config'] = dict()
                 for timeout_timer in timeout_timers:
-                    tc_input[resource_type]['generic_config'][timeout_timer] = _read_config(timeout_timer)
+                    timeout = _read_config(timeout_timer)
+                    if timeout is not None:
+                        tc_input[resource_type]['generic_config'][timeout_timer] = timeout
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
         tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')

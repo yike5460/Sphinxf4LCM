@@ -26,8 +26,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
     end-to-end functional test
     """
 
-    REQUIRED_APIS = ('mano',)
-    REQUIRED_ELEMENTS = ('nsd_id',)
+    REQUIRED_APIS = ('mano', 'traffic', )
+    REQUIRED_ELEMENTS = ('nsd_id', 'operate_vnf_data', )
     TESTCASE_EVENTS = ('instantiate_ns', 'ns_update_stop_vnf', 'ns_update_start_vnf')
 
     def run(self):
@@ -37,7 +37,6 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         # 1. Trigger NS instantiation on the NFVO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS instantiation on the NFVO')
-        print self.tc_input
         self.time_record.START('instantiate_ns')
         self.ns_instance_id = self.mano.ns_create_and_instantiate(
             nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
@@ -50,7 +49,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
             additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
             start_time=self.tc_input.get('start_time'),
             ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
-            additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
+               additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
         if self.ns_instance_id is None:
             raise TestRunError('NS instantiation operation failed')
@@ -87,7 +86,9 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                 vnf_data.vnf_instance_id = vnf_info.vnf_instance_id
                 vnf_data.change_state_to = 'stop'
                 operate_vnf_data_list.append(vnf_data)
+
         self.time_record.START('ns_update_stop_vnf')
+
         if self.mano.ns_update_sync(ns_instance_id=self.ns_instance_id, update_type='OperateVnf',
                                     operate_vnf_data = operate_vnf_data_list) != constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for NS update operation',
@@ -119,18 +120,27 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
                  ' querying the VIM')
-        # if not self.mano.validate_ns_released_vresources(ns_info):
-        #     raise TestRunError('NS resources have not been released by the VIM')
-        #
+        for vnf_data in operate_vnf_data_list:
+            if not self.mano.validate_vnf_allocated_vresources(vnf_data.vnf_instance_id,
+                                                               self.tc_input['mano'].get('query_params')):
+                raise TestRunError('Target VNF %s vresources have not been allocated by the VIM' %
+                                   vnf_data.vnf_instance_id)
+
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the VNF instance operational state on the VNFM is indicated as "started"
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as started')
+        for vnf_data in operate_vnf_data_list:
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_data.vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+                raise TestRunError('Target VNF %s was not instantiated' % vnf_data.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the NFVO shows no "operate VNF" operation errors
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the NFVO shows no "operate VNF operation errors"')
+        # LOG.info('Verifying that the NFVO shows no "operate VNF" operation errors')
+        # TODO
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running
