@@ -1058,3 +1058,11 @@ class TackerManoAdapter(object):
                 return False
 
         return True
+
+    @log_entry_exit(LOG)
+    def get_vnfd_name_from_nsd_vnf_name(self, nsd_id, vnf_name):
+        nsd = self.get_nsd(nsd_id)
+        for vnfd_name in nsd['imports']:
+            vnfd = self.get_vnfd(vnfd_name)
+            if 'tosca.nodes.nfv.%s' % vnf_name in vnfd['node_types'].keys():
+                return vnfd_name
