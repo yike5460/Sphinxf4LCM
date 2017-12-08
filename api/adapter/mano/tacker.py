@@ -295,20 +295,22 @@ class TackerManoAdapter(object):
         return construct_adapter(vim_type, module_type='vim', **vim_auth_cred)
 
     @log_entry_exit(LOG)
-    def get_vnfd(self, vnfd_id):
+    def get_vnfd(self, vnfd):
+        # 'vnfd' input can either be the VNFD ID or the VNFD name
         # TODO: translate to ETSI VNFD
         try:
-            tacker_show_vnfd = self.tacker_client.show_vnfd(vnfd_id)['vnfd']['attributes']['vnfd']
+            tacker_show_vnfd = self.tacker_client.show_vnfd(vnfd)['vnfd']['attributes']['vnfd']
         except Exception as e:
             LOG.exception(e)
             raise TackerManoAdapterError(e.message)
         return yaml.load(tacker_show_vnfd)
 
     @log_entry_exit(LOG)
-    def get_nsd(self, nsd_id):
+    def get_nsd(self, nsd):
+        # 'nsd' input can either be the NSD ID or the NSD name
         # TODO: translate to ETSI NSD
         try:
-            tacker_show_nsd = self.tacker_client.show_nsd(nsd_id)['nsd']['attributes']['nsd']
+            tacker_show_nsd = self.tacker_client.show_nsd(nsd)['nsd']['attributes']['nsd']
         except Exception as e:
             LOG.exception(e)
             raise TackerManoAdapterError(e.message)
@@ -1062,7 +1064,8 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def get_vnfd_name_from_nsd_vnf_name(self, nsd_id, vnf_name):
         nsd = self.get_nsd(nsd_id)
+        vnf_type = nsd['topology_template']['node_templates'][vnf_name]['type']
         for vnfd_name in nsd['imports']:
             vnfd = self.get_vnfd(vnfd_name)
-            if 'tosca.nodes.nfv.%s' % vnf_name in vnfd['node_types'].keys():
+            if vnf_type in vnfd['node_types'].keys():
                 return vnfd_name
