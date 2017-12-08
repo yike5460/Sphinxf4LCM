@@ -463,11 +463,11 @@ class Mano(object):
         This function was written in accordance with section 7.3.4 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
 
         :param ns_instance_id:  Identifier of the instance of the NS.
-        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'scale_ns, 'scale_vnf'.
+        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'SCALE_NS, 'SCALE_VNF'.
         :param scale_ns_data:   Provides the necessary information to scale the referenced NS instance. It shall be
-                                present when scale_type = 'scale_ns'.
+                                present when scale_type = 'SCALE_NS'.
         :param scale_vnf_data:  Provides the information to scale a given VNF instance that is part of the referenced
-                                NS instance. Shall be present when scale_type = 'scale_vnf'.
+                                NS instance. Shall be present when scale_type = 'SCALE_VNF'.
         :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
                                 timestamp.
         :return:                Identifier of the NS lifecycle operation occurrence.
@@ -482,11 +482,11 @@ class Mano(object):
         This function synchronously scales an NS instance.
 
         :param ns_instance_id:  Identifier of the instance of the NS.
-        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'scale_ns, 'scale_vnf'.
+        :param scale_type:      Indicates the type of scaling to be performed. Possible values: 'SCALE_NS, 'SCALE_VNF'.
         :param scale_ns_data:   Provides the necessary information to scale the referenced NS instance. It shall be
-                                present when scale_type = 'scale_ns'.
+                                present when scale_type = 'SCALE_NS'.
         :param scale_vnf_data:  Provides the information to scale a given VNF instance that is part of the referenced
-                                NS instance. Shall be present when scale_type = 'scale_vnf'.
+                                NS instance. Shall be present when scale_type = 'SCALE_VNF'.
         :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
                                 timestamp.
         :return:                Operation status.
@@ -1209,7 +1209,7 @@ class Mano(object):
                                     be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
                                     Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
-        :return:                    String with space-separated addresses.
+        :return:                    String containing space-separated addresses.
         """
         # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
         # values lists with CPs whose addresses need to be retrieved
@@ -1260,3 +1260,29 @@ class Mano(object):
                 LOG.error('Not all VNFCs in VNF with instance ID %s use the correct images' % vnf_info.vnf_instance_id)
                 return False
         return True
+
+    @log_entry_exit(LOG)
+    def get_vnfd_name_from_nsd_vnf_name(self, nsd_id, vnf_name):
+        """
+        This function retrieves from the NSD with the provided instance ID the VNFD name that corresponds to the
+        provided VNF name.
+
+        :param nsd_id:      Identifier of the NSD from which to retrieve the VNFD name.
+        :param vnf_name:    Name of the VNF whose VNFD name should be retrieved.
+        :return:            String representing the name of the VNFD name.
+        """
+        return self.mano_adapter.get_vnfd_name_from_nsd_vnf_name(nsd_id, vnf_name)
+
+    @log_entry_exit(LOG)
+    def get_vnf_instance_id_from_ns_vnf_name(self, ns_info, vnf_name):
+        """
+        This function retrieves from the provided NsInfo information element the VNF instance ID that corresponds to the
+        VNF with the provided name.
+
+        :param ns_info:     NsInfo information element for the NS that contains the VNF with the provided name.
+        :param vnf_name:    Name of the VNF whose instance ID should be retrieved.
+        :return:            String representing the VNF instance ID.
+        """
+        for vnf_info in ns_info.vnf_info:
+            if vnf_info.vnf_product_name == vnf_name:
+                return vnf_info.vnf_instance_id

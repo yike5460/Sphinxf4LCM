@@ -170,8 +170,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # We are scaling the NS (desired_scale_out_steps + 1) times and check at the next step that the NS scaled out
         # only desired_scale_out_steps times
         for scale_out_step in range(self.tc_input['desired_scale_out_steps'] + 1):
-            if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='scale_ns', scale_ns_data=scale_ns_data,
-                                       scale_vnf_data=self.tc_input.get('scale_vnf_data'),
+            if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='SCALE_NS', scale_ns_data=scale_ns_data,
                                        scale_time=self.tc_input.get('scale_time')) \
                     != constants.OPERATION_SUCCESS:
                 self.tc_result['scaling_out']['status'] = 'Fail'

@@ -79,6 +79,13 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                                                           self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                             'additional_param': self.tc_input['mano'].get('query_params')})
+        self.tc_result['resources']['Initial'] = dict()
+        for vnf_info in ns_info.vnf_info:
+            self.tc_result['resources']['Initial'].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that the VNF instance(s) have been deployed according to the NSD
         # --------------------------------------------------------------------------------------------------------------
@@ -90,28 +97,27 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 5. Verify that the VNF instance(s) are reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         # LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
-        # TODO
+        # TODO (ping, ssh, telnet, http; don't use stcv)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the VNF instance(s) have been configured according to the VNFD(s) by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         # LOG.info('Verifying that the VNF instance(s) have been configured according to the VNFD(s) by querying the '
         #          'VNFM')
-        # TODO
+        # TODO (compare config file with vnf config; call adapter; adapter function body can be a noop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
         # LOG.info('Verifying that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the '
         #          'descriptors')
-        # TODO
+        # TODO (don't do the validation for Tacker; do the validation in the case of Cisco NSO; this step is not the
+        # TODO highest priority at the moment)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
