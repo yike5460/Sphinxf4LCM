@@ -38,6 +38,7 @@ node {
 		sh "curl -f -XPUT http://$ipaddr:8080/v1.0/traffic/stc1 -H 'Content-Type: Application/json' -d @/tmp/vnflcv/traffic.json"
 		sh "curl -f -XPUT http://$ipaddr:8080/v1.0/env/lab1 -H 'Content-Type: Application/json' -d @/tmp/vnflcv/env.json"
 		sh "echo '\"lab1\"' | curl -f -XPUT http://$ipaddr:8080/v1.0/config/active-env -H 'Content-Type: Application/json' -d @-"
+		sh "echo '\"SP1\"' | curl -f -XPUT http://$ipaddr:8080/v1.0/config/scaling_policy_name -H 'Content-Type: Application/json' -d @-"
 	}
 
 	stage('Run') {
