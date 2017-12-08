@@ -196,8 +196,15 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
 
         self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
-        if not self.traffic.wait_for_no_traffic_loss(max_wait_time=300):
-            raise TestRunError('Traffic is not flowing or it does but with packet loss',
-                               err_details='Normal traffic did not flow or it did but with packet loss')
+        # Letting the traffic flow for a bit to make sure the network has converged
+        if not self.traffic.does_traffic_flow(delay_time=60):
+            raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
+
+        # Clearing counters so that any packets lost so far don't influence the results
+        self.traffic.clear_counters()
+
+        if self.traffic.any_traffic_loss(delay_time=5, tolerance=constants.TRAFFIC_TOLERANCE):
+            raise TestRunError('Traffic is flowing with packet loss',
+                               err_details='Normal traffic flew with packet loss')
 
         LOG.info('%s execution completed successfully' % self.tc_name)
