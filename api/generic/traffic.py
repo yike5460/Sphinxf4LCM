@@ -1,6 +1,5 @@
 import logging
 
-import constants
 from api.adapter import construct_adapter
 from api.generic import ApiGenericError
 from utils.logging_module import log_entry_exit
@@ -116,30 +115,6 @@ class Traffic(object):
         """
 
         return self.traffic_adapter.stop(delay_time, return_when_emission_stops)
-
-    @log_entry_exit(LOG)
-    def wait_for_no_traffic_loss(self, max_wait_time):
-        """
-        This function waits until traffic flows with no packet loss or the time expires.
-
-        :param max_wait_time:   Maximum interval of time in seconds to wait for the traffic to flow with no packet loss.
-        :return:                True if packet flows with no loss, False otherwise.
-        """
-        elapsed_time = 0
-
-        while elapsed_time <= max_wait_time:
-            if self.does_traffic_flow(delay_time=60) and not \
-                    self.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
-                return True
-            else:
-                LOG.debug('Traffic is not flowing or it does, but with packet loss. Checking again.')
-                # Clearing counter so that any packets lost so for don't influence the next iteration
-                self.clear_counters()
-                # TODO use delay_time from constants
-                elapsed_time += 60
-                LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
-
-        return False
 
     @log_entry_exit(LOG)
     def destroy(self):
