@@ -112,6 +112,11 @@ class OpenstackVimAdapter(object):
         server_details = self.server_get(compute_id)
         server_flavor_id = server_details['flavor_id']
         virtual_compute.flavour_id = server_flavor_id
+        server_status = server_details['status']
+        if server_status == 'ACTIVE':
+            virtual_compute.operational_state = 'ENABLED'
+        else:
+            virtual_compute.operational_state = 'DISABLED'
         flavor_details = self.flavor_get(server_flavor_id)
 
         virtual_cpu = VirtualCpu()

@@ -249,6 +249,18 @@ class Mano(object):
         return self.mano_adapter.validate_vnf_released_vresources(vnf_info)
 
     @log_entry_exit(LOG)
+    def validate_vnf_vresource_state(self, vnf_info):
+        """
+        This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM
+
+        :param vnf_info:            VnfInfo structure holding information about the VNF instance.
+        :return:                    True if the the VNF state in the VNFM matches the state indicated by the VIM,
+                                    False otherwise
+        """
+
+        return self.mano_adapter.validate_vnf_vresource_state(vnf_info)
+
+    @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
