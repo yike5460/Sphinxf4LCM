@@ -1024,8 +1024,8 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def validate_vnf_vresource_state(self, vnf_instance_id):
-        VNF_TO_VRESOURCE_MAPPING = {'ACTIVE': constants.VIRTUAL_RESOURCE_ENABLED,
-                                    'STOPPED': constants.VIRTUAL_RESOURCE_DISABLED}
+        VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
+                                    constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
         vnf_state = vnf_info.instantiated_vnf_info.vnf_state
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
@@ -1036,9 +1036,10 @@ class TackerManoAdapter(object):
                 virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
                 if virtual_compute.operational_state != VNF_TO_VRESOURCE_MAPPING[vnf_state]:
                     return False
-            except Exception as e:
+            except Exception:
                 LOG.debug('Resource ID %s corresponding to VNF %s not found in VIM' %
                           (resource_id, vnf_info.vnf_product_name))
+                return False
         return True
 
     @log_entry_exit(LOG)
