@@ -49,7 +49,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
             additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
             start_time=self.tc_input.get('start_time'),
             ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
-               additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
+            additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
         if self.ns_instance_id is None:
             raise TestRunError('NS instantiation operation failed')
@@ -132,8 +132,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
                  ' querying the VIM')
-        for vnf_info in vnf_info_list:
-            if not self.mano.validate_vnf_vresource_state(vnf_info):
+        for vnf_data in operate_vnf_data_list:
+            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id):
                 raise TestRunError('Target VNF %s vresources have not been started by the VIM' %
                                    vnf_info.vnf_product_name)
 
@@ -141,8 +141,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         # 7. Verify that the NFVO shows no "operate VNF" operation errors
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO shows no "operate VNF" operation errors')
-        LOG.info('Verification implicitly validated above (when checking VNF instance operational state on the VNFM is '
-                 'started)')
+        LOG.debug('Verification implicitly validated above (when checking VNF instance operational state on the VNFM is'
+                  ' started)')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running
@@ -165,10 +165,14 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
 
         self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
+        # Letting the traffic flow for a bit to make sure the network has converged
         if not self.traffic.does_traffic_flow(delay_time=60):
             raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
 
-        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
+        # Clearing counters so that any packets lost so far don't influence the results
+        self.traffic.clear_counters()
+
+        if self.traffic.any_traffic_loss(delay_time=5, tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 

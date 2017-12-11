@@ -21,6 +21,10 @@ VNF_STARTED = 'STARTED'
 VNF_STOPPED = 'STOPPED'
 VNF_FINAL_STATES = [VNF_STARTED, VNF_STOPPED]
 
+# ETSI VirtualCompute operational states
+VIRTUAL_RESOURCE_ENABLED = 'ENABLED'
+VIRTUAL_RESOURCE_DISABLED = 'DISABLED'
+
 OPERATION_STATUS = dict()
 # Mapping between operation results and OpenStack VNF states
 OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
@@ -78,10 +82,6 @@ VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'] = {'reached': VNF_INSTANTIATED,
 # Mapping between Cisco ESC VNF deployment states and ETSI VNF states
 VNF_STATE['ESC_DEPLOYMENT_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
                                      'SERVICE_STOPPED_STATE': VNF_STOPPED}
-
-# Mapping between ETSI VirtualCompute operational state and ETSI VNF states
-VNF_STATE['VIRTUAL_COMPUTE_OPERATIONAL_STATE'] = {'ENABLED': VNF_STARTED,
-                                                  'DISABLED': VNF_STOPPED}
 
 # Test results
 TEST_FAILED = 'FAILED'
