@@ -3,6 +3,7 @@ import logging
 from api.generic import constants
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
+from utils.net import ping
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -96,8 +97,13 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the VNF instance(s) are reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
-        # LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
-        # TODO (ping, ssh, telnet, http; don't use stcv)
+        LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
+        for vnf_info in ns_info.vnf_info:
+            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
+            for mgmt_addr in mgmt_addr_list:
+                if not ping(mgmt_addr):
+                    raise TestRunError('Unable to PING IP address %s belonging to %s'
+                                       % (mgmt_addr, vnf_info.vnf_product_name))
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the VNF instance(s) have been configured according to the VNFD(s) by querying the VNFM
