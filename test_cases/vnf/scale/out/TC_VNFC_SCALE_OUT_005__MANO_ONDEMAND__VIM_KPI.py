@@ -1,5 +1,5 @@
 import logging
-import time
+from time import sleep
 
 from api.generic import constants
 from test_cases import TestCase, TestRunError
@@ -168,7 +168,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances'] + sp['increment']:
                 break
             else:
-                time.sleep(constants.POLL_INTERVAL)
+                sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
             if elapsed_time == constants.VNF_SCALE_OUT_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
@@ -261,7 +261,7 @@ class TC_VNFC_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances']:
                 break
             else:
-                time.sleep(constants.POLL_INTERVAL)
+                sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
             if elapsed_time == constants.VNF_SCALE_IN_TIMEOUT:
                 self.tc_result['scaling_in']['status'] = 'Fail'
