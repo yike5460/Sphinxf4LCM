@@ -4,6 +4,7 @@ from api.generic import constants
 from api.structures.objects import ScaleVnfData, ScaleByStepData
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
+from utils.net import ping
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -152,7 +153,12 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # 6. Verify that the additional VNFC instance(s) are running and reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the additional VNFC instance(s) are running and reachable via the management network')
-        # TODO
+        for vnf_info in ns_info.vnf_info:
+            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
+            for mgmt_addr in mgmt_addr_list:
+                if not ping(mgmt_addr):
+                    raise TestRunError('Unable to PING IP address %s belonging to %s'
+                                       % (mgmt_addr, vnf_info.vnf_product_name))
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the VNF configuration has been updated to include the additional VNFC instances according to

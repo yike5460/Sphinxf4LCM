@@ -1103,3 +1103,16 @@ class TackerManoAdapter(object):
             vnfd = self.get_vnfd(vnfd_name)
             if vnf_type in vnfd['node_types'].keys():
                 return vnfd_name
+
+    @log_entry_exit(LOG)
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+        try:
+            vnf_mgmt_url = self.tacker_client.show_vnf(vnf_instance_id)['vnf']['mgmt_url']
+            vnf_mgmt_url_dict = json.loads(vnf_mgmt_url)
+        except Exception as e:
+            LOG.exception(e)
+            raise TackerManoAdapterError(e.message)
+
+        mgmt_addr_list = sum(vnf_mgmt_url_dict.values(), list())
+
+        return mgmt_addr_list
