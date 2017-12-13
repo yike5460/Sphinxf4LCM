@@ -238,15 +238,19 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_released_vresources(self, vnf_info):
+    def validate_vnf_released_vresources(self, vnf_info_initial, vnf_info_final=None):
         """
         This functions validates that the resources allocated to a VNF instance have been released.
 
-        :param vnf_info:            VnfInfo structure holding information about the VNF instance.
-        :return:                    True if the resources have been released, False otherwise.
+        :param vnf_info_initial:            VnfInfo structure holding information about the initial state of the VNF
+                                            instance.
+        :param vnf_info_final:              VnfInfo structure holding information about the final state of the VNF
+                                            instance
+        :return:                            True if the resources allocated to the initial VNF and not allocated to the
+                                            final VNF have been released, False otherwise.
         """
 
-        return self.mano_adapter.validate_vnf_released_vresources(vnf_info)
+        return self.mano_adapter.validate_vnf_released_vresources(vnf_info_initial, vnf_info_final)
 
     @log_entry_exit(LOG)
     def validate_vnf_vresource_state(self, vnf_info):
