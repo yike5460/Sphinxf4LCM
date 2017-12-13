@@ -54,6 +54,8 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
 
+        sleep(constants.INSTANCE_BOOT_TIME)
+
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'))

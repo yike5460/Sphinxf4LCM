@@ -23,7 +23,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
     6. Verify that the compute resources allocated to the target VNF instance have been started by querying the VIM
     7. Verify that the NFVO shows no "operate VNF" operation errors
     8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running the
-    end-to-end functional test
+       end-to-end functional test
     """
 
     REQUIRED_APIS = ('mano', 'traffic', )
@@ -57,6 +57,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+
+        sleep(constants.INSTANCE_BOOT_TIME)
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
@@ -114,6 +116,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
 
         self.tc_result['events']['ns_update_start_vnf']['duration'] = self.time_record.duration('ns_update_start_vnf')
 
+        sleep(constants.INSTANCE_BOOT_TIME)
+
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the VNF instance operational state on the VNFM is indicated as "started"
         # --------------------------------------------------------------------------------------------------------------
@@ -128,7 +132,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the compute resources allocated to the target VNF instance have been started by querying the
-        # VIM
+        #    VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
                  ' querying the VIM')
@@ -146,7 +150,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running
-        # the end-to-end functional test
+        #    the end-to-end functional test
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS functionality that utilizes the started VNF instance operates successfully by'
                  ' running the end-to-end functional test')
