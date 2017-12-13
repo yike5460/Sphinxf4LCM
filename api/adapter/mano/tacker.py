@@ -1106,17 +1106,13 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id):
-        mgmt_addr_list = list()
-
         try:
             vnf_mgmt_url = self.tacker_client.show_vnf(vnf_instance_id)['vnf']['mgmt_url']
-            vnf_mgmt_url_str = str(vnf_mgmt_url).replace("'", '"')
-            vnf_mgmt_url_dict = json.loads(vnf_mgmt_url_str)
+            vnf_mgmt_url_dict = json.loads(vnf_mgmt_url)
         except Exception as e:
             LOG.exception(e)
             raise TackerManoAdapterError(e.message)
 
-        for vdu_name in vnf_mgmt_url_dict.keys():
-            mgmt_addr_list += vnf_mgmt_url_dict[vdu_name]
+        mgmt_addr_list = sum(vnf_mgmt_url_dict.values(), list())
 
         return mgmt_addr_list
