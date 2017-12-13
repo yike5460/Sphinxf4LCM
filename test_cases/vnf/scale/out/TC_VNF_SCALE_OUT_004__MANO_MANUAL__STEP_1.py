@@ -1,5 +1,5 @@
 import logging
-import time
+from time import sleep
 
 from api.generic import constants
 from api.structures.objects import ScaleNsData, ScaleNsByStepsData
@@ -175,7 +175,7 @@ class TC_VNF_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
                     != constants.OPERATION_SUCCESS:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('MANO could not scale out the NS to the next level')
-            time.sleep(sp['cooldown'])
+            sleep(sp['cooldown'])
 
         self.time_record.END('scale_out_ns')
 

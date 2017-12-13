@@ -1,5 +1,5 @@
 import logging
-import time
+from time import sleep
 
 from api.generic import constants
 from test_cases import TestCase, TestRunError
@@ -170,7 +170,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VIM_KPI(TestCase):
             if len(ns_info.vnf_info_id) == sp['max_instances']:
                 break
             else:
-                time.sleep(constants.POLL_INTERVAL)
+                sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
             if elapsed_time == constants.NS_SCALE_OUT_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
