@@ -13,7 +13,8 @@ LOG = logging.getLogger(__name__)
 
 class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
     """
-    TD_NFV_NSLCM_SCALE_OUT_VNF_001 Scale out VNF inside NS by adding VNFC instances when triggered by a NFVO operator
+    TD_NFV_NSLCM_SCALE_OUT_VNF_001 Verify that a VNF in a NS can be successfully scaled out by adding VNFC instances
+    when triggered by a NFVO operator
 
     Sequence:
     1. Trigger NS instantiation on the NFVO
