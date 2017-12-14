@@ -182,6 +182,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             for vnf_info in ns_info.vnf_info:
                 if vnf_info_impacted.vnf_instance_id == vnf_info.vnf_instance_id:
                     vnf_info_final = vnf_info
+                    break
             if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info_impacted,
                                                               vnf_info_final=vnf_info_final):
                 raise TestRunError('Allocated vResources were not released for VNF instance ID %s' %
@@ -194,7 +195,6 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                  ' network')
         for vnf_info in ns_info.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
-            print mgmt_addr_list
             for mgmt_addr in mgmt_addr_list:
                 if not ping(mgmt_addr):
                     raise TestRunError('Unable to PING IP address %s belonging to %s'
