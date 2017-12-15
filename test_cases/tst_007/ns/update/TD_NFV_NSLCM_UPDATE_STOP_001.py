@@ -77,6 +77,11 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
+        self.tc_result['resources']['Initial'] = dict()
+        for vnf_info in ns_info.vnf_info:
+            self.tc_result['resources']['Initial'].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
         # --------------------------------------------------------------------------------------------------------------
         # 3. Trigger the NFVO to stop the target VNF instance inside the NS instance
         # --------------------------------------------------------------------------------------------------------------
