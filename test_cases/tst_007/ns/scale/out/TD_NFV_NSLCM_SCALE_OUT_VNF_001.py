@@ -32,7 +32,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
-    REQUIRED_ELEMENTS = ('nsd_id',)
+    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_list')
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns')
 
     def run(self):
