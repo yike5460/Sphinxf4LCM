@@ -32,14 +32,14 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
-    REQUIRED_ELEMENTS = ('nsd_id',)
-    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns','scale_in_ns')
+    REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_list')
+    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'scale_in_ns')
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 1.  Trigger NS instantiation on the NFVO
+        # 1. Trigger NS instantiation on the NFVO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS instantiation on the NFVO')
         self.time_record.START('instantiate_ns')
@@ -70,7 +70,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                                   ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 2.  Verify that the NFVO indicates NS instantiation operation result as successful
+        # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
         ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
@@ -86,12 +86,12 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3.  Trigger NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator action
+        # 3. Trigger NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator action
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator '
                  'action')
         scale_vnf_data_list = list()
-        expected_nr_vnfc = dict()
+        expected_vnfc_count = dict()
         for vnf_sp in self.tc_input['scaling_policy_list']:
             vnf_name, sp_name = vnf_sp.split(':')
             vnfd_name = self.mano.get_vnfd_name_from_nsd_vnf_name(self.tc_input['nsd_id'], vnf_name)
@@ -102,14 +102,13 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             scale_vnf_data.vnf_instance_id = self.mano.get_vnf_instance_id_from_ns_vnf_name(ns_info, vnf_name)
             scale_vnf_data.type = 'out'
             scale_vnf_data.scale_by_step_data = ScaleByStepData()
-            scale_vnf_data.scale_by_step_data.type = 'out'
             scale_vnf_data.scale_by_step_data.aspect_id = sp['targets'][0]
             scale_vnf_data.scale_by_step_data.number_of_steps = sp['increment']
             scale_vnf_data.scale_by_step_data.additional_param = {'scaling_policy_name': sp_name}
 
             scale_vnf_data_list.append(scale_vnf_data)
 
-            expected_nr_vnfc[vnf_name] = sp['default_instances'] + sp['increment']
+            expected_vnfc_count[vnf_name] = sp['default_instances'] + sp['increment']
 
         self.time_record.START('scale_out_ns')
         if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='SCALE_VNF', scale_vnf_data=scale_vnf_data_list,
@@ -124,22 +123,25 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
 
         # Retrieving the list of VnfInfo objects for the impacted VNFs before the scale in operation
         ns_info_before_scale_in = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        vnf_info_impacted_list = []
+                                                             'additional_param': self.tc_input['mano'].get(
+                                                                                 'query_params')})
+        vnf_info_impacted_list = list()
         for vnf_info in ns_info_before_scale_in.vnf_info:
-            if vnf_info.vnf_product_name in expected_nr_vnfc.keys():
+            if vnf_info.vnf_product_name in expected_vnfc_count.keys():
                 vnf_info_impacted_list.append(vnf_info)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4.  Trigger NS scale in by removing VNFC instance(s) from a VNF in the NS in NFVO with an operator action
+        # 4. Trigger NS scale in by removing VNFC instance(s) from a VNF in the NS in NFVO with an operator action
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS scale in by removing VNFC instance(s) from a VNF in the NS in NFVO with an operator'
                  ' action')
         for scale_vnf_data in scale_vnf_data_list:
             scale_vnf_data.type = 'in'
-            scale_vnf_data.scale_by_step_data.type = 'in'
-
-            expected_nr_vnfc[vnf_name] = expected_nr_vnfc[vnf_name] - scale_vnf_data.scale_by_step_data.number_of_steps
+            for vnf_info in vnf_info_impacted_list:
+                if scale_vnf_data.vnf_instance_id == vnf_info.vnf_instance_id:
+                    vnf_name = vnf_info.vnf_product_name
+                    expected_vnfc_count[vnf_name] = expected_vnfc_count[vnf_name] -\
+                                                 scale_vnf_data.scale_by_step_data.number_of_steps
 
         self.time_record.START('scale_in_ns')
         if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='SCALE_VNF', scale_vnf_data=scale_vnf_data_list,
@@ -153,7 +155,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         self.tc_result['events']['scale_in_ns']['duration'] = self.time_record.duration('scale_in_ns')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5.  Verify that the impacted VNFC instance(s) inside the VNF have been terminated by querying the VNFM
+        # 5. Verify that the impacted VNFC instance(s) inside the VNF have been terminated by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the impacted VNFC instance(s) inside the VNF have been terminated by querying the'
                  ' VNFM')
@@ -161,8 +163,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                                              'additional_param': self.tc_input['mano'].get('query_params')})
         for vnf_info in ns_info.vnf_info:
             vnf_name = vnf_info.vnf_product_name
-            if vnf_name in expected_nr_vnfc.keys():
-                if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != expected_nr_vnfc[vnf_name]:
+            if vnf_name in expected_vnfc_count.keys():
+                if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != expected_vnfc_count[vnf_name]:
                     raise TestRunError('VNFCs not removed after VNF scaled in')
 
         self.tc_result['resources']['After scale in'] = dict()
@@ -175,21 +177,20 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         self.tc_result['scaling_in']['status'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
-        # 6.  Verify that the impacted VNFC instance(s) resources have been released by the VIM
+        # 6. Verify that the impacted VNFC instance(s) resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the impacted VNFC instance(s) resources have been released by the VIM')
         for vnf_info_impacted in vnf_info_impacted_list:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info_impacted.vnf_instance_id == vnf_info.vnf_instance_id:
-                    vnf_info_final = vnf_info
+                    if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info_impacted,
+                                                                      vnf_info_final=vnf_info):
+                        raise TestRunError('Allocated vResources were not released for VNF instance ID %s' %
+                                           vnf_info_impacted.vnf_instance_id)
                     break
-            if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info_impacted,
-                                                              vnf_info_final=vnf_info_final):
-                raise TestRunError('Allocated vResources were not released for VNF instance ID %s' %
-                                   vnf_info_impacted.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7.  Verify that the remaining VNFC instance(s) are still running and reachable via the management network
+        # 7. Verify that the remaining VNFC instance(s) are still running and reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the remaining VNFC instance(s) are still running and reachable via the management'
                  ' network')
@@ -201,7 +202,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                                        % (mgmt_addr, vnf_info.vnf_product_name))
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8.  Verify that the VNF configuration has been updated to exclude the removed VNFC instances according to the
+        # 8. Verify that the VNF configuration has been updated to exclude the removed VNFC instances according to the
         # descriptors by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verify that the VNF configuration has been updated to exclude the additional VNFC instances according'
@@ -209,14 +210,14 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 9.  Verify that the remaining VNFC instances(s) and VL(s) are still connected according to the descriptors
+        # 9. Verify that the remaining VNFC instances(s) and VL(s) are still connected according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the remaining VNFC instances(s) and VL(s) are still connected according to the '
                  'descriptors')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 10.  Verify that the NFVO indicates the scaling operation result as successful
+        # 10. Verify that the NFVO indicates the scaling operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates the scaling operation result as successful')
         LOG.debug('This has implicitly been checked at step 4')
