@@ -126,7 +126,7 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that other existing compute resources have not been affected by the performed operation by '
                  'querying the VIM')
-        # TODO
+        LOG.debug('This check is not needed as the test is run in an isolated environment')
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the NFVO shows no "operate VNF" operation errors
