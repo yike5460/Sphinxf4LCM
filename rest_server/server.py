@@ -151,6 +151,7 @@ def do_exec():
                         tc_input[resource_type]['generic_config'][timeout_timer] = timeout
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
+        tc_input['scaling_policy_list'] = _read_config('scaling_policy_list')
         tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')
 
         # TODO: remove

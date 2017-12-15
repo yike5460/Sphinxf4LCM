@@ -1011,18 +1011,22 @@ class TackerManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_released_vresources(self, vnf_info):
-        result = True
-        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vim_id = vnfc_resource_info.compute_resource.vim_id
-            vim = self.get_vim_helper(vim_id)
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            try:
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-                result = False
-            except Exception as e:
-                LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
-        return result
+    def validate_vnf_released_vresources(self, vnf_info_initial, vnf_info_final=None):
+        vnfc_resource_id_list_final = []
+        if vnf_info_final is not None:
+            for vnfc_resource_info in vnf_info_final.instantiated_vnf_info.vnfc_resource_info:
+                vnfc_resource_id_list_final.append(vnfc_resource_info.compute_resource.resource_id)
+        for vnfc_resource_info in vnf_info_initial.instantiated_vnf_info.vnfc_resource_info:
+            if vnfc_resource_info.compute_resource.resource_id not in vnfc_resource_id_list_final:
+                vim_id = vnfc_resource_info.compute_resource.vim_id
+                vim = self.get_vim_helper(vim_id)
+                resource_id = vnfc_resource_info.compute_resource.resource_id
+                try:
+                    virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    return False
+                except Exception:
+                    LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
+        return True
 
     @log_entry_exit(LOG)
     def validate_vnf_vresource_state(self, vnf_instance_id):
