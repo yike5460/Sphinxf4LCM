@@ -2,6 +2,7 @@ import logging
 from time import sleep
 
 from api.generic import constants
+from api.structures.objects import OperateVnfData
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 
@@ -9,22 +10,25 @@ from utils.misc import generate_name
 LOG = logging.getLogger(__name__)
 
 
-class TD_NFV_NSLCM_TERMINATE_001(TestCase):
+class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
     """
-    TD_NFV_NSLCM_TERMINATE_001 Terminate standalone NS
+    TD_NFV_NSLCM_UPDATE_STOP_001 Verify the capability to stop a VNF instance inside a NS instance
 
     Sequence:
     1. Trigger NS instantiation on the NFVO
-    2. Verify that the NS is instantiated and started
-    3. Trigger the termination of the NS instance on the NFVO
-    4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
-    5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
-    6. Verify that the NFVO indicates NS instance operation termination operation result as successful
+    2. Verify that the NS is instantiated
+    3. Trigger the NFVO to stop the target VNF instance inside the NS instance
+    4. Verify that the VNF instance operational state on the VNFM is indicated as "stopped"
+    5. Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have been
+       stopped by querying the VIM
+    6. Verify that other existing compute resources have not been affected by the performed operation by querying the
+       VIM
+    7. Verify that the NFVO shows no "operate VNF" operation errors
     """
 
     REQUIRED_APIS = ('mano',)
-    REQUIRED_ELEMENTS = ('nsd_id',)
-    TESTCASE_EVENTS = ('instantiate_ns', 'terminate_ns')
+    REQUIRED_ELEMENTS = ('nsd_id', 'operate_vnf_data')
+    TESTCASE_EVENTS = ('instantiate_ns', 'ns_update_stop_vnf')
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -79,50 +83,60 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Trigger the termination of the NS instance on the NFVO
+        # 3. Trigger the NFVO to stop the target VNF instance inside the NS instance
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering the termination of the NS instance on the NFVO')
-        self.time_record.START('terminate_ns')
-        if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id) != constants.OPERATION_SUCCESS:
-            raise TestRunError('Unexpected status for NS termination operation',
-                               err_details='NS termination operation failed')
-
-        self.time_record.END('terminate_ns')
-
-        self.tc_result['events']['terminate_ns']['duration'] = self.time_record.duration('terminate_ns')
-
-        self.unregister_from_cleanup(index=20)
-        self.unregister_from_cleanup(index=10)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Sleeping 5 seconds to allow MANO to finalize termination of resources')
-        sleep(5)
-        LOG.info('Verifying that all the VNF instance(s) have been terminated')
+        LOG.info('Triggering the NFVO to stop the target VNF instance inside the NS instance')
+        operate_vnf_data_list = list()
         for vnf_info in ns_info.vnf_info:
-            vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+            if vnf_info.vnf_product_name in self.tc_input['operate_vnf_data']:
+                vnf_data = OperateVnfData()
+                vnf_data.vnf_instance_id = vnf_info.vnf_instance_id
+                vnf_data.change_state_to = 'stop'
+                operate_vnf_data_list.append(vnf_data)
+
+        self.time_record.START('ns_update_stop_vnf')
+
+        if self.mano.ns_update_sync(ns_instance_id=self.ns_instance_id, update_type='OperateVnf',
+                                    operate_vnf_data=operate_vnf_data_list) != constants.OPERATION_SUCCESS:
+            raise TestRunError('Unexpected status for NS update operation',
+                               err_details='NS update operation failed')
+
+        self.time_record.END('ns_update_stop_vnf')
+
+        self.tc_result['events']['ns_update_stop_vnf']['duration'] = self.time_record.duration('ns_update_stop_vnf')
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 4. Verify that the VNF instance operational state on the VNFM is indicated as "stopped"
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as "stopped"')
+        for vnf_data in operate_vnf_data_list:
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_data.vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
-            if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
-                raise TestRunError(
-                    'VNF instance was not terminated correctly. VNF instance ID %s expected state was %s but got %s'
-                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
+            if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STOPPED:
+                raise TestRunError('Target VNF %s was not stopped' % vnf_info.vnf_product_name)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
+        # 5. Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have been
+        #    stopped by querying the VIM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the resources allocated to the NS and VNF instance(s) have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info):
-            raise TestRunError('NS resources have not been released by the VIM')
+        LOG.info('Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have'
+                 ' been stopped by querying the VIM')
+        for vnf_data in operate_vnf_data_list:
+            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id):
+                raise TestRunError('Target VNF %s compute resources have not been stopped' % vnf_data.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Verify that the NFVO indicates NS instance operation termination operation result as successful
+        # 6. Verify that other existing compute resources have not been affected by the performed operation by querying
+        #    the VIM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the NFVO indicates NS instance operation termination operation result as successful')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info.ns_state != constants.NS_NOT_INSTANTIATED:
-            raise TestRunError(
-                'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s'
-                % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info.ns_state))
+        LOG.info('Verifying that other existing compute resources have not been affected by the performed operation by '
+                 'querying the VIM')
+        LOG.debug('This check is not needed as the test is run in an isolated environment')
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 7. Verify that the NFVO shows no "operate VNF" operation errors
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that the NFVO shows no "operate VNF" operation errors')
+        LOG.debug('This has implicitly been checked at step 3')
+
+        LOG.info('%s execution completed successfully' % self.tc_name)

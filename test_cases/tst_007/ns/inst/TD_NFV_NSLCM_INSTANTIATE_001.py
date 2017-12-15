@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
     """
-    TD_NFV_NSLCM_INSTANTIATE_001 Instantiate standalone NS
+    TD_NFV_NSLCM_INSTANTIATE_001 Verify that a standalone NS can be successfully instantiated
 
     Sequence:
     1. Trigger NS instantiation on the NFVO

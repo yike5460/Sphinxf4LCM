@@ -1,7 +1,7 @@
 # This structure was written in accordance with section 8.5.10 of ETSI GS NFV-IFA 007 - v2.1.1 (2016-10).
 
 ExtManagedVirtualLinkInfo:
-  description: ExtManagedVirtualLinkInfo provides provides a reference to an externally-managed internal VL
+  description: ExtManagedVirtualLinkInfo provides a reference to an externally-managed internal VL
   attributes:
     ext_managed_virtual_link_id:
       description: Identifier of this externally-managed internal VL
