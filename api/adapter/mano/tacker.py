@@ -388,33 +388,6 @@ class TackerManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
-
-        vresources = dict()
-
-        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vim_id = vnfc_resource_info.compute_resource.vim_id
-            vim = self.get_vim_helper(vim_id)
-
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-
-            vresources[resource_id] = dict()
-
-            num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
-            num_vnics = len(virtual_compute.virtual_network_interface)
-
-            vresources[resource_id]['vCPU'] = num_virtual_cpu
-            vresources[resource_id]['vMemory'] = str(virtual_memory) + ' MB'
-            vresources[resource_id]['vStorage'] = str(size_of_storage) + ' GB'
-            vresources[resource_id]['vNIC'] = str(num_vnics)
-
-        return vresources
-
-    @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
         # "vnf": {
@@ -1008,44 +981,6 @@ class TackerManoAdapter(object):
                                   (expected_vnic_type, cp_name, actual_vnic_type))
                         return False
 
-        return True
-
-    @log_entry_exit(LOG)
-    def validate_vnf_released_vresources(self, vnf_info_initial, vnf_info_final=None):
-        vnfc_resource_id_list_final = []
-        if vnf_info_final is not None:
-            for vnfc_resource_info in vnf_info_final.instantiated_vnf_info.vnfc_resource_info:
-                vnfc_resource_id_list_final.append(vnfc_resource_info.compute_resource.resource_id)
-        for vnfc_resource_info in vnf_info_initial.instantiated_vnf_info.vnfc_resource_info:
-            if vnfc_resource_info.compute_resource.resource_id not in vnfc_resource_id_list_final:
-                vim_id = vnfc_resource_info.compute_resource.vim_id
-                vim = self.get_vim_helper(vim_id)
-                resource_id = vnfc_resource_info.compute_resource.resource_id
-                try:
-                    virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-                    return False
-                except Exception:
-                    LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
-        return True
-
-    @log_entry_exit(LOG)
-    def validate_vnf_vresource_state(self, vnf_instance_id):
-        VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
-                                    constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
-        vnf_state = vnf_info.instantiated_vnf_info.vnf_state
-        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vim_id = vnfc_resource_info.compute_resource.vim_id
-            vim = self.get_vim_helper(vim_id)
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            try:
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-                if virtual_compute.operational_state != VNF_TO_VRESOURCE_MAPPING[vnf_state]:
-                    return False
-            except Exception:
-                LOG.debug('Resource ID %s corresponding to VNF %s not found in VIM' %
-                          (resource_id, vnf_info.vnf_product_name))
-                return False
         return True
 
     @log_entry_exit(LOG)

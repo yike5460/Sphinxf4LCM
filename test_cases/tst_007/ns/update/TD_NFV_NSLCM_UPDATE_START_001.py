@@ -19,7 +19,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
     2. Verify that the NS is instantiated
     3. Trigger the NFVO to stop the target VNF instance inside the NS
     4. Trigger the NFVO to start the target VNF instance inside the NS instance
-    5. Verify that the VNF instace operational state on the VNFM is indicated as "started"
+    5. Verify that the VNF instance operational state on the VNFM is indicated as "started"
     6. Verify that the compute resources allocated to the target VNF instance have been started by querying the VIM
     7. Verify that the NFVO shows no "operate VNF" operation errors
     8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running the

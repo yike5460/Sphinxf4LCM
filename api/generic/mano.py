@@ -88,6 +88,16 @@ class Mano(object):
         return self.mano_adapter.get_vnfd_scaling_properties(vnfd_id, scaling_policy_name)
 
     @log_entry_exit(LOG)
+    def get_vim_helper(self, vim_id):
+        """
+        This function returns an instance of Vim class
+        :param vim_id:      ID of the VIM as known by the MANO element
+        :return:            Vim object
+        """
+
+        return self.mano_adapter.get_vim_helper(vim_id)
+
+    @log_entry_exit(LOG)
     def get_nsd_scaling_properties(self, nsd_id, scaling_policy_name):
         """
         This function returns the scaling properties for the provided scaling policy name from the NSD with the
@@ -211,7 +221,7 @@ class Mano(object):
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
 
-        return self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
+        return self.mano_adapted.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
     def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
@@ -250,19 +260,49 @@ class Mano(object):
                                             final VNF have been released, False otherwise.
         """
 
-        return self.mano_adapter.validate_vnf_released_vresources(vnf_info_initial, vnf_info_final)
+        vnfc_resource_id_list_final = []
+        if vnf_info_final is not None:
+            for vnfc_resource_info in vnf_info_final.instantiated_vnf_info.vnfc_resource_info:
+                vnfc_resource_id_list_final.append(vnfc_resource_info.compute_resource.resource_id)
+        for vnfc_resource_info in vnf_info_initial.instantiated_vnf_info.vnfc_resource_info:
+            if vnfc_resource_info.compute_resource.resource_id not in vnfc_resource_id_list_final:
+                vim_id = vnfc_resource_info.compute_resource.vim_id
+                vim = self.get_vim_helper(vim_id)
+                resource_id = vnfc_resource_info.compute_resource.resource_id
+                try:
+                    virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    return False
+                except Exception:
+                    LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
+        return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_vresource_state(self, vnf_info):
+    def validate_vnf_vresource_state(self, vnf_instance_id):
         """
         This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM
 
-        :param vnf_info:            VnfInfo structure holding information about the VNF instance.
+        :param vnf_instance_id:     Vnf Instance ID value.
         :return:                    True if the the VNF state in the VNFM matches the state indicated by the VIM,
                                     False otherwise
         """
 
-        return self.mano_adapter.validate_vnf_vresource_state(vnf_info)
+        VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
+                                    constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_state = vnf_info.instantiated_vnf_info.vnf_state
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            try:
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                if virtual_compute.operational_state != VNF_TO_VRESOURCE_MAPPING[vnf_state]:
+                    return False
+            except Exception:
+                LOG.debug('Resource ID %s corresponding to VNF %s not found in VIM' %
+                          (resource_id, vnf_info.vnf_product_name))
+                return False
+        return True
 
     @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
@@ -274,7 +314,30 @@ class Mano(object):
         :return:                    Dictionary with the resources for each VNFC.
         """
 
-        return self.mano_adapter.get_allocated_vresources(vnf_instance_id, additional_param)
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+
+        vresources = dict()
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+            vresources[resource_id] = dict()
+
+            num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
+            virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
+            size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
+            num_vnics = len(virtual_compute.virtual_network_interface)
+
+            vresources[resource_id]['vCPU'] = num_virtual_cpu
+            vresources[resource_id]['vMemory'] = str(virtual_memory) + ' MB'
+            vresources[resource_id]['vStorage'] = str(size_of_storage) + ' GB'
+            vresources[resource_id]['vNIC'] = str(num_vnics)
+
+        return vresources
 
     @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
@@ -1257,8 +1320,7 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-        return self.mano_adapter.verify_vnf_sw_images(vnf_info)
+        return self.mano_adapter.verify_vnf_sw_images(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
     def verify_ns_sw_images(self, ns_instance_id, additional_param=None):
