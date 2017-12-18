@@ -221,7 +221,7 @@ class Mano(object):
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
 
-        return self.mano_adapted.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
+        return self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
     def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
