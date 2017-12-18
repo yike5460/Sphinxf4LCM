@@ -305,7 +305,7 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
+    def get_allocated_vresources(self, vnf_instance_id, additional_param):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
 
@@ -314,7 +314,7 @@ class Mano(object):
         :return:                    Dictionary with the resources for each VNFC.
         """
 
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
 
         vresources = dict()
 
@@ -1320,7 +1320,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
-        return self.mano_adapter.verify_vnf_sw_images(vnf_instance_id, additional_param)
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        return self.mano_adapter.verify_vnf_sw_images(vnf_info)
 
     @log_entry_exit(LOG)
     def verify_ns_sw_images(self, ns_instance_id, additional_param=None):

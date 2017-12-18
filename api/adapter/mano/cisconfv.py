@@ -526,32 +526,6 @@ class CiscoNFVManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id, additional_param):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-
-        vresources = dict()
-
-        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vim = self.get_vim_helper()
-
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-
-            vresources[resource_id] = dict()
-
-            num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
-            virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
-            size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
-            num_vnics = len(virtual_compute.virtual_network_interface)
-
-            vresources[resource_id]['vCPU'] = num_virtual_cpu
-            vresources[resource_id]['vMemory'] = str(virtual_memory) + ' MB'
-            vresources[resource_id]['vStorage'] = str(size_of_storage) + ' GB'
-            vresources[resource_id]['vNIC'] = str(num_vnics)
-
-        return vresources
-
-    @log_entry_exit(LOG)
     def build_vdu_list(self, vdu_params):
         vdu_list_xml = ''
         for vdu_id, vdu_param in vdu_params.items():
