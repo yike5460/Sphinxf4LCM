@@ -2,6 +2,7 @@ import logging
 
 from api.generic import constants
 from api.structures.objects import ScaleVnfData, ScaleByStepData
+from time import sleep
 from test_cases import TestCase, TestRunError
 from utils.misc import generate_name
 from utils.net import ping
@@ -129,6 +130,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         for vnf_info in ns_info_before_scale_in.vnf_info:
             if vnf_info.vnf_product_name in expected_vnfc_count.keys():
                 vnf_info_impacted_list.append(vnf_info)
+
+        sleep(constants.INSTANCE_BOOT_TIME)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Trigger NS scale in by removing VNFC instance(s) from a VNF in the NS in NFVO with an operator action
