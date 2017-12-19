@@ -126,3 +126,5 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
             raise TestRunError(
                 'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s'
                 % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info.ns_state))
+
+        LOG.info('%s execution completed successfully' % self.tc_name)
