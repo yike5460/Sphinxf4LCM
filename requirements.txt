@@ -39,6 +39,7 @@ python-neutronclient==6.3.0
 python-novaclient==9.0.1
 python-swiftclient==3.3.0
 python-tackerclient==0.10.0
+python-glanceclient==2.8.0
 pytz==2017.2
 PyYAML==3.12
 requests==2.18.1

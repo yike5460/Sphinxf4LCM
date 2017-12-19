@@ -65,6 +65,15 @@ class OpenstackVimAdapter(object):
                                                               project_domain_name=project_domain_name,
                                                               user_domain_name=user_domain_name)
 
+            self.glance_client = os_client_config.make_client('image',
+                                                              auth_url=auth_url,
+                                                              username=username,
+                                                              password=password,
+                                                              identity_api_version=identity_api_version,
+                                                              project_name=project_name,
+                                                              project_domain_name=project_domain_name,
+                                                              user_domain_name=user_domain_name)
+
         except Exception as e:
             LOG.debug('Unable to create %s instance' % self.__class__.__name__)
             LOG.exception(e)
@@ -390,7 +399,7 @@ class OpenstackVimAdapter(object):
     @log_entry_exit(LOG)
     def query_image(self, image_id):
         try:
-            image = self.nova_client.images.get(image_id)
+            image = self.glance_client.images.get(image_id)
         except Exception as e:
             LOG.exception(e)
             raise OpenstackVimAdapterError(e.message)
@@ -398,9 +407,9 @@ class OpenstackVimAdapter(object):
         software_image_information = SoftwareImageInformation()
         software_image_information.id = image_id
         software_image_information.name = image.name.encode()
-        software_image_information.created_at = image.created.encode()
-        software_image_information.updated_at = image.updated.encode()
-        software_image_information.min_disk = image.minDisk
-        software_image_information.min_ram = image.minRam
+        software_image_information.created_at = image.created_at.encode()
+        software_image_information.updated_at = image.updated_at.encode()
+        software_image_information.min_disk = image.min_disk
+        software_image_information.min_ram = image.min_ram
 
         return software_image_information
