@@ -481,7 +481,7 @@ class CiscoNFVManoAdapter(object):
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
 
             # Get VIM adapter object
-            vim = self.get_vim_helper()
+            vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
 
             # Get the name of the flavor associated to this VNFC from Nova
             server_id = vnfc_resource_info.compute_resource.resource_id
@@ -709,7 +709,7 @@ class CiscoNFVManoAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def get_vim_helper(self):
+    def get_vim_helper(self, vim_id):
         if self.vim_helper is None:
             netconf_reply = self.esc.get(('xpath', '/esc_system_config/vim_connectors/vim_connector'))
             vim_xml = etree.fromstring(netconf_reply.data_xml)
