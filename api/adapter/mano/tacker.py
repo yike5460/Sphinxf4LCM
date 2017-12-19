@@ -1052,6 +1052,11 @@ class TackerManoAdapter(object):
             LOG.exception(e)
             raise TackerManoAdapterError(e.message)
 
-        mgmt_addr_list = sum(vnf_mgmt_url_dict.values(), list())
+        mgmt_addr_list = list()
+        for vnf_mgmt_url_elem in vnf_mgmt_url_dict.values():
+            if isinstance(vnf_mgmt_url_elem, list):
+                mgmt_addr_list += vnf_mgmt_url_elem
+            else:
+                mgmt_addr_list.append(vnf_mgmt_url_elem)
 
         return mgmt_addr_list
