@@ -20,48 +20,78 @@ class SdlManoAdapterError(ManoAdapterError):
 
 
 class SdlManoAdapter(object):
-    def __init__(self, endpoint_url, tenant_id):
+    def __init__(self, endpoint_url, backend_url, tenant_id, username, password):
         self.endpoint_url = endpoint_url
+        self.backend_url = backend_url
 
-        # TODO: may need to be moved in instantiation_params
+        self.token = self.get_token(username, password)
+        self.cookiejar = self.get_cookies(username, password)
+
+        # TODO: tenant_id may need to be moved in instantiation_params
         self.tenant_id = tenant_id
-
-        self.ns_catalog = {
-            'ns1': '{"is_enabled":false,"description":"","sla_path_list":[],"edge_list":[{"start_node_id":1,\
-                     "end_interface_id":1,"end_node_id":2,"edge_id":3,"qos_desc":{"excessBw":"100","maxDelay":500,\
-                     "committedBw":"100","DSCP":"0"},"start_interface_id":1},{"start_node_id":2,"end_interface_id":1,\
-                     "end_node_id":1,"edge_id":4,"qos_desc":{"excessBw":"100","maxDelay":500,"committedBw":"100","DSCP":\
-                     "0"},"start_interface_id":1}],"schedule_list":[],"metadata":{"zoom":1,"pan":{"y":0,"x":0}},\
-                     "service_desc_list":[{"description":"","parameters":{},"service_version":"1.1.6",\
-                     "service_revision":0,"interfaces":[{"nb":1,"in":{"interface":1,"id":2,"name":"t2"}\
-                     ,"description":"Data interface eth1","name":"eth1","out":{"interface":1,"id":2,"name":"t2"}},\
-                     {"nb":2,"description":"Data interface eth2","name":"eth2"},{"nb":3,"description":\
-                     "Data interface eth3","name":"eth3"}],"service_instance_type":"router-os","service_type":\
-                     "vyos_router","node_id":1,"num_interfaces":3,"location_constraints":{"virp_id":"",\
-                     "virp_type":null},"metadata":{"position":{"y":170,"x":378}},"name":"t1"},{"description":"",\
-                     "parameters":{"DHCP_SERVER_IP":"","DHCP_RANGE":""},"service_version":"1.0","service_revision":0,\
-                     "interfaces":[{"nb":1,"in":{"interface":1,"id":1,"name":"t1"},"description":\
-                     "Data interface eth1","name":"eth1","out":{"interface":1,"id":1,"name":"t1"}},{"nb":2,\
-                     "description":"Data interface eth2","name":"eth2"},{"nb":3,"description":"Data interface eth3",\
-                     "name":"eth3"},{"nb":4,"description":"Data interface eth4","name":"eth4"},{"nb":5,"description":\
-                     "Data interface eth5","name":"eth5"}],"service_instance_type":"vnaas_small-os","service_type":\
-                     "ubuntu_vnaas","node_id":2,"num_interfaces":5,"location_constraints":{"virp_id":"","virp_type":\
-                     null},"metadata":{"position":{"y":172,"x":702}},"name":"t2"}],"default_location_constraints":\
-                     {"virp_type": "OPENSTACK"},"end_node_desc_list":[],"name":""}'
-        }
 
         self.ns_update_json_mapping = dict()
         self.ns_nsd_mapping = dict()
 
     @log_entry_exit(LOG)
+    def get_token(self, username, password):
+        response = requests.post(url=self.backend_url + '/token', data={
+            'user': username,
+            'passwd': password})
+
+        assert response.status_code == 200
+        token = response.json()['token']
+
+        return token
+
+    @log_entry_exit(LOG)
+    def get_cookies(self, username, password):
+        response = requests.post(url=self.backend_url + '/token', data={
+            'user': username,
+            'passwd': password})
+
+        assert response.status_code == 200
+        return response.cookies
+
+    @log_entry_exit(LOG)
+    def get_nsd_id_from_name(self, nsd_name):
+        # TODO: treat invalid nsd_name
+        response = requests.get(self.backend_url + '/nst/', cookies=self.cookiejar, headers={'Token': self.token})
+        assert response.status_code == 200
+
+        nsd_list = response.json()['data']
+        for nsd_dict in nsd_list:
+            if nsd_dict['name'] == nsd_name:
+                return nsd_dict['uuid']
+
+    @log_entry_exit(LOG)
+    def get_nsd(self, nsd_id):
+        # TODO: treat invalid nsd_id
+        response = requests.get(self.backend_url + '/nst/details', params={'uuid': nsd_id}, cookies=self.cookiejar,
+                                headers={'Token': self.token})
+
+        assert response.status_code == 200
+        raw_nsd = response.json()['data']
+
+        response = requests.post(self.backend_url + '/nst/export', json=raw_nsd, cookies=self.cookiejar,
+                                headers={'Token': self.token})
+        assert response.status_code == 200
+        converted_nsd = response.json()['data']
+
+        return converted_nsd
+
+    @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
-        nsd_dict = json.loads(self.ns_catalog[nsd_id])
+        # Assuming user will most likely used nsd_name as input
+        nsd_dict = self.get_nsd(self.get_nsd_id_from_name(nsd_id))
+
         nsd_dict['is_enabled'] = False
         nsd_dict['name'] = ns_name
         nsd_dict['description'] = ns_description
 
         response = requests.post(url=self.endpoint_url + '/nfv_network_service', params={'tenant_id': self.tenant_id},
                                  json=nsd_dict)
+
         assert response.status_code == 200
         ns_instance_id = response.json()['nfvns_uuid']
 
