@@ -53,6 +53,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
@@ -73,9 +74,9 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        self.tc_result['resources']['Initial'] = dict()
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['Initial'].update(
+            self.tc_result['resources']['Initial - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['Initial - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
@@ -90,6 +91,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         self.time_record.END('terminate_ns')
 
         self.tc_result['events']['terminate_ns']['duration'] = self.time_record.duration('terminate_ns')
+        self.tc_result['events']['terminate_ns']['details'] = 'Success'
 
         self.unregister_from_cleanup(index=20)
         self.unregister_from_cleanup(index=10)

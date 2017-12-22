@@ -57,6 +57,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
@@ -77,9 +78,9 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        self.tc_result['resources']['Initial'] = dict()
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['Initial'].update(
+            self.tc_result['resources']['Initial - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['Initial - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
@@ -104,6 +105,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.time_record.END('ns_update_stop_vnf')
 
         self.tc_result['events']['ns_update_stop_vnf']['duration'] = self.time_record.duration('ns_update_stop_vnf')
+        self.tc_result['events']['ns_update_stop_vnf']['details'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Trigger the NFVO to start the target VNF instance inside the NS instance
@@ -120,6 +122,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.time_record.END('ns_update_start_vnf')
 
         self.tc_result['events']['ns_update_start_vnf']['duration'] = self.time_record.duration('ns_update_start_vnf')
+        self.tc_result['events']['ns_update_start_vnf']['details'] = 'Success'
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
