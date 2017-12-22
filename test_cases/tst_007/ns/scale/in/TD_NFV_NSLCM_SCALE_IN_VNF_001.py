@@ -126,8 +126,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
 
         vnf_info_impacted_list = list()
         for vnf_info in ns_info_before_scale_in.vnf_info:
-            self.tc_result['resources']['Before Scale In - %s' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['Before Scale In - %s' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['Before scale in - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['Before scale in - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
             if vnf_info.vnf_product_name in expected_vnfc_count.keys():
                 vnf_info_impacted_list.append(vnf_info)

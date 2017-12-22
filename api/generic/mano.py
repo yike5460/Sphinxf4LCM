@@ -325,7 +325,7 @@ class Mano(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            resource_string = resource_id + ' (%s)' % vnfc_resource_info.vdu_id
+            resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
             vresources[resource_string] = dict()
 
             num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu

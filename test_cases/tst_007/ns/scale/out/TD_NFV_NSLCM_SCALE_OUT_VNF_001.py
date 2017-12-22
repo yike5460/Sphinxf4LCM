@@ -84,8 +84,8 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['Before Scale Out - %s' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['Before Scale Out - %s' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['Before scale out - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['Before scale out - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
