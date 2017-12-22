@@ -62,6 +62,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
@@ -82,9 +83,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        self.tc_result['resources']['Initial'] = dict()
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['Initial'].update(
+            self.tc_result['resources']['Before scale out - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['Before scale out - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
@@ -122,6 +123,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         self.time_record.END('scale_out_ns')
 
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
+        self.tc_result['events']['scale_out_ns']['details'] = 'Success'
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
@@ -137,9 +139,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
                 if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != expected_vnfc_count[vnf_name]:
                     raise TestRunError('VNFCs not added after VNF scaled out')
 
-        self.tc_result['resources']['After scale out'] = dict()
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['After scale out'].update(
+            self.tc_result['resources']['After scale out - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['After scale out - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # TODO Add self.tc_result['scaling_out']['level']. We should do this only for the VNF(s) that we scaled

@@ -63,6 +63,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
@@ -80,11 +81,6 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
-
-        self.tc_result['resources']['Initial'] = dict()
-        for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['Initial'].update(
-                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Trigger NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator action
@@ -121,13 +117,18 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         self.time_record.END('scale_out_ns')
 
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
+        self.tc_result['events']['scale_out_ns']['details'] = 'Success'
 
         # Retrieving the list of VnfInfo objects for the impacted VNFs before the scale in operation
         ns_info_before_scale_in = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
                                                              'additional_param': self.tc_input['mano'].get(
                                                                                  'query_params')})
+
         vnf_info_impacted_list = list()
         for vnf_info in ns_info_before_scale_in.vnf_info:
+            self.tc_result['resources']['Before scale in - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['Before scale in - %s' % vnf_info.vnf_product_name].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
             if vnf_info.vnf_product_name in expected_vnfc_count.keys():
                 vnf_info_impacted_list.append(vnf_info)
 
@@ -156,6 +157,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         self.time_record.END('scale_in_ns')
 
         self.tc_result['events']['scale_in_ns']['duration'] = self.time_record.duration('scale_in_ns')
+        self.tc_result['events']['scale_in_ns']['details'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the impacted VNFC instance(s) inside the VNF have been terminated by querying the VNFM
@@ -170,9 +172,9 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                 if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != expected_vnfc_count[vnf_name]:
                     raise TestRunError('VNFCs not removed after VNF scaled in')
 
-        self.tc_result['resources']['After scale in'] = dict()
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['After scale in'].update(
+            self.tc_result['resources']['After scale in - %s' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['After scale in - %s' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # TODO Add self.tc_result['scaling_in']['level']. We should do this only for the VNF(s) that we scaled
