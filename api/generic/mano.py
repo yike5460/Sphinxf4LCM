@@ -325,17 +325,18 @@ class Mano(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            vresources[resource_id] = dict()
+            resource_string = resource_id + ' (%s)' % vnfc_resource_info.vdu_id
+            vresources[resource_string] = dict()
 
             num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
             virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
             size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
             num_vnics = len(virtual_compute.virtual_network_interface)
 
-            vresources[resource_id]['vCPU'] = num_virtual_cpu
-            vresources[resource_id]['vMemory'] = str(virtual_memory) + ' MB'
-            vresources[resource_id]['vStorage'] = str(size_of_storage) + ' GB'
-            vresources[resource_id]['vNIC'] = str(num_vnics)
+            vresources[resource_string]['vCPU'] = num_virtual_cpu
+            vresources[resource_string]['vMemory'] = str(virtual_memory) + ' MB'
+            vresources[resource_string]['vStorage'] = str(size_of_storage) + ' GB'
+            vresources[resource_string]['vNIC'] = str(num_vnics)
 
         return vresources
 

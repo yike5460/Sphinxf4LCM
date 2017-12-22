@@ -66,18 +66,6 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
             report_file.write(t1.get_string())
             report_file.write('\n\n')
 
-        # Write VNF resources
-        report_file.write('* VNF resources:\n')
-        for key in tc_result.get('resources', {}).keys():
-            report_file.write('%s:\n' % key)
-            for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
-                report_file.write('Resources for VNFC %s\n' % vnfc_id)
-                t = PrettyTable(['Resource type', 'Expected size', 'Actual size', 'Validation'])
-                for resource_type, resource_size in vnfc_resources.items():
-                    t.add_row([resource_type, resource_size, resource_size, 'OK'])
-                report_file.write(t.get_string())
-                report_file.write('\n\n')
-
         # Write test case events
         report_file.write('* Events:\n')
         t = PrettyTable(['Event', 'Duration (sec)', 'Details'])
@@ -99,6 +87,18 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
+        # Write VNF resources
+        report_file.write('* VNF resources:\n')
+        for key in tc_result.get('resources', {}).keys():
+            report_file.write('%s:\n' % key)
+            for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
+                report_file.write('Resources for VNFC %s\n' % vnfc_id)
+                t = PrettyTable(['Resource type', 'Expected size', 'Actual size', 'Validation'])
+                for resource_type, resource_size in vnfc_resources.items():
+                    t.add_row([resource_type, resource_size, resource_size, 'OK'])
+                report_file.write(t.get_string())
+                report_file.write('\n\n')
+
         # Write test case results
         report_file.write('*** Test case results ***')
         report_file.write('\n\n')
@@ -106,7 +106,6 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
-
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict = dict()
