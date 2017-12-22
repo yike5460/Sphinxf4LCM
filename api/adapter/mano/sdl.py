@@ -1,6 +1,7 @@
 import json
 import logging
 import requests
+import time
 
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
@@ -109,6 +110,10 @@ class SdlManoAdapter(object):
         ns_update_dict = self.ns_update_json_mapping[ns_instance_id]
         ns_update_dict['is_enabled'] = True
 
+        # TODO: expose via params
+        ns_update_dict['default_location_constraints'] = dict()
+        ns_update_dict['default_location_constraints']['virp_type'] = 'OPENSTACK'
+
         response = requests.put(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
         assert response.status_code == 200
 
@@ -209,8 +214,45 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
-        return construct_adapter(vendor='openstack', module_type='vim', auth_url='http://10.2.16.50:35357',
-                                 username='root', password='pass', project_name='demo')
+        response = requests.get(url=self.endpoint_url + '/nfv/vi/virp/%s' % vim_id)
+        assert response.status_code == 200
+
+        generic_vim = response.json()
+        generic_vim_type = generic_vim['virp']['vi_plugin_id']
+        generic_vim_location = generic_vim['virp']['location']
+
+        if generic_vim_type == 'OPENSTACK':
+            vim_params = self.get_openstack_vim_params(location=generic_vim_location)
+            vim_vendor='openstack'
+        else:
+            raise SdlManoAdapterError('Unsupported VIM type: %s' % generic_vim_type)
+
+        return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+
+    @log_entry_exit(LOG)
+    def get_openstack_vim_params(self, location):
+        response = requests.get(url=self.endpoint_url + '/nfv/vi/openstack')
+        assert response.status_code == 200
+
+        openstack_vim_list = response.json()['openstack']
+        for openstack_vim in openstack_vim_list:
+            auth_url = openstack_vim['auth_url']
+            username = openstack_vim['username']
+            password = openstack_vim['password']
+            project_name = openstack_vim['project_name']
+
+            if location == '%s/%s@%s' % (auth_url, username, project_name):
+
+                # TODO: temporary workaround for DNAT
+                auth_url = 'http://10.2.16.50:35357'
+
+                return {
+                    'auth_url': auth_url,
+                    'username': username,
+                    'password': password,
+                    'project_name': project_name
+                }
+
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None):
@@ -226,3 +268,29 @@ class SdlManoAdapter(object):
     def ns_delete_id(self, ns_instance_id):
         response = requests.delete(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id)
         assert response.status_code == 200
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
+        stable_states = ['running', 'failed', 'disabled']
+        elapsed_time = 0
+
+        while elapsed_time < max_wait_time:
+            try:
+                response = requests.get(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id)
+                assert response.status_code == 200
+                ns_instance_dict = response.json()
+                ns_status = ns_instance_dict['state']
+            except Exception as e:
+                raise SdlManoAdapterError(e.message)
+            LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
+            if ns_status in stable_states:
+                return True
+            else:
+                LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
+                LOG.debug('Sleeping %s seconds' % poll_interval)
+                time.sleep(poll_interval)
+                elapsed_time += poll_interval
+                LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
+
+        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
+        return False
