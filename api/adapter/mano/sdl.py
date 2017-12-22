@@ -294,3 +294,40 @@ class SdlManoAdapter(object):
 
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def verify_vnf_sw_images(self, vnf_info):
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+
+        # TODO: optimize by creating a VDU - image mapping by passing through the VNFD a single time
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            # Get list of possible image names from the VNFD for the VDU ID of the current VNFC
+            vdu_id = vnfc_resource_info.vdu_id
+            sw_object_list = []
+            for vi_resource in vnfd['vnf']['vdu_list'][vdu_id]['vi_resources'].values():
+                for storage_list in vi_resource['storage_list'].values():
+                    sw_object_list += storage_list['sw_objects']
+
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            image_id = virtual_compute.vc_image_id
+            image_details = vim.query_image(image_id)
+            image_name_vim = image_details.name
+
+            if image_name_vim not in sw_object_list:
+                LOG.debug('Unexpected image for VNFC %s, VDU type %s' % (resource_id, vdu_id))
+                LOG.debug('Expected images: %s; actual image name: %s' % (sw_object_list, image_name_vim))
+                return False
+
+        return True
+
+    @log_entry_exit(LOG)
+    def get_vnfd(self, vnfd):
+        response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf/%s' % vnfd)
+        assert response.status_code == 200
+
+        return response.json()
