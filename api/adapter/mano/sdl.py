@@ -122,6 +122,8 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
+        # TODO :Refactor using logic from cisconfv.py (lifecycle_operation_occurrence_ids dict)
+
         operation_type, resource_id = lifecycle_operation_occurrence_id
 
         if operation_type == 'ns_instantiate':
@@ -145,6 +147,15 @@ class SdlManoAdapter(object):
                 return constants.OPERATION_FAILED
             else:
                 return constants.OPERATION_PENDING
+
+        if operation_type == 'vnf_stop':
+            response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
+            vnf_instance_dict = response.json()
+
+            print vnf_instance_dict['vnf-instance']['state']
+
+            return constants.OPERATION_PENDING
+
 
     @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):
@@ -437,3 +448,34 @@ class SdlManoAdapter(object):
             vnf_mgmt_addr_list += vnfc_instance['ip_addresses']
 
         return vnf_mgmt_addr_list
+
+    @log_entry_exit(LOG)
+    def ns_update(self, ns_instance_id, update_type, add_vnf_instance=None, remove_vnf_instance_id=None,
+                  instantiate_vnf_data=None, change_vnf_flavour_data=None, operate_vnf_data=None,
+                  modify_vnf_info_data=None, change_ext_vnf_connectivity_data=None, add_sap=None, remove_sap_id=None,
+                  add_nested_ns_id=None, remove_nested_ns_id=None, assoc_new_nsd_version_data=None,
+                  move_vnf_instance_data=None, add_vnffg=None, remove_vnffg_id=None, update_vnffg=None,
+                  change_ns_flavour_data=None, update_time=None):
+        if update_type == 'OperateVnf':
+            operation_list = []
+            for update_data in operate_vnf_data:
+                vnf_instance_id = update_data.vnf_instance_id
+                change_state_to = update_data.change_state_to
+                stop_type = update_data.stop_type
+                graceful_stop_timeout = update_data.graceful_stop_timeout
+                additional_param = update_data.additional_param
+                operation_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout, additional_param)
+                operation_list.append(operation_id)
+
+            return 'multiple_operations', operation_list
+
+    @log_entry_exit(LOG)
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
+                    additional_param=None):
+        response = requests.put(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s/%s' % (vnf_instance_id,
+                                                                                         change_state_to),
+                                json={'operation_id': change_state_to})
+        print response.content
+        assert response.status_code == 200
+
+        return 'vnf_%s' % change_state_to, vnf_instance_id
