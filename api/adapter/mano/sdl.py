@@ -331,3 +331,66 @@ class SdlManoAdapter(object):
         assert response.status_code == 200
 
         return response.json()
+
+    @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        for vnf_info in ns_info.vnf_info:
+            if not self.validate_vnf_allocated_vresources(vnf_info):
+                return False
+        return True
+
+    @log_entry_exit(LOG)
+    def validate_vnf_allocated_vresources(self, vnf_info):
+        validation_result = True
+
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vdu_id = vnfc_resource_info.vdu_id
+
+            # Get possible values for vResources
+            expected_cpu_count_list = []
+            for vi_resource in vnfd['vnf']['vdu_list'][vdu_id]['vi_resources'].values():
+                for cpu_list in vi_resource['cpu_list'].values():
+                    expected_cpu_count_list.append(cpu_list['amount'])
+
+            expected_memory_size_list = []
+            for vi_resource in vnfd['vnf']['vdu_list'][vdu_id]['vi_resources'].values():
+                for memory_list in vi_resource['memory_list'].values():
+                    expected_memory_size_list.append(memory_list['amount'])
+
+            LOG.debug('Not checking vStorage size, because it is not stated in the VNFD')
+
+            expected_nic_count_list = []
+            for vi_resource in vnfd['vnf']['vdu_list'][vdu_id]['vi_resources'].values():
+                expected_nic_count_list.append(len(vi_resource['intf_list']))
+
+            # Get VIM adapter object
+            vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            actual_cpu_count = virtual_compute.virtual_cpu.num_virtual_cpu
+            actual_memory_size = virtual_compute.virtual_memory.virtual_mem_size
+            actual_nic_count = len(virtual_compute.virtual_network_interface)
+
+            if actual_cpu_count not in expected_cpu_count_list:
+                LOG.debug('Unexpected CPU count for VDU %s: %s. Expected values: %s' % (
+                    vdu_id, actual_cpu_count, expected_cpu_count_list))
+                validation_result = False
+
+            if actual_memory_size not in expected_memory_size_list:
+                LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
+                    vdu_id, actual_memory_size, expected_memory_size_list))
+
+                # TODO: Clarify memory size in VNFD. Until then, do not set validation_result
+                # validation_result = False
+
+            if actual_nic_count not in expected_nic_count_list:
+                LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
+                    vdu_id, actual_nic_count, expected_nic_count_list))
+                validation_result = False
+
+        return validation_result
