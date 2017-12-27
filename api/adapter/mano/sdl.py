@@ -425,3 +425,15 @@ class SdlManoAdapter(object):
                 validation_result = False
 
         return validation_result
+
+    @log_entry_exit(LOG)
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+        vnf_mgmt_addr_list = list()
+
+        response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
+        vnf_instance_dict = response.json()
+
+        for vnfc_instance in vnf_instance_dict['vnf-instance']['vnfc_instance_list'].values():
+            vnf_mgmt_addr_list += vnfc_instance['ip_addresses']
+
+        return vnf_mgmt_addr_list
