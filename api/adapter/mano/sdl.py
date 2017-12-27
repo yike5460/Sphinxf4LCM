@@ -156,6 +156,19 @@ class SdlManoAdapter(object):
 
             return constants.OPERATION_PENDING
 
+        if operation_type == 'multiple_operations':
+            operation_list = resource_id
+            for operation_id in operation_list:
+                operation_status_list = map(self.get_operation_status, operation_list)
+
+            if constants.OPERATION_FAILED in operation_status_list:
+                return constants.OPERATION_FAILED
+            elif constants.OPERATION_PENDING in operation_status_list:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_SUCCESS
+
+
 
     @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):
