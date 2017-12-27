@@ -84,7 +84,8 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         # Assuming user will most likely used nsd_name as input
-        nsd_dict = self.get_nsd(self.get_nsd_id_from_name(nsd_id))
+        real_nsd_id = self.get_nsd_id_from_name(nsd_id)
+        nsd_dict = self.get_nsd(real_nsd_id)
 
         nsd_dict['is_enabled'] = False
         nsd_dict['name'] = ns_name
@@ -97,7 +98,7 @@ class SdlManoAdapter(object):
         ns_instance_id = response.json()['nfvns_uuid']
 
         self.ns_update_json_mapping[ns_instance_id] = nsd_dict
-        self.ns_nsd_mapping[ns_instance_id] = nsd_id
+        self.ns_nsd_mapping[ns_instance_id] = real_nsd_id
 
         return ns_instance_id
 
@@ -156,7 +157,7 @@ class SdlManoAdapter(object):
 
         ns_info.ns_name = str(ns_instance_dict['name'])
         ns_info.description = str(ns_instance_dict['description'])
-        ns_info.nsd_id = self.ns_nsd_mapping[ns_info.ns_instance_id]
+        ns_info.nsd_id = str(self.ns_nsd_mapping[ns_info.ns_instance_id])
 
         if ns_instance_dict['state'] == 'running':
             ns_info.ns_state = constants.NS_INSTANTIATED
@@ -268,6 +269,8 @@ class SdlManoAdapter(object):
     def ns_delete_id(self, ns_instance_id):
         response = requests.delete(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id)
         assert response.status_code == 200
+
+        self.ns_nsd_mapping.pop(ns_instance_id)
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
@@ -391,6 +394,34 @@ class SdlManoAdapter(object):
             if actual_nic_count not in expected_nic_count_list:
                 LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
                     vdu_id, actual_nic_count, expected_nic_count_list))
+                validation_result = False
+
+        return validation_result
+
+    @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
+        validation_result = True
+
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        nsd_id = ns_info.nsd_id
+        nsd = self.get_nsd(nsd_id)
+
+        service_name_type_mapping = dict()
+        for service_desc in nsd['service_desc_list']:
+            service_name_type_mapping[service_desc['name']] = service_desc['service_type']
+
+        for vnf_info in ns_info.vnf_info:
+            # Get the VNF product name
+            vnf_name = vnf_info.vnf_product_name
+            vnfd_id = vnf_info.vnfd_id
+            vnfd = self.get_vnfd(vnfd_id)
+
+            vnfd_service_type = vnfd['vnf']['service_type']
+            nsd_service_type = service_name_type_mapping[vnf_name]
+
+            if vnfd_service_type != nsd_service_type:
+                LOG.debug('Unexpected VNFD %s, having service type %s for VNF %s. Expecting a VNFD with service type %s'
+                          % (vnfd_id, vnfd_service_type, vnf_name, nsd_service_type))
                 validation_result = False
 
         return validation_result
