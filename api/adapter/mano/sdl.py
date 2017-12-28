@@ -1,12 +1,13 @@
 import json
 import logging
+import re
 import requests
 import time
 
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import ResourceHandle, InstantiatedVnfInfo, NsInfo, VnfInfo, VnfcResourceInfo
+from api.structures.objects import ResourceHandle, InstantiatedVnfInfo, NsInfo, VnfInfo, VnfExtCpInfo, VnfcResourceInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -243,6 +244,24 @@ class SdlManoAdapter(object):
             vnfc_resource_info.compute_resource.resource_id = str(vnfc_details['vi_resources']['vi_descriptor']
                                                                   ['vi_resources']['mgmt_objects']['OPENSTACK_SERVER'])
             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            port_gen = vim.port_list(device_id=vnf_resource_id)
+
+            for port_dict in port_gen:
+                for port in port_dict['ports']:
+                    match = re.search('^%s-p(\d+)\*?$' % vnf_info.vnf_product_name, port['name'])
+                    if match is not None:
+                        vnf_ext_cp_info = VnfExtCpInfo()
+                        vnf_ext_cp_info.cp_instance_id = str(port['id'])
+                        vnf_ext_cp_info.address = [str(port['mac_address'])]
+                        vnf_ext_cp_info.cpd_id = str(match.groups()[0])
+                        vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
         return vnf_info
 
