@@ -150,16 +150,27 @@ class SdlManoAdapter(object):
 
         if operation_type == 'vnf_stop':
             response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
-            vnf_instance_dict = response.json()
+            vnf_instance_state = response.json()['vnf-instance']['state']['oper_state']
 
-            print vnf_instance_dict['vnf-instance']['state']
+            if vnf_instance_state == 'INACTIVE':
+                return constants.OPERATION_SUCCESS
+            else:
+                return constants.OPERATION_PENDING
+            # Add case for OPERATION_FAILED
 
-            return constants.OPERATION_PENDING
+        if operation_type == 'vnf_start':
+            response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
+            vnf_instance_state = response.json()['vnf-instance']['state']['oper_state']
+
+            if vnf_instance_state == 'ACTIVE':
+                return constants.OPERATION_SUCCESS
+            else:
+                return constants.OPERATION_PENDING
+            # Add case for OPERATION_FAILED
 
         if operation_type == 'multiple_operations':
             operation_list = resource_id
-            for operation_id in operation_list:
-                operation_status_list = map(self.get_operation_status, operation_list)
+            operation_status_list = map(self.get_operation_status, operation_list)
 
             if constants.OPERATION_FAILED in operation_status_list:
                 return constants.OPERATION_FAILED
@@ -167,8 +178,6 @@ class SdlManoAdapter(object):
                 return constants.OPERATION_PENDING
             else:
                 return constants.OPERATION_SUCCESS
-
-
 
     @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):
@@ -277,7 +286,6 @@ class SdlManoAdapter(object):
                     'password': password,
                     'project_name': project_name
                 }
-
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None):
@@ -488,7 +496,6 @@ class SdlManoAdapter(object):
         response = requests.put(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s/%s' % (vnf_instance_id,
                                                                                          change_state_to),
                                 json={'operation_id': change_state_to})
-        print response.content
         assert response.status_code == 200
 
         return 'vnf_%s' % change_state_to, vnf_instance_id
