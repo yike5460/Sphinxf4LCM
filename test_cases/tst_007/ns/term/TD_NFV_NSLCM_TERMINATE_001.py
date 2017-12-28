@@ -96,11 +96,14 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         self.unregister_from_cleanup(index=20)
         self.unregister_from_cleanup(index=10)
 
+        self.register_for_cleanup(index=10, function_reference=self.mano.ns_delete_id,
+                                  ns_instance_id=self.ns_instance_id)
+
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Sleeping 5 seconds to allow MANO to finalize termination of resources')
-        sleep(5)
+        LOG.info('Sleeping 30 seconds to allow MANO to finalize termination of resources')
+        sleep(30)
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
         for vnf_info in ns_info.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
