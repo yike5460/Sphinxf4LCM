@@ -226,4 +226,5 @@ class TestCase(object):
                 self._LOG.exception(e)
             finally:
                 self.collect_timestamps()
+                self._LOG.info('RESULT: %s' % self.tc_result['overall_status'])
                 return self.tc_result
