@@ -330,15 +330,31 @@ class TackerManoAdapter(object):
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
             # Get expected values
-            expected_num_vcpus = \
-                vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities']['nfv_compute'][
-                    'properties']['num_cpus']
-            expected_vmemory_size = \
-                int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute']['properties']['mem_size'].split(' ')[0])
-            expected_vstorage_size = \
-                int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute']['properties']['disk_size'].split(' ')[0])
+            if 'capabilities' in vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id].keys():
+                # VDU flavor is specified explicitly (by vresource type)
+                expected_num_vcpus = \
+                    vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                        'nfv_compute']['properties']['num_cpus']
+                expected_vmemory_size = \
+                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                            'nfv_compute']['properties']['mem_size'].split(' ')[0])
+                expected_vstorage_size = \
+                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
+                            'nfv_compute']['properties']['disk_size'].split(' ')[0])
+            elif 'flavor' in vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id][
+                'properties'].keys():
+                # VDU flavor is specified implicitly (by VIM flavour name)
+                vnfd_flavor_name = vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['properties'][
+                    'flavor']
+                server_details = vim.server_get(resource_id)
+                server_flavor_id = server_details['flavor_id']
+                flavor_details = vim.flavor_get(server_flavor_id)
+                vim_flavor_name = flavor_details['name'].encode()
+                if vnfd_flavor_name != vim_flavor_name:
+                    return False
+                else:
+                    return True
+
             expected_num_vnics = 0
             expected_vnic_types = dict()
             for node in vnfd['topology_template']['node_templates'].keys():
