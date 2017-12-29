@@ -341,6 +341,26 @@ class TackerManoAdapter(object):
                 expected_vstorage_size = \
                     int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
                             'nfv_compute']['properties']['disk_size'].split(' ')[0])
+                # Get actual values
+                actual_num_vcpus = virtual_compute.virtual_cpu.num_virtual_cpu
+                actual_vmemory_size = virtual_compute.virtual_memory.virtual_mem_size
+                actual_vstorage_size = virtual_compute.virtual_disks[0].size_of_storage
+                actual_num_vnics = len(virtual_compute.virtual_network_interface)
+
+                # Compare actual values with expected values for number of vCPUs, vMemory vStorage and number of vNICs
+                if actual_num_vcpus != expected_num_vcpus or \
+                                actual_vmemory_size != expected_vmemory_size or \
+                                actual_vstorage_size != expected_vstorage_size or \
+                                actual_num_vnics != expected_num_vnics:
+                    LOG.debug('For VNFC with id %s expected resources do not match the actual ones' % resource_id)
+                    LOG.debug(
+                        'Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_vcpus, actual_num_vcpus))
+                    LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_vmemory_size, actual_vmemory_size))
+                    LOG.debug(
+                        'Expected %s vStorage, actual vStorage: %s' % (expected_vstorage_size, actual_vstorage_size))
+                    LOG.debug('Expected %s vNICs, actual number of vNICs: %s' % (expected_num_vnics, actual_num_vnics))
+                    return False
+
             elif 'flavor' in vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id][
                 'properties'].keys():
                 # VDU flavor is specified implicitly (by VIM flavour name)
@@ -352,8 +372,6 @@ class TackerManoAdapter(object):
                 vim_flavor_name = flavor_details['name'].encode()
                 if vnfd_flavor_name != vim_flavor_name:
                     return False
-                else:
-                    return True
 
             expected_num_vnics = 0
             expected_vnic_types = dict()
@@ -365,24 +383,6 @@ class TackerManoAdapter(object):
                                 expected_num_vnics += 1
                                 expected_vnic_types[node] = vnfd['topology_template']['node_templates'][node][
                                     'properties'].get('type', 'normal')
-
-            # Get actual values
-            actual_num_vcpus = virtual_compute.virtual_cpu.num_virtual_cpu
-            actual_vmemory_size = virtual_compute.virtual_memory.virtual_mem_size
-            actual_vstorage_size = virtual_compute.virtual_disks[0].size_of_storage
-            actual_num_vnics = len(virtual_compute.virtual_network_interface)
-
-            # Compare actual values with expected values for number of vCPUs, vMemory vStorage and number of vNICs
-            if actual_num_vcpus != expected_num_vcpus or \
-                            actual_vmemory_size != expected_vmemory_size or \
-                            actual_vstorage_size != expected_vstorage_size or \
-                            actual_num_vnics != expected_num_vnics:
-                LOG.debug('For VNFC with id %s expected resources do not match the actual ones' % resource_id)
-                LOG.debug('Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_vcpus, actual_num_vcpus))
-                LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_vmemory_size, actual_vmemory_size))
-                LOG.debug('Expected %s vStorage, actual vStorage: %s' % (expected_vstorage_size, actual_vstorage_size))
-                LOG.debug('Expected %s vNICs, actual number of vNICs: %s' % (expected_num_vnics, actual_num_vnics))
-                return False
 
             # Compare expected vNIC types with actual vNIC types
             for vnic in virtual_compute.virtual_network_interface:
