@@ -415,7 +415,10 @@ class SdlManoAdapter(object):
                 for memory_list in vi_resource['memory_list'].values():
                     expected_memory_size_list.append(memory_list['amount'])
 
-            LOG.debug('Not checking vStorage size, because it is not stated in the VNFD')
+            expected_disk_size_list = []
+            for vi_resource in vnfd['vnf']['vdu_list'][vdu_id]['vi_resources'].values():
+                for storage_list in vi_resource['storage_list'].values():
+                    expected_disk_size_list.append(int(storage_list['size'] or 0) / 1024)
 
             expected_nic_count_list = []
             for vi_resource in vnfd['vnf']['vdu_list'][vdu_id]['vi_resources'].values():
@@ -428,6 +431,7 @@ class SdlManoAdapter(object):
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
             actual_cpu_count = virtual_compute.virtual_cpu.num_virtual_cpu
             actual_memory_size = virtual_compute.virtual_memory.virtual_mem_size
+            actual_disk_size = virtual_compute.virtual_disks[0].size_of_storage
             actual_nic_count = len(virtual_compute.virtual_network_interface)
 
             if actual_cpu_count not in expected_cpu_count_list:
@@ -439,8 +443,13 @@ class SdlManoAdapter(object):
                 LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
                     vdu_id, actual_memory_size, expected_memory_size_list))
 
-                # TODO: Clarify memory size in VNFD. Until then, do not set validation_result
-                # validation_result = False
+                validation_result = False
+
+            if actual_disk_size not in expected_disk_size_list:
+                LOG.debug('Unexpected disk size for VDU %s: %s. Expected values: %s' % (
+                    vdu_id, actual_disk_size, expected_disk_size_list))
+
+                validation_result = False
 
             if actual_nic_count not in expected_nic_count_list:
                 LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
