@@ -22,14 +22,13 @@ class SdlManoAdapterError(ManoAdapterError):
 
 
 class SdlManoAdapter(object):
-    def __init__(self, endpoint_url, backend_url, tenant_id, username, password):
-        self.endpoint_url = endpoint_url
-        self.backend_url = backend_url
+    def __init__(self, nfv_api_url, ui_api_url, tenant_id, username, password):
+        self.nfv_api_url = nfv_api_url
+        self.ui_api_url = ui_api_url
 
         self.token = self.get_token(username, password)
         self.cookiejar = self.get_cookies(username, password)
 
-        # TODO: tenant_id may need to be moved in instantiation_params
         self.tenant_id = tenant_id
 
         self.ns_update_json_mapping = dict()
@@ -37,7 +36,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_token(self, username, password):
-        response = requests.post(url=self.backend_url + '/token', data={
+        response = requests.post(url=self.ui_api_url + '/token', data={
             'user': username,
             'passwd': password})
 
@@ -48,7 +47,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_cookies(self, username, password):
-        response = requests.post(url=self.backend_url + '/token', data={
+        response = requests.post(url=self.ui_api_url + '/token', data={
             'user': username,
             'passwd': password})
 
@@ -58,7 +57,7 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def get_nsd_id_from_name(self, nsd_name):
         # TODO: treat invalid nsd_name
-        response = requests.get(self.backend_url + '/nst/', cookies=self.cookiejar, headers={'Token': self.token})
+        response = requests.get(self.ui_api_url + '/nst/', cookies=self.cookiejar, headers={'Token': self.token})
         assert response.status_code == 200
 
         nsd_list = response.json()['data']
@@ -69,14 +68,14 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def get_nsd(self, nsd_id):
         # TODO: treat invalid nsd_id
-        response = requests.get(self.backend_url + '/nst/details', params={'uuid': nsd_id}, cookies=self.cookiejar,
+        response = requests.get(self.ui_api_url + '/nst/details', params={'uuid': nsd_id}, cookies=self.cookiejar,
                                 headers={'Token': self.token})
 
         assert response.status_code == 200
         raw_nsd = response.json()['data']
 
-        response = requests.post(self.backend_url + '/nst/export', json=raw_nsd, cookies=self.cookiejar,
-                                headers={'Token': self.token})
+        response = requests.post(self.ui_api_url + '/nst/export', json=raw_nsd, cookies=self.cookiejar,
+                                 headers={'Token': self.token})
         assert response.status_code == 200
         converted_nsd = response.json()['data']
 
@@ -92,7 +91,7 @@ class SdlManoAdapter(object):
         nsd_dict['name'] = ns_name
         nsd_dict['description'] = ns_description
 
-        response = requests.post(url=self.endpoint_url + '/nfv_network_service', params={'tenant_id': self.tenant_id},
+        response = requests.post(url=self.nfv_api_url + '/nfv_network_service', params={'tenant_id': self.tenant_id},
                                  json=nsd_dict)
 
         assert response.status_code == 200
@@ -116,7 +115,7 @@ class SdlManoAdapter(object):
         ns_update_dict['default_location_constraints'] = dict()
         ns_update_dict['default_location_constraints']['virp_type'] = 'OPENSTACK'
 
-        response = requests.put(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
+        response = requests.put(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
         assert response.status_code == 200
 
         return 'ns_instantiate', ns_instance_id
@@ -128,7 +127,7 @@ class SdlManoAdapter(object):
         operation_type, resource_id = lifecycle_operation_occurrence_id
 
         if operation_type == 'ns_instantiate':
-            response = requests.get(url=self.endpoint_url + '/nfv_network_service/%s' % resource_id)
+            response = requests.get(url=self.nfv_api_url + '/nfv_network_service/%s' % resource_id)
             ns_instance_state = response.json()['state']
 
             if ns_instance_state == 'running':
@@ -139,7 +138,7 @@ class SdlManoAdapter(object):
                 return constants.OPERATION_PENDING
 
         if operation_type == 'ns_terminate':
-            response = requests.get(url=self.endpoint_url + '/nfv_network_service/%s' % resource_id)
+            response = requests.get(url=self.nfv_api_url + '/nfv_network_service/%s' % resource_id)
             ns_instance_state = response.json()['state']
 
             if ns_instance_state == 'disabled':
@@ -150,7 +149,7 @@ class SdlManoAdapter(object):
                 return constants.OPERATION_PENDING
 
         if operation_type == 'vnf_stop':
-            response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
+            response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
             vnf_instance_state = response.json()['vnf-instance']['state']['oper_state']
 
             if vnf_instance_state == 'INACTIVE':
@@ -160,7 +159,7 @@ class SdlManoAdapter(object):
             # Add case for OPERATION_FAILED
 
         if operation_type == 'vnf_start':
-            response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
+            response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % resource_id)
             vnf_instance_state = response.json()['vnf-instance']['state']['oper_state']
 
             if vnf_instance_state == 'ACTIVE':
@@ -186,7 +185,7 @@ class SdlManoAdapter(object):
         ns_info = NsInfo()
         ns_info.ns_instance_id = str(ns_instance_id)
 
-        response = requests.get(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id)
+        response = requests.get(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id)
         ns_instance_dict = response.json()
 
         ns_info.ns_name = str(ns_instance_dict['name'])
@@ -213,7 +212,7 @@ class SdlManoAdapter(object):
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id.encode()
 
-        response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
+        response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
         vnf_instance_dict = response.json()
 
         if response.status_code == 404:
@@ -267,7 +266,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
-        response = requests.get(url=self.endpoint_url + '/nfv/vi/virp/%s' % vim_id)
+        response = requests.get(url=self.nfv_api_url + '/nfv/vi/virp/%s' % vim_id)
         assert response.status_code == 200
 
         generic_vim = response.json()
@@ -284,7 +283,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_openstack_vim_params(self, location):
-        response = requests.get(url=self.endpoint_url + '/nfv/vi/openstack')
+        response = requests.get(url=self.nfv_api_url + '/nfv/vi/openstack')
         assert response.status_code == 200
 
         openstack_vim_list = response.json()['openstack']
@@ -311,14 +310,14 @@ class SdlManoAdapter(object):
         ns_update_dict = self.ns_update_json_mapping[ns_instance_id]
         ns_update_dict['is_enabled'] = False
 
-        response = requests.put(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
+        response = requests.put(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
         assert response.status_code == 200
 
         return 'ns_terminate', ns_instance_id
 
     @log_entry_exit(LOG)
     def ns_delete_id(self, ns_instance_id):
-        response = requests.delete(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id)
+        response = requests.delete(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id)
         assert response.status_code == 200
 
         self.ns_nsd_mapping.pop(ns_instance_id)
@@ -330,7 +329,7 @@ class SdlManoAdapter(object):
 
         while elapsed_time < max_wait_time:
             try:
-                response = requests.get(url=self.endpoint_url + '/nfv_network_service/%s' % ns_instance_id)
+                response = requests.get(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id)
                 assert response.status_code == 200
                 ns_instance_dict = response.json()
                 ns_status = ns_instance_dict['state']
@@ -381,7 +380,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnfd(self, vnfd):
-        response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf/%s' % vnfd)
+        response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf/%s' % vnfd)
         assert response.status_code == 200
 
         return response.json()
@@ -490,7 +489,7 @@ class SdlManoAdapter(object):
     def get_vnf_mgmt_addr_list(self, vnf_instance_id):
         vnf_mgmt_addr_list = list()
 
-        response = requests.get(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
+        response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
         vnf_instance_dict = response.json()
 
         for vnfc_instance in vnf_instance_dict['vnf-instance']['vnfc_instance_list'].values():
@@ -521,8 +520,8 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
                     additional_param=None):
-        response = requests.put(url=self.endpoint_url + '/nfv/vnf/vnf-instance/%s/%s' % (vnf_instance_id,
-                                                                                         change_state_to),
+        response = requests.put(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s/%s' % (vnf_instance_id,
+                                                                                        change_state_to),
                                 json={'operation_id': change_state_to})
         assert response.status_code == 200
 
