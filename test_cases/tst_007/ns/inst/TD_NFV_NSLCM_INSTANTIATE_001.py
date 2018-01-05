@@ -87,8 +87,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
                                              'additional_param': self.tc_input['mano'].get('query_params')})
         for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['Initial - %s' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['Initial - %s' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------

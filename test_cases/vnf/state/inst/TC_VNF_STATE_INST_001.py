@@ -102,33 +102,33 @@ class TC_VNF_STATE_INST_001(TestCase):
                                                                               self.vnf_instance_id,
                                                                               self.tc_input['mano'].get('query_params'))
 
-        # --------------------------------------------------------------------------------------------------------------
-        # 6. Start the low traffic load
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Starting the low traffic load')
-        self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic']['traffic_config'])
-
-        self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
-
-        # Configure stream destination address(es)
-        dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
-                                                          vnf_info,
-                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
-        self.traffic.reconfig_traffic_dest(dest_addr_list)
-
-        self.traffic.start(return_when_emission_starts=True)
-
-        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 7. Validate traffic flows
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating traffic flows')
-        if not self.traffic.does_traffic_flow(delay_time=5):
-            raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
-
-        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
-            raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
-
-        LOG.info('%s execution completed successfully' % self.tc_name)
+        # # --------------------------------------------------------------------------------------------------------------
+        # # 6. Start the low traffic load
+        # # --------------------------------------------------------------------------------------------------------------
+        # LOG.info('Starting the low traffic load')
+        # self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
+        #                        traffic_config=self.tc_input['traffic']['traffic_config'])
+        #
+        # self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
+        #
+        # # Configure stream destination address(es)
+        # dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
+        #                                                   vnf_info,
+        #                                                   self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
+        # self.traffic.reconfig_traffic_dest(dest_addr_list)
+        #
+        # self.traffic.start(return_when_emission_starts=True)
+        #
+        # self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
+        #
+        # # --------------------------------------------------------------------------------------------------------------
+        # # 7. Validate traffic flows
+        # # --------------------------------------------------------------------------------------------------------------
+        # LOG.info('Validating traffic flows')
+        # if not self.traffic.does_traffic_flow(delay_time=5):
+        #     raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
+        #
+        # if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
+        #     raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
+        #
+        # LOG.info('%s execution completed successfully' % self.tc_name)
