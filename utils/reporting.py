@@ -52,9 +52,9 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
                 load_before_scaling = tc_result[scale_type].get('traffic_before', 'N/A')
                 load_after_scaling = tc_result[scale_type].get('traffic_after', 'N/A')
                 traffic_before_scaling = str(
-                    constants.traffic_load_percent_mapping.get(load_before_scaling, 0) * port_speed / 100) + ' Mbps'
+                        constants.traffic_load_percent_mapping.get(load_before_scaling, 0) * port_speed / 100) + ' Mbps'
                 traffic_after_scaling = str(
-                    constants.traffic_load_percent_mapping.get(load_after_scaling, 0) * port_speed / 100) + ' Mbps'
+                        constants.traffic_load_percent_mapping.get(load_after_scaling, 0) * port_speed / 100) + ' Mbps'
 
                 # Add the row to the table
                 t1.add_row([scale_type, status, scale_level, traffic_before_scaling, traffic_after_scaling])
@@ -113,7 +113,6 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
-
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict = dict()
