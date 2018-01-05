@@ -296,7 +296,7 @@ class SdlManoAdapter(object):
             if location == '%s/%s@%s' % (auth_url, username, project_name):
 
                 # TODO: temporary workaround for DNAT
-                auth_url = 'http://10.2.16.50:35357'
+                auth_url = auth_url.replace('192.168.2.254', '10.2.16.50')
 
                 return {
                     'auth_url': auth_url,
