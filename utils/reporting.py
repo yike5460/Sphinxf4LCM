@@ -87,32 +87,11 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write('\n\n')
 
         # Write VNF resources
-        # report_file.write('* VNF resources:\n')
-        # for key in tc_result.get('resources', {}).keys():
-        #     report_file.write('%s:\n' % key)
-        #     for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
-        #         report_file.write('Resources for VNFC %s\n' % vnfc_id)
-        #         t = PrettyTable(['Resource type', 'Expected size', 'Actual size', 'Validation'])
-        #         for resource_type, resource_size in vnfc_resources.items():
-        #             t.add_row([resource_type, resource_size, resource_size, 'OK'])
-        #         report_file.write(t.get_string())
-        #         report_file.write('\n\n')
-
-        # report_file.write('* VNF resources:\n')
-        # for key in tc_result.get('resources', {}).keys():
-        #     report_file.write('%s:\n' % key)
-        #     t = PrettyTable(['VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'])
-        #     for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
-        #         for resource_type, resource_size in vnfc_resources.items():
-        #             t.add_row([vnfc_id, resource_type, resource_size, resource_size, 'OK'])
-        #     report_file.write(t.get_string())
-        #     report_file.write('\n\n')
         report_file.write('* VNF resources:\n')
         t_outside = PrettyTable(['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
                                 hrules=prettytable.ALL)
         t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
-            # report_file.write('%s:\n' % key)
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
                 row = [key, vnfc_id]
                 t_inside = [PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
