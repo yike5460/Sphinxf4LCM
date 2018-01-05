@@ -68,9 +68,10 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def get_nsd(self, nsd_id):
         # TODO: treat invalid nsd_id
-        response = requests.get(self.ui_api_url + '/nst/details', params={'uuid': nsd_id}, cookies=self.cookiejar,
-                                headers={'Token': self.token})
+        ns_template_uuid = self.get_nst_uuid_from_nsd_id(nsd_id)
 
+        response = requests.get(self.ui_api_url + '/nst/details', params={'uuid': ns_template_uuid},
+                                cookies=self.cookiejar, headers={'Token': self.token})
         assert response.status_code == 200
         raw_nsd = response.json()['data']
 
@@ -83,9 +84,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
-        # Assuming user will most likely used nsd_name as input
-        ns_template_uuid = self.get_nst_uuid_from_nsd_id(nsd_id)
-        nsd_dict = self.get_nsd(ns_template_uuid)
+        nsd_dict = self.get_nsd(nsd_id)
 
         nsd_dict['is_enabled'] = False
         nsd_dict['name'] = ns_name
@@ -97,8 +96,9 @@ class SdlManoAdapter(object):
         assert response.status_code == 200
         ns_instance_id = response.json()['nfvns_uuid']
 
+        # TODO: maybe get nsd_dict every time, instead of keeping mapping
         self.ns_update_json_mapping[ns_instance_id] = nsd_dict
-        self.ns_nsd_mapping[ns_instance_id] = ns_template_uuid
+        self.ns_nsd_mapping[ns_instance_id] = nsd_id
 
         return ns_instance_id
 
