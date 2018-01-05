@@ -1,7 +1,7 @@
 import os
 
+import prettytable
 import requests
-from prettytable import PrettyTable
 
 from api.generic import constants
 
@@ -9,14 +9,13 @@ REPORT_DIR = '/var/log/vnflcv'
 
 
 def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
-
     report_file_path = os.path.join(REPORT_DIR, report_file_name)
     with open(report_file_path, 'w') as report_file:
 
         # Write run details
         report_file.write('*** Run details ***')
         report_file.write('\n\n')
-        t = PrettyTable(['Aspect', 'Value'])
+        t = prettytable.PrettyTable(['Aspect', 'Value'])
         t.add_row(['Run ID', tc_exec_request['run_id'].replace('\n', '')])
         t.add_row(['Suite name', tc_exec_request['suite_name']])
         t.add_row(['TC name', tc_exec_request['tc_name']])
@@ -29,7 +28,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         # Write test case environment
         report_file.write('*** Test case environment ***')
         report_file.write('\n\n')
-        t = PrettyTable(['Module', 'Type'])
+        t = prettytable.PrettyTable(['Module', 'Type'])
         t.add_row(['MANO', tc_input.get('mano', {}).get('type')])
         t.add_row(['VIM', 'openstack'])
         t.add_row(['VNF', 'vcpe'])
@@ -37,12 +36,11 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
-        t1 = PrettyTable(['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
+        t1 = prettytable.PrettyTable(['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
         print_scaling_results = False
         for direction in ['out', 'in', 'up', 'down']:
             scale_type = 'scaling_' + direction
             if bool(tc_result[scale_type]):
-
                 # Set flag so the scaling results table will be printed
                 print_scaling_results = True
 
@@ -68,7 +66,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write test case events
         report_file.write('* Events:\n')
-        t = PrettyTable(['Event', 'Duration (sec)', 'Details'])
+        t = prettytable.PrettyTable(['Event', 'Duration (sec)', 'Details'])
         for event_name in tc_result.get('events', {}).keys():
             try:
                 event_duration = round(tc_result['events'][event_name].get('duration'), 1)
@@ -81,7 +79,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write timestamps
         report_file.write('* Timestamps:\n')
-        t = PrettyTable(['Event', 'Timestamp (epoch time)'])
+        t = prettytable.PrettyTable(['Event', 'Timestamp (epoch time)'])
         for event_name, timestamp in tc_result.get('timestamps', {}).items():
             t.add_row([event_name, timestamp])
         report_file.write(t.get_string())
@@ -89,20 +87,33 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write VNF resources
         report_file.write('* VNF resources:\n')
+        t_outside = prettytable.PrettyTable(['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
+                                hrules=prettytable.ALL)
+        t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
-            report_file.write('%s:\n' % key)
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
-                report_file.write('Resources for VNFC %s\n' % vnfc_id)
-                t = PrettyTable(['Resource type', 'Expected size', 'Actual size', 'Validation'])
+                row = [key, vnfc_id]
+                # t_inside = [prettytable.PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
+                t_inside = dict()
+                t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Expected size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Actual size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Validation'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 for resource_type, resource_size in vnfc_resources.items():
-                    t.add_row([resource_type, resource_size, resource_size, 'OK'])
-                report_file.write(t.get_string())
-                report_file.write('\n\n')
+                    t_inside['Resource type'].add_row([resource_type])
+                    t_inside['Expected size'].add_row([resource_size])
+                    t_inside['Actual size'].add_row([resource_size])
+                    t_inside['Validation'].add_row(['OK'])
+                for t_in in t_inside.values():
+                    row.append(t_in)
+                t_outside.add_row(row)
+        report_file.write(t_outside.get_string())
+        report_file.write('\n\n')
 
         # Write test case results
         report_file.write('*** Test case results ***')
         report_file.write('\n\n')
-        t = PrettyTable(['Overall status', 'Error info'])
+        t = prettytable.PrettyTable(['Overall status', 'Error info'])
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
@@ -135,4 +146,3 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
 
     requests.post(url='http://' + kibana_srv + ':9200/nfv/tc-exec', json=json_dict)
-
