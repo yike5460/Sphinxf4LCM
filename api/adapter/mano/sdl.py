@@ -55,7 +55,7 @@ class SdlManoAdapter(object):
         return response.cookies
 
     @log_entry_exit(LOG)
-    def get_nsd_id_from_name(self, nsd_name):
+    def get_nst_uuid_from_nsd_id(self, nsd_name):
         # TODO: treat invalid nsd_name
         response = requests.get(self.ui_api_url + '/nst/', cookies=self.cookiejar, headers={'Token': self.token})
         assert response.status_code == 200
@@ -84,8 +84,8 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         # Assuming user will most likely used nsd_name as input
-        real_nsd_id = self.get_nsd_id_from_name(nsd_id)
-        nsd_dict = self.get_nsd(real_nsd_id)
+        ns_template_uuid = self.get_nst_uuid_from_nsd_id(nsd_id)
+        nsd_dict = self.get_nsd(ns_template_uuid)
 
         nsd_dict['is_enabled'] = False
         nsd_dict['name'] = ns_name
@@ -98,7 +98,7 @@ class SdlManoAdapter(object):
         ns_instance_id = response.json()['nfvns_uuid']
 
         self.ns_update_json_mapping[ns_instance_id] = nsd_dict
-        self.ns_nsd_mapping[ns_instance_id] = real_nsd_id
+        self.ns_nsd_mapping[ns_instance_id] = ns_template_uuid
 
         return ns_instance_id
 
