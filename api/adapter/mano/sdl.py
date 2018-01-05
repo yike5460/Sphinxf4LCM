@@ -96,7 +96,7 @@ class SdlManoAdapter(object):
         assert response.status_code == 200
         ns_instance_id = response.json()['nfvns_uuid']
 
-        # TODO: maybe get nsd_dict every time, instead of keeping mapping
+        # TODO: get nsd update dict from SDL every time, instead of keeping mapping
         self.ns_update_json_mapping[ns_instance_id] = nsd_dict
         self.ns_nsd_mapping[ns_instance_id] = nsd_id
 
