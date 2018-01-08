@@ -214,6 +214,8 @@ def mano_validate():
         project_name = request.forms.get('project_name')
         auth_url = request.forms.get('auth_url')
         vnfd_id = request.forms.get('vnfd_id')
+        nsd_id = request.forms.get('nsd_id')
+        operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         if not request.forms.get('identity_api_version'):
             identity_api_version = 0
         else:
@@ -221,7 +223,8 @@ def mano_validate():
         (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
                                        password=password, project_domain_name=project_domain_name,
                                        project_name=project_name, auth_url=auth_url,
-                                       identity_api_version=identity_api_version, vnfd_id=vnfd_id)
+                                       identity_api_version=identity_api_version, vnfd_id=vnfd_id, nsd_id=nsd_id,
+                                       operate_vnf_data=operate_vnf_data)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -251,12 +254,15 @@ def mano_validate():
         esc_port = request.forms.get('esc_port')
         vnfd_id = request.forms.get('vnfd_id')
         flavour_id = request.forms.get('flavour_id')
+        nsd_id = request.forms.get('nsd_id')
+        operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         instantiation_level__id = request.forms.get('instantiation_level_id')
         (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
                                        nso_password=nso_password, nso_port=nso_port, esc_hostname=esc_hostname,
                                        esc_username=esc_username, esc_password=esc_password, esc_port=esc_port,
                                        vnfd_id=vnfd_id, flavour_id=flavour_id,
-                                       instantiation_level_id=instantiation_level__id)
+                                       instantiation_level_id=instantiation_level__id, nsd_id=nsd_id,
+                                       operate_vnf_data=operate_vnf_data)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -291,6 +297,7 @@ def mano_update(warning=None, message=None, mano=None, name=None):
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
+        mano_json['operate_vnf_data'] = get_string_by_list(mano_json['operate_vnf_data'])
         return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name)
     else:
         return template('mano_update.html', warning=warning, message=message, mano=mano, name=name)
@@ -318,6 +325,8 @@ def mano_delete():
             mano_info['auth_url'] = mano_json[mano_name]['client_config']['auth_url']
             mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
             mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
+            mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
+            mano_info['operate_vnf_data'] = get_string_by_list(mano_json[mano_name]['operate_vnf_data'])
         elif mano_json[mano_name]['type'] == 'cisco':
             mano_info['nso_hostname'] = mano_json[mano_name]['client_config']['nso_hostname']
             mano_info['nso_username'] = mano_json[mano_name]['client_config']['nso_username']
@@ -328,6 +337,8 @@ def mano_delete():
             mano_info['esc_password'] = mano_json[mano_name]['client_config']['esc_password']
             mano_info['esc_port'] = mano_json[mano_name]['client_config']['esc_port']
             mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
+            mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
+            mano_info['operate_vnf_data'] = get_string_by_list(mano_json[mano_name]['operate_vnf_data'])
             mano_info['flavour_id'] = mano_json[mano_name]['flavour_id']
             mano_info['instantiation_level_id'] = mano_json[mano_name]['instantiation_level_id']
         return template('mano_delete.html', mano=mano_info)
@@ -607,7 +618,7 @@ def traffic_validate():
         left_traffic_plen = request.forms.get('left_traffic_plen')
         left_traffic_gw = request.forms.get('left_traffic_gw')
         left_traffic_gw_mac = request.forms.get('left_traffic_gw_mac')
-        ingress_cp_name = request.forms.get('ingress_cp_name')
+        ingress_cp_name = get_list_by_string(request.forms.get('ingress_cp_name'))
         right_port_location = request.forms.get('right_port_location')
         right_traffic_addr = request.forms.get('right_traffic_addr')
         right_traffic_plen = request.forms.get('right_traffic_plen')
@@ -656,7 +667,7 @@ def traffic_validate():
         port_location = request.forms.get('port_location')
         traffic_src_addr = request.forms.get('traffic_src_addr')
         traffic_dst_addr = request.forms.get('traffic_dst_addr')
-        ingress_cp_name = request.forms.get('ingress_cp_name')
+        ingress_cp_name = get_list_by_string(request.forms.get('ingress_cp_name'))
         if not request.forms.get('port_speed'):
             port_speed = 0
         else:
@@ -699,6 +710,7 @@ def traffic_update(warning=None, message=None, traffic=None, name=None):
         name = request.forms.get('update_traffic')
         traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % name)
         traffic_json = traffic_data.json()[name]
+        traffic_json['traffic_config']['ingress_cp_name'] = get_string_by_list(traffic_json['traffic_config']['ingress_cp_name'])
         return template('traffic_update.html', warning=warning, message=message, traffic=traffic_json, name=name)
     else:
         return template('traffic_update.html', warning=warning, message=message, traffic=traffic, name=name)
@@ -726,7 +738,8 @@ def traffic_delete():
             traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
             traffic_info['left_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw']
             traffic_info['left_traffic_gw_mac'] = traffic_json[traffic_name]['traffic_config']['left_traffic_gw_mac']
-            traffic_info['ingress_cp_name'] = traffic_json[traffic_name]['traffic_config']['ingress_cp_name']
+            traffic_info['ingress_cp_name'] = get_string_by_list(traffic_json[traffic_name]['traffic_config'][
+                                                                     'ingress_cp_name'])
             traffic_info['right_port_location'] = traffic_json[traffic_name]['traffic_config']['right_port_location']
             traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
             traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
@@ -740,7 +753,8 @@ def traffic_delete():
             traffic_info['port_location'] = traffic_json[traffic_name]['traffic_config']['port_location']
             traffic_info['traffic_src_addr'] = traffic_json[traffic_name]['traffic_config']['traffic_src_addr']
             traffic_info['traffic_dst_addr'] = traffic_json[traffic_name]['traffic_config']['traffic_dst_addr']
-            traffic_info['ingress_cp_name'] = traffic_json[traffic_name]['traffic_config']['ingress_cp_name']
+            traffic_info['ingress_cp_name'] = get_string_by_list(traffic_json[traffic_name]['traffic_config'][
+                                                                     'ingress_cp_name'])
             traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
         return template('traffic_delete.html', traffic=traffic_info)
     else:
@@ -1108,7 +1122,9 @@ def struct_mano(type, name, **kwargs):
                 'auth_url': kwargs['auth_url'],
                 'identity_api_version': kwargs['identity_api_version']
             },
-            'vnfd_id': kwargs['vnfd_id']
+            'vnfd_id': kwargs['vnfd_id'],
+            'nsd_id': kwargs['nsd_id'],
+            'operate_vnf_data': kwargs['operate_vnf_data']
         }
     elif type == 'cisco':
         mano = {
@@ -1124,6 +1140,8 @@ def struct_mano(type, name, **kwargs):
                 'esc_port': kwargs['esc_port']
             },
             'vnfd_id': kwargs['vnfd_id'],
+            'nsd_id': kwargs['nsd_id'],
+            'operate_vnf_data': kwargs['operate_vnf_data'],
             'flavour_id': kwargs['flavour_id'],
             'instantiation_level_id': kwargs['instantiation_level_id']
         }
@@ -1209,5 +1227,18 @@ def validate(element, struct):
         message = response.json().get('message')
         return {'warning': None, 'message': message}
 
+
+def get_list_by_string(raw_input):
+    result_list = list()
+    for element in raw_input.split(','):
+        element = element.lstrip()
+        element = element.rstrip()
+        result_list.append(element)
+    return result_list
+
+
+def get_string_by_list(elem_list):
+    result = ', '.join(elem_list)
+    return result
 
 run(host='0.0.0.0', port=8081, debug=False)

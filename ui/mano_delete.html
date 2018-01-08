@@ -76,6 +76,8 @@
                 <form action="/mano/delete/" method="post">
                   <% if mano['type'] == 'tacker': %>
                     <tr><td>vnfd id:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" readonly style="width: 200px" value={{mano['nsd_id']}}></td></tr>
+                    <tr><td>Operate VNF Data:</td><td><input type="text" name="operate_vnf_data" readonly style="width: 200px" value="{{mano['operate_vnf_data']}}"></td></tr>
                     <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" readonly style="width: 200px" value={{mano['user_domain_name']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
@@ -97,6 +99,8 @@
                     <tr><td>NETCONF Port:</td><td><input type="number" name="esc_port" readonly style="width: 200px" value={{mano['esc_port']}}></td></tr>
                     <tr><td><h3>Additional Parameters</h3></td><td></td></tr>
                     <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" readonly style="width: 200px" value={{mano['nsd_id']}}></td></tr>
+                    <tr><td>Operate VNF Data:</td><td><input type="text" name="operate_vnf_data" readonly style="width: 200px" value="{{mano['operate_vnf_data']}}"></td></tr>
                     <tr><td>Flavour ID:</td><td><input type="text" name="flavour_id" readonly style="width: 200px" value="{{mano['flavour_id']}}"></td></tr>
                     <tr><td>Instantiation Level ID:</td><td><input type="text" name="instantiation_level_id" readonly style="width: 200px" value="{{mano['instantiation_level_id']}}"></td></tr>
 
