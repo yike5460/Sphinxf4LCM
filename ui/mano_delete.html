@@ -75,7 +75,7 @@
           <table class="table table-striped">
                 <form action="/mano/delete/" method="post">
                   <% if mano['type'] == 'tacker': %>
-                    <tr><td>vnfd id:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
+                    <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
                     <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" readonly style="width: 200px" value={{mano['user_domain_name']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
@@ -99,7 +99,14 @@
                     <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" readonly style="width: 200px" value={{mano['vnfd_id']}}></td></tr>
                     <tr><td>Flavour ID:</td><td><input type="text" name="flavour_id" readonly style="width: 200px" value="{{mano['flavour_id']}}"></td></tr>
                     <tr><td>Instantiation Level ID:</td><td><input type="text" name="instantiation_level_id" readonly style="width: 200px" value="{{mano['instantiation_level_id']}}"></td></tr>
-
+                  <% end %>
+                  <% if mano['type'] == 'SDL': %>
+                    <tr><td>NFV API URL:</td><td><input type="text" name="nfv_api_url" readonly style="width: 200px" value={{mano['nfv_api_url']}}></td></tr>
+                    <tr><td>UI API URL:</td><td><input type="text" name="ui_api_url" readonly style="width: 200px" value={{mano['ui_api_url']}}></td></tr>
+                    <tr><td>Tenant ID:</td><td><input type="text" name="tenant_id" readonly style="width: 200px" value={{mano['tenant_id']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
+                    <tr><td>NSD Name:</td><td><input type="text" name="nsd_name" readonly style="width: 200px" value={{mano['nsd_name']}}></td></tr>
                   <% end %>
 
                   <input type="hidden" name="confirmed" value="yes">

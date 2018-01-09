@@ -4,7 +4,7 @@ from collections import OrderedDict
 import requests
 from bottle import route, run, request, template, static_file, redirect
 
-MANO_TYPES = ['tacker', 'cisco']
+MANO_TYPES = ['tacker', 'cisco', 'SDL']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
 TRAFFIC_TYPES = ['stc']
@@ -274,6 +274,33 @@ def mano_validate():
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+    if type == 'SDL':
+        name = request.forms.get('name')
+        nfv_api_url = request.forms.get('nfv_api_url')
+        ui_api_url = request.forms.get('ui_api_url')
+        tenant_id = request.forms.get('tenant_id')
+        username = request.forms.get('username')
+        password = request.forms.get('password')
+        nsd_name = request.forms.get('nsd_name')
+        (name, new_mano) = struct_mano(type=type, name=name, nfv_api_url=nfv_api_url, ui_api_url=ui_api_url,
+                                       tenant_id=tenant_id, username=username, password=password, nsd_name=nsd_name)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+        elif request.forms.get('add'):
+            if not name:
+                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
+                                mano=new_mano, name=name)
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
     return mano()
 
 
@@ -330,6 +357,13 @@ def mano_delete():
             mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
             mano_info['flavour_id'] = mano_json[mano_name]['flavour_id']
             mano_info['instantiation_level_id'] = mano_json[mano_name]['instantiation_level_id']
+        elif mano_json[mano_name]['type'] == 'SDL':
+            mano_info['nfv_api_url'] = mano_json[mano_name]['client_config']['nfv_api_url']
+            mano_info['ui_api_url'] = mano_json[mano_name]['client_config']['ui_api_url']
+            mano_info['tenant_id'] = mano_json[mano_name]['client_config']['tenant_id']
+            mano_info['username'] = mano_json[mano_name]['client_config']['username']
+            mano_info['password'] = mano_json[mano_name]['client_config']['password']
+            mano_info['nsd_name'] = mano_json[mano_name]['nsd_name']
         return template('mano_delete.html', mano=mano_info)
     else:
         mano_name = request.forms.get('name')
@@ -1126,6 +1160,18 @@ def struct_mano(type, name, **kwargs):
             'vnfd_id': kwargs['vnfd_id'],
             'flavour_id': kwargs['flavour_id'],
             'instantiation_level_id': kwargs['instantiation_level_id']
+        }
+    elif type == 'SDL':
+        mano = {
+            'type': type,
+            'client_config': {
+                'nfv_api_url': kwargs['nfv_api_url'],
+                'ui_api_url': kwargs['ui_api_url'],
+                'tenant_id': kwargs['tenant_id'],
+                'username': kwargs['username'],
+                'password': kwargs['password']
+            },
+            'nsd_name': kwargs['nsd_name']
         }
     return (name, mano)
 
