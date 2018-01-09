@@ -215,7 +215,6 @@ def mano_validate():
         auth_url = request.forms.get('auth_url')
         vnfd_id = request.forms.get('vnfd_id')
         nsd_id = request.forms.get('nsd_id')
-        operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         if not request.forms.get('identity_api_version'):
             identity_api_version = 0
         else:
@@ -223,8 +222,7 @@ def mano_validate():
         (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
                                        password=password, project_domain_name=project_domain_name,
                                        project_name=project_name, auth_url=auth_url,
-                                       identity_api_version=identity_api_version, vnfd_id=vnfd_id, nsd_id=nsd_id,
-                                       operate_vnf_data=operate_vnf_data)
+                                       identity_api_version=identity_api_version, vnfd_id=vnfd_id, nsd_id=nsd_id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -255,14 +253,12 @@ def mano_validate():
         vnfd_id = request.forms.get('vnfd_id')
         flavour_id = request.forms.get('flavour_id')
         nsd_id = request.forms.get('nsd_id')
-        operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         instantiation_level__id = request.forms.get('instantiation_level_id')
         (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
                                        nso_password=nso_password, nso_port=nso_port, esc_hostname=esc_hostname,
                                        esc_username=esc_username, esc_password=esc_password, esc_port=esc_port,
                                        vnfd_id=vnfd_id, flavour_id=flavour_id,
-                                       instantiation_level_id=instantiation_level__id, nsd_id=nsd_id,
-                                       operate_vnf_data=operate_vnf_data)
+                                       instantiation_level_id=instantiation_level__id, nsd_id=nsd_id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -297,7 +293,6 @@ def mano_update(warning=None, message=None, mano=None, name=None):
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
-        mano_json['operate_vnf_data'] = get_string_by_list(mano_json['operate_vnf_data'])
         return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name)
     else:
         return template('mano_update.html', warning=warning, message=message, mano=mano, name=name)
@@ -326,7 +321,6 @@ def mano_delete():
             mano_info['identity_api_version'] = mano_json[mano_name]['client_config']['identity_api_version']
             mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
             mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
-            mano_info['operate_vnf_data'] = get_string_by_list(mano_json[mano_name]['operate_vnf_data'])
         elif mano_json[mano_name]['type'] == 'cisco':
             mano_info['nso_hostname'] = mano_json[mano_name]['client_config']['nso_hostname']
             mano_info['nso_username'] = mano_json[mano_name]['client_config']['nso_username']
@@ -338,7 +332,6 @@ def mano_delete():
             mano_info['esc_port'] = mano_json[mano_name]['client_config']['esc_port']
             mano_info['vnfd_id'] = mano_json[mano_name]['vnfd_id']
             mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
-            mano_info['operate_vnf_data'] = get_string_by_list(mano_json[mano_name]['operate_vnf_data'])
             mano_info['flavour_id'] = mano_json[mano_name]['flavour_id']
             mano_info['instantiation_level_id'] = mano_json[mano_name]['instantiation_level_id']
         return template('mano_delete.html', mano=mano_info)
@@ -710,7 +703,8 @@ def traffic_update(warning=None, message=None, traffic=None, name=None):
         name = request.forms.get('update_traffic')
         traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % name)
         traffic_json = traffic_data.json()[name]
-        traffic_json['traffic_config']['ingress_cp_name'] = get_string_by_list(traffic_json['traffic_config']['ingress_cp_name'])
+        traffic_json['traffic_config']['ingress_cp_name'] = get_string_by_list(
+            traffic_json['traffic_config']['ingress_cp_name'])
         return template('traffic_update.html', warning=warning, message=message, traffic=traffic_json, name=name)
     else:
         return template('traffic_update.html', warning=warning, message=message, traffic=traffic, name=name)
@@ -892,6 +886,8 @@ def additional():
     set_default_additional()
     scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
     desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
+    operate_vnf_data = get_str_by_unicode(
+        requests.get(url='http://localhost:8080/v1.0/config/operate_vnf_data').json())
     vnf_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT')
     vnf_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT')
     vnf_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT')
@@ -910,6 +906,7 @@ def additional():
     additional_params = {
         'scaling_policy_name': scaling_policy_name.json(),
         'desired_scale_out_steps': desired_scale_out_steps.json(),
+        'operate_vnf_data': operate_vnf_data,
         'VNF_INSTANTIATE_TIMEOUT': vnf_instantiate_timeout.json(),
         'VNF_SCALE_OUT_TIMEOUT': vnf_scale_out_timeout.json(),
         'VNF_SCALE_IN_TIMEOUT': vnf_scale_in_timeout.json(),
@@ -939,6 +936,7 @@ def additional_update():
     if confirmed == 'yes':
         scaling_policy_name = request.forms.get('scaling_policy_name')
         desired_scale_out_steps = int(request.forms.get('desired_scale_out_steps'))
+        operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         vnf_instantiate_timeout = int(request.forms.get('vnf_instantiate_timeout'))
         vnf_scale_out_timeout = int(request.forms.get('vnf_scale_out_timeout'))
         vnf_scale_in_timeout = int(request.forms.get('vnf_scale_in_timeout'))
@@ -956,6 +954,7 @@ def additional_update():
         traffic_tolerance = float(request.forms.get('traffic_tolerance')) / 100
         requests.put(url='http://localhost:8080/v1.0/config/scaling_policy_name', json=scaling_policy_name)
         requests.put(url='http://localhost:8080/v1.0/config/desired_scale_out_steps', json=desired_scale_out_steps)
+        requests.put(url='http://localhost:8080/v1.0/config/operate_vnf_data', json=operate_vnf_data)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT', json=vnf_instantiate_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT', json=vnf_scale_out_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT', json=vnf_scale_in_timeout)
@@ -975,6 +974,8 @@ def additional_update():
     else:
         scaling_policy_name = requests.get(url='http://localhost:8080/v1.0/config/scaling_policy_name')
         desired_scale_out_steps = requests.get(url='http://localhost:8080/v1.0/config/desired_scale_out_steps')
+        operate_vnf_data = get_str_by_unicode(
+            requests.get(url='http://localhost:8080/v1.0/config/operate_vnf_data').json())
         vnf_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT')
         vnf_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT')
         vnf_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT')
@@ -993,6 +994,7 @@ def additional_update():
         additional_params = {
             'scaling_policy_name': scaling_policy_name.json(),
             'desired_scale_out_steps': desired_scale_out_steps.json(),
+            'operate_vnf_data': operate_vnf_data,
             'VNF_INSTANTIATE_TIMEOUT': vnf_instantiate_timeout.json(),
             'VNF_SCALE_OUT_TIMEOUT': vnf_scale_out_timeout.json(),
             'VNF_SCALE_IN_TIMEOUT': vnf_scale_in_timeout.json(),
@@ -1072,7 +1074,7 @@ def all_img(font):
 def set_default_additional():
     timers = {'VNF_INSTANTIATE_TIMEOUT': 600,
               'VNF_SCALE_OUT_TIMEOUT': 360,
-              'VNF_SCALE_IN_TIMEOUT':360,
+              'VNF_SCALE_IN_TIMEOUT': 360,
               'VNF_START_TIMEOUT': 300,
               'VNF_STOP_TIMEOUT': 300,
               'VNF_TERMINATE_TIMEOUT': 300,
@@ -1095,6 +1097,7 @@ def set_default_additional():
         if config.json().encode() == 'None':
             default_value = traffic_load_values[item]
             requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
+
 
 def struct_mano(type, name, **kwargs):
     """
@@ -1123,8 +1126,7 @@ def struct_mano(type, name, **kwargs):
                 'identity_api_version': kwargs['identity_api_version']
             },
             'vnfd_id': kwargs['vnfd_id'],
-            'nsd_id': kwargs['nsd_id'],
-            'operate_vnf_data': kwargs['operate_vnf_data']
+            'nsd_id': kwargs['nsd_id']
         }
     elif type == 'cisco':
         mano = {
@@ -1141,7 +1143,6 @@ def struct_mano(type, name, **kwargs):
             },
             'vnfd_id': kwargs['vnfd_id'],
             'nsd_id': kwargs['nsd_id'],
-            'operate_vnf_data': kwargs['operate_vnf_data'],
             'flavour_id': kwargs['flavour_id'],
             'instantiation_level_id': kwargs['instantiation_level_id']
         }
@@ -1240,5 +1241,19 @@ def get_list_by_string(raw_input):
 def get_string_by_list(elem_list):
     result = ', '.join(elem_list)
     return result
+
+
+def get_str_by_unicode(raw_input):
+    result_list = list()
+    result_string = ''
+    temp_list = raw_input.lstrip('[').rstrip(']').split(',')
+    for item in temp_list:
+        item = item.lstrip()
+        item = item.lstrip('u')
+        item = item.lstrip('\'').rstrip('\'')
+        result_list.append(item.encode())
+    result_string = ', '.join(result_list)
+    return result_string
+
 
 run(host='0.0.0.0', port=8081, debug=False)
