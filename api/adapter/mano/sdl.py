@@ -1,8 +1,8 @@
-import json
 import logging
 import re
-import requests
 import time
+
+import requests
 
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
@@ -233,7 +233,7 @@ class SdlManoAdapter(object):
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STOPPED
 
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
-        for vnfc_id, vnfc_details in vnf_instance_dict['vnf-instance']['vnfc_instance_list'].items():
+        for _, vnfc_details in vnf_instance_dict['vnf-instance']['vnfc_instance_list'].items():
             vnfc_resource_info = VnfcResourceInfo()
             vnfc_resource_info.vnfc_instance_id = str(vnfc_details['vnfc_id'])
             vnfc_resource_info.vdu_id = str(vnfc_details['vi_resources']['vdu_id'])
@@ -245,14 +245,13 @@ class SdlManoAdapter(object):
             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
         vnf_info.instantiated_vnf_info.ext_cp_info = list()
-
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
-            port_gen = vim.port_list(device_id=vnf_resource_id)
+            port_iterator = vim.port_list(device_id=vnf_resource_id)
 
-            for port_dict in port_gen:
+            for port_dict in port_iterator:
                 for port in port_dict['ports']:
                     match = re.search('^%s-p(\d+)\*?$' % vnf_info.vnf_product_name, port['name'])
                     if match is not None:
@@ -275,7 +274,7 @@ class SdlManoAdapter(object):
 
         if generic_vim_type == 'OPENSTACK':
             vim_params = self.get_openstack_vim_params(location=generic_vim_location)
-            vim_vendor='openstack'
+            vim_vendor = 'openstack'
         else:
             raise SdlManoAdapterError('Unsupported VIM type: %s' % generic_vim_type)
 
@@ -434,25 +433,25 @@ class SdlManoAdapter(object):
             actual_nic_count = len(virtual_compute.virtual_network_interface)
 
             if actual_cpu_count not in expected_cpu_count_list:
-                LOG.debug('Unexpected CPU count for VDU %s: %s. Expected values: %s' % (
-                    vdu_id, actual_cpu_count, expected_cpu_count_list))
+                LOG.debug('Unexpected CPU count for VDU %s: %s. Expected values: %s'
+                          % (vdu_id, actual_cpu_count, expected_cpu_count_list))
                 validation_result = False
 
             if actual_memory_size not in expected_memory_size_list:
-                LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
-                    vdu_id, actual_memory_size, expected_memory_size_list))
+                LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s'
+                          % (vdu_id, actual_memory_size, expected_memory_size_list))
 
                 validation_result = False
 
             if actual_disk_size not in expected_disk_size_list:
-                LOG.debug('Unexpected disk size for VDU %s: %s. Expected values: %s' % (
-                    vdu_id, actual_disk_size, expected_disk_size_list))
+                LOG.debug('Unexpected disk size for VDU %s: %s. Expected values: %s'
+                          % (vdu_id, actual_disk_size, expected_disk_size_list))
 
                 validation_result = False
 
             if actual_nic_count not in expected_nic_count_list:
-                LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s' % (
-                    vdu_id, actual_nic_count, expected_nic_count_list))
+                LOG.debug('Unexpected memory size for VDU %s: %s. Expected values: %s'
+                          % (vdu_id, actual_nic_count, expected_nic_count_list))
                 validation_result = False
 
         return validation_result
@@ -512,7 +511,8 @@ class SdlManoAdapter(object):
                 stop_type = update_data.stop_type
                 graceful_stop_timeout = update_data.graceful_stop_timeout
                 additional_param = update_data.additional_param
-                operation_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout, additional_param)
+                operation_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout,
+                                                additional_param)
                 operation_list.append(operation_id)
 
             return 'multiple_operations', operation_list
@@ -520,8 +520,8 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
                     additional_param=None):
-        response = requests.put(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s/%s' % (vnf_instance_id,
-                                                                                        change_state_to),
+        response = requests.put(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s/%s'
+                                                       % (vnf_instance_id, change_state_to),
                                 json={'operation_id': change_state_to})
         assert response.status_code == 200
 
