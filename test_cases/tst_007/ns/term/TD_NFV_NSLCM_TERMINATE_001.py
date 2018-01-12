@@ -102,8 +102,9 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Sleeping 30 seconds to allow MANO to finalize termination of resources')
-        sleep(30)
+        # TODO: add this timer in constants
+        LOG.info('Sleeping 60 seconds to allow MANO to finalize termination of resources')
+        sleep(60)
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
         for vnf_info in ns_info.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
