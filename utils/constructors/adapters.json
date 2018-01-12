@@ -3,6 +3,7 @@
     "dummy":    "api.adapter.mano.dummy.DummyManoAdapter",
     "rift":     "api.adapter.mano.rift.RiftManoAdapter",
     "tacker":   "api.adapter.mano.tacker.TackerManoAdapter",
+    "cisconfv45":"api.adapter.mano.cisconfv45.CiscoNFVManoAdapter",
     "cisconfv": "api.adapter.mano.cisconfv.CiscoNFVManoAdapter",
     "sdl":      "api.adapter.mano.sdl.SdlManoAdapter"
   },
