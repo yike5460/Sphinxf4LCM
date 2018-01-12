@@ -114,6 +114,15 @@
                     <tr><td>Flavour ID:</td><td><input type="text" name="flavour_id" style="width: 200px" value="{{mano['flavour_id']}}"></td></tr>
                     <tr><td>Instantiation Level ID:</td><td><input type="text" name="instantiation_level_id" style="width: 200px" value="{{mano['instantiation_level_id']}}"></td></tr>
                   <% end %>
+                  <% if mano['type'] == 'sdl': %>
+                    <tr><td>NFV API URL:</td><td><input type="text" name="nfv_api_url" style="width: 200px" value={{mano['client_config']['nfv_api_url']}}></td></tr>
+                    <tr><td>UI API URL:</td><td><input type="text" name="ui_api_url" style="width: 200px" value={{mano['client_config']['ui_api_url']}}></td></tr>
+                    <tr><td>Tenant ID:</td><td><input type="text" name="tenant_id" style="width: 200px"  value={{mano['client_config']['tenant_id']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"  value={{mano['client_config']['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{mano['client_config']['password']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"  value={{mano['nsd_id']}}></td></tr>
+                  <% end %>
+
 
           </table>
             <div class="btn-group navbar-left">
