@@ -83,7 +83,7 @@
                     <tr><td>Left Traffic Prefix Length:</td><td><input type="text" name="left_traffic_plen" style="width: 200px" readonly value={{traffic['left_traffic_plen']}}></td></tr>
                     <tr><td>Left Traffic Gateway:</td><td><input type="text" name="left_traffic_gw" style="width: 200px" readonly value={{traffic['left_traffic_gw']}}></td></tr>
                     <tr><td>Left Traffic Gateway MAC:</td><td><input type="text" name="left_traffic_gw_mac" style="width: 200px" readonly value={{traffic['left_traffic_gw_mac']}}></td></tr>
-                    <tr><td>Ingress Connection Point Name:</td><td><input type="text" name="ingress_cp_name" style="width: 200px" readonly value={{traffic['ingress_cp_name']}}></td></tr>
+                    <tr><td>Ingress Connection Point Name:</td><td><input type="text" name="ingress_cp_name" style="width: 200px" readonly value="{{traffic['ingress_cp_name']}}"></td></tr>
                     <tr><td>Right Port Location:</td><td><input type="text" name="right_port_location" style="width: 200px" readonly value={{traffic['right_port_location']}}></td></tr>
                     <tr><td>Right Traffic Address:</td><td><input type="text" name="right_traffic_addr" style="width: 200px" readonly value={{traffic['right_traffic_addr']}}></td></tr>
                     <tr><td>Right Traffic Prefix Length:</td><td><input type="text" name="right_traffic_plen" style="width: 200px" readonly value={{traffic['right_traffic_plen']}}></td></tr>
@@ -101,7 +101,7 @@
                     <tr><td>Port Location:</td><td><input type="text" name="port_location" style="width: 200px" readonly value={{traffic['port_location']}}></td></tr>
                     <tr><td>Traffic Source Address:</td><td><input type="text" name="traffic_src_addr" style="width: 200px" readonly value={{traffic['traffic_src_addr']}}></td></tr>
                     <tr><td>Traffic Destination Address:</td><td><input type="text" name="traffic_dst_addr" style="width: 200px" readonly value={{traffic['traffic_dst_addr']}}></td></tr>
-                    <tr><td>Ingress Connection Point Name:</td><td><input type="text" name="ingress_cp_name" style="width: 200px" readonly value={{traffic['ingress_cp_name']}}></td></tr>
+                    <tr><td>Ingress Connection Point Name:</td><td><input type="text" name="ingress_cp_name" style="width: 200px" readonly value="{{traffic['ingress_cp_name']}}"></td></tr>
                     <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px" readonly value={{traffic['port_speed']}}></td></tr>
                   <% end %>
                   <input type="hidden" name="confirmed" value="yes">
