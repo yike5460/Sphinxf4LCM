@@ -76,6 +76,7 @@
                 <form action="/additional/update/" method="post">
                     <tr><td>Scaling Policy Name:</td><td><input type="text" name="scaling_policy_name" style="width: 200px" readonly value={{additional_params['scaling_policy_name']}}></td></tr>
                     <tr><td>Desired Scale Out Steps:</td><td><input type="number" name="desired_scale_out_steps" style="width: 200px" readonly value={{additional_params['desired_scale_out_steps']}}></td></tr>
+                    <tr><td>Operate VNF Data:</td><td><input type="text" name="operate_vnf_data" style="width: 200px" readonly value="{{additional_params['operate_vnf_data']}}"></td></tr>
                     <tr><td>VNF Instantiate Timeout:</td><td><input type="number" name="vnf_instantiate_timeout" style="width: 200px" readonly value={{additional_params['VNF_INSTANTIATE_TIMEOUT']}}></td></tr>
                     <tr><td>VNF Scale Out Timeout:</td><td><input type="number" name="vnf_scale_out_timeout" style="width: 200px" readonly value={{additional_params['VNF_SCALE_OUT_TIMEOUT']}}></td></tr>
                     <tr><td>VNF Scale In Timeout:</td><td><input type="number" name="vnf_scale_in_timeout" style="width: 200px" readonly value={{additional_params['VNF_SCALE_IN_TIMEOUT']}}></td></tr>

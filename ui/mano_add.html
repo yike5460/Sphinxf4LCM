@@ -91,6 +91,7 @@
                     <% if mano == None: %>
                     <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px"></td></tr>
                     <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" style="width: 200px"></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"></td></tr>
                     <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px"></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px"></td></tr>
@@ -101,6 +102,7 @@
                     <% else: %>
                     <tr><td>Name:</td><td><input type="text" name="name" style="width: 200px" value={{name}}></td></tr>
                     <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" style="width: 200px"></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"></td></tr>
                     <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px" value={{mano['client_config']['user_domain_name']}}></td></tr>
                     <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"  value={{mano['client_config']['username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{mano['client_config']['password']}}></td></tr>
@@ -126,6 +128,7 @@
                     <tr><td>NETCONF Port:</td><td><input type="number" name="esc_port" style="width: 200px"></td></tr>
                     <tr><td><h3>Additional Parameters</h3></td><td></td></tr>
                     <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" style="width: 200px"></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"></td></tr>
                     <tr><td>Flavour ID:</td><td><input type="text" name="flavour_id" style="width: 200px"></td></tr>
                     <tr><td>Instantiation Level ID:</td><td><input type="text" name="instantiation_level_id" style="width: 200px"></td></tr>
                     <% else: %>
@@ -140,6 +143,7 @@
                     <tr><td>Password:</td><td><input type="password" name="esc_password" style="width: 200px" value={{mano['client_config']['esc_password']}}></td></tr>
                     <tr><td><h3>Additional Parameters</h3></td><td></td></tr>
                     <tr><td>VNFD ID:</td><td><input type="text" name="vnfd_id" style="width: 200px"></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"></td></tr>
                     <tr><td>Flavour ID:</td><td><input type="text" name="flavour_id" style="width: 200px"></td></tr>
                     <tr><td>Instantiation Level ID:</td><td><input type="text" name="instantiation_level_id" style="width: 200px"></td></tr>
                     <% end %>
