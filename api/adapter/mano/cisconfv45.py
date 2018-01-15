@@ -377,8 +377,8 @@ class CiscoNFVManoAdapter(object):
             vm_group_list = deployment_xml.findall(
                 './/{http://www.cisco.com/esc/esc}vm_group/{http://www.cisco.com/esc/esc}name')
             for vm_group in vm_group_list:
-                _, vm_group_text = vm_group.text.split('-')
-
+                vm_group_text = vm_group.text
+                _, vm_group_text_suffix = vm_group.text.split('-')
                 # Find all VM IDs in this VM group
                 vm_id_list = deployment_xml.findall(
                     './/{http://www.cisco.com/esc/esc}vm_group[{http://www.cisco.com/esc/esc}name="%s"]/'
@@ -399,7 +399,7 @@ class CiscoNFVManoAdapter(object):
                     # Build the VnfcResourceInfo data structure
                     vnfc_resource_info = VnfcResourceInfo()
                     vnfc_resource_info.vnfc_instance_id = name_text
-                    vnfc_resource_info.vdu_id = vm_group_text
+                    vnfc_resource_info.vdu_id = vm_group_text_suffix
 
                     vnfc_resource_info.compute_resource = ResourceHandle()
                     # Cisco ESC only support one VIM. Hardcode the VIM ID to string 'default_vim'
@@ -428,7 +428,7 @@ class CiscoNFVManoAdapter(object):
                                                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
                                                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
                                                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id="%s"]/'
-                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id' % (vm_group_text, nic_id_text))
+                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id' % (vm_group_text_suffix, nic_id_text))
                         cpd_id_text = cpd_id.text
 
                         # Get the port ID
@@ -486,6 +486,7 @@ class CiscoNFVManoAdapter(object):
         # Get the VNFR from the NSO
         vnfr = self.nso.get(('xpath',
                              '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info' % vnf_instance_id)).data_xml
+
         vnfr = etree.fromstring(vnfr)
 
         # Iterate over each VNFC and check that the corresponding flavor name in VNFR and Nova are the same
@@ -530,8 +531,8 @@ class CiscoNFVManoAdapter(object):
 
             # Check that the number of ports reported by Nova for the current VNFC is the same as the number of ports in
             # the VNFD for the VDU type that corresponds to the current VNFC type
-            if port_number_nova != port_number_vnfd:
-                return False
+            # if port_number_nova != port_number_vnfd:
+            #     return False
 
                 # TODO: Check NIC type
 
