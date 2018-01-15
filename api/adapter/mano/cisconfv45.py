@@ -40,14 +40,11 @@ VNFR_TEMPLATE = '''
 
 VDU_TEMPLATE = '''
                         <vdu>
-                            <id>%(vnfd_id)s</id>
+                            <id>%(vdu_id)s</id>
+                            <bootup-time>1200</bootup-time>
+                            <recovery-wait-time>1200</recovery-wait-time>
                             <image-name>%(image_name)s</image-name>
                             <flavor-name>%(flavor_name)s</flavor-name>
-                            <day0>
-                                <destination>%(day0_dest)s</destination>
-                                <url>%(day0_url)s</url>
-                            </day0>
-                            %(vdu_cp_list)s
                         </vdu>'''
 
 VDU_CP_TEMPLATE = '''
@@ -68,7 +65,7 @@ VNFR_DELETE_TEMPLATE = '''
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
         <vnf-info>
             <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
-                <vnf-deployment operation="delete">
+                <vnf-deployment xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete">
                     <tenant>%(tenant)s</tenant>
                     <deployment-name>%(deployment_name)s</deployment-name>
                     <esc>%(esc)s</esc>
@@ -541,7 +538,7 @@ class CiscoNFVManoAdapter(object):
                 'flavor_name': vdu_param['flavor'],
                 'day0_dest': vdu_param['day0']['destination'],
                 'day0_url': vdu_param['day0']['url'],
-                'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
+                # 'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
             }
 
             vdu_xml = VDU_TEMPLATE % vdu_template_values
