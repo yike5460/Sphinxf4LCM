@@ -259,4 +259,6 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
+        self.tc_result['scaling_in']['traffic_after'] = 'NORMAL_TRAFFIC_LOAD'
+
         LOG.info('%s execution completed successfully' % self.tc_name)
