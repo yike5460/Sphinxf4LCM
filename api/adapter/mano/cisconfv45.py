@@ -31,6 +31,14 @@ VNFR_TEMPLATE = '''
                         <instantiation-level>%(instantiation_level)s</instantiation-level>
                         %(vdu_list)s
                         %(vnfd_cp_list)s
+                        <virtual-link>
+                            <id>vld-data</id>
+                            <dhcp/>
+                            <subnet>
+                                <network>192.168.20.0/24</network>
+                                <gateway>192.168.20.1</gateway>
+                            </subnet>
+                        </virtual-link>
                     </vnf-info>
                 </vnf-deployment>
             </esc>
@@ -328,11 +336,12 @@ class CiscoNFVManoAdapter(object):
 
         # Get the VNFD ID from the NSO
         xml = self.nso.get(('xpath',
-                            '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/id' % vnf_instance_id)).data_xml
+                            '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/vnfd' % vnf_instance_id)).data_xml
+
         xml = etree.fromstring(xml)
         vnfd_id = xml.find(
             './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
-            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}id').text
+            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd').text
 
         # Get the VNFD XML from the NSO
         vnfd_xml = self.nso.get(('xpath', '/nfvo/vnfd[id="%s"]' % vnfd_id)).data_xml
@@ -368,7 +377,7 @@ class CiscoNFVManoAdapter(object):
             vm_group_list = deployment_xml.findall(
                 './/{http://www.cisco.com/esc/esc}vm_group/{http://www.cisco.com/esc/esc}name')
             for vm_group in vm_group_list:
-                vm_group_text = vm_group.text
+                _, vm_group_text = vm_group.text.split('-')
 
                 # Find all VM IDs in this VM group
                 vm_id_list = deployment_xml.findall(
@@ -415,11 +424,11 @@ class CiscoNFVManoAdapter(object):
                         nic_id_text = nic_id.text
 
                         # Get the internal connection point ID from the VNFD that corresponds to this port ID
-                        cpd_id = vnfd_xml.find('.//{http://tail-f.com/pkg/nfvo}vdu'
-                                               '[{http://tail-f.com/pkg/nfvo}id="%s"]/'
-                                               '{http://tail-f.com/pkg/nfvo}internal-connection-point'
+                        cpd_id = vnfd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu'
+                                               '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
                                                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id="%s"]/'
-                                               '{http://tail-f.com/pkg/nfvo}id' % (vm_group_text, nic_id_text))
+                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id' % (vm_group_text, nic_id_text))
                         cpd_id_text = cpd_id.text
 
                         # Get the port ID
