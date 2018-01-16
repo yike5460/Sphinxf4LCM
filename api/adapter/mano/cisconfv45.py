@@ -31,14 +31,6 @@ VNFR_TEMPLATE = '''
                         <instantiation-level>%(instantiation_level)s</instantiation-level>
                         %(vdu_list)s
                         %(vnfd_cp_list)s
-                        <virtual-link>
-                            <id>vld-data</id>
-                            <dhcp/>
-                            <subnet>
-                                <network>192.168.20.0/24</network>
-                                <gateway>192.168.20.1</gateway>
-                            </subnet>
-                        </virtual-link>
                     </vnf-info>
                 </vnf-deployment>
             </esc>
@@ -733,7 +725,9 @@ class CiscoNFVManoAdapter(object):
                 property_name_mapping = {
                     'os_auth_url': 'auth_url',
                     'os_password': 'password',
-                    'os_tenant_name': 'project_name'
+                    'os_project_name': 'project_name',
+                    'os_project_domain_name': 'project_domain_name',
+                    'os_user_domain_name': 'user_domain_name'
                 }
                 property_list = vim_xml.findall('.//{http://www.cisco.com/esc/esc}property')
                 for property_elem in property_list:

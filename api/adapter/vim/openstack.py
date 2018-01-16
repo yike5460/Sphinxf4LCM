@@ -24,7 +24,7 @@ class OpenstackVimAdapter(object):
     """
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
-                 project_domain_name='Default', user_domain_name='Default', **kwargs):
+                 project_domain_name=None, user_domain_name=None, **kwargs):
         """
         Create the Heat, Neutron and Nova clients.
         """
