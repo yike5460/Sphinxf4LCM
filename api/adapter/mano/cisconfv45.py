@@ -741,6 +741,7 @@ class CiscoNFVManoAdapter(object):
                 user_id_elem = vim_xml.find('.//{http://www.cisco.com/esc/esc}user/{http://www.cisco.com/esc/esc}id')
                 user_id = user_id_elem.text
                 client_params['username'] = user_id
+                client_params['project_domain_name'] = 'Default'
 
                 self.vim_helper = construct_adapter(vendor='openstack', module_type='vim', **client_params)
 
