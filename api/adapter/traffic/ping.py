@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 class PingTrafficAdapterError(TrafficAdapterError):
     """
-    A problem occurred in the VNF LifeCycle Validation STC traffic adapter API.
+    A problem occurred in the VNF LifeCycle Validation Ping traffic adapter API.
     """
     pass
 
