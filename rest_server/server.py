@@ -140,10 +140,10 @@ def do_exec():
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
             if resource_type == 'mano':
-                tc_input['mano']['instantiation_params'] = resource_params['instantiation_params']
-                tc_input['mano']['query_params'] = resource_params['query_params']
-                tc_input['mano']['termination_params'] = resource_params['termination_params']
-                tc_input['mano']['operate_params'] = resource_params['operate_params']
+                tc_input['mano']['instantiation_params'] = resource_params.get('instantiation_params', {})
+                tc_input['mano']['query_params'] = resource_params.get('query_params', {})
+                tc_input['mano']['termination_params'] = resource_params.get('termination_params', {})
+                tc_input['mano']['operate_params'] = resource_params.get('operate_params', {})
                 tc_input['vnfd_id'] = resource_params.get('vnfd_id')
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
