@@ -27,6 +27,7 @@
     "windriver":  "api.adapter.vim.windriver.WindriverVimAdapter"
   },
   "traffic": {
-    "stc":  "api.adapter.traffic.stc.StcTrafficAdapter"
+    "stc":  "api.adapter.traffic.stc.StcTrafficAdapter",
+    "ping": "api.adapter.traffic.ping.PingTrafficAdapter"
   }
 }
