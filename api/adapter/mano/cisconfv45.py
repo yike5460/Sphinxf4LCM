@@ -45,6 +45,10 @@ VDU_TEMPLATE = '''
                             <recovery-wait-time>1200</recovery-wait-time>
                             <image-name>%(image_name)s</image-name>
                             <flavor-name>%(flavor_name)s</flavor-name>
+                            <day0>
+                                <destination>%(day0_dest)s</destination>
+                                <url>%(day0_url)s</url>
+                            </day0>
                         </vdu>'''
 
 VDU_CP_TEMPLATE = '''
