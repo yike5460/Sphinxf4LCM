@@ -36,7 +36,8 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
-        t1 = prettytable.PrettyTable(['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
+        t1 = prettytable.PrettyTable(
+                         ['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
         print_scaling_results = False
         for direction in ['out', 'in', 'up', 'down']:
             scale_type = 'scaling_' + direction
@@ -87,8 +88,9 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write VNF resources
         report_file.write('* VNF resources:\n')
-        t_outside = prettytable.PrettyTable(['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
-                                hrules=prettytable.ALL)
+        t_outside = prettytable.PrettyTable(
+                                         ['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
+                                         hrules=prettytable.ALL)
         t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
@@ -117,6 +119,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
+
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict = dict()
