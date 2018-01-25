@@ -546,13 +546,13 @@ class CiscoNFVManoAdapter(object):
 
             # Get the number of ports in the VNFD for the VDU type that corresponds to the current VNFC type
             port_number_vnfd = len(vnfd.findall(
-                './/{http://tail-f.com/pkg/nfvo}vdu[{http://tail-f.com/pkg/nfvo}id="%s"]/'
-                '{http://tail-f.com/pkg/nfvo}internal-connection-point' % vdu_id))
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                'id="%s"]/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor' % vdu_id))
 
             # Check that the number of ports reported by Nova for the current VNFC is the same as the number of ports in
             # the VNFD for the VDU type that corresponds to the current VNFC type
-            # if port_number_nova != port_number_vnfd:
-            #     return False
+            if port_number_nova != port_number_vnfd:
+                return False
 
                 # TODO: Check NIC type
 
