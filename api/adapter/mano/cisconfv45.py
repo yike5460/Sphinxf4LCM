@@ -31,6 +31,7 @@ VNFR_TEMPLATE = '''
                         <instantiation-level>%(instantiation_level)s</instantiation-level>
                         %(vdu_list)s
                         %(vnfd_cp_list)s
+                        %(vl_list)s
                     </vnf-info>
                 </vnf-deployment>
             </esc>
@@ -41,14 +42,15 @@ VNFR_TEMPLATE = '''
 VDU_TEMPLATE = '''
                         <vdu>
                             <id>%(vdu_id)s</id>
-                            <bootup-time>1200</bootup-time>
-                            <recovery-wait-time>1200</recovery-wait-time>
+                            <bootup-time>%(bootup_time)s</bootup-time>
+                            <recovery-wait-time>%(recovery_wait_time)s</recovery-wait-time>
                             <image-name>%(image_name)s</image-name>
                             <flavor-name>%(flavor_name)s</flavor-name>
                             <day0>
                                 <destination>%(day0_dest)s</destination>
                                 <url>%(day0_url)s</url>
                             </day0>
+                            %(vdu_cp_list)s
                         </vdu>'''
 
 VDU_CP_TEMPLATE = '''
@@ -63,6 +65,16 @@ VNFD_CP_TEMPLATE = '''
                             <id>%(cp_id)s</id>
                             <network-name>%(vlr)s</network-name>
                         </vnfd-connection-point>'''
+
+VL_TEMPLATE = '''
+                        <virtual-link>
+                             <id>%(vl_id)s</id>
+                             %(dhcp)s
+                             <subnet>
+                                 <network>%(network)s</network>
+                                 <gateway>%(gateway)s</gateway>
+                             </subnet>
+                        </virtual-link>'''
 
 VNFR_DELETE_TEMPLATE = '''
 <config>
@@ -148,8 +160,9 @@ class CiscoNFVManoAdapter(object):
             # Get the NSO VNF deployment state for the 'self' component
             try:
                 xml = self.nso.get(('xpath',
-                                    '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
-                                    'state[name="ncs:ready"]/status' % deployment_name)).data_xml
+                                    '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/'
+                                        'component[name="self"]/state[name="ncs:ready"]/status'
+                                        % deployment_name)).data_xml
                 xml = etree.fromstring(xml)
                 nso_vnf_deployment_state = xml.find(
                     './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
@@ -175,7 +188,7 @@ class CiscoNFVManoAdapter(object):
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
-                                    'state_machine/state' % (tenant_name, deployment_name))).data_xml
+                                        'state_machine/state' % (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                     './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -204,8 +217,8 @@ class CiscoNFVManoAdapter(object):
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                    'deployments[deployment_name="%s"]/''state_machine/state' %
-                                    (tenant_name, deployment_name))).data_xml
+                                        'deployments[deployment_name="%s"]/''state_machine/state' %
+                                        (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                     './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -222,8 +235,9 @@ class CiscoNFVManoAdapter(object):
                 # So far the ESC reports the VNF as un-deployed. Check the NSO reports the same.
                 try:
                     xml = self.nso.get(('xpath',
-                                        '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]'
-                                        '/state[name="ncs:ready"]/status' % deployment_name)).data_xml
+                                        '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/'
+                                            'component[name="self"]/state[name="ncs:ready"]/status'
+                                            % deployment_name)).data_xml
                     xml = etree.fromstring(xml)
                     nso_vnf_deployment_state = xml.find(
                         './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
@@ -245,8 +259,8 @@ class CiscoNFVManoAdapter(object):
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                    'deployments[deployment_name="%s"]/''state_machine/state' %
-                                    (tenant_name, deployment_name))).data_xml
+                                        'deployments[deployment_name="%s"]/''state_machine/state' %
+                                        (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                     './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -271,8 +285,8 @@ class CiscoNFVManoAdapter(object):
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                    'deployments[deployment_name="%s"]/''state_machine/state' %
-                                    (tenant_name, deployment_name))).data_xml
+                                        'deployments[deployment_name="%s"]/''state_machine/state' %
+                                        (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                     './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -306,7 +320,7 @@ class CiscoNFVManoAdapter(object):
         try:
             xml = self.nso.get(('xpath',
                                 '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
-                                'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
+                                    'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
             xml = etree.fromstring(xml)
             nso_vnf_deployment_state = xml.find(
                 './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
@@ -322,7 +336,7 @@ class CiscoNFVManoAdapter(object):
         try:
             xml = self.esc.get(('xpath',
                                 '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
-                                'state_machine/state' % (tenant_name, vnf_instance_id))).data_xml
+                                    'state_machine/state' % (tenant_name, vnf_instance_id))).data_xml
             xml = etree.fromstring(xml)
             esc_vnf_deployment_state = xml.find(
                 './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -332,7 +346,8 @@ class CiscoNFVManoAdapter(object):
 
         # Get the VNFD ID from the NSO
         xml = self.nso.get(('xpath',
-                            '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/vnfd' % vnf_instance_id)).data_xml
+                            '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/vnfd'
+                                % vnf_instance_id)).data_xml
 
         xml = etree.fromstring(xml)
         vnfd_id = xml.find(
@@ -365,8 +380,8 @@ class CiscoNFVManoAdapter(object):
             # Get the deployment XML from the ESC
             deployment_xml = self.esc.get(('xpath',
                                            '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                           'deployments[deployment_name="%s"]' %
-                                           (tenant_name, vnf_instance_id))).data_xml
+                                               'deployments[deployment_name="%s"]' %
+                                               (tenant_name, vnf_instance_id))).data_xml
             deployment_xml = etree.fromstring(deployment_xml)
 
             # Get the VM group list from the deployment XML
@@ -420,11 +435,13 @@ class CiscoNFVManoAdapter(object):
                         nic_id_text = nic_id.text
 
                         # Get the internal connection point ID from the VNFD that corresponds to this port ID
-                        cpd_id = vnfd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu'
-                                               '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
-                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
-                                               '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id="%s"]/'
-                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id' % (vm_group_text_suffix, nic_id_text))
+                        cpd_id = vnfd_xml.find(
+                                      './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu'
+                                      '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                                      '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
+                                      '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id="%s"]/'
+                                      '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id'
+                                    % (vm_group_text_suffix, nic_id_text))
                         cpd_id_text = cpd_id.text
 
                         # Get the port ID
@@ -493,7 +510,8 @@ class CiscoNFVManoAdapter(object):
 
         # Get the VNFR from the NSO
         vnfr = self.nso.get(('xpath',
-                             '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info' % vnf_instance_id)).data_xml
+                             '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info'
+                                % vnf_instance_id)).data_xml
 
         vnfr = etree.fromstring(vnfr)
 
@@ -534,13 +552,13 @@ class CiscoNFVManoAdapter(object):
 
             # Get the number of ports in the VNFD for the VDU type that corresponds to the current VNFC type
             port_number_vnfd = len(vnfd.findall(
-                './/{http://tail-f.com/pkg/nfvo}vdu[{http://tail-f.com/pkg/nfvo}id="%s"]/'
-                '{http://tail-f.com/pkg/nfvo}internal-connection-point' % vdu_id))
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                'id="%s"]/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor' % vdu_id))
 
             # Check that the number of ports reported by Nova for the current VNFC is the same as the number of ports in
             # the VNFD for the VDU type that corresponds to the current VNFC type
-            # if port_number_nova != port_number_vnfd:
-            #     return False
+            if port_number_nova != port_number_vnfd:
+                return False
 
                 # TODO: Check NIC type
 
@@ -556,7 +574,9 @@ class CiscoNFVManoAdapter(object):
                 'flavor_name': vdu_param['flavor'],
                 'day0_dest': vdu_param['day0']['destination'],
                 'day0_url': vdu_param['day0']['url'],
-                # 'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
+                'bootup_time': vdu_param['bootup_time'],
+                'recovery_wait_time': vdu_param['recovery_wait_time'],
+                'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
             }
 
             vdu_xml = VDU_TEMPLATE % vdu_template_values
@@ -594,6 +614,22 @@ class CiscoNFVManoAdapter(object):
         return vnfd_cp_list_xml
 
     @log_entry_exit(LOG)
+    def build_vl_list(self, vl_params):
+        vl_list_xml = ''
+        for vl_id, vl_param in vl_params.items():
+            vl_template_values = {
+                'vl_id': vl_id,
+                'dhcp': '<dhcp/>' if vl_param.get('dhcp', False) is True else '',
+                'network': vl_param['subnet']['network'],
+                'gateway': vl_param['subnet']['gateway']
+            }
+
+            vl_xml = VL_TEMPLATE % vl_template_values
+            vl_list_xml += vl_xml
+
+        return vl_list_xml
+
+    @log_entry_exit(LOG)
     def build_vnfr(self, vnf_instance_id, flavour_id, instantiation_level_id, additional_param):
         vnfd_id = self.vnf_vnfd_mapping[vnf_instance_id]
 
@@ -606,7 +642,8 @@ class CiscoNFVManoAdapter(object):
             'vnfd_flavor': flavour_id,
             'instantiation_level': instantiation_level_id,
             'vdu_list': self.build_vdu_list(additional_param['vdu']),
-            'vnfd_cp_list': self.build_vnfd_cp_list(additional_param['ext_cp_vlr'])
+            'vnfd_cp_list': self.build_vnfd_cp_list(additional_param['ext_cp_vlr']),
+            'vl_list': self.build_vl_list(additional_param['virtual_link'])
         }
 
         vnfr_xml = VNFR_TEMPLATE % vnfr_template_values
@@ -757,7 +794,11 @@ class CiscoNFVManoAdapter(object):
                 user_id_elem = vim_xml.find('.//{http://www.cisco.com/esc/esc}user/{http://www.cisco.com/esc/esc}id')
                 user_id = user_id_elem.text
                 client_params['username'] = user_id
-                client_params['project_domain_name'] = 'Default'
+
+                # If the ESC reports VIM project_domain_name as empty string, set it as Default
+                if 'project_domain_name' in client_params and 'user_domain_name' in client_params:
+                    if client_params['project_domain_name'] is None:
+                        client_params['project_domain_name'] = client_params['user_domain_name']
 
                 self.vim_helper = construct_adapter(vendor='openstack', module_type='vim', **client_params)
 
