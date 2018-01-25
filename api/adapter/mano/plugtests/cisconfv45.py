@@ -637,7 +637,7 @@ class CiscoNFVManoAdapter(object):
             'instantiation_level': instantiation_level_id,
             'vdu_list': self.build_vdu_list(additional_param['vdu']),
             'vnfd_cp_list': self.build_vnfd_cp_list(additional_param['ext_cp_vlr']),
-            'vl_list': self.build_vl_list(additional_param['virtual_link'])
+            'vl_list': self.build_vl_list(additional_param.get('virtual_link', {}))
         }
 
         vnfr_xml = VNFR_TEMPLATE % vnfr_template_values
