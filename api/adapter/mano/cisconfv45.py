@@ -102,6 +102,132 @@ VNF_OPERATE_TEMPLATE = '''
 </serviceAction>
 '''
 
+NSR_TEMPLATE = '''
+<config>
+  <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
+  <ns-info>
+  <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
+  <ns-info>
+    <id>fortios-ns</id>
+    <username>admin</username>
+    <nsd>fortios_spirent</nsd>
+    <flavor>fortios</flavor>
+    <instantiation-level>normal</instantiation-level>
+    <vnf-info>
+      <name>fortios</name>
+      <vnfd>fortios</vnfd>
+      <vdu>
+        <id>fortios</id>
+        <bootup-time>1200</bootup-time>
+        <recovery-wait-time>1200</recovery-wait-time>
+        <image-name>fortios</image-name>
+        <flavor-name>fortios</flavor-name>
+        <day0>
+          <destination>--user-data</destination>
+          <url>http://172.22.1.1/VNFs/Fortinet/fortios/user-data-hive.txt</url>
+        </day0>
+         <internal-connection-point>
+          <id>port1</id>
+        </internal-connection-point>
+        <internal-connection-point>
+          <id>port2</id>
+        </internal-connection-point>
+      </vdu>
+      <tenant>cisco-etsi</tenant>
+      <deployment-name>fortios_deployment</deployment-name>
+      <esc>esc_lenovo_titan</esc>
+    </vnf-info>
+    <vnf-info>
+      <name>stcv-in</name>
+      <vnfd>spirent-stcv</vnfd>
+      <vdu>
+        <id>stcv</id>
+        <bootup-time>1200</bootup-time>
+        <recovery-wait-time>1200</recovery-wait-time>
+        <image-name>stcv-4.80.2426</image-name>
+        <flavor-name>spirent-stcv</flavor-name>
+        <internal-connection-point>
+          <id>test-if</id>
+        </internal-connection-point>
+      </vdu>
+      <tenant>cisco-etsi</tenant>
+      <deployment-name>fortios_deployment</deployment-name>
+      <esc>esc_lenovo_titan</esc>
+    </vnf-info>
+    <vnf-info>
+      <name>stcv-ex</name>
+      <vnfd>spirent-stcv</vnfd>
+      <vdu>
+        <id>stcv</id>
+        <bootup-time>1200</bootup-time>
+        <recovery-wait-time>1200</recovery-wait-time>
+        <image-name>stcv-4.80.2426</image-name>
+        <flavor-name>spirent-stcv</flavor-name>
+        <internal-connection-point>
+          <id>test-if</id>
+        </internal-connection-point>
+      </vdu>
+      <tenant>cisco-etsi</tenant>
+      <deployment-name>fortios_deployment</deployment-name>
+      <esc>esc_lenovo_titan</esc>
+    </vnf-info>
+    <virtual-link-info>
+      <virtual-link-descriptor>data-in</virtual-link-descriptor>
+      <dhcp/>
+      <subnet>
+        <network>192.168.10.0/24</network>
+        <gateway>192.168.10.1</gateway>
+      </subnet>
+    </virtual-link-info>
+    <virtual-link-info>
+      <virtual-link-descriptor>data-out</virtual-link-descriptor>
+      <dhcp/>
+      <subnet>
+        <network>192.168.20.0/24</network>
+        <gateway>192.168.20.1</gateway>
+      </subnet>
+    </virtual-link-info>
+    <sap-info>
+      <sapd>mgmt</sapd>
+      <network-name>external</network-name>
+    </sap-info>
+    <state>instantiated</state>
+  </ns-info>
+  </esc>
+  </ns-info>
+  </nfvo>
+</config>
+'''
+
+VNF_INFO_TEMPLATE = '''
+<vnf-info>
+      <name>stcv-in</name>
+      <vnfd>spirent-stcv</vnfd>
+      %(vdu_list)s
+      <tenant>cisco-etsi</tenant>
+      <deployment-name>fortios_deployment</deployment-name>
+      <esc>esc_lenovo_titan</esc>
+    </vnf-info>
+'''
+
+VL_TEMPLATE_NS = '''
+<virtual-link-info>
+      <virtual-link-descriptor>data-in</virtual-link-descriptor>
+      <dhcp/>
+      <subnet>
+        <network>192.168.10.0/24</network>
+        <gateway>192.168.10.1</gateway>
+      </subnet>
+    </virtual-link-info>
+'''
+
+SAP_INFO_TEMPLATE = '''
+<sap-info>
+      <sapd>mgmt</sapd>
+      <network-name>external</network-name>
+    </sap-info>
+'''
+
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
@@ -134,6 +260,7 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError(e.message)
 
         self.vnf_vnfd_mapping = dict()
+        self.ns_nsd_mapping = dict()
         self.lifecycle_operation_occurrence_ids = dict()
 
     @log_entry_exit(LOG)
@@ -812,3 +939,49 @@ class CiscoNFVManoAdapter(object):
         # Since the NSO VNF deployment state is seen as VNF instantiation state, the VNF termination is always safe, no
         # matter the VNF deployment state in the ESC.
         return True
+
+    @log_entry_exit(LOG)
+    def ns_create_id(self, nsd_id, ns_name, ns_description):
+        ns_instance_id = ns_name
+        self.ns_nsd_mapping[ns_instance_id] = nsd_id
+
+        return ns_instance_id
+
+    @log_entry_exit(LOG)
+    def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
+                       nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
+                       additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
+                       additional_affinity_or_anti_affinity_rule=None):
+
+        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, ns_instantiation_level_id, additional_param_for_ns)
+        try:
+            netconf_reply = self.nso.edit_config(target='running', config=nsr_xml)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+        lifecycle_operation_occurrence_id = uuid.uuid4()
+        lifecycle_operation_occurrence_dict = {
+            'operation_type': 'ns_instantiate',
+            'tenant_name': additional_param_for_ns['tenant'],
+            'deployment_name': ns_instance_id
+        }
+        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def build_nsr(self, ns_instance_id, flavour_id, ns_instantiation_level_id, additional_param_for_ns):
+        nsd_id = self.ns_nsd_mapping[ns_instance_id]
+
+        nsr_template_values = {
+        }
+
+        # nsr_xml = NSR_TEMPLATE % nsr_template_values
+        nsr_xml = NSR_TEMPLATE
+        return nsr_xml
