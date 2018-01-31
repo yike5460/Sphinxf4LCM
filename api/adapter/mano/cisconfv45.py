@@ -46,12 +46,15 @@ VDU_TEMPLATE = '''
                             <recovery-wait-time>%(recovery_wait_time)s</recovery-wait-time>
                             <image-name>%(image_name)s</image-name>
                             <flavor-name>%(flavor_name)s</flavor-name>
-                            <day0>
-                                <destination>%(day0_dest)s</destination>
-                                <url>%(day0_url)s</url>
-                            </day0>
+                            %(day0_config)s
                             %(vdu_cp_list)s
                         </vdu>'''
+
+DAY0_TEMPLATE = """
+<day0>
+    <destination>%(day0_dest)s</destination>
+    <url>%(day0_url)s</url>
+</day0>"""
 
 VDU_CP_TEMPLATE = '''
                         <connection-point-address>
@@ -89,8 +92,7 @@ VNFR_DELETE_TEMPLATE = '''
             </esc>
         </vnf-info>
     </nfvo>
-</config>
-'''
+</config>'''
 
 VNF_OPERATE_TEMPLATE = '''
 <serviceAction xmlns="http://www.cisco.com/esc/esc">
@@ -99,134 +101,64 @@ VNF_OPERATE_TEMPLATE = '''
     <depName>%(deployment_name)s</depName>
     <serviceName>-</serviceName>
     <serviceVersion>-</serviceVersion>
-</serviceAction>
-'''
+</serviceAction>'''
 
 NSR_TEMPLATE = '''
 <config>
-  <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
-  <ns-info>
-  <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
-  <ns-info>
-    <id>fortios-ns</id>
-    <username>admin</username>
-    <nsd>fortios_spirent</nsd>
-    <flavor>fortios</flavor>
-    <instantiation-level>normal</instantiation-level>
-    <vnf-info>
-      <name>fortios</name>
-      <vnfd>fortios</vnfd>
-      <vdu>
-        <id>fortios</id>
-        <bootup-time>1200</bootup-time>
-        <recovery-wait-time>1200</recovery-wait-time>
-        <image-name>fortios</image-name>
-        <flavor-name>fortios</flavor-name>
-        <day0>
-          <destination>--user-data</destination>
-          <url>http://172.22.1.1/VNFs/Fortinet/fortios/user-data-hive.txt</url>
-        </day0>
-         <internal-connection-point>
-          <id>port1</id>
-        </internal-connection-point>
-        <internal-connection-point>
-          <id>port2</id>
-        </internal-connection-point>
-      </vdu>
-      <tenant>cisco-etsi</tenant>
-      <deployment-name>fortios_deployment</deployment-name>
-      <esc>esc_lenovo_titan</esc>
-    </vnf-info>
-    <vnf-info>
-      <name>stcv-in</name>
-      <vnfd>spirent-stcv</vnfd>
-      <vdu>
-        <id>stcv</id>
-        <bootup-time>1200</bootup-time>
-        <recovery-wait-time>1200</recovery-wait-time>
-        <image-name>stcv-4.80.2426</image-name>
-        <flavor-name>spirent-stcv</flavor-name>
-        <internal-connection-point>
-          <id>test-if</id>
-        </internal-connection-point>
-      </vdu>
-      <tenant>cisco-etsi</tenant>
-      <deployment-name>fortios_deployment</deployment-name>
-      <esc>esc_lenovo_titan</esc>
-    </vnf-info>
-    <vnf-info>
-      <name>stcv-ex</name>
-      <vnfd>spirent-stcv</vnfd>
-      <vdu>
-        <id>stcv</id>
-        <bootup-time>1200</bootup-time>
-        <recovery-wait-time>1200</recovery-wait-time>
-        <image-name>stcv-4.80.2426</image-name>
-        <flavor-name>spirent-stcv</flavor-name>
-        <internal-connection-point>
-          <id>test-if</id>
-        </internal-connection-point>
-      </vdu>
-      <tenant>cisco-etsi</tenant>
-      <deployment-name>fortios_deployment</deployment-name>
-      <esc>esc_lenovo_titan</esc>
-    </vnf-info>
-    <virtual-link-info>
-      <virtual-link-descriptor>data-in</virtual-link-descriptor>
-      <dhcp/>
-      <subnet>
-        <network>192.168.10.0/24</network>
-        <gateway>192.168.10.1</gateway>
-      </subnet>
-    </virtual-link-info>
-    <virtual-link-info>
-      <virtual-link-descriptor>data-out</virtual-link-descriptor>
-      <dhcp/>
-      <subnet>
-        <network>192.168.20.0/24</network>
-        <gateway>192.168.20.1</gateway>
-      </subnet>
-    </virtual-link-info>
-    <sap-info>
-      <sapd>mgmt</sapd>
-      <network-name>external</network-name>
-    </sap-info>
-    <state>instantiated</state>
-  </ns-info>
-  </esc>
-  </ns-info>
-  </nfvo>
-</config>
-'''
+    <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
+    <ns-info>
+    <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
+    <ns-info>
+        <id>%(nsd_id)s</id>
+        <username>%(username)s</username>
+        <nsd>%(nsd_id)s</nsd>
+        <flavor>%(flavor)s</flavor>
+        <instantiation-level>%(instantiation_level)s</instantiation-level>
+        %(vnf_info_list)s
+        %(vl_list)s
+        %(sap_info_list)s
+        <state>%(state)s</state>
+    </ns-info>
+    </esc>
+    </ns-info>
+    </nfvo>
+</config>'''
 
 VNF_INFO_TEMPLATE = '''
-<vnf-info>
-      <name>stcv-in</name>
-      <vnfd>spirent-stcv</vnfd>
-      %(vdu_list)s
-      <tenant>cisco-etsi</tenant>
-      <deployment-name>fortios_deployment</deployment-name>
-      <esc>esc_lenovo_titan</esc>
-    </vnf-info>
-'''
+        <vnf-info>
+            <name>%(vnf_name)s</name>
+            <vnfd>%(vnfd_id)s</vnfd>
+            %(vdu_list)s
+            <tenant>%(tenant)s</tenant>
+            <deployment-name>%(deployment_name)s</deployment-name>
+            <esc>%(esc)s</esc>
+        </vnf-info>'''
 
-VL_TEMPLATE_NS = '''
-<virtual-link-info>
-      <virtual-link-descriptor>data-in</virtual-link-descriptor>
-      <dhcp/>
-      <subnet>
-        <network>192.168.10.0/24</network>
-        <gateway>192.168.10.1</gateway>
-      </subnet>
-    </virtual-link-info>
-'''
+NS_VDU_TEMPLATE = '''
+            <vdu>
+                <id>%(vdu_id)s</id>
+                <bootup-time>%(bootup_time)s</bootup-time>
+                <recovery-wait-time>%(recovery_wait_time)s</recovery-wait-time>
+                <image-name>%(image_name)s</image-name>
+                <flavor-name>%(flavor_name)s</flavor-name>
+                %(day0_config)s
+            </vdu>'''
+
+VL_INFO_TEMPLATE = '''
+        <virtual-link-info>
+            <virtual-link-descriptor>%(vl_id)s</virtual-link-descriptor>
+            %(dhcp)s
+            <subnet>
+                <network>%(network)s</network>
+                <gateway>%(gateway)s</gateway>
+            </subnet>
+        </virtual-link-info>'''
 
 SAP_INFO_TEMPLATE = '''
-<sap-info>
-      <sapd>mgmt</sapd>
-      <network-name>external</network-name>
-    </sap-info>
-'''
+        <sap-info>
+            <sapd>%(sapd)s</sapd>
+            <network-name>%(network_name)s</network-name>
+        </sap-info>'''
 
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
@@ -432,6 +364,85 @@ class CiscoNFVManoAdapter(object):
             except AttributeError as e:
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
+
+        if operation_type == 'ns_instantiate':
+            # Get the NSO NS deployment state for the 'self' component
+            try:
+                xml = self.nso.get(('xpath',
+                                    '/nfvo/ns-info/esc/ns-info[id="%s"]/plan/component[name="self"]/state'
+                                        '[name="ncs:ready"]/status' % deployment_name)).data_xml
+                xml = etree.fromstring(xml)
+                nso_ns_deployment_state = xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                LOG.debug('NS deployment state reported by NSO: "%s"; expected: "%s"'
+                          % (nso_ns_deployment_state, 'reached'))
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.debug('NS deployment state not available in NSO')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Return the operation status depending on the NS deployment state reported by NSO
+            if nso_ns_deployment_state == 'failed':
+                return constants.OPERATION_FAILED
+            elif nso_ns_deployment_state == 'not-reached':
+                return constants.OPERATION_PENDING
+
+            # Get the NSO VNF deployment state for the 'self' component
+            try:
+                xml = self.nso.get(('xpath',
+                                    '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]/plan/'
+                                        'component[name="self"]/state[name="ncs:ready"]/status'
+                                        % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                nso_vnf_deployment_state = xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                LOG.debug('NS VNF deployment state reported by NSO: "%s"; expected: "%s"'
+                          % (nso_ns_deployment_state, 'reached'))
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.debug('NS VNF deployment state not available in NSO')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Return the operation status depending on the NS deployment state reported by NSO
+            if nso_vnf_deployment_state == 'failed':
+                return constants.OPERATION_FAILED
+            elif nso_vnf_deployment_state == 'not-reached':
+                return constants.OPERATION_PENDING
+
+            # Get the ESC deployment state
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                        'state_machine/state' % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_deployment_state = xml.find(
+                    './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+                LOG.debug('Deployment state reported by ESC: "%s"; expected: "%s"'
+                          % (esc_deployment_state, 'SERVICE_ACTIVE_STATE'))
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.debug('Deployment state not available in ESC')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Return the operation status depending on the VNF deployment state reported by ESC
+            if nso_ns_deployment_state == 'reached' and nso_vnf_deployment_state == 'reached' \
+                    and esc_deployment_state == 'SERVICE_ACTIVE_STATE':
+                return constants.OPERATION_SUCCESS
+            return constants.OPERATION_FAILED
 
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
 
@@ -692,6 +703,16 @@ class CiscoNFVManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
+    def build_day0_config(self, day0_config):
+        day0_config__xml = ''
+        if 'destination' in day0_config and 'url' in day0_config:
+            day0_config_template_values = {'day0_dest': day0_config['destination'],
+                                           'day0_url': day0_config['url']}
+            day0_config__xml = DAY0_TEMPLATE % day0_config_template_values
+
+        return day0_config__xml
+
+    @log_entry_exit(LOG)
     def build_vdu_list(self, vdu_params):
         vdu_list_xml = ''
         for vdu_id, vdu_param in vdu_params.items():
@@ -699,8 +720,9 @@ class CiscoNFVManoAdapter(object):
                 'vdu_id': vdu_id,
                 'image_name': vdu_param['image'],
                 'flavor_name': vdu_param['flavor'],
-                'day0_dest': vdu_param['day0']['destination'],
-                'day0_url': vdu_param['day0']['url'],
+                # 'day0_dest': vdu_param['day0']['destination'],
+                # 'day0_url': vdu_param['day0']['url'],
+                'day0_config': self.build_day0_config(vdu_param['day0']),
                 'bootup_time': vdu_param['bootup_time'],
                 'recovery_wait_time': vdu_param['recovery_wait_time'],
                 'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
@@ -953,7 +975,8 @@ class CiscoNFVManoAdapter(object):
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
 
-        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, ns_instantiation_level_id, additional_param_for_ns)
+        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id,
+                                 additional_param_for_ns)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=nsr_xml)
         except NCClientError as e:
@@ -969,19 +992,76 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operation_occurrence_dict = {
             'operation_type': 'ns_instantiate',
             'tenant_name': additional_param_for_ns['tenant'],
-            'deployment_name': ns_instance_id
+            'deployment_name': self.ns_nsd_mapping[ns_instance_id]
         }
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def build_nsr(self, ns_instance_id, flavour_id, ns_instantiation_level_id, additional_param_for_ns):
+    def build_vnf_info_list(self, vnf_info_params):
+        vnf_info_list_xml = ''
+        for vnf_name, vnf_param in vnf_info_params.items():
+            vnf_info_template_values = {
+                'vnf_name': vnf_name,
+                'vnfd_id': vnf_param['vnfd_id'],
+                'tenant': vnf_param['tenant'],
+                'vdu_list': self.build_vdu_list(vnf_param['vdu']),
+                'deployment_name': vnf_param['deployment_name'],
+                'esc': vnf_param['esc']
+            }
+
+            vnf_info_xml = VNF_INFO_TEMPLATE % vnf_info_template_values
+            vnf_info_list_xml += vnf_info_xml
+
+        return vnf_info_list_xml
+
+    @log_entry_exit(LOG)
+    def build_vl_info_list(self, vl_info_params):
+        vl_info_list_xml = ''
+        for vl_id, vl_param in vl_info_params.items():
+            vl_info_template_values = {
+                'vl_id': vl_id,
+                'dhcp': '<dhcp/>' if vl_param.get('dhcp', False) is True else '',
+                'network': vl_param['subnet']['network'],
+                'gateway': vl_param['subnet']['gateway']
+            }
+
+            vl_info_xml = VL_INFO_TEMPLATE % vl_info_template_values
+            vl_info_list_xml += vl_info_xml
+
+        return vl_info_list_xml
+
+    @log_entry_exit(LOG)
+    def build_sap_info_list(self, sap_info_params):
+        sap_info_list_xml = ''
+        for sapd in sap_info_params:
+            sap_info_template_values = {
+                'sapd': sapd,
+                'network_name': sap_info_params[sapd]
+            }
+
+            sap_info_xml = SAP_INFO_TEMPLATE % sap_info_template_values
+            sap_info_list_xml += sap_info_xml
+
+        return sap_info_list_xml
+
+    @log_entry_exit(LOG)
+    def build_nsr(self, ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id, additional_param_for_ns):
         nsd_id = self.ns_nsd_mapping[ns_instance_id]
 
         nsr_template_values = {
+            'ns_id': ns_instance_id,
+            'username': additional_param_for_ns['username'],
+            'nsd_id': nsd_id,
+            'flavor': flavour_id,
+            'instantiation_level': ns_instantiation_level_id,
+            'vnf_info_list': self.build_vnf_info_list(additional_param_for_ns['vnf_info']),
+            'vl_list': self.build_vl_info_list(additional_param_for_ns['virtual_link_info']),
+            'state': 'instantiated',
+            'sap_info_list': self.build_sap_info_list(sap_data)
         }
 
-        # nsr_xml = NSR_TEMPLATE % nsr_template_values
-        nsr_xml = NSR_TEMPLATE
+        nsr_xml = NSR_TEMPLATE % nsr_template_values
+
         return nsr_xml
