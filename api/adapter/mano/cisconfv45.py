@@ -51,10 +51,10 @@ VDU_TEMPLATE = '''
                         </vdu>'''
 
 DAY0_TEMPLATE = """
-<day0>
-    <destination>%(day0_dest)s</destination>
-    <url>%(day0_url)s</url>
-</day0>"""
+                            <day0>
+                                <destination>%(day0_dest)s</destination>
+                                <url>%(day0_url)s</url>
+                            </day0>"""
 
 VDU_CP_TEMPLATE = '''
                         <connection-point-address>
@@ -160,6 +160,20 @@ SAP_INFO_TEMPLATE = '''
             <network-name>%(network_name)s</network-name>
         </sap-info>'''
 
+NSR_DELETE_TEMPLATE = '''
+<config>
+    <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
+        <ns-info>
+            <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
+                <ns-info xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="delete">
+                    <id>%(ns_info_id)s</id>
+                </ns-info>
+            </esc>
+        </ns-info>
+    </nfvo>
+</config>'''
+
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
@@ -201,11 +215,11 @@ class CiscoNFVManoAdapter(object):
         This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
         VNF with given ID.
 
-        :param lifecycle_operation_occurrence_id:   UUID used to retrieve the operation details from the class
-                                                     attribute self.lifecycle_operation_occurrence_ids
+        :param lifecycle_operation_occurrence_id:   UUID used to retrieve the operation details from the class attribute
+                                                    self.lifecycle_operation_occurrence_ids
         """
         LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in Cisco NFV MANO!')
-        LOG.debug('Will return the state of the VNF with the given ID')
+        LOG.debug('Will return the state of the VNF/NS with the given ID')
 
         if lifecycle_operation_occurrence_id is None:
             raise CiscoNFVManoAdapterError('Lifecycle Operation Occurrence ID is absent')
@@ -275,9 +289,8 @@ class CiscoNFVManoAdapter(object):
             # Try to retrieve the VNF deployment name from the ESC.
             try:
                 xml = self.esc.get(('xpath',
-                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                        'deployments[deployment_name="%s"]/''state_machine/state' %
-                                        (tenant_name, deployment_name))).data_xml
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                        'state_machine/state' % (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
                     './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -399,24 +412,24 @@ class CiscoNFVManoAdapter(object):
                                         'component[name="self"]/state[name="ncs:ready"]/status'
                                         % (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
-                nso_vnf_deployment_state = xml.find(
+                nso_deployment_state = xml.find(
                     './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
                     '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
-                LOG.debug('NS VNF deployment state reported by NSO: "%s"; expected: "%s"'
+                LOG.debug('Deployment state reported by NSO: "%s"; expected: "%s"'
                           % (nso_ns_deployment_state, 'reached'))
             except NCClientError as e:
                 LOG.debug('Error occurred while communicating with the NSO Netconf server')
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
             except AttributeError as e:
-                LOG.debug('NS VNF deployment state not available in NSO')
+                LOG.debug('Deployment state not available in NSO')
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
 
             # Return the operation status depending on the NS deployment state reported by NSO
-            if nso_vnf_deployment_state == 'failed':
+            if nso_deployment_state == 'failed':
                 return constants.OPERATION_FAILED
-            elif nso_vnf_deployment_state == 'not-reached':
+            elif nso_deployment_state == 'not-reached':
                 return constants.OPERATION_PENDING
 
             # Get the ESC deployment state
@@ -439,10 +452,75 @@ class CiscoNFVManoAdapter(object):
                 raise CiscoNFVManoAdapterError(e.message)
 
             # Return the operation status depending on the VNF deployment state reported by ESC
-            if nso_ns_deployment_state == 'reached' and nso_vnf_deployment_state == 'reached' \
+            if nso_ns_deployment_state == 'reached' and nso_deployment_state == 'reached' \
                     and esc_deployment_state == 'SERVICE_ACTIVE_STATE':
                 return constants.OPERATION_SUCCESS
             return constants.OPERATION_FAILED
+
+        if operation_type == 'ns_terminate':
+            # To check that the NS was un-deployed, try to retrieve the NS deployment name until the AttributeError
+            # exception is raised. Do this first on the ESC. When the ESC reports that the deployment was un-deployed,
+            # check that the NSO reports both the deployment state and NS deployment state as un-deployed.
+
+            # Try to retrieve the deployment name from the ESC.
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                        'state_machine/state' % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_deployment_state = xml.find(
+                    './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
+                LOG.debug('Deployment state reported by ESC: "%s"; expected no state' % esc_deployment_state)
+                if esc_deployment_state == 'SERVICE_ERROR_STATE':
+                    return constants.OPERATION_FAILED
+                else:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError:
+                # So far the ESC reports the deployment as un-deployed. Check the NSO reports the deployment as
+                # un-deployed.
+                try:
+                    xml = self.nso.get(('xpath',
+                                        '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]/plan/'
+                                            'component[name="self"]/state[name="ncs:ready"]/status'
+                                            % (tenant_name, deployment_name))).data_xml
+                    xml = etree.fromstring(xml)
+                    nso_deployment_state = xml.find(
+                        './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                        '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                    LOG.debug(
+                        'Deployment state reported by NSO: "%s"; expected no state' % nso_deployment_state)
+                    if nso_deployment_state == 'reached':
+                        LOG.debug('ESC reports the deployment as un-deployed, but the NSO does not')
+                        return constants.OPERATION_PENDING
+                except NCClientError as e:
+                    LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                    LOG.exception(e)
+                    raise CiscoNFVManoAdapterError(e.message)
+                except AttributeError:
+                    # Check the NSO reports the NS as un-deployed
+                    try:
+                        xml = self.nso.get(('xpath',
+                                            '/nfvo/ns-info/esc/ns-info[id="%s"]/plan/component[name="self"]/state'
+                                                '[name="ncs:ready"]/status' % deployment_name)).data_xml
+                        xml = etree.fromstring(xml)
+                        nso_ns_deployment_state = xml.find(
+                            './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                        LOG.debug('NS deployment state reported by NSO: "%s"; expected no state'
+                                  % nso_ns_deployment_state)
+                        if nso_ns_deployment_state == 'reached':
+                            LOG.debug('NSO reports the deployment as un-deployed, but the NS as deployed')
+                            return constants.OPERATION_PENDING
+                    except NCClientError as e:
+                        LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                        LOG.exception(e)
+                        raise CiscoNFVManoAdapterError(e.message)
+                    except AttributeError:
+                        return constants.OPERATION_SUCCESS
 
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
 
@@ -957,46 +1035,10 @@ class CiscoNFVManoAdapter(object):
         return self.vim_helper
 
     @log_entry_exit(LOG)
-    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval=constants):
+    def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval):
         # Since the NSO VNF deployment state is seen as VNF instantiation state, the VNF termination is always safe, no
         # matter the VNF deployment state in the ESC.
         return True
-
-    @log_entry_exit(LOG)
-    def ns_create_id(self, nsd_id, ns_name, ns_description):
-        ns_instance_id = ns_name
-        self.ns_nsd_mapping[ns_instance_id] = nsd_id
-
-        return ns_instance_id
-
-    @log_entry_exit(LOG)
-    def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
-                       nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
-                       additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
-                       additional_affinity_or_anti_affinity_rule=None):
-
-        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id,
-                                 additional_param_for_ns)
-        try:
-            netconf_reply = self.nso.edit_config(target='running', config=nsr_xml)
-        except NCClientError as e:
-            LOG.exception(e)
-            raise CiscoNFVManoAdapterError(e.message)
-
-        if '<ok/>' not in netconf_reply.xml:
-            raise CiscoNFVManoAdapterError('NSO replied with an error')
-
-        LOG.debug('NSO reply: %s' % netconf_reply.xml)
-
-        lifecycle_operation_occurrence_id = uuid.uuid4()
-        lifecycle_operation_occurrence_dict = {
-            'operation_type': 'ns_instantiate',
-            'tenant_name': additional_param_for_ns['tenant'],
-            'deployment_name': self.ns_nsd_mapping[ns_instance_id]
-        }
-        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
-
-        return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
     def build_vnf_info_list(self, vnf_info_params):
@@ -1065,3 +1107,85 @@ class CiscoNFVManoAdapter(object):
         nsr_xml = NSR_TEMPLATE % nsr_template_values
 
         return nsr_xml
+
+    @log_entry_exit(LOG)
+    def build_nsr_delete(self, ns_instance_id):
+        nsr_delete_template_values = {
+            'ns_info_id': self.ns_nsd_mapping[ns_instance_id]
+        }
+
+        nsr_delete_xml = NSR_DELETE_TEMPLATE % nsr_delete_template_values
+        return nsr_delete_xml
+
+    @log_entry_exit(LOG)
+    def ns_create_id(self, nsd_id, ns_name, ns_description):
+        ns_instance_id = ns_name
+        self.ns_nsd_mapping[ns_instance_id] = nsd_id
+
+        return ns_instance_id
+
+    @log_entry_exit(LOG)
+    def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
+                       nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
+                       additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
+                       additional_affinity_or_anti_affinity_rule=None):
+
+        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id,
+                                 additional_param_for_ns)
+        try:
+            netconf_reply = self.nso.edit_config(target='running', config=nsr_xml)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+        lifecycle_operation_occurrence_id = uuid.uuid4()
+        lifecycle_operation_occurrence_dict = {
+            'operation_type': 'ns_instantiate',
+            'tenant_name': additional_param_for_ns['tenant'],
+            'deployment_name': self.ns_nsd_mapping[ns_instance_id]
+        }
+        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def ns_terminate(self, ns_instance_id, terminate_time=None):
+        nsr_delete_xml = self.build_nsr_delete(ns_instance_id)
+
+        try:
+            netconf_reply = self.nso.edit_config(target='running', config=nsr_delete_xml)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+        lifecycle_operation_occurrence_id = uuid.uuid4()
+        lifecycle_operation_occurrence_dict = {
+            'operation_type': 'ns_terminate',
+            # TODO: ns_terminate does not have additional_param input as per IFA 13 v2.3.1. Find a way to pass the
+            # tenant as input
+            'tenant_name': 'cisco-etsi',
+            'deployment_name': self.ns_nsd_mapping[ns_instance_id]
+        }
+        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+        return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def ns_delete_id(self, ns_instance_id):
+        self.ns_nsd_mapping.pop(ns_instance_id)
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
+        # Since the NSO NS deployment state is seen as NS instantiation state, the NS termination is always safe, no
+        # matter the NS deployment state in the ESC.
+        return True
