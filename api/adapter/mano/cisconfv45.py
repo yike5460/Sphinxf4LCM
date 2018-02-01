@@ -1234,3 +1234,20 @@ class CiscoNFVManoAdapter(object):
             LOG.exception(e)
             raise CiscoNFVManoAdapterError(e.message)
         return vm_group
+
+    @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        for vnf_info in ns_info.vnf_info:
+            vnf_instance_id = vnf_info.vnf_instance_id
+            if not self.validate_vnf_allocated_vresources(vnf_instance_id, additional_param):
+                LOG.debug('For VNFC with id %s expected resources do not match the actual ones' % resource_id)
+                LOG.debug(
+                    'Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_vcpus, actual_num_vcpus))
+                LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_vmemory_size, actual_vmemory_size))
+                LOG.debug(
+                    'Expected %s vStorage, actual vStorage: %s' % (expected_vstorage_size, actual_vstorage_size))
+                LOG.debug('Expected %s vNICs, actual number of vNICs: %s' % (expected_num_vnics, actual_num_vnics))
+                return False
+
+        return True
