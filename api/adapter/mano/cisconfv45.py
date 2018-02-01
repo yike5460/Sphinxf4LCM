@@ -1189,3 +1189,48 @@ class CiscoNFVManoAdapter(object):
         # Since the NSO NS deployment state is seen as NS instantiation state, the NS termination is always safe, no
         # matter the NS deployment state in the ESC.
         return True
+
+    @log_entry_exit(LOG)
+    def verify_vnf_sw_images(self, vnf_info):
+
+        vnfd_id = vnf_info.vnfd_id
+        # TODO We must populate the tenant name in the VnfInfo structure or any other suitable structure
+        tenant_name = 'cisco-etsi'
+        deployment_name = vnf_info.vnf_instance_id
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            # Get image name from the deployment for the VDU ID of the current VNFC
+            vdu_id = vnfc_resource_info.vdu_id
+            vm_group_name = vnfd_id + '-' + vdu_id
+            deployment_vm_group = self.get_deployment_vm_group(tenant_name, deployment_name, vm_group_name)
+            image_name_esc = deployment_vm_group.find('.//{http://www.cisco.com/esc/esc}image').text
+
+            # Get image name from VIM for the current VNFC
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            image_id = virtual_compute.vc_image_id
+            image_details = vim.query_image(image_id)
+            image_name_vim = image_details.name
+
+            # The two image names should be identical
+            if image_name_esc != image_name_vim:
+                LOG.debug('Unexpected image for VNFC %s, VDU type %s' % (resource_id, vdu_id))
+                LOG.debug('Expected image name: %s; actual image name: %s' % (image_name_esc, image_name_vim))
+                return False
+
+        return True
+
+    @log_entry_exit(LOG)
+    def get_deployment_vm_group(self, tenant_name, deployment_name, vm_group_name):
+        try:
+            xml = self.esc.get(('xpath',
+                                '/esc_datamodel/tenants/tenant[name="%s"]/deployments/deployment[name="%s"]/'
+                                'vm_group[name="%s"]' % (tenant_name, deployment_name, vm_group_name))).data_xml
+            vm_group = etree.fromstring(xml)
+        except NCClientError as e:
+            LOG.debug('Error occurred while communicating with the ESC Netconf server')
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+        return vm_group
