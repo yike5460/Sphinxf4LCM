@@ -751,11 +751,10 @@ class CiscoNFVManoAdapter(object):
 
             # Get the name of the flavor associated to this VNFC from the VNFR
             vdu_id = vnfc_resource_info.vdu_id
-            flavor_name_vnfr = vnfr.find(
-                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
-                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}'
-                'vdu[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}id="%s"]/'
-                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}flavor-name' % vdu_id).text
+            flavor_name_vnfr = vnfr.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                                         '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}'
+                                         'vdu[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}id="%s"]/'
+                                         '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}flavor-name' % vdu_id).text
 
             # Check that the the two flavor names are the same
             if flavor_name_nova != flavor_name_vnfr:
@@ -803,8 +802,6 @@ class CiscoNFVManoAdapter(object):
                 'vdu_id': vdu_id,
                 'image_name': vdu_param['image'],
                 'flavor_name': vdu_param['flavor'],
-                # 'day0_dest': vdu_param['day0']['destination'],
-                # 'day0_url': vdu_param['day0']['url'],
                 'day0_config': self.build_day0_config(vdu_param['day0']),
                 'bootup_time': vdu_param['bootup_time'],
                 'recovery_wait_time': vdu_param['recovery_wait_time'],
@@ -1239,7 +1236,6 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info):
 
-        vnfd_id = vnf_info.vnfd_id
         # TODO We must populate the tenant name in the VnfInfo structure or any other suitable structure
         tenant_name = 'cisco-etsi'
         deployment_name = vnf_info.vnf_instance_id
