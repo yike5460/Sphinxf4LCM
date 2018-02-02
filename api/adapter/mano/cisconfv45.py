@@ -1244,7 +1244,15 @@ class CiscoNFVManoAdapter(object):
             # Get image name from the deployment for the VDU ID of the current VNFC
             vdu_id = vnfc_resource_info.vdu_id
             vm_group_name = '%s-%s' % (vnf_info.vnf_product_name, vdu_id)
-            deployment_vm_group = self.get_deployment_vm_group(tenant_name, deployment_name, vm_group_name)
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/tenants/tenant[name="%s"]/deployments/deployment[name="%s"]/'
+                                    'vm_group[name="%s"]' % (tenant_name, deployment_name, vm_group_name))).data_xml
+                deployment_vm_group = etree.fromstring(xml)
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
             image_name_esc = deployment_vm_group.find('.//{http://www.cisco.com/esc/esc}image').text
 
             # Get image name from VIM for the current VNFC
@@ -1265,32 +1273,13 @@ class CiscoNFVManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_deployment_vm_group(self, tenant_name, deployment_name, vm_group_name):
-        try:
-            xml = self.esc.get(('xpath',
-                                '/esc_datamodel/tenants/tenant[name="%s"]/deployments/deployment[name="%s"]/'
-                                'vm_group[name="%s"]' % (tenant_name, deployment_name, vm_group_name))).data_xml
-            vm_group = etree.fromstring(xml)
-        except NCClientError as e:
-            LOG.debug('Error occurred while communicating with the ESC Netconf server')
-            LOG.exception(e)
-            raise CiscoNFVManoAdapterError(e.message)
-        return vm_group
-
-    @log_entry_exit(LOG)
     def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
         for vnf_info in ns_info.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             additional_param.update({'vnf_name': vnf_info.vnf_product_name})
             if not self.validate_vnf_allocated_vresources(vnf_instance_id, additional_param):
-                # LOG.debug('For VNFC with id %s expected resources do not match the actual ones' % resource_id)
-                # LOG.debug(
-                #     'Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_vcpus, actual_num_vcpus))
-                # LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_vmemory_size, actual_vmemory_size))
-                # LOG.debug(
-                #     'Expected %s vStorage, actual vStorage: %s' % (expected_vstorage_size, actual_vstorage_size))
-                # LOG.debug('Expected %s vNICs, actual number of vNICs: %s' % (expected_num_vnics, actual_num_vnics))
+                LOG.debug('For VNF instance id %s expected resources do not match the actual ones' % vnf_instance_id)
                 return False
 
         return True
