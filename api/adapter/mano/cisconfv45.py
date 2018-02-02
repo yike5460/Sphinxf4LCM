@@ -1194,6 +1194,10 @@ class CiscoNFVManoAdapter(object):
         ns_info.nsd_id = self.ns_nsd_mapping[ns_instance_id]
         ns_info.ns_state = constants.NS_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'][nso_ns_deployment_state]
 
+        # Get the NS deployment flavor from the NSO
+        ns_deployment_flavor = nso_deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}flavor').text
+        ns_info.flavor_id = ns_deployment_flavor
+
         # Build the VnfInfo data structure for each VNF that is part of the NS
         ns_info.vnf_info = list()
         vnf_ids = nso_deployment_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
