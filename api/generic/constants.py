@@ -79,6 +79,10 @@ VNF_STATE['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
 VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'] = {'reached': VNF_INSTANTIATED,
                                                    'not-reached': VNF_NOT_INSTANTIATED}
 
+# Mapping between Cisco NSO NS deployment states and ETSI NS instantiation states
+NS_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'] = {'reached': NS_INSTANTIATED,
+                                                  'not-reached': NS_NOT_INSTANTIATED}
+
 # Mapping between Cisco ESC VNF deployment states and ETSI VNF states
 VNF_STATE['ESC_DEPLOYMENT_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
                                      'SERVICE_STOPPED_STATE': VNF_STOPPED}
