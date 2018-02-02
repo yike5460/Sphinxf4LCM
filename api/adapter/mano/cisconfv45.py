@@ -14,6 +14,8 @@ from utils.logging_module import log_entry_exit
 # Instantiate logger
 LOG = logging.getLogger(__name__)
 
+SEPARATOR = '###'
+
 VNFR_TEMPLATE = '''
 <config>
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
@@ -527,8 +529,11 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
+        if SEPARATOR in vnf_instance_id:
+            deployment_name, vnf_name = vnf_instance_id.split(SEPARATOR)
+        else:
+            deployment_name, vnf_name = vnf_instance_id, None
         tenant_name = filter['additional_param']['tenant']
-        vnf_name = filter['additional_param'].get('vnf_name')
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id.encode()
 
@@ -537,7 +542,7 @@ class CiscoNFVManoAdapter(object):
         try:
             xml = self.nso.get(('xpath',
                                 '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/component[name="self"]/'
-                                    'state[name="ncs:ready"]/status' % vnf_instance_id)).data_xml
+                                    'state[name="ncs:ready"]/status' % deployment_name)).data_xml
             xml = etree.fromstring(xml)
             nso_vnf_deployment_state = xml.find(
                 './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
@@ -553,7 +558,7 @@ class CiscoNFVManoAdapter(object):
         try:
             xml = self.esc.get(('xpath',
                                 '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
-                                    'state_machine/state' % (tenant_name, vnf_instance_id))).data_xml
+                                    'state_machine/state' % (tenant_name, deployment_name))).data_xml
             xml = etree.fromstring(xml)
             esc_vnf_deployment_state = xml.find(
                 './/{http://www.cisco.com/esc/esc}state_machine/{http://www.cisco.com/esc/esc}state').text
@@ -564,9 +569,9 @@ class CiscoNFVManoAdapter(object):
         # Get the VNFD ID from the NSO
         if vnf_name is not None:
             xpath = '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info[name="%s"]/vnfd' \
-                    % (vnf_instance_id, vnf_name)
+                    % (deployment_name, vnf_name)
         else:
-            xpath = '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/vnfd' % vnf_instance_id
+            xpath = '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/vnfd' % deployment_name
         xml = self.nso.get(('xpath', xpath)).data_xml
         xml = etree.fromstring(xml)
         vnfd_id = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
@@ -599,7 +604,7 @@ class CiscoNFVManoAdapter(object):
             deployment_xml = self.esc.get(('xpath',
                                            '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
                                                'deployments[deployment_name="%s"]' %
-                                               (tenant_name, vnf_instance_id))).data_xml
+                                               (tenant_name, deployment_name))).data_xml
             deployment_xml = etree.fromstring(deployment_xml)
 
             # Get the VM group list from the deployment XML
@@ -729,10 +734,15 @@ class CiscoNFVManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
         vnfd = etree.fromstring(vnfd)
 
+        if SEPARATOR in vnf_instance_id:
+            deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        else:
+            deployment_name = vnf_instance_id
+
         # Get the VNFR from the NSO
         vnfr = self.nso.get(('xpath',
                              '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info'
-                                % vnf_instance_id)).data_xml
+                                % deployment_name)).data_xml
 
         vnfr = etree.fromstring(vnfr)
 
@@ -1189,8 +1199,8 @@ class CiscoNFVManoAdapter(object):
         vnf_ids = nso_deployment_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name')
         for vnf_name in vnf_ids:
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': ns_instance_id,
-                                              'additional_param': {'tenant': 'cisco-etsi', 'vnf_name': vnf_name.text}})
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': '%s%s%s' % (ns_instance_id, SEPARATOR, vnf_name.text),
+                                              'additional_param': {'tenant': 'cisco-etsi'}})
             vnf_info.vnf_product_name = vnf_name.text
             ns_info.vnf_info.append(vnf_info)
 
@@ -1238,7 +1248,11 @@ class CiscoNFVManoAdapter(object):
 
         # TODO We must populate the tenant name in the VnfInfo structure or any other suitable structure
         tenant_name = 'cisco-etsi'
-        deployment_name = vnf_info.vnf_instance_id
+        vnf_instance_id = vnf_info.vnf_instance_id
+        if SEPARATOR in vnf_instance_id:
+            deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        else:
+            deployment_name = vnf_instance_id
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             # Get image name from the deployment for the VDU ID of the current VNFC
@@ -1277,7 +1291,6 @@ class CiscoNFVManoAdapter(object):
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
         for vnf_info in ns_info.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            additional_param.update({'vnf_name': vnf_info.vnf_product_name})
             if not self.validate_vnf_allocated_vresources(vnf_instance_id, additional_param):
                 LOG.debug('For VNF instance id %s expected resources do not match the actual ones' % vnf_instance_id)
                 return False
