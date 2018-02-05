@@ -14,8 +14,6 @@ from utils.logging_module import log_entry_exit
 # Instantiate logger
 LOG = logging.getLogger(__name__)
 
-SEPARATOR = '###'
-
 VNFR_TEMPLATE = '''
 <config>
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
@@ -210,6 +208,7 @@ class CiscoNFVManoAdapter(object):
         self.vnf_vnfd_mapping = dict()
         self.ns_nsd_mapping = dict()
         self.lifecycle_operation_occurrence_ids = dict()
+        self.vnf_instance_id_metadata = dict()
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -529,10 +528,10 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
-        deployment_name, vnf_name = vnf_instance_id.split(SEPARATOR)
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         tenant_name = filter['additional_param']['tenant']
         vnf_info = VnfInfo()
-        vnf_info.vnf_instance_id = vnf_instance_id.encode()
+        vnf_info.vnf_instance_id = vnf_instance_id
 
         # Try to retrieve the instantiation state for the VNF with the given deployment name. If the AttributeError
         # exception is raised, report the VNF instantiation state as NOT_INSTANTIATED.
@@ -735,7 +734,7 @@ class CiscoNFVManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
         vnfd = etree.fromstring(vnfd)
 
-        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
 
         # Get the VNFR from the NSO
         vnfr = self.nso.get(('xpath',
@@ -755,7 +754,7 @@ class CiscoNFVManoAdapter(object):
             server_details = vim.server_get(server_id)
             server_flavor_id = server_details['flavor_id']
             flavor_details = vim.flavor_get(server_flavor_id)
-            flavor_name_nova = flavor_details['name'].encode()
+            flavor_name_nova = str(flavor_details['name'])
 
             # Get the name of the flavor associated to this VNFC from the VNFR
             vdu_id = vnfc_resource_info.vdu_id
@@ -867,8 +866,9 @@ class CiscoNFVManoAdapter(object):
         return vl_list_xml
 
     @log_entry_exit(LOG)
-    def build_vnfr(self, vnf_instance_id, flavour_id, instantiation_level_id, additional_param):
-        vnfd_id = self.vnf_vnfd_mapping[vnf_instance_id]
+    def build_vnfr(self, vnf_instance_id, vnfd_id, flavour_id, instantiation_level_id, additional_param):
+        # TODO: Rename vnf_instance_id param to deployment_name
+        # TODO: Add vnf_name to template
 
         vnfr_template_values = {
             'tenant': additional_param['tenant'],
@@ -909,15 +909,25 @@ class CiscoNFVManoAdapter(object):
         return vnf_operate_xml
 
     @log_entry_exit(LOG)
+    def generate_vnf_instance_id(self, deployment_name, vnf_name):
+        vnf_instance_id = str(uuid.uuid3(uuid.NAMESPACE_OID, '%s-%s' % (deployment_name, vnf_name)))
+        self.vnf_instance_id_metadata[vnf_instance_id] = deployment_name, vnf_name
+
+        return vnf_instance_id
+
+    @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
-        self.vnf_vnfd_mapping[vnf_instance_name] = vnfd_id
-        return '%s%s%s' % (vnf_instance_name, SEPARATOR, vnfd_id)
+        vnf_instance_id = self.generate_vnf_instance_id(deployment_name=vnf_instance_name, vnf_name=vnfd_id)
+        self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
+
+        return vnf_instance_id
 
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
-        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
-        vnfr_xml = self.build_vnfr(deployment_name, flavour_id, instantiation_level_id, additional_param)
+        deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
+        vnfd_id = self.vnf_vnfd_mapping[vnf_instance_id]
+        vnfr_xml = self.build_vnfr(deployment_name, vnfd_id, flavour_id, instantiation_level_id, additional_param)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_xml)
         except NCClientError as e:
@@ -942,7 +952,9 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
                       additional_param=None):
-        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        # TODO: Deletes entire deployment, not only one VNF!
+
+        deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
         vnfr_delete_xml = self.build_vnfr_delete(deployment_name, additional_param)
 
         try:
@@ -968,8 +980,8 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_delete_id(self, vnf_instance_id):
-        instance_name, _ = vnf_instance_id.split(SEPARATOR)
-        self.vnf_vnfd_mapping.pop(instance_name)
+        self.vnf_instance_id_metadata.pop(vnf_instance_id)
+        self.vnf_vnfd_mapping.pop(vnf_instance_id)
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
@@ -979,7 +991,7 @@ class CiscoNFVManoAdapter(object):
             'stop': 'STOP'
         }
 
-        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
         vnf_operate_xml = self.build_vnf_operate(deployment_name, etsi_state_esc_action_mapping[change_state_to],
                                                  additional_param)
 
@@ -1201,8 +1213,10 @@ class CiscoNFVManoAdapter(object):
         vnf_ids = nso_deployment_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name')
         for vnf_name in vnf_ids:
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': '%s%s%s' % (ns_instance_id, SEPARATOR, vnf_name.text),
+            vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id, vnf_name=vnf_name.text)
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                               'additional_param': {'tenant': 'cisco-etsi'}})
+            # TODO: get tenant from additional params
             vnf_info.vnf_product_name = vnf_name.text
             ns_info.vnf_info.append(vnf_info)
 
@@ -1251,7 +1265,7 @@ class CiscoNFVManoAdapter(object):
         # TODO We must populate the tenant name in the VnfInfo structure or any other suitable structure
         tenant_name = 'cisco-etsi'
         vnf_instance_id = vnf_info.vnf_instance_id
-        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             # Get image name from the deployment for the VDU ID of the current VNFC
