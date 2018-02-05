@@ -529,10 +529,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
-        if SEPARATOR in vnf_instance_id:
-            deployment_name, vnf_name = vnf_instance_id.split(SEPARATOR)
-        else:
-            deployment_name, vnf_name = vnf_instance_id, None
+        deployment_name, vnf_name = vnf_instance_id.split(SEPARATOR)
         tenant_name = filter['additional_param']['tenant']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id.encode()
@@ -567,12 +564,9 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError(e.message)
 
         # Get the VNFD ID from the NSO
-        if vnf_name is not None:
-            xpath = '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info[name="%s"]/vnfd' \
-                    % (deployment_name, vnf_name)
-        else:
-            xpath = '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info/vnfd' % deployment_name
-        xml = self.nso.get(('xpath', xpath)).data_xml
+        xml = self.nso.get(('xpath',
+                            '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info[name="%s"]/vnfd'
+                                % (deployment_name, vnf_name))).data_xml
         xml = etree.fromstring(xml)
         vnfd_id = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd').text
@@ -741,10 +735,7 @@ class CiscoNFVManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
         vnfd = etree.fromstring(vnfd)
 
-        if SEPARATOR in vnf_instance_id:
-            deployment_name, _ = vnf_instance_id.split(SEPARATOR)
-        else:
-            deployment_name = vnf_instance_id
+        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
 
         # Get the VNFR from the NSO
         vnfr = self.nso.get(('xpath',
@@ -919,16 +910,14 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
-        vnf_instance_id = vnf_instance_name
-        self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
-
-        return vnf_instance_id
+        self.vnf_vnfd_mapping[vnf_instance_name] = vnfd_id
+        return '%s%s%s' % (vnf_instance_name, SEPARATOR, vnfd_id)
 
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
-
-        vnfr_xml = self.build_vnfr(vnf_instance_id, flavour_id, instantiation_level_id, additional_param)
+        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        vnfr_xml = self.build_vnfr(deployment_name, flavour_id, instantiation_level_id, additional_param)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_xml)
         except NCClientError as e:
@@ -944,7 +933,7 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operation_occurrence_dict = {
             'operation_type': 'vnf_instantiate',
             'tenant_name': additional_param['tenant'],
-            'deployment_name': vnf_instance_id
+            'deployment_name': deployment_name
         }
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
@@ -953,7 +942,8 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
                       additional_param=None):
-        vnfr_delete_xml = self.build_vnfr_delete(vnf_instance_id, additional_param)
+        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        vnfr_delete_xml = self.build_vnfr_delete(deployment_name, additional_param)
 
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_delete_xml)
@@ -970,7 +960,7 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operation_occurrence_dict = {
             'operation_type': 'vnf_terminate',
             'tenant_name': additional_param['tenant'],
-            'deployment_name': vnf_instance_id
+            'deployment_name': deployment_name
         }
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
@@ -978,7 +968,8 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_delete_id(self, vnf_instance_id):
-        self.vnf_vnfd_mapping.pop(vnf_instance_id)
+        instance_name, _ = vnf_instance_id.split(SEPARATOR)
+        self.vnf_vnfd_mapping.pop(instance_name)
 
     @log_entry_exit(LOG)
     def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
@@ -988,7 +979,8 @@ class CiscoNFVManoAdapter(object):
             'stop': 'STOP'
         }
 
-        vnf_operate_xml = self.build_vnf_operate(vnf_instance_id, etsi_state_esc_action_mapping[change_state_to],
+        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
+        vnf_operate_xml = self.build_vnf_operate(deployment_name, etsi_state_esc_action_mapping[change_state_to],
                                                  additional_param)
 
         try:
@@ -1006,7 +998,7 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operation_occurrence_dict = {
             'operation_type': 'vnf_%s' % change_state_to,
             'tenant_name': additional_param['tenant'],
-            'deployment_name': vnf_instance_id
+            'deployment_name': deployment_name
         }
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
@@ -1259,10 +1251,7 @@ class CiscoNFVManoAdapter(object):
         # TODO We must populate the tenant name in the VnfInfo structure or any other suitable structure
         tenant_name = 'cisco-etsi'
         vnf_instance_id = vnf_info.vnf_instance_id
-        if SEPARATOR in vnf_instance_id:
-            deployment_name, _ = vnf_instance_id.split(SEPARATOR)
-        else:
-            deployment_name = vnf_instance_id
+        deployment_name, _ = vnf_instance_id.split(SEPARATOR)
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             # Get image name from the deployment for the VDU ID of the current VNFC
