@@ -1335,11 +1335,9 @@ class CiscoNFVManoAdapter(object):
         # Compare list of deployed VNFs against the list of VNFs configured in the deployment-flavor of the NSD
         for vnf_info in ns_info.vnf_info:
             vnf_name = vnf_info.vnf_product_name
-            print "Checking vnf %s" % vnf_name
             for nsd_vnf_profile in nsd_vnf_profile_list:
                 vnf_profile_name, vnfd_id = nsd_vnf_profile
                 if vnf_name == vnf_profile_name:
-                    print 'Expected vnfd_id: %s, deployed vnfd_id: %s' % (vnfd_id, vnf_info.vnfd_id)
                     if vnfd_id != vnf_info.vnfd_id:
                         LOG.debug('VNF instance id %s was expected to be deployed according to VNFD %s'
                             % (vnf_info.vnf_instance_id, vnfd_id))
