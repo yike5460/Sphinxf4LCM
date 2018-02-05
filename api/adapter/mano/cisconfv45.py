@@ -728,6 +728,13 @@ class CiscoNFVManoAdapter(object):
         vnfd_xml = netconf_reply.data_xml
         return vnfd_xml
 
+    @log_entry_exit(LOG)
+    def get_nsd(self, nsd_id):
+        netconf_reply = self.nso.get(('xpath', '/nfvo/nsd[id="%s"]' % nsd_id))
+        nsd_xml = netconf_reply.data_xml
+        return nsd_xml
+
+
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
         vnfd_id = vnf_info.vnfd_id
@@ -1190,7 +1197,6 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError(e.message)
 
         ns_info.ns_name = ns_instance_id
-        # ns_info.description =
         ns_info.nsd_id = self.ns_nsd_mapping[ns_instance_id]
         ns_info.ns_state = constants.NS_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'][nso_ns_deployment_state]
 
@@ -1298,5 +1304,47 @@ class CiscoNFVManoAdapter(object):
             if not self.validate_vnf_allocated_vresources(vnf_instance_id, additional_param):
                 LOG.debug('For VNF instance id %s expected resources do not match the actual ones' % vnf_instance_id)
                 return False
+
+        return True
+
+    @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        nsd_id = ns_info.nsd_id
+        ns_deployment_flavor = ns_info.flavor_id
+        nsd = self.get_nsd(nsd_id)
+        nsd = etree.fromstring(nsd)
+        nsd_vnf_profile_list = list()
+
+        # Get list of VNFs and corresponding VNFDs according to the deployment-flavor configured in the NSD
+        deployment_flavor_all = nsd.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nfvo'
+                                             '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd'
+                                             '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor')
+        for deployment_flavor in deployment_flavor_all:
+            nsd_deployment_flavor_id = deployment_flavor.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+            if ns_deployment_flavor == nsd_deployment_flavor_id:
+                vnf_profile_list_xml = deployment_flavor.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                                             'vnf-profile')
+                for vnf_profile in vnf_profile_list_xml:
+                    vnf_profile_name = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
+                    vnfd_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd')
+                    if vnf_profile_name is not None and vnfd_id is not None:
+                        nsd_vnf_profile_list.append((vnf_profile_name.text, vnfd_id.text))
+                break
+
+        # Compare list of deployed VNFs against the list of VNFs configured in the deployment-flavor of the NSD
+        for vnf_info in ns_info.vnf_info:
+            vnf_name = vnf_info.vnf_product_name
+            print "Checking vnf %s" % vnf_name
+            for nsd_vnf_profile in nsd_vnf_profile_list:
+                vnf_profile_name, vnfd_id = nsd_vnf_profile
+                if vnf_name == vnf_profile_name:
+                    print 'Expected vnfd_id: %s, deployed vnfd_id: %s' % (vnfd_id, vnf_info.vnfd_id)
+                    if vnfd_id != vnf_info.vnfd_id:
+                        LOG.debug('VNF instance id %s was expected to be deployed according to VNFD %s'
+                            % (vnf_info.vnf_instance_id, vnfd_id))
+                        return False
+                else:
+                    continue
 
         return True
