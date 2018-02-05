@@ -25,7 +25,7 @@ VNFR_TEMPLATE = '''
                     <esc>%(esc)s</esc>
                     <username>%(username)s</username>
                     <vnf-info>
-                        <name>%(vnfd_id)s</name>
+                        <name>%(vnf_name)s</name>
                         <vnfd>%(vnfd_id)s</vnfd>
                         <vnfd-flavor>%(vnfd_flavor)s</vnfd-flavor>
                         <instantiation-level>%(instantiation_level)s</instantiation-level>
@@ -727,7 +727,6 @@ class CiscoNFVManoAdapter(object):
         nsd_xml = netconf_reply.data_xml
         return nsd_xml
 
-
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
         vnfd_id = vnf_info.vnfd_id
@@ -866,15 +865,13 @@ class CiscoNFVManoAdapter(object):
         return vl_list_xml
 
     @log_entry_exit(LOG)
-    def build_vnfr(self, vnf_instance_id, vnfd_id, flavour_id, instantiation_level_id, additional_param):
-        # TODO: Rename vnf_instance_id param to deployment_name
-        # TODO: Add vnf_name to template
-
+    def build_vnfr(self, deployment_name, vnf_name, vnfd_id, flavour_id, instantiation_level_id, additional_param):
         vnfr_template_values = {
             'tenant': additional_param['tenant'],
-            'deployment_name': vnf_instance_id,
+            'deployment_name': deployment_name,
             'esc': additional_param['esc'],
             'username': additional_param['username'],
+            'vnf_name': vnf_name,
             'vnfd_id': vnfd_id,
             'vnfd_flavor': flavour_id,
             'instantiation_level': instantiation_level_id,
@@ -925,9 +922,10 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
-        deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         vnfd_id = self.vnf_vnfd_mapping[vnf_instance_id]
-        vnfr_xml = self.build_vnfr(deployment_name, vnfd_id, flavour_id, instantiation_level_id, additional_param)
+        vnfr_xml = self.build_vnfr(deployment_name, vnf_name, vnfd_id, flavour_id, instantiation_level_id,
+                                   additional_param)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_xml)
         except NCClientError as e:
