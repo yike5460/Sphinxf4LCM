@@ -200,7 +200,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         LOG.info('Verifying that the remaining VNFC instance(s) are still running and reachable via the management'
                  ' network')
         for vnf_info in ns_info.vnf_info:
-            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
+            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                              self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
                 if not ping(mgmt_addr):
                     raise TestRunError('Unable to PING IP address %s belonging to %s'

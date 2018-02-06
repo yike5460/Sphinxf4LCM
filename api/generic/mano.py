@@ -1368,11 +1368,11 @@ class Mano(object):
                 return vnf_info.vnf_instance_id
 
     @log_entry_exit(LOG)
-    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         """
         This function retrieves the management addresses of the VNFCs that belong to the VNF with the given instance ID.
 
         :param vnf_instance_id: Identifier of the VNF instance.
         :return:                List of management addresses.
         """
-        return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id)
+        return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id, additional_param)

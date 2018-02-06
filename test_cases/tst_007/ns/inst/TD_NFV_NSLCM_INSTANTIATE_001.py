@@ -87,6 +87,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
                                              'additional_param': self.tc_input['mano'].get('query_params')})
         for vnf_info in ns_info.vnf_info:
+
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -103,7 +104,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
         for vnf_info in ns_info.vnf_info:
-            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
+            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                              self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
                 if not ping(mgmt_addr):
                     raise TestRunError('Unable to PING IP address %s belonging to %s'
@@ -139,7 +141,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         if 'left_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['left_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)[0]
+                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                 self.tc_input['mano'].get('query_params'))[0]
                     self.tc_input['traffic']['traffic_config']['left_port_location'] = dest_addr + \
                                                                                        self.tc_input['traffic'][
                                                                                            'traffic_config'][
@@ -148,7 +151,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         if 'right_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['right_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)[0]
+                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                 self.tc_input['mano'].get('query_params'))[0]
                     self.tc_input['traffic']['traffic_config']['right_port_location'] = dest_addr + \
                                                                                        self.tc_input['traffic'][
                                                                                            'traffic_config'][

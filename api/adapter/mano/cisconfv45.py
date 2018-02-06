@@ -1347,3 +1347,75 @@ class CiscoNFVManoAdapter(object):
                     continue
 
         return True
+
+    @log_entry_exit(LOG)
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
+        mgmt_addr_list = list()
+        vm_group_list = list()
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
+        # Get vnfd corresponding to this VNF instance
+        tenant_name = additional_param['tenant']
+        filter = {'vnf_instance_id': vnf_instance_id,
+                  'additional_param': {'tenant': tenant_name}}
+        vnf_info = self.vnf_query(filter=filter)
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+        vnfd_xml = etree.fromstring(vnfd)
+
+        # Finding the external-connection-point descriptor that is used by the VNF as management interface
+        ecpd_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                     'external-connection-point-descriptor')
+        for ecpd in ecpd_list:
+            ecpd_mgmt = ecpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}management')
+            if ecpd_mgmt is not None:
+                cpd_mgmt = ecpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+                break
+
+        # Finding the interface id used for management for each VNFC of this VNF
+        vdu_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu')
+        for vdu in vdu_list:
+            vdu_id =  vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
+            if vdu_id is None:
+                continue
+            vdu_id = vdu_id.text
+            icpd_list = vdu.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                    'internal-connection-point-descriptor')
+            for icpd in icpd_list:
+                ecpd = icpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                 'external-connection-point-descriptor')
+                if ecpd is None:
+                    continue
+                ecpd = ecpd.text
+                interface_id = icpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id').text
+                if ecpd == cpd_mgmt:
+                    vm_group_list.append(('%s-%s' % (vnf_name, vdu_id), interface_id))
+                    break
+
+        # Get management address for each VNFC from the ESC
+        for vm_group in vm_group_list:
+            vm_group_name, interface_id = vm_group
+            try:
+                vm_group_xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]'
+                                    '/vm_group[name="%s"]' %
+                                    (tenant_name, deployment_name, vm_group_name))).data_xml
+                vm_group_xml = etree.fromstring(vm_group_xml)
+                vm_instance_list = vm_group_xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance')
+                for vm_instance in vm_instance_list:
+                    interface_list = vm_instance.findall('.//{http://www.cisco.com/esc/esc}interfaces')
+                    for interface in interface_list:
+                        nicid = interface.find('.//{http://www.cisco.com/esc/esc}nicid').text
+                        if nicid == interface_id:
+                            ip_address = vm_instance.find('.//{http://www.cisco.com/esc/esc}ip_address').text
+                            mgmt_addr_list.append(ip_address)
+                            break
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.debug('Management IP address not available for vm_group %s' % vm_group[0])
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+        return mgmt_addr_list

@@ -159,7 +159,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         if 'left_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['left_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)[0]
+                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                 self.tc_input['mano'].get('query_params'))[0]
                     self.tc_input['traffic']['traffic_config']['left_port_location'] = dest_addr + \
                                                                                        self.tc_input['traffic'][
                                                                                            'traffic_config'][
@@ -168,7 +169,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         if 'right_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['right_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)[0]
+                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                 self.tc_input['mano'].get('query_params'))[0]
                     self.tc_input['traffic']['traffic_config']['right_port_location'] = dest_addr + \
                                                                                        self.tc_input['traffic'][
                                                                                            'traffic_config'][
