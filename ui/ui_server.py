@@ -969,7 +969,7 @@ def additional_update():
     confirmed = request.forms.get('confirmed')
     if confirmed == 'yes':
         scaling_policy_name = request.forms.get('scaling_policy_name')
-        desired_scale_out_steps = int(request.forms.get('desired_scale_out_steps'))
+        desired_scale_out_steps = int(request.forms.get('desired_scale_out_steps') or 0)
         operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         vnf_instantiate_timeout = int(request.forms.get('vnf_instantiate_timeout'))
         vnf_scale_out_timeout = int(request.forms.get('vnf_scale_out_timeout'))
