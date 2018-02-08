@@ -103,6 +103,12 @@ VNF_OPERATE_TEMPLATE = '''
     <serviceVersion>-</serviceVersion>
 </serviceAction>'''
 
+VM_OPERATE_TEMPLATE = '''
+<vmAction xmlns="http://www.cisco.com/esc/esc">
+    <actionType>%(action)s</actionType>
+    <vmName>%(vm_name)s</vmName>
+</vmAction>'''
+
 NSR_TEMPLATE = '''
 <config>
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
@@ -536,10 +542,14 @@ class CiscoNFVManoAdapter(object):
             else:
                 return constants.OPERATION_SUCCESS
 
+        # TODO: implement for 'vm_start' and 'vm_stop'
+
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
     def get_vnf_deployment_state(self, vm_group_list, deployment_name):
+    # TODO: should receive additional_param, for consistency
+
         # If the VM group list is empty, report the VNF instantiation state as NOT_INSTANTIATED.
         if vm_group_list == list():
             return constants.VNF_NOT_INSTANTIATED
@@ -569,6 +579,8 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_service_state(self, vm_group_list, tenant_name, deployment_name):
+    #TODO: should receive additional_param, for consistency
+
         # If the VM group list is empty, report the VNF state as STOPPED.
         if vm_group_list == list():
             raise CiscoNFVManoAdapterError('Cannot get VNF state for empty VM group in deployment %s' % deployment_name)
@@ -585,7 +597,8 @@ class CiscoNFVManoAdapter(object):
 
         # If all VMs' state status is 'VM_ALIVE_STATE' report the VNF instantiation state as instantiated.
         for vm_group in vm_group_list:
-            # Get all VM instance name belonging to the current VM grou
+            # Get all VM instance name belonging to the current VM group
+            # TODO: we should build a function for this code
             vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
                                        '[{http://www.cisco.com/esc/esc}name="%s"]/'
                                        '{http://www.cisco.com/esc/esc}vm_instance'
@@ -977,6 +990,17 @@ class CiscoNFVManoAdapter(object):
         return vnf_operate_xml
 
     @log_entry_exit(LOG)
+    def build_vm_operate(self, vm_name, action):
+        vm_operate_template_values = {
+            'vm_name': vm_name,
+            'action': action
+        }
+
+        vm_operate_xml = VM_OPERATE_TEMPLATE % vm_operate_template_values
+
+        return vm_operate_xml
+
+    @log_entry_exit(LOG)
     def generate_vnf_instance_id(self, deployment_name, vnf_name):
         vnf_instance_id = str(uuid.uuid3(uuid.NAMESPACE_OID, '%s-%s' % (deployment_name, vnf_name)))
         self.vnf_instance_id_metadata[vnf_instance_id] = deployment_name, vnf_name
@@ -1061,20 +1085,42 @@ class CiscoNFVManoAdapter(object):
         }
 
         deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
+
+        # DO NOT delete, keep for reference
         vnf_operate_xml = self.build_vnf_operate(deployment_name, etsi_state_esc_action_mapping[change_state_to],
                                                  additional_param)
 
-        try:
-            netconf_reply = self.esc.dispatch(rpc_command=etree.fromstring(vnf_operate_xml))
-        except NCClientError as e:
-            LOG.exception(e)
-            raise CiscoNFVManoAdapterError(e.message)
+        xml = self.esc.get(('xpath',
+                            '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]'
+                            % (additional_param['tenant'], deployment_name))).data_xml
+        xml = etree.fromstring(xml)
 
-        if '<ok/>' not in netconf_reply.xml:
-            raise CiscoNFVManoAdapterError('ESC replied with an error')
+        vm_group_list = self.get_vm_groups_for_vnf(vnf_instance_id, additional_param)
+        vm_name_list = []
+        for vm_group in vm_group_list:
+            # Get all VM instance name belonging to the current VM group
+            # TODO: we should build a function for this code
+            vm_name_list += xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
+                                       '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                       '{http://www.cisco.com/esc/esc}vm_instance'
+                                       '/{http://www.cisco.com/esc/esc}name' % vm_group)
 
-        LOG.debug('NSO reply: %s' % netconf_reply.xml)
+        for vm_name in vm_name_list:
+            vm_operate_xml = self.build_vm_operate(vm_name.text, etsi_state_esc_action_mapping[change_state_to])
+            # TODO: can we send all XMLs in one request?
 
+            try:
+                netconf_reply = self.esc.dispatch(rpc_command=etree.fromstring(vm_operate_xml))
+            except NCClientError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            if '<ok/>' not in netconf_reply.xml:
+                raise CiscoNFVManoAdapterError('ESC replied with an error')
+
+            LOG.debug('ESC reply: %s' % netconf_reply.xml)
+
+        # TODO: must return multiple operations (like ns_update)
         lifecycle_operation_occurrence_id = uuid.uuid4()
         lifecycle_operation_occurrence_dict = {
             'operation_type': 'vnf_%s' % change_state_to,
