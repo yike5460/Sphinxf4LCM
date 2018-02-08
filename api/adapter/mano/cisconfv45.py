@@ -228,8 +228,9 @@ class CiscoNFVManoAdapter(object):
         else:
             operation_details = self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id]
             operation_type = operation_details['operation_type']
-            tenant_name = operation_details['tenant_name']
-            deployment_name = operation_details['deployment_name']
+            tenant_name = operation_details.get('tenant_name')
+            deployment_name = operation_details.get('deployment_name')
+            # TODO: not all operations have the same structure (maybe we need to extract values inside each 'if')
 
         if operation_type == 'vnf_instantiate':
             # Get the NSO VNF deployment state for the 'self' component
@@ -524,7 +525,18 @@ class CiscoNFVManoAdapter(object):
                     except AttributeError:
                         return constants.OPERATION_SUCCESS
 
-        raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
+        if operation_type == 'multiple_operations':
+            operation_list = operation_details['resource_id']
+            operation_status_list = map(self.get_operation_status, operation_list)
+
+            if constants.OPERATION_FAILED in operation_status_list:
+                return constants.OPERATION_FAILED
+            elif constants.OPERATION_PENDING in operation_status_list:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_SUCCESS
+
+        raise CiscoNFVManoAdapterError('Cannot get operation status for operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
     def get_vnf_deployment_state(self, vm_group_list, deployment_name):
@@ -1527,3 +1539,32 @@ class CiscoNFVManoAdapter(object):
                 raise CiscoNFVManoAdapterError(e.message)
 
         return mgmt_addr_list
+
+    @log_entry_exit(LOG)
+    def ns_update(self, ns_instance_id, update_type, add_vnf_instance=None, remove_vnf_instance_id=None,
+                  instantiate_vnf_data=None, change_vnf_flavour_data=None, operate_vnf_data=None,
+                  modify_vnf_info_data=None, change_ext_vnf_connectivity_data=None, add_sap=None, remove_sap_id=None,
+                  add_nested_ns_id=None, remove_nested_ns_id=None, assoc_new_nsd_version_data=None,
+                  move_vnf_instance_data=None, add_vnffg=None, remove_vnffg_id=None, update_vnffg=None,
+                  change_ns_flavour_data=None, update_time=None):
+        if update_type == 'OperateVnf':
+            operation_list = []
+            for update_data in operate_vnf_data:
+                vnf_instance_id = update_data.vnf_instance_id
+                change_state_to = update_data.change_state_to
+                stop_type = update_data.stop_type
+                graceful_stop_timeout = update_data.graceful_stop_timeout
+                additional_param = update_data.additional_param
+                operation_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout,
+                                                additional_param)
+                operation_list.append(operation_id)
+
+            lifecycle_operation_occurrence_id = uuid.uuid4()
+            lifecycle_operation_occurrence_dict = {
+                'operation_type': 'multiple_operations',
+                'resource_id': operation_list
+            }
+            self.lifecycle_operation_occurrence_ids[
+                lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+            return lifecycle_operation_occurrence_id
