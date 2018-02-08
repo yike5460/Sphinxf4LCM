@@ -277,7 +277,7 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_vresource_state(self, vnf_instance_id):
+    def validate_vnf_vresource_state(self, vnf_instance_id, additional_param=None):
         """
         This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM
 
@@ -288,7 +288,8 @@ class Mano(object):
 
         VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
                                     constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                          'additional_param': additional_param})
         vnf_state = vnf_info.instantiated_vnf_info.vnf_state
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
