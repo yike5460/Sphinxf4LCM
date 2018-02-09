@@ -26,7 +26,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
        end-to-end functional test
     """
 
-    REQUIRED_APIS = ('mano', 'traffic', )
+    REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'operate_vnf_data')
     TESTCASE_EVENTS = ('instantiate_ns', 'ns_update_stop_vnf', 'ns_update_start_vnf')
 
@@ -94,6 +94,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                 vnf_data = OperateVnfData()
                 vnf_data.vnf_instance_id = vnf_info.vnf_instance_id
                 vnf_data.change_state_to = 'stop'
+                vnf_data.additional_param = self.tc_input['mano'].get('operate_params')
                 operate_vnf_data_list.append(vnf_data)
 
         self.time_record.START('ns_update_stop_vnf')
