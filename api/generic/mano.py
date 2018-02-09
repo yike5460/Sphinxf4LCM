@@ -602,17 +602,19 @@ class Mano(object):
         return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
     @log_entry_exit(LOG)
-    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None):
+    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None, additional_param=None):
         """
         This function synchronously terminates an NS and deletes its instance ID.
 
-        :param ns_instance_id:  Identifier of the NS instance to terminate.
-        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
-                                automatically at this timestamp.
-        :return:                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
+        :param ns_instance_id:      Identifier of the NS instance to terminate.
+        :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                    automatically at this timestamp.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
+                                    specific to the NS being terminated.
+        :return:                    'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
 
-        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time)
+        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
@@ -622,17 +624,19 @@ class Mano(object):
         self.ns_delete_id(ns_instance_id)
 
     @log_entry_exit(LOG)
-    def ns_terminate_sync(self, ns_instance_id, terminate_time=None):
+    def ns_terminate_sync(self, ns_instance_id, terminate_time=None, additional_param=None):
         """
         This function synchronously terminates an NS.
 
-        :param ns_instance_id:  Identifier of the NS instance to terminate.
-        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
-                                automatically at this timestamp.
-        :return:                Operation status.
+        :param ns_instance_id:      Identifier of the NS instance to terminate.
+        :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                    automatically at this timestamp.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
+                                    specific to the NS being terminated.
+        :return:                    Operation status.
         """
 
-        lifecycle_operation_occurrence_id = self.ns_terminate(ns_instance_id, terminate_time)
+        lifecycle_operation_occurrence_id = self.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
