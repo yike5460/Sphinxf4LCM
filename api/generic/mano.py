@@ -282,6 +282,7 @@ class Mano(object):
         This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM
 
         :param vnf_instance_id:     Vnf Instance ID value.
+        :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the the VNF state in the VNFM matches the state indicated by the VIM,
                                     False otherwise
         """
