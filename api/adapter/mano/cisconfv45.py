@@ -1415,10 +1415,8 @@ class CiscoNFVManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def verify_vnf_sw_images(self, vnf_info):
-
-        # TODO We must populate the tenant name in the VnfInfo structure or any other suitable structure
-        tenant_name = 'cisco-etsi'
+    def verify_vnf_sw_images(self, vnf_info, additional_param=None):
+        tenant_name = additional_param['tenant']
         vnf_instance_id = vnf_info.vnf_instance_id
         deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
 

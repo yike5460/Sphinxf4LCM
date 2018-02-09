@@ -1331,7 +1331,7 @@ class Mano(object):
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-        return self.mano_adapter.verify_vnf_sw_images(vnf_info)
+        return self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
     def verify_ns_sw_images(self, ns_instance_id, additional_param=None):
@@ -1345,7 +1345,7 @@ class Mano(object):
         """
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         for vnf_info in ns_info.vnf_info:
-            if not self.mano_adapter.verify_vnf_sw_images(vnf_info):
+            if not self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param):
                 LOG.error('Not all VNFCs in VNF with instance ID %s use the correct images' % vnf_info.vnf_instance_id)
                 return False
         return True
