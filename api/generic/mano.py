@@ -583,20 +583,23 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def ns_terminate(self, ns_instance_id, terminate_time=None):
+    def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
         """
         This function terminates an NS.
 
-        This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+        This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10). The
+        additional_param inout is not part of the standard specification.
 
-        :param ns_instance_id:  Identifier of the NS instance to terminate.
-        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
-                                automatically at this timestamp.
-        :return:                Identifier of the NS lifecycle operation occurrence.
+        :param ns_instance_id:      Identifier of the NS instance to terminate.
+        :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                    automatically at this timestamp.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
+                                    specific to the NS being terminated.
+        :return:                    Identifier of the NS lifecycle operation occurrence.
 
         """
 
-        return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time)
+        return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
     @log_entry_exit(LOG)
     def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None):
