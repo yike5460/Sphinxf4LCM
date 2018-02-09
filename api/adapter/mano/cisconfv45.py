@@ -234,11 +234,11 @@ class CiscoNFVManoAdapter(object):
         else:
             operation_details = self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id]
             operation_type = operation_details['operation_type']
-            tenant_name = operation_details.get('tenant_name')
-            deployment_name = operation_details.get('deployment_name')
-            # TODO: not all operations have the same structure (maybe we need to extract values inside each 'if')
 
         if operation_type == 'vnf_instantiate':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
             # Get the NSO VNF deployment state for the 'self' component
             try:
                 xml = self.nso.get(('xpath',
@@ -291,6 +291,9 @@ class CiscoNFVManoAdapter(object):
             return constants.OPERATION_FAILED
 
         if operation_type == 'vnf_terminate':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
             # To check that the VNF was un-deployed, try to retrieve the VNF deployment name until the AttributeError
             # exception is raised. Do this first on the ESC. When the ESC reports that the VNF was un-deployed, check on
             # the NSO.
@@ -336,11 +339,14 @@ class CiscoNFVManoAdapter(object):
                     return constants.OPERATION_SUCCESS
 
         if operation_type == 'vnf_stop':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
             # Try to retrieve the VNF deployment name from the ESC.
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                        'deployments[deployment_name="%s"]/''state_machine/state' %
+                                        'deployments[deployment_name="%s"]/state_machine/state' %
                                         (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
@@ -362,11 +368,14 @@ class CiscoNFVManoAdapter(object):
                 raise CiscoNFVManoAdapterError(e.message)
 
         if operation_type == 'vnf_start':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
             # Try to retrieve the VNF deployment name from the ESC.
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                        'deployments[deployment_name="%s"]/''state_machine/state' %
+                                        'deployments[deployment_name="%s"]/state_machine/state' %
                                         (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vnf_deployment_state = xml.find(
@@ -388,6 +397,9 @@ class CiscoNFVManoAdapter(object):
                 raise CiscoNFVManoAdapterError(e.message)
 
         if operation_type == 'ns_instantiate':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
             # Get the NSO NS deployment state for the 'self' component
             try:
                 xml = self.nso.get(('xpath',
@@ -467,6 +479,9 @@ class CiscoNFVManoAdapter(object):
             return constants.OPERATION_FAILED
 
         if operation_type == 'ns_terminate':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+
             # To check that the NS was un-deployed, try to retrieve the NS deployment name until the AttributeError
             # exception is raised. Do this first on the ESC. When the ESC reports that the deployment was un-deployed,
             # check that the NSO reports both the deployment state and NS deployment state as un-deployed.
@@ -530,6 +545,66 @@ class CiscoNFVManoAdapter(object):
                         raise CiscoNFVManoAdapterError(e.message)
                     except AttributeError:
                         return constants.OPERATION_SUCCESS
+
+        if operation_type == 'vm_start':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+            vm_name = operation_details['vm_name']
+
+            # Try to retrieve the VM state machines from the ESC.
+            try:
+                xml = self.esc.get(('xpath', '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                                'deployments[deployment_name="%s"]/state_machine/vm_state_machines'
+                                                % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_vm_state_machine = xml.find('.//{http://www.cisco.com/esc/esc}vm_state_machine'
+                                                '[{http://www.cisco.com/esc/esc}vm_name="%s"]/'
+                                                '{http://www.cisco.com/esc/esc}state' % vm_name).text
+                LOG.debug('State reported by ESC for VM with name %s: "%s"; expected: "%s"'
+                          % (vm_name, esc_vm_state_machine, 'VM_ALIVE_STATE'))
+                if esc_vm_state_machine == 'VM_ALIVE_STATE':
+                    return constants.OPERATION_SUCCESS
+                elif esc_vm_state_machine == 'VM_ERROR_STATE':
+                    return constants.OPERATION_FAILED
+                else:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+        if operation_type == 'vm_stop':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+            vm_name = operation_details['vm_name']
+
+            # Try to retrieve the VM state machines from the ESC.
+            try:
+                xml = self.esc.get(('xpath', '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                                'deployments[deployment_name="%s"]/state_machine/vm_state_machines'
+                                                % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                esc_vm_state_machine = xml.find('.//{http://www.cisco.com/esc/esc}vm_state_machine'
+                                                '[{http://www.cisco.com/esc/esc}vm_name="%s"]/'
+                                                '{http://www.cisco.com/esc/esc}state' % vm_name).text
+                LOG.debug('State reported by ESC for VM with name %s: "%s"; expected: "%s"'
+                          % (vm_name, esc_vm_state_machine, 'VM_SHUTOFF_STATE'))
+                if esc_vm_state_machine == 'VM_SHUTOFF_STATE':
+                    return constants.OPERATION_SUCCESS
+                elif esc_vm_state_machine == 'VM_ERROR_STATE':
+                    return constants.OPERATION_FAILED
+                else:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
 
         if operation_type == 'multiple_operations':
             operation_list = operation_details['resource_id']
@@ -1095,10 +1170,11 @@ class CiscoNFVManoAdapter(object):
         for vm_group in vm_group_list:
             # Get all VM instance name belonging to the current VM group
             vm_name_list += xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
-                                       '[{http://www.cisco.com/esc/esc}name="%s"]/'
-                                       '{http://www.cisco.com/esc/esc}vm_instance'
-                                       '/{http://www.cisco.com/esc/esc}name' % vm_group)
+                                        '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                        '{http://www.cisco.com/esc/esc}vm_instance'
+                                        '/{http://www.cisco.com/esc/esc}name' % vm_group)
 
+        operation_list = []
         for vm_name in vm_name_list:
             vm_operate_xml = self.build_vm_operate(vm_name.text, etsi_state_esc_action_mapping[change_state_to])
 
@@ -1113,16 +1189,26 @@ class CiscoNFVManoAdapter(object):
 
             LOG.debug('ESC reply: %s' % netconf_reply.xml)
 
-        # TODO: must return multiple operations (like ns_update)
-        lifecycle_operation_occurrence_id = uuid.uuid4()
-        lifecycle_operation_occurrence_dict = {
-            'operation_type': 'vnf_%s' % change_state_to,
-            'tenant_name': additional_param['tenant'],
-            'deployment_name': deployment_name
-        }
-        self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+            lifecycle_operation_occurrence_id = uuid.uuid4()
+            lifecycle_operation_occurrence_dict = {
+                'operation_type': 'vm_%s' % change_state_to,
+                'vm_name': vm_name.text,
+                'tenant_name': additional_param['tenant'],
+                'deployment_name': deployment_name
+            }
+            self.lifecycle_operation_occurrence_ids[
+                lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+            operation_list.append(lifecycle_operation_occurrence_id)
 
-        return lifecycle_operation_occurrence_id
+        lifecycle_operations_occurrence_id = uuid.uuid4()
+        lifecycle_operations_occurrence_dict = {
+            'operation_type': 'multiple_operations',
+            'resource_id': operation_list
+        }
+        self.lifecycle_operation_occurrence_ids[
+            lifecycle_operations_occurrence_id] = lifecycle_operations_occurrence_dict
+
+        return lifecycle_operations_occurrence_id
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
