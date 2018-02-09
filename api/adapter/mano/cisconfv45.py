@@ -1404,9 +1404,7 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operation_occurrence_id = uuid.uuid4()
         lifecycle_operation_occurrence_dict = {
             'operation_type': 'ns_terminate',
-            # TODO: ns_terminate does not have additional_param input as per IFA 13 v2.3.1. Find a way to pass the
-            # tenant as input
-            'tenant_name': 'cisco-etsi',
+            'tenant_name': additional_param['tenant'],
             'deployment_name': ns_instance_id
         }
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
@@ -1519,41 +1517,45 @@ class CiscoNFVManoAdapter(object):
         mgmt_addr_list = list()
         vm_group_list = list()
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
-        # Get vnfd corresponding to this VNF instance
+
+        # Get the VNFD corresponding to this VNF instance
         tenant_name = additional_param['tenant']
-        filter = {'vnf_instance_id': vnf_instance_id,
-                  'additional_param': {'tenant': tenant_name}}
-        vnf_info = self.vnf_query(filter=filter)
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                          'additional_param': {'tenant': tenant_name}})
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
         vnfd_xml = etree.fromstring(vnfd)
 
         # Finding the external-connection-point descriptor that is used by the VNF as management interface
-        ecpd_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                     'external-connection-point-descriptor')
-        for ecpd in ecpd_list:
-            ecpd_mgmt = ecpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}management')
-            if ecpd_mgmt is not None:
-                cpd_mgmt = ecpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+        ext_cpd_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                        'external-connection-point-descriptor')
+        for ext_cpd in ext_cpd_list:
+            ext_cpd_mgmt = ext_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}management')
+            if ext_cpd_mgmt is not None:
+                cpd_mgmt = ext_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
                 break
+
+        if ext_cpd_mgmt is None:
+            raise CiscoNFVManoAdapterError('VNF with instance ID %s does not have and external connection point'
+                                           % vnf_instance_id)
 
         # Finding the interface id used for management for each VNFC of this VNF
         vdu_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu')
         for vdu in vdu_list:
-            vdu_id =  vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
+            vdu_id = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
             if vdu_id is None:
                 continue
             vdu_id = vdu_id.text
-            icpd_list = vdu.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                    'internal-connection-point-descriptor')
-            for icpd in icpd_list:
-                ecpd = icpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                 'external-connection-point-descriptor')
-                if ecpd is None:
+            int_cpd_list = vdu.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                       'internal-connection-point-descriptor')
+            for int_cpd in int_cpd_list:
+                ext_cpd = int_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                       'external-connection-point-descriptor')
+                if ext_cpd is None:
                     continue
-                ecpd = ecpd.text
-                interface_id = icpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id').text
-                if ecpd == cpd_mgmt:
+                ext_cpd = ext_cpd.text
+                interface_id = int_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id').text
+                if ext_cpd == cpd_mgmt:
                     vm_group_list.append(('%s-%s' % (vnf_name, vdu_id), interface_id))
                     break
 
@@ -1562,9 +1564,9 @@ class CiscoNFVManoAdapter(object):
             vm_group_name, interface_id = vm_group
             try:
                 vm_group_xml = self.esc.get(('xpath',
-                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]'
-                                    '/vm_group[name="%s"]' %
-                                    (tenant_name, deployment_name, vm_group_name))).data_xml
+                                             '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                                'deployments[deployment_name="%s"]/vm_group[name="%s"]'
+                                                % (tenant_name, deployment_name, vm_group_name))).data_xml
                 vm_group_xml = etree.fromstring(vm_group_xml)
                 vm_instance_list = vm_group_xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance')
                 for vm_instance in vm_instance_list:
