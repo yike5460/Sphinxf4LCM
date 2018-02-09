@@ -64,7 +64,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
-                                  terminate_time=self.tc_input.get('terminate_time'))
+                                  terminate_time=self.tc_input.get('terminate_time'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
