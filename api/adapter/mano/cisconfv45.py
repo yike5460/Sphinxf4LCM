@@ -598,7 +598,6 @@ class CiscoNFVManoAdapter(object):
         # If all VMs' state status is 'VM_ALIVE_STATE' report the VNF instantiation state as instantiated.
         for vm_group in vm_group_list:
             # Get all VM instance name belonging to the current VM group
-            # TODO: we should build a function for this code
             vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
                                        '[{http://www.cisco.com/esc/esc}name="%s"]/'
                                        '{http://www.cisco.com/esc/esc}vm_instance'
@@ -1045,7 +1044,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
                       additional_param=None):
-        # TODO: Deletes entire deployment, not only one VNF!
+        LOG.debug('This function deletes the entire deployment! It should be used only in VNF lifecycle tests!')
 
         deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
         vnfr_delete_xml = self.build_vnfr_delete(deployment_name, additional_param)
@@ -1095,7 +1094,6 @@ class CiscoNFVManoAdapter(object):
         vm_name_list = []
         for vm_group in vm_group_list:
             # Get all VM instance name belonging to the current VM group
-            # TODO: we should build a function for this code
             vm_name_list += xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
                                        '[{http://www.cisco.com/esc/esc}name="%s"]/'
                                        '{http://www.cisco.com/esc/esc}vm_instance'
