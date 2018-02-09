@@ -143,7 +143,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
                  ' querying the VIM')
         for vnf_data in operate_vnf_data_list:
-            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id):
+            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id,
+                                                          self.tc_input['mano'].get('query_params')):
                 raise TestRunError('Target VNF %s compute resources have not been started' % vnf_data.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
