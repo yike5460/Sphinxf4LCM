@@ -1086,10 +1086,6 @@ class CiscoNFVManoAdapter(object):
 
         deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
 
-        # DO NOT delete, keep for reference
-        vnf_operate_xml = self.build_vnf_operate(deployment_name, etsi_state_esc_action_mapping[change_state_to],
-                                                 additional_param)
-
         xml = self.esc.get(('xpath',
                             '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]'
                             % (additional_param['tenant'], deployment_name))).data_xml
@@ -1107,7 +1103,6 @@ class CiscoNFVManoAdapter(object):
 
         for vm_name in vm_name_list:
             vm_operate_xml = self.build_vm_operate(vm_name.text, etsi_state_esc_action_mapping[change_state_to])
-            # TODO: can we send all XMLs in one request?
 
             try:
                 netconf_reply = self.esc.dispatch(rpc_command=etree.fromstring(vm_operate_xml))
