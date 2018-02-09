@@ -617,8 +617,6 @@ class CiscoNFVManoAdapter(object):
             else:
                 return constants.OPERATION_SUCCESS
 
-        # TODO: implement for 'vm_start' and 'vm_stop'
-
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
