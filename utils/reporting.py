@@ -106,8 +106,10 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
                     t_inside['Expected size'].add_row([resource_size])
                     t_inside['Actual size'].add_row([resource_size])
                     t_inside['Validation'].add_row(['OK'])
-                for t_in in t_inside.values():
-                    row.append(t_in)
+                row.append(t_inside['Resource type'])
+                row.append(t_inside['Expected size'])
+                row.append(t_inside['Actual size'])
+                row.append(t_inside['Validation'])
                 t_outside.add_row(row)
         report_file.write(t_outside.get_string())
         report_file.write('\n\n')
