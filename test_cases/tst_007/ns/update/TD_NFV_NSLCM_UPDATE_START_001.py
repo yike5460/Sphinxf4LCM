@@ -15,15 +15,22 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
     TD_NFV_NSLCM_UPDATE_START_001 Verify the capability to start a VNF instance inside a NS instance
 
     Sequence:
-    1. Trigger NS instantiation on the NFVO
-    2. Verify that the NS is instantiated
-    3. Trigger the NFVO to stop the target VNF instance inside the NS
-    4. Trigger the NFVO to start the target VNF instance inside the NS instance
-    5. Verify that the VNF instance operational state on the VNFM is indicated as "started"
-    6. Verify that the compute resources allocated to the target VNF instance have been started by querying the VIM
-    7. Verify that the NFVO shows no "operate VNF" operation errors
-    8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running the
-       end-to-end functional test
+    1.  Trigger NS instantiation on the NFVO
+    2.  Verify that the NS is instantiated
+    3.  Trigger the NFVO to stop the target VNF instance inside the NS
+    4.  Verify that the VNF instance operational state on the VNFM is indicated as "stopped"
+    5.  Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have been
+        stopped by querying the VIM
+    6.  Verify that other existing compute resources have not been affected by the performed operation by querying the
+        VIM
+    7.  Trigger the NFVO to start the target VNF instance inside the NS instance
+    8.  Verify that the VNF instance operational state on the VNFM is indicated as "started"
+    9.  Verify that the compute resources allocated to the target VNF instance have been started by querying the VIM
+    10. Verify that other existing compute resources have not been affected by the performed operation by querying the
+        VIM
+    11. Verify that the NFVO shows no "operate VNF" operation errors
+    12. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running the
+        end-to-end functional test
     """
 
     REQUIRED_APIS = ('mano', 'traffic', )
@@ -108,7 +115,45 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.tc_result['events']['ns_update_stop_vnf']['details'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Trigger the NFVO to start the target VNF instance inside the NS instance
+        # 4. Verify that the VNF instance operational state on the VNFM is indicated as "stopped"
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as "stopped"')
+        for vnf_data in operate_vnf_data_list:
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_data.vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STOPPED:
+                raise TestRunError('Target VNF %s was not stopped' % vnf_info.vnf_product_name)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 5. Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have been
+        #    stopped by querying the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have'
+                 ' been stopped by querying the VIM')
+        for vnf_data in operate_vnf_data_list:
+            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id,
+                                                          self.tc_input['mano'].get('query_params')):
+                raise TestRunError(
+                    'Target VNF %s compute resources have not been stopped' % vnf_data.vnf_instance_id)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 6. Verify that other existing compute resources have not been affected by the performed operation by querying
+        #    the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that other existing compute resources have not been affected by the performed operation by '
+                 'querying the VIM')
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                             'additional_param': self.tc_input['mano'].get('query_params')})
+        for vnf_info in ns_info.vnf_info:
+            if vnf_info.vnf_product_name not in self.tc_input['operate_vnf_data']:
+                if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+                    raise TestRunError('Other compute resources have been affected by the VNF stop operation',
+                                       err_details='VNF %s state is %s; expected %s'
+                                           % (vnf_info.vnf_product_name, vnf_info.instantiated_vnf_info.vnf_state,
+                                              constants.VNF_STARTED))
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 7. Trigger the NFVO to start the target VNF instance inside the NS instance
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Trigger the NFVO to start the target VNF instance inside the NS instance')
         for vnf_data in operate_vnf_data_list:
@@ -127,7 +172,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         sleep(constants.INSTANCE_BOOT_TIME)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Verify that the VNF instance operational state on the VNFM is indicated as "started"
+        # 8. Verify that the VNF instance operational state on the VNFM is indicated as "started"
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as started')
         for vnf_data in operate_vnf_data_list:
@@ -137,7 +182,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                 raise TestRunError('Target VNF %s was not started' % vnf_info.vnf_product_name)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Verify that the compute resources allocated to the target VNF instance have been started by querying the
+        # 9. Verify that the compute resources allocated to the target VNF instance have been started by querying the
         #    VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
@@ -147,14 +192,29 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                 raise TestRunError('Target VNF %s compute resources have not been started' % vnf_data.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Verify that the NFVO shows no "operate VNF" operation errors
+        # 10. Verify that other existing compute resources have not been affected by the performed operation by querying
+        #     the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that other existing compute resources have not been affected by the performed operation by '
+                 'querying the VIM')
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                             'additional_param': self.tc_input['mano'].get('query_params')})
+        for vnf_info in ns_info.vnf_info:
+            if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+                raise TestRunError('Other compute resources have been affected by the VNF start operation',
+                                   err_details='VNF %s state is %s; expected %s'
+                                       % (vnf_info.vnf_product_name, vnf_info.instantiated_vnf_info.vnf_state,
+                                          constants.VNF_STARTED))
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 11. Verify that the NFVO shows no "operate VNF" operation errors
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO shows no "operate VNF" operation errors')
         LOG.debug('This has implicitly been checked at step 5')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running
-        #    the end-to-end functional test
+        # 12. Verify that the NS functionality that utilizes the started VNF instance operates successfully by running
+        #     the end-to-end functional test
         # --------------------------------------------------------------------------------------------------------------
         if 'left_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
