@@ -133,7 +133,15 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that other existing compute resources have not been affected by the performed operation by '
                  'querying the VIM')
-        LOG.debug('This check is not needed as the test is run in an isolated environment')
+        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                             'additional_param': self.tc_input['mano'].get('query_params')})
+        for vnf_info in ns_info.vnf_info:
+            if vnf_info.vnf_product_name not in self.tc_input['operate_vnf_data']:
+                if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+                    raise TestRunError('Other compute resources have been affected by the VNF stop operation',
+                                       err_details='VNF %s state is %s; expected %s'
+                                           % (vnf_info.vnf_product_name, vnf_info.instantiated_vnf_info.vnf_state,
+                                              constants.VNF_STARTED))
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the NFVO shows no "operate VNF" operation errors
