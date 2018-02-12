@@ -1074,7 +1074,7 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def generate_vnf_instance_id(self, deployment_name, vnf_name):
-        vnf_instance_id = str(uuid.uuid3(uuid.NAMESPACE_OID, '%s-%s' % (deployment_name, vnf_name)))
+        vnf_instance_id = str(uuid.uuid3(uuid.NAMESPACE_OID, str('%s-%s' % (deployment_name, vnf_name))))
         self.vnf_instance_id_metadata[vnf_instance_id] = deployment_name, vnf_name
 
         return vnf_instance_id
