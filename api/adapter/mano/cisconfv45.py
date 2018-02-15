@@ -109,6 +109,39 @@ VM_OPERATE_TEMPLATE = '''
     <vmName>%(vm_name)s</vmName>
 </vmAction>'''
 
+SCALING_TEMPLATE = '''
+<config>
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>%(esc_name)s</name>
+      <config>
+        <esc_datamodel xmlns="http://www.cisco.com/esc/esc">
+          <tenants>
+            <tenant>
+              <name>%(tenant_name)s</name>
+              <deployments>
+                <deployment>
+                  <name>%(deployment_name)s</name>
+                  %(vm_group_list)s
+                </deployment>
+              </deployments>
+            </tenant>
+          </tenants>
+        </esc_datamodel>
+      </config>
+    </device>
+  </devices>
+</config>'''
+
+SCALING_VM_GROUP_TEMPLATE = '''
+                  <vm_group>
+                    <name>%(vm_group_name)s</name>
+                    <scaling>
+                      <min_active>%(min_active)s</min_active>
+                      <max_active>%(max_active)s</max_active>
+                    </scaling>
+                  </vm_group>'''
+
 NSR_TEMPLATE = '''
 <config>
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
@@ -553,9 +586,9 @@ class CiscoNFVManoAdapter(object):
 
             # Try to retrieve the VM state machines from the ESC.
             try:
-                xml = self.esc.get(('xpath', '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                                'deployments[deployment_name="%s"]/state_machine/vm_state_machines'
-                                                % (tenant_name, deployment_name))).data_xml
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                        'state_machine/vm_state_machines' % (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vm_state_machine = xml.find('.//{http://www.cisco.com/esc/esc}vm_state_machine'
                                                 '[{http://www.cisco.com/esc/esc}vm_name="%s"]/'
@@ -583,9 +616,9 @@ class CiscoNFVManoAdapter(object):
 
             # Try to retrieve the VM state machines from the ESC.
             try:
-                xml = self.esc.get(('xpath', '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                                'deployments[deployment_name="%s"]/state_machine/vm_state_machines'
-                                                % (tenant_name, deployment_name))).data_xml
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                        'state_machine/vm_state_machines' % (tenant_name, deployment_name))).data_xml
                 xml = etree.fromstring(xml)
                 esc_vm_state_machine = xml.find('.//{http://www.cisco.com/esc/esc}vm_state_machine'
                                                 '[{http://www.cisco.com/esc/esc}vm_name="%s"]/'
@@ -606,6 +639,56 @@ class CiscoNFVManoAdapter(object):
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
 
+        if operation_type == 'vm_scale':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+            vm_group_name = operation_details['vm_group_name']
+            number_of_instances = operation_details['number_of_instances']
+
+            # Get the number of VM instances belonging to this VM group name and compare it with the provided one
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/deployments[deployment_name="%s"]/'
+                                    'vm_group[name="%s"]' % (tenant_name, deployment_name, vm_group_name))).data_xml
+                xml = etree.fromstring(xml)
+                vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance/'
+                                           '{http://www.cisco.com/esc/esc}name')
+                actual_number_of_instances = len(vm_name_list)
+                LOG.debug('ESC reported %s VM instances as part of VM group with name %s; expected %s'
+                          % (actual_number_of_instances, vm_group_name, number_of_instances))
+                if actual_number_of_instances != number_of_instances:
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Check that all VMs are started
+            operation_list = []
+            for vm_name in vm_name_list:
+                lifecycle_operation_occurrence_id_item = uuid.uuid4()
+                lifecycle_operation_occurrence_dict = {
+                    'operation_type': 'vm_start',
+                    'vm_name': vm_name.text,
+                    'tenant_name': tenant_name,
+                    'deployment_name': deployment_name
+                }
+                self.lifecycle_operation_occurrence_ids[
+                    lifecycle_operation_occurrence_id_item] = lifecycle_operation_occurrence_dict
+                operation_list.append(lifecycle_operation_occurrence_id_item)
+
+            lifecycle_operations_occurrence_dict = {
+                'operation_type': 'multiple_operations',
+                'resource_id': operation_list
+            }
+            self.lifecycle_operation_occurrence_ids[
+                lifecycle_operation_occurrence_id] = lifecycle_operations_occurrence_dict
+
+            return self.get_operation_status(lifecycle_operation_occurrence_id)
+
         if operation_type == 'multiple_operations':
             operation_list = operation_details['resource_id']
             operation_status_list = map(self.get_operation_status, operation_list)
@@ -621,7 +704,7 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_deployment_state(self, vm_group_list, deployment_name):
-    # TODO: should receive additional_param, for consistency
+        # TODO: should receive additional_param, for consistency
 
         # If the VM group list is empty, report the VNF instantiation state as NOT_INSTANTIATED.
         if vm_group_list == list():
@@ -652,7 +735,7 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_service_state(self, vm_group_list, tenant_name, deployment_name):
-    #TODO: should receive additional_param, for consistency
+        # TODO: should receive additional_param, for consistency
 
         # If the VM group list is empty, report the VNF state as STOPPED.
         if vm_group_list == list():
@@ -1073,6 +1156,34 @@ class CiscoNFVManoAdapter(object):
         return vm_operate_xml
 
     @log_entry_exit(LOG)
+    def build_scaling_vm_group_list(self, vm_group_params):
+        scaling_vm_group_list_xml = ''
+        for vm_group_name, number_of_instances in vm_group_params.items():
+            scaling_vm_group_template_values = {
+                'vm_group_name': vm_group_name,
+                'min_active': number_of_instances,
+                'max_active': number_of_instances
+            }
+
+            scaling_vm_group_xml = SCALING_VM_GROUP_TEMPLATE % scaling_vm_group_template_values
+            scaling_vm_group_list_xml += scaling_vm_group_xml
+
+        return scaling_vm_group_list_xml
+
+    @log_entry_exit(LOG)
+    def build_scaling_xml(self, esc_name, tenant_name, deployment_name, vm_group_params):
+        scaling_template_values = {
+            'esc_name': esc_name,
+            'tenant_name': tenant_name,
+            'deployment_name': deployment_name,
+            'vm_group_list': self.build_scaling_vm_group_list(vm_group_params)
+        }
+
+        scaling_xml = SCALING_TEMPLATE % scaling_template_values
+
+        return scaling_xml
+
+    @log_entry_exit(LOG)
     def generate_vnf_instance_id(self, deployment_name, vnf_name):
         vnf_instance_id = str(uuid.uuid3(uuid.NAMESPACE_OID, str('%s-%s' % (deployment_name, vnf_name))))
         self.vnf_instance_id_metadata[vnf_instance_id] = deployment_name, vnf_name
@@ -1113,6 +1224,126 @@ class CiscoNFVManoAdapter(object):
         self.lifecycle_operation_occurrence_ids[lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
         return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
+        tenant_name = additional_param['tenant']
+
+        if instantiation_level_id is not None:
+            # This operation will not change de instantiation level ID as the scaling does not occur in Cisco NSO when
+            # changing to an instantiation level that has a lower number of instances.
+            # Instead, this operation will set the min_active and max_active values to the number of instances
+            # corresponding to the provided instantiation level ID.
+
+            # Get the deployment XML
+            try:
+                deployment_xml = self.nso.get(('xpath',
+                                               '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
+                                                   % (tenant_name, deployment_name))).data_xml
+                deployment_xml = etree.fromstring(deployment_xml)
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Get the name of the ESC this deployment belongs to
+            try:
+                esc_name = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-deployment/'
+                                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}esc').text
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Get the VNFD ID
+            try:
+                vnfd_id = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                                              '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
+                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd' % vnf_name).text
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Get the deployment flavor name
+            try:
+                deployment_flavor = deployment_xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd-flavor' % vnf_name).text
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            # Get the instantiation level XML corresponding to the provided instantiation level ID from the VNFD with
+            # the above ID
+            try:
+                instantiation_level_xml = self.nso.get(('xpath',
+                                                        '/nfvo/vnfd[id="%s"]/deployment-flavor[id="%s"]/'
+                                                            'instantiation-level[id="%s"]'
+                                                            % (vnfd_id, deployment_flavor,
+                                                               instantiation_level_id))).data_xml
+                instantiation_level_xml = etree.fromstring(instantiation_level_xml)
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            # TODO raise exception if instantiation_level_xml is empty
+
+            # Get the list of VDU in this instantiation level
+            vdu_list = instantiation_level_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level/'
+                                                       '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu')
+
+            # Set the min and max active instances for each VDU with the corresponding number of instances from the
+            # instantiation level
+            operation_list = []
+            vm_group_params = {}
+            for vdu_id in vdu_list:
+                number_of_instances = instantiation_level_xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances' % vdu_id.text).text
+                vm_group_name = '%s-%s' % (vnf_name, vdu_id.text)
+                vm_group_params[vm_group_name] = number_of_instances
+
+                lifecycle_operation_occurrence_id = uuid.uuid4()
+                lifecycle_operation_occurrence_dict = {
+                    'operation_type': 'vm_scale',
+                    'vm_group_name': vm_group_name,
+                    'number_of_instances': int(number_of_instances),
+                    'tenant_name': additional_param['tenant'],
+                    'deployment_name': deployment_name
+                }
+                self.lifecycle_operation_occurrence_ids[
+                    lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+                operation_list.append(lifecycle_operation_occurrence_id)
+
+            # Build the scaling XML
+            scaling_xml = self.build_scaling_xml(esc_name, tenant_name, deployment_name, vm_group_params)
+            try:
+                netconf_reply = self.nso.edit_config(target='running', config=scaling_xml)
+            except NCClientError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
+            if '<ok/>' not in netconf_reply.xml:
+                raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+            LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+            lifecycle_operations_occurrence_id = uuid.uuid4()
+            lifecycle_operations_occurrence_dict = {
+                'operation_type': 'multiple_operations',
+                'resource_id': operation_list
+            }
+            self.lifecycle_operation_occurrence_ids[
+                lifecycle_operations_occurrence_id] = lifecycle_operations_occurrence_dict
+
+            return lifecycle_operations_occurrence_id
+
+        if scale_info is not None:
+            raise NotImplementedError
+
+        raise CiscoNFVManoAdapterError('Neither instantiationLevelId nor ScaleInfo is present')
 
     @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
@@ -1446,8 +1677,8 @@ class CiscoNFVManoAdapter(object):
             LOG.exception(e)
             raise CiscoNFVManoAdapterError(e.message)
 
-        # Get the list of VDUs belonging to the VNF with the name corresponding to the provided VNF instance ID
-        vdu_list = list()
+        # Get the list of VM groups belonging to the VNF with the name corresponding to the provided VNF instance ID
+        vm_group_list = list()
         for vm_group_name in vm_group_names:
             crt_vnf_name = vm_groups.find('.//{http://www.cisco.com/esc/esc}vm_group'
                                           '[{http://www.cisco.com/esc/esc}name="%s"]/'
@@ -1459,9 +1690,9 @@ class CiscoNFVManoAdapter(object):
                                           '[{http://www.cisco.com/esc/esc}name="VNF-INFO-NAME"]/'
                                           '{http://www.cisco.com/esc/esc}value' % vm_group_name.text).text
             if crt_vnf_name == vnf_name:
-                vdu_list.append(vm_group_name.text)
+                vm_group_list.append(vm_group_name.text)
 
-        return vdu_list
+        return vm_group_list
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
