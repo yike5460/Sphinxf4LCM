@@ -377,6 +377,42 @@ class RiftManoAdapter(object):
         return validation_result
 
     @log_entry_exit(LOG)
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
+        validation_result = True
+
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        nsd_id = ns_info.nsd_id
+        nsd = self.get_nsd(nsd_id)
+
+        member_vnf_index_vnfd_mapping = {}
+        for constituent_vnfd in nsd['constituent-vnfd']:
+            member_vnf_index_vnfd_mapping[constituent_vnfd['member-vnf-index']] = constituent_vnfd['vnfd-id-ref']
+
+        for vnf_info in ns_info.vnf_info:
+            actual_vnfd_id = vnf_info.vnfd_id
+            vnf_instance_id = vnf_info.vnf_instance_id
+
+            resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_instance_id
+            try:
+                response = self.session.get(url=self.url + resource)
+                assert response.status_code == 200
+                json_content = response.json()
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to get VNFR data for VNF %s' % vnf_instance_id)
+
+            vnfr = json_content['rw-project:project']['vnfr:vnfr-catalog']['vnfr'][0]
+            member_vnf_index_ref = vnfr['member-vnf-index-ref']
+
+            expected_vnfd_id = member_vnf_index_vnfd_mapping[member_vnf_index_ref]
+            if expected_vnfd_id != actual_vnfd_id:
+                LOG.debug('Unexpected VNFD ID %s for VNF %s. Expected: %s'
+                          % (actual_vnfd_id, vnf_info.vnf_product_name, expected_vnfd_id))
+                validation_result = False
+
+        return validation_result
+
+    @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
         stable_states = ['running', 'failed']
         elapsed_time = 0
