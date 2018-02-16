@@ -680,6 +680,9 @@ class CiscoNFVManoAdapter(object):
                     lifecycle_operation_occurrence_id_item] = lifecycle_operation_occurrence_dict
                 operation_list.append(lifecycle_operation_occurrence_id_item)
 
+            # To avoid checking again the number of VM instances for this VM group, use the current
+            # lifecycle_operation_occurrence_id and not generate a new one. This will forcefully override the previous
+            # operation dictionary, for vm_scale operation, with a new dictionary for vm_start operation.
             lifecycle_operations_occurrence_dict = {
                 'operation_type': 'multiple_operations',
                 'resource_id': operation_list
@@ -1645,6 +1648,39 @@ class CiscoNFVManoAdapter(object):
             ns_info.vnf_info.append(vnf_info)
 
         return ns_info
+
+    @log_entry_exit(LOG)
+    def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
+        if scale_type == 'SCALE_NS':
+            raise NotImplementedError
+        elif scale_type == 'SCALE_VNF':
+            operation_list = []
+            for scale_data in scale_vnf_data:
+                if scale_data.type == 'to_instantiation_level':
+                    vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id,
+                                                                    vnf_name=scale_data.vnf_instance_id)
+                    instantiation_level_id = scale_data.scale_to_level_data.instantiation_level_id
+                    lifecycle_operation_occurrence_id = self.vnf_scale_to_level(
+                                                       vnf_instance_id=vnf_instance_id,
+                                                       instantiation_level_id=instantiation_level_id,
+                                                       additional_param=scale_data.scale_to_level_data.additional_param)
+                    operation_list.append(lifecycle_operation_occurrence_id)
+                elif scale_data.type == 'to_scale_levels':
+                    raise NotImplementedError
+                elif scale_data.type == 'out':
+                    raise NotImplementedError
+                elif scale_data.type == 'in':
+                    raise NotImplementedError
+
+            lifecycle_operations_occurrence_id = uuid.uuid4()
+            lifecycle_operations_occurrence_dict = {
+                'operation_type': 'multiple_operations',
+                'resource_id': operation_list
+            }
+            self.lifecycle_operation_occurrence_ids[
+                lifecycle_operations_occurrence_id] = lifecycle_operations_occurrence_dict
+
+            return lifecycle_operations_occurrence_id
 
     @log_entry_exit(LOG)
     def get_vm_groups_for_vnf(self, vnf_instance_id, additional_param):
