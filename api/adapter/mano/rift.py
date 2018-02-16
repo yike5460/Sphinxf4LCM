@@ -7,6 +7,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
@@ -152,6 +153,11 @@ class RiftManoAdapter(object):
         resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_instance_id
         try:
             response = self.session.get(url=self.url + resource)
+            if response.status_code == 204:
+                # vnf-instance-id not found, so assuming NOT_INSTANTIATED
+                vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
+                return vnf_info
+
             assert response.status_code == 200
             json_content = response.json()
         except Exception as e:
@@ -198,6 +204,11 @@ class RiftManoAdapter(object):
         resource = '/api/operational/project/ns-instance-opdata/nsr/%s' % ns_instance_id
         try:
             response = self.session.get(url=self.url + resource)
+            if response.status_code == 204:
+                # vnf-instance-id not found, so assuming NOT_INSTANTIATED
+                ns_info.ns_state = constants.NS_NOT_INSTANTIATED
+                return ns_info
+
             assert response.status_code == 200
             json_content = response.json()
         except Exception as e:
@@ -238,6 +249,38 @@ class RiftManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_delete_id(self, ns_instance_id):
         self.nsr_metadata.pop(ns_instance_id)
+
+    @log_entry_exit(LOG)
+    def get_vim_helper(self, vim_id):
+        resource = '/api/config/project/cloud/account/%s' % vim_id
+
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VIM details for %s' % vim_id)
+
+        vim_details = json_content['rw-project:project']['rw-cloud:cloud']['account'][0]
+
+        vim_type = vim_details['account-type']
+        if vim_type == 'openstack':
+            openstack_params = vim_details['openstack']
+
+            vim_vendor = vim_type
+            vim_params = {
+                'auth_url': openstack_params['auth_url'],
+                'username': openstack_params['key'],
+                'password': openstack_params['secret'],
+                'project_name': openstack_params['tenant'],
+                'project_domain_name': openstack_params['project-domain'],
+                'user_domain_name': openstack_params['user-domain']
+            }
+        else:
+            raise RiftManoAdapterError('Unsupported VIM type: %s' % vim_type)
+
+        return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
