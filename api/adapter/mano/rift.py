@@ -121,6 +121,23 @@ class RiftManoAdapter(object):
         return nsd
 
     @log_entry_exit(LOG)
+    def get_vnfd(self, vnfd_id):
+        resource = '/api/config/project/vnfd-catalog/vnfd/%s' % vnfd_id
+
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VNFD %s' % vnfd_id)
+
+        vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
+        vnfd.pop('rw-project-vnfd:meta')
+
+        return vnfd
+
+    @log_entry_exit(LOG)
     def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
                        nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
@@ -281,6 +298,34 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unsupported VIM type: %s' % vim_type)
 
         return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+
+    @log_entry_exit(LOG)
+    def verify_vnf_sw_images(self, vnf_info):
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+
+        expected_vdu_images = {}
+        for vdu in vnfd['vdu']:
+            expected_vdu_images[vdu['id']] = vdu['name']
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vdu_id = vnfc_resource_info.vdu_id
+
+            vim_id = vnfc_resource_info.compute_resource.vim_id
+            vim = self.get_vim_helper(vim_id)
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            image_id = virtual_compute.vc_image_id
+            image_details = vim.query_image(image_id)
+            image_name_vim = image_details.name
+
+            image_name_vnfd = expected_vdu_images[vdu_id]
+            if image_name_vim != image_name_vnfd:
+                LOG.debug('Unexpected image for VNFC %s, VDU type %s' % (resource_id, vdu_id))
+                LOG.debug('Expected image name: %s; actual image name: %s' % (image_name_vnfd, image_name_vim))
+                return False
+
+        return True
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
