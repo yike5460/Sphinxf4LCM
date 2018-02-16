@@ -328,6 +328,55 @@ class RiftManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
+    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        for vnf_info in ns_info.vnf_info:
+            if not self.validate_vnf_allocated_vresources(vnf_info):
+                return False
+        return True
+
+    @log_entry_exit(LOG)
+    def validate_vnf_allocated_vresources(self, vnf_info):
+        validation_result = True
+
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+
+        expected_vdu_resources = {}
+        for vdu in vnfd['vdu']:
+            expected_vdu_resources[vdu['id']] = {
+                'vcpu-count': vdu['vm-flavor']['vcpu-count'],
+                'memory-mb': vdu['vm-flavor']['memory-mb'],
+                'storage-gb': vdu['vm-flavor']['storage-gb'],
+                'nic-count': len(vdu['interface'])
+            }
+
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vdu_id = vnfc_resource_info.vdu_id
+
+            # Get VIM adapter object
+            vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+            actual_vdu_resources = {
+                'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
+                'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
+                'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
+                'nic-count': len(virtual_compute.virtual_network_interface)
+            }
+
+            for resource_name, actual_value in actual_vdu_resources.items():
+                expected_value = expected_vdu_resources[vdu_id][resource_name]
+                if actual_value != expected_value:
+                    LOG.debug('Unexpected value for %s: %s. Expected: %s'
+                              % (resource_name, actual_value, expected_value))
+                    validation_result = False
+
+        return validation_result
+
+    @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
         stable_states = ['running', 'failed']
         elapsed_time = 0
