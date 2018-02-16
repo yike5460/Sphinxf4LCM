@@ -413,6 +413,27 @@ class RiftManoAdapter(object):
         return validation_result
 
     @log_entry_exit(LOG)
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+        vnf_mgmt_addr_list = list()
+
+        resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_instance_id
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VNFR data for VNF %s' % vnf_instance_id)
+
+        vnfr = json_content['rw-project:project']['vnfr:vnfr-catalog']['vnfr'][0]
+
+        for vdur in vnfr['vdur']:
+            if 'vm-management-ip' in vdur:
+                vnf_mgmt_addr_list += vdur['vm-management-ip']
+
+        return vnf_mgmt_addr_list
+
+    @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
         stable_states = ['running', 'failed']
         elapsed_time = 0
