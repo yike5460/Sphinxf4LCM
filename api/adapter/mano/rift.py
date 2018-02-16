@@ -9,7 +9,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import NsInfo
+from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -144,6 +144,52 @@ class RiftManoAdapter(object):
         return 'ns_instantiate', ns_instance_id
 
     @log_entry_exit(LOG)
+    def vnf_query(self, filter, attribute_selector=None):
+        vnf_instance_id = filter['vnf_instance_id']
+        vnf_info = VnfInfo()
+        vnf_info.vnf_instance_id = str(vnf_instance_id)
+
+        resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_instance_id
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VNFR data for VNF %s' % vnf_instance_id)
+
+        vnfr = json_content['rw-project:project']['vnfr:vnfr-catalog']['vnfr'][0]
+
+        vnf_info.vnf_instance_name = str(vnfr['name'])
+        vnf_info.vnf_product_name = str(vnfr['short-name'])
+
+        # TODO: add logic for all states
+        vnf_info.instantiation_state = constants.VNF_INSTANTIATED
+        vnf_info.vnfd_id = str(vnfr['vnfd']['id'])
+
+        vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
+        if vnfr['operational-status'] == 'running':
+            vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STARTED
+        else:
+            vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STOPPED
+
+        vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+        for vdur in vnfr['vdur']:
+            vnfc_resource_info = VnfcResourceInfo()
+            vnfc_resource_info.vnfc_instance_id = str(vdur['id'])
+            vnfc_resource_info.vdu_id = str(vdur['vdu-id-ref'])
+
+            vnfc_resource_info.compute_resource = ResourceHandle()
+            vnfc_resource_info.compute_resource.vim_id = str(vnfr['rw-vnfr:datacenter'])
+            vnfc_resource_info.compute_resource.resource_id = str(vdur['vim-id'])
+            vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
+        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+        # TODO: populate this list
+
+        return vnf_info
+
+    @log_entry_exit(LOG)
     def ns_query(self, filter, attribute_selector=None):
         ns_instance_id = filter['ns_instance_id']
         ns_info = NsInfo()
@@ -168,6 +214,11 @@ class RiftManoAdapter(object):
             ns_info.ns_state = constants.NS_INSTANTIATED
         else:
             ns_info.ns_state = constants.NS_NOT_INSTANTIATED
+
+        ns_info.vnf_info = list()
+        for constituent_vnfr in ns_opdata['constituent-vnfr-ref']:
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': constituent_vnfr['vnfr-id']})
+            ns_info.vnf_info.append(vnf_info)
 
         return ns_info
 
