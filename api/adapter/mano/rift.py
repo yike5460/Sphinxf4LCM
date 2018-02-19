@@ -10,7 +10,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle
+from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, VnfExtCpInfo
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -184,6 +184,8 @@ class RiftManoAdapter(object):
         vnfr = json_content['rw-project:project']['vnfr:vnfr-catalog']['vnfr'][0]
 
         vnf_info.vnf_instance_name = str(vnfr['name'])
+
+        # TODO: see if other value for vnf_product_name is more relevant
         vnf_info.vnf_product_name = str(vnfr['short-name'])
 
         # TODO: add logic for all states
@@ -208,7 +210,12 @@ class RiftManoAdapter(object):
             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
         vnf_info.instantiated_vnf_info.ext_cp_info = list()
-        # TODO: populate this list
+        for connection_point in vnfr['connection-point']:
+            vnf_ext_cp_info = VnfExtCpInfo()
+            vnf_ext_cp_info.cp_instance_id = str(connection_point['connection-point-id'])
+            vnf_ext_cp_info.address = [str(connection_point['mac-address'])]
+            vnf_ext_cp_info.cpd_id = str(connection_point['name'])
+            vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
         return vnf_info
 
