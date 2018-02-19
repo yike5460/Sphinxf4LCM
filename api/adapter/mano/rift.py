@@ -306,7 +306,7 @@ class RiftManoAdapter(object):
 
         expected_vdu_images = {}
         for vdu in vnfd['vdu']:
-            expected_vdu_images[vdu['id']] = vdu['name']
+            expected_vdu_images[vdu['id']] = vdu['image']
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
@@ -429,7 +429,7 @@ class RiftManoAdapter(object):
 
         for vdur in vnfr['vdur']:
             if 'vm-management-ip' in vdur:
-                vnf_mgmt_addr_list += vdur['vm-management-ip']
+                vnf_mgmt_addr_list.append(vdur['vm-management-ip'])
 
         return vnf_mgmt_addr_list
 
