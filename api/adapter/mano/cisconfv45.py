@@ -1196,7 +1196,6 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         vnf_instance_id = self.generate_vnf_instance_id(deployment_name=vnf_instance_name, vnf_name=vnfd_id)
-        # vnf_instance_id = self.generate_vnf_instance_id(deployment_name='', vnf_name=vnfd_id)
         self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
 
         return vnf_instance_id
@@ -1571,7 +1570,6 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         ns_instance_id = ns_name
-        # ns_instance_id = ''
         self.ns_nsd_mapping[ns_instance_id] = nsd_id
 
         return ns_instance_id
