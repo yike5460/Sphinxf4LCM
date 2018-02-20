@@ -81,6 +81,8 @@ class TestCase(object):
         self.tc_result['scaling_in'] = dict()
         self.tc_result['scaling_up'] = dict()
         self.tc_result['scaling_down'] = dict()
+        self.tc_result['scaling_to_level'] = dict()
+        self.tc_result['scaling_from_level'] = dict()
         self.tc_result['timestamps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
