@@ -25,7 +25,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
     6. Verify that the additional VNFC instance(s) are running and reachable via the management network
     7. Verify that the VNF configuration has been updated to include the additional VNFC instances according to the
        descriptors by querying the VNFM
-    8. Verify that the additional VNFC instances(s) are connected to the VL(s) according to the descriptors
+    8. Verify that the additional VNFC instance(s) are connected to the VL(s) according to the descriptors
     9. Verify that the NFVO indicates the scaling operation result as successful
     10. Verify that NS has been scaled out by running the end-to-end functional test in relevance to the VNF scale and
         capacity
@@ -166,7 +166,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
                                                               self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
                 if not ping(mgmt_addr):
-                    raise TestRunError('Unable to PING IP address %s belonging to %s'
+                    raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
                                        % (mgmt_addr, vnf_info.vnf_product_name))
 
         # --------------------------------------------------------------------------------------------------------------
@@ -178,9 +178,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Verify that the additional VNFC instances(s) are connected to the VL(s) according to the descriptors
+        # 8. Verify that the additional VNFC instance(s) are connected to the VL(s) according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the additional VNFC instances(s) are connected to the VL(s) according to the '
+        LOG.info('Verifying that the additional VNFC instance(s) are connected to the VL(s) according to the '
                  'descriptors')
         # TODO
 

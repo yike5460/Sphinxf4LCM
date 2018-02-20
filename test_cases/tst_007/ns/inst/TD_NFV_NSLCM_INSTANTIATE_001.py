@@ -109,7 +109,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                                                               self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
                 if not ping(mgmt_addr):
-                    raise TestRunError('Unable to PING IP address %s belonging to %s'
+                    raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
                                        % (mgmt_addr, vnf_info.vnf_product_name))
 
         # --------------------------------------------------------------------------------------------------------------
