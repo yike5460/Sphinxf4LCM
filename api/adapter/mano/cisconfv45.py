@@ -1196,6 +1196,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         vnf_instance_id = self.generate_vnf_instance_id(deployment_name=vnf_instance_name, vnf_name=vnfd_id)
+        # vnf_instance_id = self.generate_vnf_instance_id(deployment_name='', vnf_name=vnfd_id)
         self.vnf_vnfd_mapping[vnf_instance_id] = vnfd_id
 
         return vnf_instance_id
@@ -1570,6 +1571,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         ns_instance_id = ns_name
+        # ns_instance_id = ''
         self.ns_nsd_mapping[ns_instance_id] = nsd_id
 
         return ns_instance_id
@@ -1716,16 +1718,16 @@ class CiscoNFVManoAdapter(object):
         # Get the list of VM groups belonging to the VNF with the name corresponding to the provided VNF instance ID
         vm_group_list = list()
         for vm_group_name in vm_group_names:
-            crt_vnf_name = vm_groups.find('.//{http://www.cisco.com/esc/esc}vm_group'
-                                          '[{http://www.cisco.com/esc/esc}name="%s"]/'
-                                          '{http://www.cisco.com/esc/esc}extensions/'
-                                          '{http://www.cisco.com/esc/esc}extension'
-                                          '[{http://www.cisco.com/esc/esc}name="NSO"]/'
-                                          '{http://www.cisco.com/esc/esc}properties/'
-                                          '{http://www.cisco.com/esc/esc}property'
-                                          '[{http://www.cisco.com/esc/esc}name="VNF-INFO-NAME"]/'
-                                          '{http://www.cisco.com/esc/esc}value' % vm_group_name.text).text
-            if crt_vnf_name == vnf_name:
+            current_vnf_name = vm_groups.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                              '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                              '{http://www.cisco.com/esc/esc}extensions/'
+                                              '{http://www.cisco.com/esc/esc}extension'
+                                              '[{http://www.cisco.com/esc/esc}name="NSO"]/'
+                                              '{http://www.cisco.com/esc/esc}properties/'
+                                              '{http://www.cisco.com/esc/esc}property'
+                                              '[{http://www.cisco.com/esc/esc}name="VNF-INFO-NAME"]/'
+                                              '{http://www.cisco.com/esc/esc}value' % vm_group_name.text).text
+            if current_vnf_name == vnf_name:
                 vm_group_list.append(vm_group_name.text)
 
         return vm_group_list
@@ -1958,3 +1960,98 @@ class CiscoNFVManoAdapter(object):
                 lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
             return lifecycle_operation_occurrence_id
+
+    @log_entry_exit(LOG)
+    def validate_vnf_instantiation_level(self, vnf_info, target_instantiation_level_id, additional_param=None):
+        tenant_name = additional_param['tenant']
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_info.vnf_instance_id]
+
+        # Get the VNFD XML
+        vnfd_id = vnf_info.vnfd_id
+        vnfd_xml = self.get_vnfd(vnfd_id)
+        vnfd_xml = etree.fromstring(vnfd_xml)
+
+        # Get the deployment XML
+        try:
+            deployment_xml = self.nso.get(('xpath',
+                                           '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
+                                           % (tenant_name, deployment_name))).data_xml
+            deployment_xml = etree.fromstring(deployment_xml)
+        except NCClientError as e:
+            LOG.debug('Error occurred while communicating with the ESC Netconf server')
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Get the deployment flavor name
+        try:
+            deployment_flavor = deployment_xml.find(
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
+                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd-flavor' % vnf_name).text
+        except AttributeError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Find the current instantiation level ID
+        try:
+            current_instantiation_level_id = deployment_xml.find(
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
+                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}instantiation-level' % vnf_name).text
+        except AttributeError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Create dictionary with expected number of VNFC instances for each VDU
+        expected_vnfc_count = dict()
+        try:
+            vdu_id_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu/'
+                                           '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
+        except AttributeError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        for vdu_id in vdu_id_list:
+            # Try to get the number of instances for the current VDU ID in the target instantiation level.
+            # If AttributeError exception is raised, get it from the current instantiation level.
+            try:
+                number_of_instances = vnfd_xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}instantiation-level'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances'
+                    % (deployment_flavor, target_instantiation_level_id, vdu_id.text)).text
+            except AttributeError:
+                number_of_instances = vnfd_xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}instantiation-level'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances'
+                    % (deployment_flavor, current_instantiation_level_id, vdu_id.text)).text
+
+            # Update the expected VNFC count dictionary
+            expected_vnfc_count[vdu_id.text] = int(number_of_instances)
+
+        # Create dictionary with actual number of VNFC instances for each VDU
+        actual_vnfc_count = dict()
+        for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+            vdu_id = vnfc_resource_info.vdu_id
+            if vdu_id not in actual_vnfc_count:
+                actual_vnfc_count[vdu_id] = 1
+            else:
+                actual_vnfc_count[vdu_id] += 1
+
+        # Compare actual values with expected values
+        for vdu_id in expected_vnfc_count:
+            LOG.debug('Expected number of VNFC instances deployed after VDU %s: %s; actual number: %s'
+                      % (vdu_id, expected_vnfc_count[vdu_id], actual_vnfc_count[vdu_id]))
+            if actual_vnfc_count[vdu_id] != expected_vnfc_count[vdu_id]:
+                return False
+
+        return True
