@@ -1408,7 +1408,55 @@ class Mano(object):
         """
         This function retrieves the management addresses of the VNFCs that belong to the VNF with the given instance ID.
 
-        :param vnf_instance_id: Identifier of the VNF instance.
-        :return:                List of management addresses.
+        :param vnf_instance_id:     Identifier of the VNF instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    List of management addresses.
         """
         return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id, additional_param)
+
+    @log_entry_exit(LOG)
+    def validate_vnf_instantiation_level(self, vnf_info, instantiation_level_id, additional_param=None):
+        """
+        This function verifies that the number of VNFC instances in the provided VnfInfo information element matches the
+        number of instances indicated by the provided instantiation level ID of the current deployment flavor.
+
+        If the number of instances for a particular VDU is not present in the provided instantiation level ID, the
+        number of instances for that VDU will be compared to the number of instances indicated by the default
+        instantiation level ID of the current deployment flavor.
+
+        :param vnf_info:                VnfInfo information element.
+        :param instantiation_level_id:  ID of the instantiation level.
+        :param additional_param:        Additional parameters used for filtering.
+        :return:                        True if the number of VNFC instances is correct, False otherwise.
+        """
+        return self.mano_adapter.validate_vnf_instantiation_level(vnf_info, instantiation_level_id, additional_param)
+
+    @log_entry_exit(LOG)
+    def validate_ns_instantiation_level(self, ns_info, instantiation_level_list, additional_param):
+        """
+        This function verifies that the number of VNFC instances for each VNF in the provided NsInfo information element
+        matches the number of instances indicated by the instantiation level ID corresponding to that VNF.
+
+        If no instantiation level ID corresponds to a particular VNF, the number of VNFC instances for that VNF will be
+        compared to the number of instances indicated by the default instantiation level ID corresponding to that VNF.
+
+        :param ns_info:                     NsInfo information element.
+        :param instantiation_level_list:    List of dictionaries containing the VNF name and the corresponding target
+                                            instantiation level ID.
+                                            Example: [{'target_vnf_name': 'empirix',
+                                                       'target_instantiation_level_id': 'scaled'}]
+        :param additional_param:            Additional parameters used for filtering.
+        :return:                            True if the number of VNFC instances for each VNF is correct,
+                                            False otherwise.
+        """
+        vnf_name_level_id_mapping = dict()
+        for scale_to_level in instantiation_level_list:
+            vnf_name = scale_to_level['target_vnf_name']
+            target_instantiation_level_id = scale_to_level['target_instantiation_level_id']
+            vnf_name_level_id_mapping[vnf_name] = target_instantiation_level_id
+        for vnf_info in ns_info.vnf_info:
+            instantiation_level_id = vnf_name_level_id_mapping.get(vnf_info.vnf_product_name)
+            if not self.validate_vnf_instantiation_level(vnf_info, instantiation_level_id, additional_param):
+                LOG.debug('Incorrect number of VNFC instances for VNF %s' % vnf_info.vnf_product_name)
+                return False
+        return True
