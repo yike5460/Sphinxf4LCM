@@ -514,6 +514,7 @@ class RiftManoAdapter(object):
                     raise RiftManoAdapterError('Unable to scale out NS %s' % ns_instance_id)
 
                 return 'ns_scale_out', ns_instance_id
+
             elif scale_ns_data.scale_ns_by_steps_data.scaling_direction == 'scale_in':
                 resource = '/api/config/project/ns-instance-config/nsr/%s/scaling-group/%s'\
                            % (ns_instance_id, scaling_group_name)
@@ -544,6 +545,10 @@ class RiftManoAdapter(object):
                     raise RiftManoAdapterError('Unable to scale in NS %s' % ns_instance_id)
 
                 return 'ns_scale_in', ns_instance_id
+
+            else:
+                raise RiftManoAdapterError('Invalid scaling direction: %s'
+                                           % scale_ns_data.scale_ns_by_steps_data.scaling_direction)
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
