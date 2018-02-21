@@ -538,7 +538,6 @@ class RiftManoAdapter(object):
 
                 try:
                     response = self.session.delete(url=self.url + resource)
-                    print json.dumps(response.json(), indent=2)
                     assert response.status_code == 201
                 except Exception as e:
                     LOG.exception(e)
