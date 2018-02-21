@@ -19,7 +19,8 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
     Sequence:
     1. Trigger NS instantiation on the NFVO
     2. Verify that the NFVO indicates NS instantiation operation result as successful
-    3. Trigger NS scale by scaling to an instantiation level a VNF in the NS in NFVO with an operator action
+    3. Trigger NS scale by scaling to another existing instantiation level a VNF in the NS in NFVO with an operator
+       action
     4. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
     5. Verify that the resources allocated by the VIM have changed according to the descriptors
     6. Verify that all VNFC instance(s) are running and reachable via the management network
@@ -89,10 +90,11 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Trigger NS scale by scaling to an instantiation level a VNF in the NS in NFVO with an operator action
+        # 3. Trigger NS scale by scaling to another existing instantiation level a VNF in the NS in NFVO with an
+        #    operator action
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering NS scale by scaling to an instantiation level a VNF in the NS in NFVO with an operator '
-                 'action')
+        LOG.info('Triggering NS scale by scaling to another existing instantiation level a VNF in the NS in NFVO with '
+                 'an operator action')
         scale_vnf_data_list = list()
         for scale_to_level in self.tc_input['scale_to_level_list']:
             vnf_name = scale_to_level['target_vnf_name']
