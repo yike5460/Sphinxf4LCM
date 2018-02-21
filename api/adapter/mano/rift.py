@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import time
 import uuid
 
@@ -85,6 +86,44 @@ class RiftManoAdapter(object):
                 return constants.OPERATION_FAILED
             else:
                 return constants.OPERATION_PENDING
+
+        if operation_type == 'ns_scale_out':
+            resource = '/api/operational/project/ns-instance-opdata/nsr/%s' % resource_id
+            try:
+                response = self.session.get(url=self.url + resource)
+                assert response.status_code == 200
+                json_content = response.json()
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to get opdata for NS %s' % resource_id)
+
+            ns_op_status = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]['operational-status']
+
+            if ns_op_status == 'running':
+                return constants.OPERATION_SUCCESS
+            elif ns_op_status == 'scaling-out':
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_FAILED
+
+        if operation_type == 'ns_scale_in':
+            resource = '/api/operational/project/ns-instance-opdata/nsr/%s' % resource_id
+            try:
+                response = self.session.get(url=self.url + resource)
+                assert response.status_code == 200
+                json_content = response.json()
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to get opdata for NS %s' % resource_id)
+
+            ns_op_status = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]['operational-status']
+
+            if ns_op_status == 'running':
+                return constants.OPERATION_SUCCESS
+            elif ns_op_status == 'scaling-in':
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_FAILED
 
         raise RiftManoAdapterError('Unknown operation type "%s"' % operation_type)
 
@@ -439,6 +478,72 @@ class RiftManoAdapter(object):
                 vnf_mgmt_addr_list.append(vdur['vm-management-ip'])
 
         return vnf_mgmt_addr_list
+
+    @log_entry_exit(LOG)
+    def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
+        # TODO: add support for scaling steps > 1?
+
+        if scale_type == 'SCALE_VNF':
+            raise NotImplementedError
+        elif scale_type == 'SCALE_NS':
+            if scale_ns_data.scale_ns_by_steps_data is None:
+                raise RiftManoAdapterError('Rift MANO Adapter only supports NS scaling by steps, but'
+                                           'scale_ns_by_steps_data was not provided.')
+
+            scaling_group_name = scale_ns_data.additional_param_for_ns['scaling_group_name']
+
+            if scale_ns_data.scale_ns_by_steps_data.scaling_direction == 'scale_out':
+                resource = '/api/config/project/%s/ns-instance-config/nsr/%s/scaling-group/%s/instance'\
+                           % (self.project,  ns_instance_id, scaling_group_name)
+
+                scaling_group_instance_id = random.randint(0, 65535)
+                request_body = {
+                    'instance': [
+                        {
+                            'id': scaling_group_instance_id
+                        }
+                    ]
+                }
+
+                try:
+                    response = self.session.post(url=self.url + resource, json=request_body)
+                    assert response.status_code == 201
+                    assert 'ok' in response.json().get('rpc-reply', {})
+                except Exception as e:
+                    LOG.exception(e)
+                    raise RiftManoAdapterError('Unable to scale out NS %s' % ns_instance_id)
+
+                return 'ns_scale_out', ns_instance_id
+            elif scale_ns_data.scale_ns_by_steps_data.scaling_direction == 'scale_in':
+                resource = '/api/config/project/ns-instance-config/nsr/%s/scaling-group/%s'\
+                           % (ns_instance_id, scaling_group_name)
+                try:
+                    response = self.session.get(url=self.url + resource)
+                    assert response.status_code == 200
+                    json_content = response.json()
+                except Exception as e:
+                    LOG.exception(e)
+                    raise RiftManoAdapterError('Unable to get existing instances of scaling group %s for NS %s'
+                                               % (scaling_group_name, ns_instance_id))
+
+                scaling_groups_ids = json_content['rw-project:project']['nsr:ns-instance-config']['nsr'][0][
+                    'scaling-group'][0].get('instance', [])
+                if len(scaling_groups_ids) == 0:
+                    raise RiftManoAdapterError('Unable to scale in because no existing scaling group instances')
+
+                removed_scaling_groups_id = scaling_groups_ids[0]['id']
+                resource = '/api/config/project/%s/ns-instance-config/nsr/%s/scaling-group/%s/instance/%s' \
+                           % (self.project, ns_instance_id, scaling_group_name, removed_scaling_groups_id)
+
+                try:
+                    response = self.session.delete(url=self.url + resource)
+                    print json.dumps(response.json(), indent=2)
+                    assert response.status_code == 201
+                except Exception as e:
+                    LOG.exception(e)
+                    raise RiftManoAdapterError('Unable to scale in NS %s' % ns_instance_id)
+
+                return 'ns_scale_in', ns_instance_id
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
