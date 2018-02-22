@@ -222,9 +222,7 @@ class RiftManoAdapter(object):
         vnfr = json_content['rw-project:project']['vnfr:vnfr-catalog']['vnfr'][0]
 
         vnf_info.vnf_instance_name = str(vnfr['name'])
-
-        # TODO: see if other value for vnf_product_name is more relevant
-        vnf_info.vnf_product_name = str(vnfr['short-name'])
+        vnf_info.vnf_product_name = str(vnfr['member-vnf-index-ref'])
 
         # TODO: add logic for all states
         vnf_info.instantiation_state = constants.VNF_INSTANTIATED
