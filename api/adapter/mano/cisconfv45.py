@@ -1822,6 +1822,8 @@ class CiscoNFVManoAdapter(object):
                                              '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor')
         for deployment_flavor in deployment_flavor_all:
             nsd_deployment_flavor_id = deployment_flavor.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+
+            # TODO: can we get the ns_deployment_flavor directly (without 'for')?
             if ns_deployment_flavor == nsd_deployment_flavor_id:
                 vnf_profile_list_xml = deployment_flavor.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
                                                              'vnf-profile')
@@ -1829,12 +1831,16 @@ class CiscoNFVManoAdapter(object):
                     vnf_profile_name = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
                     vnfd_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd')
                     if vnf_profile_name is not None and vnfd_id is not None:
+
+                        # TODO: why use a list of tuple and not a dictionary?
                         nsd_vnf_profile_list.append((vnf_profile_name.text, vnfd_id.text))
                 break
 
         # Compare list of deployed VNFs against the list of VNFs configured in the deployment-flavor of the NSD
         for vnf_info in ns_info.vnf_info:
             vnf_name = vnf_info.vnf_product_name
+
+            # TODO: if using a dictionary, 'for' will not be needed
             for nsd_vnf_profile in nsd_vnf_profile_list:
                 vnf_profile_name, vnfd_id = nsd_vnf_profile
                 if vnf_name == vnf_profile_name:
