@@ -50,11 +50,11 @@ VDU_TEMPLATE = '''
                             %(vdu_cp_list)s
                         </vdu>'''
 
-DAY0_TEMPLATE = """
+DAY0_TEMPLATE = '''
                             <day0>
                                 <destination>%(day0_dest)s</destination>
                                 <url>%(day0_url)s</url>
-                            </day0>"""
+                            </day0>'''
 
 VDU_CP_TEMPLATE = '''
                         <connection-point-address>
@@ -71,13 +71,16 @@ VNFD_CP_TEMPLATE = '''
 
 VL_TEMPLATE = '''
                         <virtual-link>
-                             <id>%(vl_id)s</id>
-                             %(dhcp)s
-                             <subnet>
-                                 <network>%(network)s</network>
-                                 <gateway>%(gateway)s</gateway>
-                             </subnet>
+                            <id>%(vl_id)s</id>
+                            %(vl_details)s
                         </virtual-link>'''
+
+VL_DETAILS_TEMPLATE = '''
+                            %(dhcp)s
+                            <subnet>
+                                <network>%(network)s</network>
+                                <gateway>%(gateway)s</gateway>
+                            </subnet>'''
 
 VNFR_DELETE_TEMPLATE = '''
 <config>
@@ -163,7 +166,7 @@ NSR_TEMPLATE = '''
     </nfvo>
 </config>'''
 
-VNF_INFO_TEMPLATE = '''
+NS_VNF_INFO_TEMPLATE = '''
         <vnf-info>
             <name>%(vnf_name)s</name>
             <vnfd>%(vnfd_id)s</vnfd>
@@ -176,12 +179,8 @@ VNF_INFO_TEMPLATE = '''
 
 VL_INFO_TEMPLATE = '''
         <virtual-link-info>
-            <virtual-link-descriptor>%(vl_id)s</virtual-link-descriptor>
-            %(dhcp)s
-            <subnet>
-                <network>%(network)s</network>
-                <gateway>%(gateway)s</gateway>
-            </subnet>
+            <virtual-link-descriptor>%(vl_descriptor_id)s</virtual-link-descriptor>
+            %(vl_details)s
         </virtual-link-info>'''
 
 SAP_INFO_TEMPLATE = '''
@@ -195,8 +194,7 @@ NSR_DELETE_TEMPLATE = '''
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
         <ns-info>
             <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
-                <ns-info xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-                        nc:operation="delete">
+                <ns-info xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete">
                     <id>%(ns_info_id)s</id>
                 </ns-info>
             </esc>
@@ -1086,9 +1084,7 @@ class CiscoNFVManoAdapter(object):
         for vl_id, vl_param in vl_params.items():
             vl_template_values = {
                 'vl_id': vl_id,
-                'dhcp': '<dhcp/>' if vl_param.get('dhcp', False) is True else '',
-                'network': vl_param['subnet']['network'],
-                'gateway': vl_param['subnet']['gateway']
+                'vl_details': self.build_vl_details(vl_param)
             }
 
             vl_xml = VL_TEMPLATE % vl_template_values
@@ -1480,8 +1476,8 @@ class CiscoNFVManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def build_vnf_info_list(self, ns_instance_id, vnf_info_params):
-        vnf_info_list_xml = ''
+    def build_ns_vnf_info_list(self, ns_instance_id, vnf_info_params):
+        ns_vnf_info_list_xml = ''
         for vnf_name, vnf_param in vnf_info_params.items():
             vnf_info_template_values = {
                 'vnf_name': vnf_name,
@@ -1493,22 +1489,30 @@ class CiscoNFVManoAdapter(object):
                 'esc': vnf_param['esc']
             }
 
-            vnf_info_xml = VNF_INFO_TEMPLATE % vnf_info_template_values
-            vnf_info_list_xml += vnf_info_xml
+            ns_vnf_info_xml = NS_VNF_INFO_TEMPLATE % vnf_info_template_values
+            ns_vnf_info_list_xml += ns_vnf_info_xml
 
-        return vnf_info_list_xml
+        return ns_vnf_info_list_xml
+
+    @log_entry_exit(LOG)
+    def build_vl_details(self, vl_param):
+        vl_details_template_values = {
+            'dhcp': '<dhcp/>' if vl_param.get('dhcp', False) is True else '',
+            'network': vl_param['subnet']['network'],
+            'gateway': vl_param['subnet']['gateway']
+        }
+
+        vl_details_template_xml = VL_DETAILS_TEMPLATE % vl_details_template_values
+        return vl_details_template_xml
 
     @log_entry_exit(LOG)
     def build_vl_info_list(self, vl_info_params):
         vl_info_list_xml = ''
-        for vl_id, vl_param in vl_info_params.items():
+        for vl_descriptor_id, vl_param in vl_info_params.items():
             vl_info_template_values = {
-                'vl_id': vl_id,
-                'dhcp': '<dhcp/>' if vl_param.get('dhcp', False) is True else '',
-                'network': vl_param['subnet']['network'],
-                'gateway': vl_param['subnet']['gateway']
+                'vl_descriptor_id': vl_descriptor_id,
+                'vl_details': self.build_vl_details(vl_param)
             }
-
             vl_info_xml = VL_INFO_TEMPLATE % vl_info_template_values
             vl_info_list_xml += vl_info_xml
 
@@ -1538,7 +1542,7 @@ class CiscoNFVManoAdapter(object):
             'nsd_id': nsd_id,
             'flavor': flavour_id,
             'instantiation_level': ns_instantiation_level_id,
-            'vnf_info_list': self.build_vnf_info_list(ns_instance_id, additional_param_for_ns['vnf_info']),
+            'vnf_info_list': self.build_ns_vnf_info_list(ns_instance_id, additional_param_for_ns['vnf_info']),
             'vl_list': self.build_vl_info_list(additional_param_for_ns['virtual_link_info']),
             'state': 'instantiated',
             'sap_info_list': self.build_sap_info_list(sap_data)
