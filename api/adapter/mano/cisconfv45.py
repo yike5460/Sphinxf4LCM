@@ -1023,8 +1023,10 @@ class CiscoNFVManoAdapter(object):
     def build_day0_config(self, day0_config):
         day0_config__xml = ''
         if 'destination' in day0_config and 'url' in day0_config:
-            day0_config_template_values = {'day0_dest': day0_config['destination'],
-                                           'day0_url': day0_config['url']}
+            day0_config_template_values = {
+                'day0_dest': day0_config['destination'],
+                'day0_url': day0_config['url']
+            }
             day0_config__xml = DAY0_TEMPLATE % day0_config_template_values
 
         return day0_config__xml
@@ -1140,7 +1142,6 @@ class CiscoNFVManoAdapter(object):
         }
 
         vm_operate_xml = VM_OPERATE_TEMPLATE % vm_operate_template_values
-
         return vm_operate_xml
 
     @log_entry_exit(LOG)
@@ -1159,7 +1160,7 @@ class CiscoNFVManoAdapter(object):
         return scaling_vm_group_list_xml
 
     @log_entry_exit(LOG)
-    def build_scaling_xml(self, esc_name, tenant_name, deployment_name, vm_group_params):
+    def build_scaling(self, esc_name, tenant_name, deployment_name, vm_group_params):
         scaling_template_values = {
             'esc_name': esc_name,
             'tenant_name': tenant_name,
@@ -1168,7 +1169,6 @@ class CiscoNFVManoAdapter(object):
         }
 
         scaling_xml = SCALING_TEMPLATE % scaling_template_values
-
         return scaling_xml
 
     @log_entry_exit(LOG)
@@ -1306,7 +1306,7 @@ class CiscoNFVManoAdapter(object):
                 operation_list.append(lifecycle_operation_occurrence_id)
 
             # Build the scaling XML
-            scaling_xml = self.build_scaling_xml(esc_name, tenant_name, deployment_name, vm_group_params)
+            scaling_xml = self.build_scaling(esc_name, tenant_name, deployment_name, vm_group_params)
             try:
                 netconf_reply = self.nso.edit_config(target='running', config=scaling_xml)
             except NCClientError as e:
