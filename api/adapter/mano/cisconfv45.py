@@ -1826,7 +1826,7 @@ class CiscoNFVManoAdapter(object):
             # TODO: can we get the ns_deployment_flavor directly (without 'for')?
             if ns_deployment_flavor == nsd_deployment_flavor_id:
                 vnf_profile_list_xml = deployment_flavor.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                                             'vnf-profile')
+                                                                 'vnf-profile')
                 for vnf_profile in vnf_profile_list_xml:
                     vnf_profile_name = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
                     vnfd_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd')
