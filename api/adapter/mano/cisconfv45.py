@@ -174,16 +174,6 @@ VNF_INFO_TEMPLATE = '''
             <esc>%(esc)s</esc>
         </vnf-info>'''
 
-NS_VDU_TEMPLATE = '''
-            <vdu>
-                <id>%(vdu_id)s</id>
-                <bootup-time>%(bootup_time)s</bootup-time>
-                <recovery-wait-time>%(recovery_wait_time)s</recovery-wait-time>
-                <image-name>%(image_name)s</image-name>
-                <flavor-name>%(flavor_name)s</flavor-name>
-                %(day0_config)s
-            </vdu>'''
-
 VL_INFO_TEMPLATE = '''
         <virtual-link-info>
             <virtual-link-descriptor>%(vl_id)s</virtual-link-descriptor>
