@@ -1376,3 +1376,19 @@ class Mano(object):
         :return:                List of management addresses.
         """
         return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id)
+
+    @log_entry_exit(LOG)
+    def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param=None):
+        """
+        This function verifies that the NS with the provided instance ID contains the correct number of VNF instances.
+        It can also be used to validate the result of the NS scale in/out operation.
+
+        :param ns_instance_id:      Identifier of the NS instance.
+        :param aspect_id:           Provides the aspect of the NS that is requested to be scaled, as declared in the
+                                    NSD.
+        :param number_of_steps:     Specifies the number of scaling steps to be performed. Defaults to 1.
+        :param additional_param:    Additional scaling parameters.
+        :return:                    True if the number of VNF instances is correct, False otherwise.
+        """
+        return self.mano_adapter.verify_ns_vnf_instance_count(ns_instance_id, aspect_id, number_of_steps,
+                                                              additional_param)
