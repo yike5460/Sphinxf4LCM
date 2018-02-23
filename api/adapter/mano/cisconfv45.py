@@ -111,55 +111,55 @@ VM_OPERATE_TEMPLATE = '''
 
 SCALING_TEMPLATE = '''
 <config>
-  <devices xmlns="http://tail-f.com/ns/ncs">
-    <device>
-      <name>%(esc_name)s</name>
-      <config>
-        <esc_datamodel xmlns="http://www.cisco.com/esc/esc">
-          <tenants>
-            <tenant>
-              <name>%(tenant_name)s</name>
-              <deployments>
-                <deployment>
-                  <name>%(deployment_name)s</name>
-                  %(vm_group_list)s
-                </deployment>
-              </deployments>
-            </tenant>
-          </tenants>
-        </esc_datamodel>
-      </config>
-    </device>
-  </devices>
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>%(esc_name)s</name>
+            <config>
+                <esc_datamodel xmlns="http://www.cisco.com/esc/esc">
+                    <tenants>
+                        <tenant>
+                            <name>%(tenant_name)s</name>
+                            <deployments>
+                                <deployment>
+                                    <name>%(deployment_name)s</name>
+                                    %(vm_group_list)s
+                                </deployment>
+                            </deployments>
+                        </tenant>
+                    </tenants>
+                </esc_datamodel>
+            </config>
+        </device>
+    </devices>
 </config>'''
 
 SCALING_VM_GROUP_TEMPLATE = '''
-                  <vm_group>
-                    <name>%(vm_group_name)s</name>
-                    <scaling>
-                      <min_active>%(min_active)s</min_active>
-                      <max_active>%(max_active)s</max_active>
-                    </scaling>
-                  </vm_group>'''
+                                    <vm_group>
+                                    <name>%(vm_group_name)s</name>
+                                    <scaling>
+                                        <min_active>%(min_active)s</min_active>
+                                        <max_active>%(max_active)s</max_active>
+                                    </scaling>
+                                    </vm_group>'''
 
 NSR_TEMPLATE = '''
 <config>
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
-    <ns-info>
-    <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
-    <ns-info>
-        <id>%(ns_id)s</id>
-        <username>%(username)s</username>
-        <nsd>%(nsd_id)s</nsd>
-        <flavor>%(flavor)s</flavor>
-        <instantiation-level>%(instantiation_level)s</instantiation-level>
-        %(vnf_info_list)s
-        %(vl_list)s
-        %(sap_info_list)s
-        <state>%(state)s</state>
-    </ns-info>
-    </esc>
-    </ns-info>
+        <ns-info>
+            <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
+                <ns-info>
+                    <id>%(ns_id)s</id>
+                    <username>%(username)s</username>
+                    <nsd>%(nsd_id)s</nsd>
+                    <flavor>%(flavor)s</flavor>
+                    <instantiation-level>%(instantiation_level)s</instantiation-level>
+                    %(vnf_info_list)s
+                    %(vl_list)s
+                    %(sap_info_list)s
+                    <state>%(state)s</state>
+                </ns-info>
+            </esc>
+        </ns-info>
     </nfvo>
 </config>'''
 
