@@ -337,27 +337,28 @@ class CiscoNFVManoAdapter(object):
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
             except AttributeError:
-                # So far the ESC reports the VNF as un-deployed. Check the NSO reports the same.
-                try:
-                    xml = self.nso.get(('xpath',
-                                        '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/'
-                                            'component[name="self"]/state[name="ncs:ready"]/status'
-                                            % deployment_name)).data_xml
-                    xml = etree.fromstring(xml)
-                    nso_vnf_deployment_state = xml.find(
-                        './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
-                        '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
-                    LOG.debug(
-                        'VNF deployment state reported by NSO: "%s"; expected no state' % nso_vnf_deployment_state)
-                    if nso_vnf_deployment_state == 'reached':
-                        LOG.debug('ESC reports the VNF as un-deployed, but the NSO does not')
-                        return constants.OPERATION_PENDING
-                except NCClientError as e:
-                    LOG.debug('Error occurred while communicating with the NSO Netconf server')
-                    LOG.exception(e)
-                    raise CiscoNFVManoAdapterError(e.message)
-                except AttributeError:
-                    return constants.OPERATION_SUCCESS
+                LOG.debug('So far the ESC reports the VNF as un-deployed. Check the NSO reports the same')
+
+            try:
+                xml = self.nso.get(('xpath',
+                                    '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/plan/'
+                                        'component[name="self"]/state[name="ncs:ready"]/status'
+                                        % deployment_name)).data_xml
+                xml = etree.fromstring(xml)
+                nso_vnf_deployment_state = xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                LOG.debug(
+                    'VNF deployment state reported by NSO: "%s"; expected no state' % nso_vnf_deployment_state)
+                if nso_vnf_deployment_state == 'reached':
+                    LOG.debug('ESC reports the VNF as un-deployed, but the NSO does not')
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError:
+                return constants.OPERATION_SUCCESS
 
         if operation_type == 'vnf_stop':
             tenant_name = operation_details['tenant_name']
@@ -494,7 +495,8 @@ class CiscoNFVManoAdapter(object):
                 raise CiscoNFVManoAdapterError(e.message)
 
             # Return the operation status depending on the VNF deployment state reported by ESC
-            if nso_ns_deployment_state == 'reached' and nso_deployment_state == 'reached' \
+            if nso_ns_deployment_state == 'reached'\
+                    and nso_deployment_state == 'reached'\
                     and esc_deployment_state == 'SERVICE_ACTIVE_STATE':
                 return constants.OPERATION_SUCCESS
             return constants.OPERATION_FAILED
@@ -525,47 +527,48 @@ class CiscoNFVManoAdapter(object):
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
             except AttributeError:
-                # So far the ESC reports the deployment as un-deployed. Check the NSO reports the deployment as
-                # un-deployed.
-                try:
-                    xml = self.nso.get(('xpath',
-                                        '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]/plan/'
-                                            'component[name="self"]/state[name="ncs:ready"]/status'
-                                            % (tenant_name, deployment_name))).data_xml
-                    xml = etree.fromstring(xml)
-                    nso_deployment_state = xml.find(
-                        './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
-                        '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
-                    LOG.debug(
-                        'Deployment state reported by NSO: "%s"; expected no state' % nso_deployment_state)
-                    if nso_deployment_state == 'reached':
-                        LOG.debug('ESC reports the deployment as un-deployed, but the NSO does not')
-                        return constants.OPERATION_PENDING
-                except NCClientError as e:
-                    LOG.debug('Error occurred while communicating with the NSO Netconf server')
-                    LOG.exception(e)
-                    raise CiscoNFVManoAdapterError(e.message)
-                except AttributeError:
-                    # Check the NSO reports the NS as un-deployed
-                    try:
-                        xml = self.nso.get(('xpath',
-                                            '/nfvo/ns-info/esc/ns-info[id="%s"]/plan/component[name="self"]/state'
-                                                '[name="ncs:ready"]/status' % deployment_name)).data_xml
-                        xml = etree.fromstring(xml)
-                        nso_ns_deployment_state = xml.find(
-                            './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
-                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
-                        LOG.debug('NS deployment state reported by NSO: "%s"; expected no state'
-                                  % nso_ns_deployment_state)
-                        if nso_ns_deployment_state == 'reached':
-                            LOG.debug('NSO reports the deployment as un-deployed, but the NS as deployed')
-                            return constants.OPERATION_PENDING
-                    except NCClientError as e:
-                        LOG.debug('Error occurred while communicating with the NSO Netconf server')
-                        LOG.exception(e)
-                        raise CiscoNFVManoAdapterError(e.message)
-                    except AttributeError:
-                        return constants.OPERATION_SUCCESS
+                LOG.debug('So far the ESC reports the deployment as un-deployed. Check the NSO reports the same')
+
+            try:
+                xml = self.nso.get(('xpath',
+                                    '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]/plan/'
+                                        'component[name="self"]/state[name="ncs:ready"]/status'
+                                        % (tenant_name, deployment_name))).data_xml
+                xml = etree.fromstring(xml)
+                nso_deployment_state = xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                LOG.debug(
+                    'Deployment state reported by NSO: "%s"; expected no state' % nso_deployment_state)
+                if nso_deployment_state == 'reached':
+                    LOG.debug('ESC reports the deployment as un-deployed, but the NSO does not')
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError:
+                LOG.debug('Check the NSO reports the NS as un-deployed')
+
+            try:
+                xml = self.nso.get(('xpath',
+                                    '/nfvo/ns-info/esc/ns-info[id="%s"]/plan/component[name="self"]/state'
+                                        '[name="ncs:ready"]/status' % deployment_name)).data_xml
+                xml = etree.fromstring(xml)
+                nso_ns_deployment_state = xml.find(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}state/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}status').text
+                LOG.debug('NS deployment state reported by NSO: "%s"; expected no state'
+                          % nso_ns_deployment_state)
+                if nso_ns_deployment_state == 'reached':
+                    LOG.debug('NSO reports the deployment as un-deployed, but the NS as deployed')
+                    return constants.OPERATION_PENDING
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the NSO Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError:
+                return constants.OPERATION_SUCCESS
 
         if operation_type == 'vm_start':
             tenant_name = operation_details['tenant_name']
