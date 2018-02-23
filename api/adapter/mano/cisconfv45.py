@@ -697,9 +697,7 @@ class CiscoNFVManoAdapter(object):
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
-    def get_vnf_deployment_state(self, vm_group_list, deployment_name):
-        # TODO: should receive additional_param, for consistency
-
+    def get_vm_groups_aggregated_deployment_state(self, vm_group_list, deployment_name):
         # If the VM group list is empty, report the VNF instantiation state as NOT_INSTANTIATED.
         if vm_group_list == list():
             return constants.VNF_NOT_INSTANTIATED
@@ -728,9 +726,7 @@ class CiscoNFVManoAdapter(object):
         return 'reached'
 
     @log_entry_exit(LOG)
-    def get_vnf_service_state(self, vm_group_list, tenant_name, deployment_name):
-        # TODO: should receive additional_param, for consistency
-
+    def get_vm_groups_aggregated_service_state(self, vm_group_list, tenant_name, deployment_name):
         # If the VM group list is empty, report the VNF state as STOPPED.
         if vm_group_list == list():
             raise CiscoNFVManoAdapterError('Cannot get VNF state for empty VM group in deployment %s' % deployment_name)
@@ -779,7 +775,7 @@ class CiscoNFVManoAdapter(object):
         vm_group_list = self.get_vm_groups_for_vnf(vnf_instance_id, additional_param)
 
         # Get the VNF instantiation state
-        vnf_deployment_state = self.get_vnf_deployment_state(vm_group_list, deployment_name)
+        vnf_deployment_state = self.get_vm_groups_aggregated_deployment_state(vm_group_list, deployment_name)
         vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'][vnf_deployment_state]
         if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
             return vnf_info
@@ -806,7 +802,7 @@ class CiscoNFVManoAdapter(object):
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
 
             # Get the VNF state
-            vnf_service_state = self.get_vnf_service_state(vm_group_list, tenant_name, deployment_name)
+            vnf_service_state = self.get_vm_groups_aggregated_service_state(vm_group_list, tenant_name, deployment_name)
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['ESC_DEPLOYMENT_STATE'][vnf_service_state]
 
             # Initialize the VnfcResourceInfo list
@@ -2035,6 +2031,9 @@ class CiscoNFVManoAdapter(object):
 
         # Create dictionary with actual number of VNFC instances for each VDU
         actual_vnfc_count = dict()
+
+        # TODO: use defaultdict
+
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
             if vdu_id not in actual_vnfc_count:
