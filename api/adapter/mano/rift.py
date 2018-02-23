@@ -2,6 +2,7 @@ import logging
 import random
 import time
 import uuid
+from collections import defaultdict
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -574,3 +575,58 @@ class RiftManoAdapter(object):
 
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
+
+    @log_entry_exit(LOG)
+    def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps, additional_param):
+        validation_result = True
+
+        # Get the NSR
+        resource = '/api/operational/project/ns-instance-opdata/nsr/%s' % ns_instance_id
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get opdata for NS %s' % ns_instance_id)
+
+        nsr = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]
+
+        # Get the NSD
+        nsd_id = str(nsr['nsd-ref'])
+        nsd = self.get_nsd(nsd_id)
+
+        # Create dictionary with expected number of instances for each VNF
+        expected_vnf_count = dict()
+        # Since the NS is instantiated, for each VNF in the NS, set the number of instances to 1.
+        for constituent_vnfd in nsd['constituent-vnfd']:
+            expected_vnf_count[str(constituent_vnfd['member-vnf-index'])] = 1
+
+        scaling_group_record_list = nsr['scaling-group-record']
+        scaling_group_descriptor_list = nsd['scaling-group-descriptor']
+        scaling_group_descriptor_dict = {scaling_group_descriptor['name']: scaling_group_descriptor for
+                                         scaling_group_descriptor in scaling_group_descriptor_list}
+        for scaling_group_record in scaling_group_record_list:
+            scaling_group_name = str(scaling_group_record['scaling-group-name-ref'])
+            number_of_instances = len(scaling_group_record.get('instance', []))
+            scaling_group_descriptor = scaling_group_descriptor_dict[scaling_group_name]
+            vnfd_member_list = scaling_group_descriptor['vnfd-member']
+            for vnfd_member in vnfd_member_list:
+                expected_vnf_count[str(vnfd_member['member-vnf-index-ref'])] += vnfd_member['count'] * \
+                                                                                number_of_instances
+
+        # Create dictionary with actual number of instances for each VNF
+        actual_vnf_count = defaultdict(int)
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        for vnf_info in ns_info.vnf_info:
+            vnf_product_name = vnf_info.vnf_product_name
+            actual_vnf_count[vnf_product_name] += 1
+
+        # Compare actual values with expected values
+        for vnf_product_name in expected_vnf_count:
+            LOG.debug('Expected number of instances for VNF %s: %s; actual number: %s'
+                      % (vnf_product_name, expected_vnf_count[vnf_product_name], actual_vnf_count[vnf_product_name]))
+            if actual_vnf_count[vnf_product_name] != expected_vnf_count[vnf_product_name]:
+                validation_result = False
+
+        return validation_result
