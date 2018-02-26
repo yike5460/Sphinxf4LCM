@@ -631,7 +631,7 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=constants.NS_TERMINATE_TIMEOUT,
+                                                              max_wait_time=self.NS_TERMINATE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
