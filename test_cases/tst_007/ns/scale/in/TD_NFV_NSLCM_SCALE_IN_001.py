@@ -109,7 +109,10 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
         # 4. Verify that the additional VNF instance(s) have been deployed by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the additional VNF instance(s) have been deployed by querying the VNFM')
-        # TODO
+        if not self.mano.verify_ns_vnf_instance_count(ns_instance_id=self.ns_instance_id,
+                                                      aspect_id=self.tc_input.get('aspect_id', ''),
+                                                      additional_param=self.tc_input['mano'].get('scale_params')):
+            raise TestRunError('Incorrect number of VNF instances after NS scale out')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Trigger NS scale in by removing VNF instances from the NS in NFVO with an operator action
@@ -138,20 +141,24 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
         # 6. Verify that the impacted VNF instance(s) have been terminated by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the impacted VNF instance(s) have been terminated by querying the VNFM')
-        # TODO
+        if not self.mano.verify_ns_vnf_instance_count(ns_instance_id=self.ns_instance_id,
+                                                      aspect_id=self.tc_input.get('aspect_id', ''),
+                                                      additional_param=self.tc_input['mano'].get('scale_params')):
+            raise TestRunError('Incorrect number of VNF instances after NS scale in')
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the impacted VNF related resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the impacted VNF related resources have been released by the VIM')
-        # TODO
+        if not self.mano.validate_ns_allocated_vresources(self.ns_instance_id,
+                                                          self.tc_input['mano'].get('query_params')):
+            raise TestRunError('Allocated vResources could not be validated')
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the remaining VNF instances(s) are still running and reachable via their management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the remaining VNF instances(s) are still running and reachable via their management '
                  'network')
-        LOG.info('Verifying that the additional VNF instance(s) are running and reachable via their management network')
         for vnf_info in ns_info.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
             for mgmt_addr in mgmt_addr_list:

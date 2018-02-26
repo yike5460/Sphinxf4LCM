@@ -117,7 +117,10 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         # 4. Verify that the additional VNF instance(s) have been deployed by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the additional VNF instance(s) have been deployed by querying the VNFM')
-        # TODO
+        if not self.mano.verify_ns_vnf_instance_count(ns_instance_id=self.ns_instance_id,
+                                                      aspect_id=self.tc_input.get('aspect_id', ''),
+                                                      additional_param=self.tc_input['mano'].get('scale_params')):
+            raise TestRunError('Incorrect number of VNF instances after NS scale out')
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the additional resources have been allocated by the VIM according to the descriptors
@@ -142,7 +145,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         # 7. Verify that the additional VNF instances(s) have been configured according to the descriptors by querying
         #    the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that the additional VNF instances(s) have been configured according to the descriptors by '
+        LOG.info('Verifying that the additional VNF instances(s) have been configured according to the descriptors by '
                  'querying the VNFM')
         # TODO
 
@@ -163,8 +166,8 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         # 10. Verify that NS has been scaled out by running the end-to-end functional test factoring the VNF scale and
         #     capacity
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that NS has been scaled out by running the end-to-end functional test factoring the VNF scale '
-                 'and capacity')
+        LOG.info('Verifying that NS has been scaled out by running the end-to-end functional test factoring the VNF '
+                 'scale and capacity')
         self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
