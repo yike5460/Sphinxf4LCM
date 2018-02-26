@@ -1,5 +1,6 @@
 import logging
 import uuid
+from collections import defaultdict
 from lxml import etree
 
 import ncclient
@@ -2036,16 +2037,10 @@ class CiscoNFVManoAdapter(object):
             expected_vnfc_count[vdu_id.text] = int(number_of_instances)
 
         # Create dictionary with actual number of VNFC instances for each VDU
-        actual_vnfc_count = dict()
-
-        # TODO: use defaultdict
-
+        actual_vnfc_count = defaultdict(int)
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
-            if vdu_id not in actual_vnfc_count:
-                actual_vnfc_count[vdu_id] = 1
-            else:
-                actual_vnfc_count[vdu_id] += 1
+            actual_vnfc_count[vdu_id] += 1
 
         # Compare actual values with expected values
         for vdu_id in expected_vnfc_count:
