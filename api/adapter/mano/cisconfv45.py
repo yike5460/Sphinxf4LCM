@@ -1815,42 +1815,33 @@ class CiscoNFVManoAdapter(object):
         ns_deployment_flavor = ns_info.flavor_id
         nsd = self.get_nsd(nsd_id)
         nsd = etree.fromstring(nsd)
-        nsd_vnf_profile_list = list()
 
-        # Get list of VNFs and corresponding VNFDs according to the deployment-flavor configured in the NSD
-        deployment_flavor_all = nsd.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nfvo'
-                                             '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd'
-                                             '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor')
-        for deployment_flavor in deployment_flavor_all:
-            nsd_deployment_flavor_id = deployment_flavor.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+        # Build mapping between VNF names and their corresponding VNFD IDs
+        vnf_profile_list_xml = nsd.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nfvo'
+                                           '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd'
+                                           '/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor'
+                                           '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                                           '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnf-profile'
+                                           % ns_deployment_flavor)
+        vnf_name_vnfd_id_mapping = dict()
+        for vnf_profile in vnf_profile_list_xml:
+            vnf_profile_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+            vnfd_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd').text
+            vnf_name_vnfd_id_mapping[vnf_profile_id] = vnfd_id
 
-            # TODO: can we get the ns_deployment_flavor directly (without 'for')?
-            if ns_deployment_flavor == nsd_deployment_flavor_id:
-                vnf_profile_list_xml = deployment_flavor.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                                                 'vnf-profile')
-                for vnf_profile in vnf_profile_list_xml:
-                    vnf_profile_name = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
-                    vnfd_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd')
-                    if vnf_profile_name is not None and vnfd_id is not None:
-
-                        # TODO: why use a list of tuple and not a dictionary?
-                        nsd_vnf_profile_list.append((vnf_profile_name.text, vnfd_id.text))
-                break
-
-        # Compare list of deployed VNFs against the list of VNFs configured in the deployment-flavor of the NSD
+        # Compare the expected VNFD IDs with the actual ones
         for vnf_info in ns_info.vnf_info:
-            vnf_name = vnf_info.vnf_product_name
-
-            # TODO: if using a dictionary, 'for' will not be needed
-            for nsd_vnf_profile in nsd_vnf_profile_list:
-                vnf_profile_name, vnfd_id = nsd_vnf_profile
-                if vnf_name == vnf_profile_name:
-                    if vnfd_id != vnf_info.vnfd_id:
-                        LOG.debug('VNF instance id %s was expected to be deployed according to VNFD %s'
-                            % (vnf_info.vnf_instance_id, vnfd_id))
-                        return False
-                else:
-                    continue
+            try:
+                expected_vnfd_id = vnf_name_vnfd_id_mapping[vnf_info.vnf_product_name]
+                actual_vnfd_id = vnf_info.vnfd_id
+                if actual_vnfd_id != expected_vnfd_id:
+                    LOG.debug('VNF with instance ID %s was deployed according to VNFD %s instead of %s'
+                              % (vnf_info.vnf_instance_id, actual_vnfd_id, expected_vnfd_id))
+                    return False
+            except KeyError:
+                LOG.debug('VNF with instance ID %s was deployed according to an unknown VNFD'
+                          % vnf_info.vnf_instance_id)
+                return False
 
         return True
 
