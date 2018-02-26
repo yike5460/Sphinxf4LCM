@@ -1803,7 +1803,7 @@ class CiscoNFVManoAdapter(object):
         for vnf_info in ns_info.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             if not self.validate_vnf_allocated_vresources(vnf_instance_id, additional_param):
-                LOG.debug('For VNF instance id %s expected resources do not match the actual ones' % vnf_instance_id)
+                LOG.debug('For VNF instance ID %s expected resources do not match the actual ones' % vnf_instance_id)
                 return False
 
         return True
@@ -1847,9 +1847,8 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
-        mgmt_addr_list = list()
-        vm_group_list = list()
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
+        mgmt_addr_list = list()
 
         # Get the VNFD corresponding to this VNF instance
         tenant_name = additional_param['tenant']
@@ -1860,62 +1859,55 @@ class CiscoNFVManoAdapter(object):
         vnfd_xml = etree.fromstring(vnfd)
 
         # Finding the external-connection-point descriptor that is used by the VNF as management interface
-        ext_cpd_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                        'external-connection-point-descriptor')
-        for ext_cpd in ext_cpd_list:
-            ext_cpd_mgmt = ext_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}management')
-            if ext_cpd_mgmt is not None:
-                cpd_mgmt = ext_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
-                break
+        try:
+            mgmt_cpd = vnfd_xml.find(
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}external-connection-point-descriptor/'
+                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}management]/'
+                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+        except AttributeError:
+            LOG.debug('VNF with instance ID %s does not have a management external connection point' % vnf_instance_id)
+            return mgmt_addr_list
 
-        if ext_cpd_mgmt is None:
-            raise CiscoNFVManoAdapterError('VNF with instance ID %s does not have and external connection point'
-                                           % vnf_instance_id)
-
-        # Finding the interface id used for management for each VNFC of this VNF
-        vdu_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu')
+        # Building a mapping between VM group name and management interface ID
+        vm_group_name_mgmt_if_id = dict()
+        vdu_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd/'
+                                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu')
         for vdu in vdu_list:
-            vdu_id = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
-            if vdu_id is None:
-                continue
-            vdu_id = vdu_id.text
-            int_cpd_list = vdu.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                       'internal-connection-point-descriptor')
-            for int_cpd in int_cpd_list:
-                ext_cpd = int_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                       'external-connection-point-descriptor')
-                if ext_cpd is None:
-                    continue
-                ext_cpd = ext_cpd.text
-                interface_id = int_cpd.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id').text
-                if ext_cpd == cpd_mgmt:
-                    vm_group_list.append(('%s-%s' % (vnf_name, vdu_id), interface_id))
-                    break
+            vdu_id = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+            vm_group_name = '%s-%s' % (vnf_name, vdu_id)
+            mgmt_if_id = vdu.find(
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
+                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}external-connection-point-descriptor="%s"]/'
+                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id' % mgmt_cpd).text
+            vm_group_name_mgmt_if_id[vm_group_name] = mgmt_if_id
 
-        # Get management address for each VNFC from the ESC
-        for vm_group in vm_group_list:
-            vm_group_name, interface_id = vm_group
+        # Get the deployment XML from ESC
+        try:
+            esc_deployment_xml = self.esc.get(('xpath',
+                                               '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                                   'deployments[deployment_name="%s"]/vm_group'
+                                                    % (tenant_name, deployment_name))).data_xml
+            esc_deployment_xml = etree.fromstring(esc_deployment_xml)
+        except NCClientError as e:
+            LOG.debug('Error occurred while communicating with the ESC Netconf server')
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Get the address corresponding to the management interface ID for each VNFC from the ESC
+        for vm_group_name, mgmt_if_id in vm_group_name_mgmt_if_id.items():
             try:
-                vm_group_xml = self.esc.get(('xpath',
-                                             '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                                'deployments[deployment_name="%s"]/vm_group[name="%s"]'
-                                                % (tenant_name, deployment_name, vm_group_name))).data_xml
-                vm_group_xml = etree.fromstring(vm_group_xml)
-                vm_instance_list = vm_group_xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance')
-                for vm_instance in vm_instance_list:
-                    interface_list = vm_instance.findall('.//{http://www.cisco.com/esc/esc}interfaces')
-                    for interface in interface_list:
-                        nicid = interface.find('.//{http://www.cisco.com/esc/esc}nicid').text
-                        if nicid == interface_id:
-                            ip_address = vm_instance.find('.//{http://www.cisco.com/esc/esc}ip_address').text
-                            mgmt_addr_list.append(ip_address)
-                            break
-            except NCClientError as e:
-                LOG.debug('Error occurred while communicating with the ESC Netconf server')
-                LOG.exception(e)
-                raise CiscoNFVManoAdapterError(e.message)
+                mgmt_ip_addr_list = esc_deployment_xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                               '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                               '{http://www.cisco.com/esc/esc}vm_instance/'
+                                                               '{http://www.cisco.com/esc/esc}interfaces/'
+                                                               '{http://www.cisco.com/esc/esc}interface'
+                                                               '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
+                                                               '{http://www.cisco.com/esc/esc}ip_address'
+                                                               % (vm_group_name, mgmt_if_id))
+                for mgmt_addr in mgmt_ip_addr_list:
+                    mgmt_addr_list.append(mgmt_addr.text)
             except AttributeError as e:
-                LOG.debug('Management IP address not available for vm_group %s' % vm_group[0])
+                LOG.debug('Management IP address not available for vm_group %s' % '')
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
 
