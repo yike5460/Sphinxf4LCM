@@ -121,8 +121,8 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # 5. Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have been
         #    stopped by querying the VIM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that the compute resources allocated to the VNFC instances inside the target VNF instance have'
-                 ' been stopped by querying the VIM')
+        LOG.info('Verifying that the compute resources allocated to the VNFC instances inside the target VNF instance '
+                 'have been stopped by querying the VIM')
         for vnf_data in operate_vnf_data_list:
             if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id):
                 raise TestRunError('Target VNF %s compute resources have not been stopped' % vnf_data.vnf_instance_id)

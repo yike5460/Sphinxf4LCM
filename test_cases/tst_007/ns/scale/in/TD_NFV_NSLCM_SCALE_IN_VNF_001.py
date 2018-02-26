@@ -210,8 +210,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         # 8. Verify that the VNF configuration has been updated to exclude the removed VNFC instances according to the
         # descriptors by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that the VNF configuration has been updated to exclude the additional VNFC instances according'
-                 ' to the descriptors by querying the VNFM')
+        LOG.info('Verifying that the VNF configuration has been updated to exclude the additional VNFC instances '
+                 'according to the descriptors by querying the VNFM')
         # TODO
 
         # --------------------------------------------------------------------------------------------------------------
@@ -231,8 +231,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         # 11. Verify that NS has been scaled in by running the end-to-end functional test in relevance to the VNF scale
         # and capacity
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that NS has been scaled in by running the end-to-end functional test in relevance to the VNF '
-                 'scale and capacity')
+        LOG.info('Verifying that NS has been scaled in by running the end-to-end functional test in relevance to the '
+                 'VNF scale and capacity')
         self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
