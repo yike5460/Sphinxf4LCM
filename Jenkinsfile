@@ -1,16 +1,20 @@
 node {
 	def vm
-	def ipaddr	
+	def ipaddr
+	def instanceid
+	def timestamp
 
 	stage('Build') {
 		checkout scm
 		sh "./create_archive.sh --source-dir \$(pwd) --destination-dir /tmp/vnflcv --twister-dir /tmp/twister"
 		sh "ls -l /tmp/vnflcv"
+		timestamp = sh(script: "date '+%Y%m%d-%H%M%S' | tr -d '\n'", returnStdout: true)
 	}
 
 	stage('Provision') {
 		vm = openstackMachine cloud: 'mirantis', template: 'vnflcv'
 		ipaddr = vm.getAddress()
+		instanceid = vm.getId()
 	}
 
 	stage('Connect') {
@@ -49,6 +53,18 @@ node {
 	}
 
 	stage('Publish') {
-		sh "cp /tmp/vnflcv/vnflcv.tar.gz /var/www/html/vnflcv/vnflcv-\$(date '+%Y%m%d-%H%M%S').tar.gz"
+		sh "cp /tmp/vnflcv/vnflcv.tar.gz /var/www/html/vnflcv/vnflcv-${timestamp}.tar.gz"
 	}
+
+	stage('Snapshot') {
+                sh """
+			. /tmp/vnflcv/openrc
+			imageid=\$(nova image-create --show --poll $instanceid vnflcv-$timestamp | grep -w id | tr -s ' ' | cut -f 4 -d ' ')
+			glance image-download \$imageid --file /tmp/vnflcv/vnflcv-${timestamp}.qcow2
+			glance image-delete \$imageid
+			rm -v /var/www/html/vnflcv/*.qcow2 || true
+			qemu-img convert -c /tmp/vnflcv/vnflcv-${timestamp}.qcow2 -O /var/www/html/vnflcv/vnflcv-${timestamp}.qcow2
+			rm -v /tmp/vnflcv/vnflcv-${timestamp}.qcow2
+                """
+        }
 }
