@@ -1244,6 +1244,16 @@ class CiscoNFVManoAdapter(object):
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
 
+            # Get the deployment flavor name
+            try:
+                deployment_flavor = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                                                        '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
+                                                        '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd-flavor'
+                                                        % vnf_name).text
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+
             # Get the VNFD ID
             try:
                 vnfd_id = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
@@ -1253,30 +1263,25 @@ class CiscoNFVManoAdapter(object):
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
 
-            # Get the deployment flavor name
-            try:
-                deployment_flavor = deployment_xml.find(
-                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
-                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
-                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd-flavor' % vnf_name).text
-            except AttributeError as e:
-                LOG.exception(e)
-                raise CiscoNFVManoAdapterError(e.message)
+            # Get the VNFD
+            vnfd = self.get_vnfd(vnfd_id)
+            vnfd = etree.fromstring(vnfd)
 
-            # Get the instantiation level XML corresponding to the provided instantiation level ID from the VNFD with
-            # the above ID
+            # Get the instantiation level XML corresponding to the provided instantiation level ID from the VNFD
             try:
-                instantiation_level_xml = self.nso.get(('xpath',
-                                                        '/nfvo/vnfd[id="%s"]/deployment-flavor[id="%s"]/'
-                                                            'instantiation-level[id="%s"]'
-                                                            % (vnfd_id, deployment_flavor,
-                                                               instantiation_level_id))).data_xml
-                instantiation_level_xml = etree.fromstring(instantiation_level_xml)
+                instantiation_level_xml = vnfd.find(('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor'
+                                                     '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                                                     '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}instantiation-level'
+                                                     '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]'
+                                                     % (deployment_flavor, instantiation_level_id)))
+                if instantiation_level_xml is None:
+                    raise CiscoNFVManoAdapterError('No instantiation level ID named %s defined in VNFD %s, under '
+                                                   'deployment flavor %s' % (instantiation_level_id, vnfd_id,
+                                                                             deployment_flavor))
             except NCClientError as e:
                 LOG.debug('Error occurred while communicating with the ESC Netconf server')
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
-            # TODO raise exception if instantiation_level_xml is empty
 
             # Get the list of VDU in this instantiation level
             vdu_list = instantiation_level_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level/'
