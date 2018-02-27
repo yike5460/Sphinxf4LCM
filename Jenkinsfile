@@ -1,16 +1,20 @@
 node {
 	def vm
-	def ipaddr	
+	def ipaddr
+	def instanceid
+	def timestamp
 
 	stage('Build') {
 		checkout scm
 		sh "./create_archive.sh --source-dir \$(pwd) --destination-dir /tmp/vnflcv --twister-dir /tmp/twister"
 		sh "ls -l /tmp/vnflcv"
+		timestamp = sh(script: "date '+%Y%m%d-%H%M%S' | tr -d '\n'", returnStdout: true)
 	}
 
 	stage('Provision') {
 		vm = openstackMachine cloud: 'mirantis', template: 'vnflcv'
 		ipaddr = vm.getAddress()
+		instanceid = vm.getId()
 	}
 
 	stage('Connect') {
@@ -24,7 +28,7 @@ node {
 
 	stage('Deploy') {
 		try {
-			timeout(time: 40, unit: 'MINUTES') {
+			timeout(time: 60, unit: 'MINUTES') {
 				sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr vnflcv/deploy.sh --headless"
 			}
 		} finally {
@@ -46,9 +50,26 @@ node {
 		sh "curl http://$ipaddr:8080/v1.0/wait/$executionid"
 		sh "curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | python -mjson.tool"
 		sh "test \$(curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | jq -r '.tc_result|.overall_status') = PASSED"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/mano/tacker1"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/traffic/stc1"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/env/lab1"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/config/active-env"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/config/scaling_policy_name"
 	}
 
 	stage('Publish') {
-		sh "cp /tmp/vnflcv/vnflcv.tar.gz /var/www/html/vnflcv/vnflcv-\$(date '+%Y%m%d-%H%M%S').tar.gz"
+		sh "cp /tmp/vnflcv/vnflcv.tar.gz /var/www/html/vnflcv/vnflcv-${timestamp}.tar.gz"
 	}
+
+	stage('Snapshot') {
+                sh """
+			. /tmp/vnflcv/openrc
+			imageid=\$(nova image-create --show --poll $instanceid vnflcv-$timestamp | grep -w id | tr -s ' ' | cut -f 4 -d ' ')
+			glance image-download \$imageid --file /tmp/vnflcv/vnflcv-${timestamp}.qcow2
+			glance image-delete \$imageid
+			rm -v /var/www/html/vnflcv/*.qcow2 || true
+			qemu-img convert -c /tmp/vnflcv/vnflcv-${timestamp}.qcow2 -O qcow2 /var/www/html/vnflcv/vnflcv-${timestamp}.qcow2
+			rm -v /tmp/vnflcv/vnflcv-${timestamp}.qcow2
+                """
+        }
 }
