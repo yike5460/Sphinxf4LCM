@@ -109,12 +109,6 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
 
             scale_vnf_data_list.append(scale_vnf_data)
 
-        if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='SCALE_VNF', scale_vnf_data=scale_vnf_data_list,
-                                   scale_time=self.tc_input.get('scale_time')) \
-                != constants.OPERATION_SUCCESS:
-            self.tc_result['scaling_to_level']['status'] = 'Fail'
-            raise TestRunError('MANO could not scale to level the NS')
-
         self.time_record.START('scale_to_level_ns')
         if self.mano.ns_scale_sync(self.ns_instance_id, scale_type='SCALE_VNF', scale_vnf_data=scale_vnf_data_list,
                                    scale_time=self.tc_input.get('scale_time')) \
