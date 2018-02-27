@@ -50,6 +50,11 @@ node {
 		sh "curl http://$ipaddr:8080/v1.0/wait/$executionid"
 		sh "curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | python -mjson.tool"
 		sh "test \$(curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | jq -r '.tc_result|.overall_status') = PASSED"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/mano/tacker1"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/traffic/stc1"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/env/lab1"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/config/active-env"
+		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/config/scaling_policy_name"
 	}
 
 	stage('Publish') {
@@ -63,7 +68,7 @@ node {
 			glance image-download \$imageid --file /tmp/vnflcv/vnflcv-${timestamp}.qcow2
 			glance image-delete \$imageid
 			rm -v /var/www/html/vnflcv/*.qcow2 || true
-			qemu-img convert -c /tmp/vnflcv/vnflcv-${timestamp}.qcow2 -O /var/www/html/vnflcv/vnflcv-${timestamp}.qcow2
+			qemu-img convert -c /tmp/vnflcv/vnflcv-${timestamp}.qcow2 -O qcow2 /var/www/html/vnflcv/vnflcv-${timestamp}.qcow2
 			rm -v /tmp/vnflcv/vnflcv-${timestamp}.qcow2
                 """
         }
