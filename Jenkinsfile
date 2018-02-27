@@ -28,7 +28,7 @@ node {
 
 	stage('Deploy') {
 		try {
-			timeout(time: 40, unit: 'MINUTES') {
+			timeout(time: 60, unit: 'MINUTES') {
 				sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr vnflcv/deploy.sh --headless"
 			}
 		} finally {
