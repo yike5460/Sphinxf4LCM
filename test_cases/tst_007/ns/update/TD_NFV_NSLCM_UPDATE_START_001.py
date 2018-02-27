@@ -33,7 +33,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         end-to-end functional test
     """
 
-    REQUIRED_APIS = ('mano', 'traffic', )
+    REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'operate_vnf_data')
     TESTCASE_EVENTS = ('instantiate_ns', 'ns_update_stop_vnf', 'ns_update_start_vnf')
 
@@ -70,7 +70,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
-                                  terminate_time=self.tc_input.get('terminate_time'))
+                                  terminate_time=self.tc_input.get('terminate_time'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
@@ -100,6 +101,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                 vnf_data = OperateVnfData()
                 vnf_data.vnf_instance_id = vnf_info.vnf_instance_id
                 vnf_data.change_state_to = 'stop'
+                vnf_data.additional_param = self.tc_input['mano'].get('operate_params')
                 operate_vnf_data_list.append(vnf_data)
 
         self.time_record.START('ns_update_stop_vnf')
@@ -188,7 +190,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         LOG.info('Verifying that the compute resources allocated to the target VNF instance have been started by'
                  ' querying the VIM')
         for vnf_data in operate_vnf_data_list:
-            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id):
+            if not self.mano.validate_vnf_vresource_state(vnf_data.vnf_instance_id,
+                                                          self.tc_input['mano'].get('query_params')):
                 raise TestRunError('Target VNF %s compute resources have not been started' % vnf_data.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -219,7 +222,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         if 'left_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['left_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)[0]
+                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                 self.tc_input['mano'].get('query_params'))[0]
                     self.tc_input['traffic']['traffic_config']['left_port_location'] = dest_addr + \
                                                                                        self.tc_input['traffic'][
                                                                                            'traffic_config'][
@@ -228,7 +232,8 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         if 'right_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
                 if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['right_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)[0]
+                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                 self.tc_input['mano'].get('query_params'))[0]
                     self.tc_input['traffic']['traffic_config']['right_port_location'] = dest_addr + \
                                                                                        self.tc_input['traffic'][
                                                                                            'traffic_config'][

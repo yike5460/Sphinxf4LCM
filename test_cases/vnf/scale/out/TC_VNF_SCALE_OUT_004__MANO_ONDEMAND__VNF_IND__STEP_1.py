@@ -83,7 +83,8 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VNF_IND__STEP_1(TestCase):
 
         self.register_for_cleanup(index=20, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
-                                  terminate_time=self.tc_input.get('terminate_time'))
+                                  terminate_time=self.tc_input.get('terminate_time'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Validate NS state is INSTANTIATED

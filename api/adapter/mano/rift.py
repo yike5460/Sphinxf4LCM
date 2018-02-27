@@ -102,7 +102,7 @@ class RiftManoAdapter(object):
         return ns_list
 
     @log_entry_exit(LOG)
-    def ns_terminate(self, ns_id):
+    def ns_terminate(self, ns_id, terminate_time=None, additional_param=None):
         resource = '/api/config/ns-instance-config/nsr/' + ns_id
 
         try:

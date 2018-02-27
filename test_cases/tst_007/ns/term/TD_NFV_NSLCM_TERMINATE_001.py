@@ -59,7 +59,8 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
-                                  terminate_time=self.tc_input.get('terminate_time'))
+                                  terminate_time=self.tc_input.get('terminate_time'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
@@ -84,7 +85,10 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering the termination of the NS instance on the NFVO')
         self.time_record.START('terminate_ns')
-        if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id) != constants.OPERATION_SUCCESS:
+        if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id,
+                                       terminate_time=self.tc_input.get('terminate_time'),
+                                       additional_param=self.tc_input['mano'].get('termination_params')) \
+                != constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='NS termination operation failed')
 
