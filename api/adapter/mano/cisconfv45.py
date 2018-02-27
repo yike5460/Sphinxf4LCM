@@ -1569,7 +1569,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         ns_instance_id = ns_name
-        self.ns_nsd_mapping[ns_instance_id] = nsd_id
+        self.ns_nsd_mapping[ns_instance_id] = str(nsd_id)
 
         return ns_instance_id
 
