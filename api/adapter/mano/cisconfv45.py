@@ -699,9 +699,9 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vm_groups_aggregated_deployment_state(self, vm_group_list, deployment_name):
-        # If the VM group list is empty, report the VNF instantiation state as NOT_INSTANTIATED.
+        # If the VM group list is empty, report the deployment state as 'not-reached.
         if vm_group_list == list():
-            return constants.VNF_NOT_INSTANTIATED
+            return 'not-reached'
 
         # Get the NSO deployment plan xml
         try:
@@ -713,7 +713,7 @@ class CiscoNFVManoAdapter(object):
             LOG.exception(e)
             raise CiscoNFVManoAdapterError(e.message)
 
-        # If all VMs' state status is 'reached' report the VNF instantiation state as instantiated.
+        # If all VMs' state status is 'reached' report the deployment state as 'reached'.
         for vm_group in vm_group_list:
             component_state = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}component'
                                        '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
@@ -1685,18 +1685,23 @@ class CiscoNFVManoAdapter(object):
     def get_vm_groups_for_vnf(self, vnf_instance_id, additional_param):
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         tenant_name = additional_param['tenant']
+        vm_group_list = list()
 
         # Get from the NSO the name of the ESC this deployment belongs to
         try:
-            xml = self.nso.get(('xpath', '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
-                                % (tenant_name, deployment_name))).data_xml
-            xml = etree.fromstring(xml)
-            esc_name = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-deployment/'
-                                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}esc').text
+            deployment_xml = self.nso.get(('xpath',
+                                           '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
+                                               % (tenant_name, deployment_name))).data_xml
+            deployment_xml = etree.fromstring(deployment_xml)
+            esc_name = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-deployment/'
+                                           '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}esc').text
         except NCClientError as e:
             LOG.debug('Error occurred while communicating with the ESC Netconf server')
             LOG.exception(e)
             raise CiscoNFVManoAdapterError(e.message)
+        except AttributeError:
+            LOG.debug('The VM group list for VNF %s is empty' % vnf_instance_id)
+            return vm_group_list
 
         # Get from the NSO the VM group names belonging to this deployment
         try:
@@ -1713,7 +1718,6 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError(e.message)
 
         # Get the list of VM groups belonging to the VNF with the name corresponding to the provided VNF instance ID
-        vm_group_list = list()
         for vm_group_name in vm_group_names:
             current_vnf_name = vm_groups.find('.//{http://www.cisco.com/esc/esc}vm_group'
                                               '[{http://www.cisco.com/esc/esc}name="%s"]/'
