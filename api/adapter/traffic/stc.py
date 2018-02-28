@@ -7,6 +7,7 @@ from stcrestclient import resthttp, stchttp
 from api.adapter.traffic import TrafficAdapterError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
+from utils.misc import generate_name
 
 LOG = logging.getLogger(__name__)
 
@@ -19,14 +20,12 @@ class StcTrafficAdapterError(TrafficAdapterError):
 
 
 class StcTrafficAdapter(object):
-    def __init__(self, lab_server_addr, user_name, session_name, lab_server_port=80):
+    def __init__(self, lab_server_addr, lab_server_port=80):
         try:
             self.stc = stchttp.StcHttp(lab_server_addr, port=lab_server_port)
         except Exception as e:
             LOG.exception(e)
             raise StcTrafficAdapterError(e.message)
-        self.user_name = user_name
-        self.session_name = session_name
         self.session = None
         self.project = None
         self.tx_results = None
@@ -48,8 +47,9 @@ class StcTrafficAdapter(object):
     @log_entry_exit(LOG)
     def create_session(self):
         try:
-            self.session = self.stc.new_session(user_name=self.user_name, session_name=self.session_name,
-                                                kill_existing=True)
+            user_name = 'vnflcv'
+            session_name = generate_name('session')
+            self.session = self.stc.new_session(user_name=user_name, session_name=session_name, kill_existing=True)
             self.project = self.stc.create(object_type='project')
         except Exception as e:
             LOG.exception(e)
