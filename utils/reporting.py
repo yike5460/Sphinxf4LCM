@@ -41,7 +41,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write('\n\n')
 
         t1 = prettytable.PrettyTable(
-                         ['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
+            ['Scaling type', 'Status', 'Scaling level', 'Traffic before scaling', 'Traffic after scaling'])
         print_scaling_results = False
         for direction in ['out', 'in', 'up', 'down']:
             scale_type = 'scaling_' + direction
@@ -50,22 +50,24 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
                 print_scaling_results = True
 
                 # Build the scale table row
-                port_speed = tc_input['traffic']['traffic_config']['port_speed']
                 status = tc_result[scale_type].get('status', 'N/A')
                 scale_level = tc_result[scale_type].get('level', 'N/A')
-                load_before_scaling = tc_result[scale_type].get('traffic_before', 'N/A')
-                load_after_scaling = tc_result[scale_type].get('traffic_after', 'N/A')
-                traffic_before_scaling = str(
-                        constants.traffic_load_percent_mapping.get(load_before_scaling, 0) * port_speed / 100) + ' Mbps'
-                traffic_after_scaling = str(
-                        constants.traffic_load_percent_mapping.get(load_after_scaling, 0) * port_speed / 100) + ' Mbps'
+
+                load_before_scaling = tc_result[scale_type].get('traffic_before')
+                load_after_scaling = tc_result[scale_type].get('traffic_after')
+
+                percent_before_scaling = constants.traffic_load_percent_mapping.get(load_before_scaling, 'N/A')
+                percent_after_scaling = constants.traffic_load_percent_mapping.get(load_after_scaling, 'N/A')
+
+                traffic_before_scaling = str(percent_before_scaling) + ' %'
+                traffic_after_scaling = str(percent_after_scaling) + ' %'
 
                 # Add the row to the table
                 t1.add_row([scale_type, status, scale_level, traffic_before_scaling, traffic_after_scaling])
 
         # Write scaling results, if any
         if print_scaling_results:
-            report_file.write('* Scaling results\n')
+            report_file.write('* Scaling results (traffic values are expressed as percent of line rate)\n')
             report_file.write(t1.get_string())
             report_file.write('\n\n')
 
