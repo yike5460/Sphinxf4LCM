@@ -277,18 +277,20 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_vresource_state(self, vnf_instance_id):
+    def validate_vnf_vresource_state(self, vnf_instance_id, additional_param=None):
         """
         This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM
 
         :param vnf_instance_id:     Vnf Instance ID value.
+        :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the the VNF state in the VNFM matches the state indicated by the VIM,
                                     False otherwise
         """
 
         VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
                                     constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                          'additional_param': additional_param})
         vnf_state = vnf_info.instantiated_vnf_info.vnf_state
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
@@ -581,33 +583,38 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def ns_terminate(self, ns_instance_id, terminate_time=None):
+    def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
         """
         This function terminates an NS.
 
-        This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
+        This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10). The
+        additional_param inout is not part of the standard specification.
 
-        :param ns_instance_id:  Identifier of the NS instance to terminate.
-        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
-                                automatically at this timestamp.
-        :return:                Identifier of the NS lifecycle operation occurrence.
+        :param ns_instance_id:      Identifier of the NS instance to terminate.
+        :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                    automatically at this timestamp.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
+                                    specific to the NS being terminated.
+        :return:                    Identifier of the NS lifecycle operation occurrence.
 
         """
 
-        return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time)
+        return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
     @log_entry_exit(LOG)
-    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None):
+    def ns_terminate_and_delete(self, ns_instance_id, terminate_time=None, additional_param=None):
         """
         This function synchronously terminates an NS and deletes its instance ID.
 
-        :param ns_instance_id:  Identifier of the NS instance to terminate.
-        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
-                                automatically at this timestamp.
-        :return:                'SUCCESS' if both operations were successful, 'FAILED' otherwise.
+        :param ns_instance_id:      Identifier of the NS instance to terminate.
+        :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                    automatically at this timestamp.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
+                                    specific to the NS being terminated.
+        :return:                    'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
 
-        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time)
+        operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
             LOG.debug('Expected termination operation status %s, got %s'
@@ -617,21 +624,23 @@ class Mano(object):
         self.ns_delete_id(ns_instance_id)
 
     @log_entry_exit(LOG)
-    def ns_terminate_sync(self, ns_instance_id, terminate_time=None):
+    def ns_terminate_sync(self, ns_instance_id, terminate_time=None, additional_param=None):
         """
         This function synchronously terminates an NS.
 
-        :param ns_instance_id:  Identifier of the NS instance to terminate.
-        :param terminate_time:  Timestamp indicating the end time of the NS, i.e. the NS will be terminated
-                                automatically at this timestamp.
-        :return:                Operation status.
+        :param ns_instance_id:      Identifier of the NS instance to terminate.
+        :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+                                    automatically at this timestamp.
+        :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
+                                    specific to the NS being terminated.
+        :return:                    Operation status.
         """
 
-        lifecycle_operation_occurrence_id = self.ns_terminate(ns_instance_id, terminate_time)
+        lifecycle_operation_occurrence_id = self.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=constants.NS_TERMINATE_TIMEOUT,
+                                                              max_wait_time=self.NS_TERMINATE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
@@ -1087,6 +1096,33 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
+    def vnf_scale_to_level_sync(self, vnf_instance_id, instantiation_level_id=None, scale_info=None,
+                                additional_param=None):
+        """
+        This function synchronously scales an instantiated VNF of a particular DF to a target size.
+
+        :param vnf_instance_id:         Identifier of the VNF instance to which this scaling request is related.
+        :param instantiation_level_id:  Identifier of the target instantiation level of the current DF to which the
+                                        VNF is requested to be scaled. Either instantiationLevelId or scaleInfo
+                                        but not both shall be present.
+        :param scale_info:              For each scaling aspect of the current DF, defines the target scale level to
+                                        which the VNF is to be scaled. Either instantiationLevelId or scaleInfo
+                                        but not both shall be present.
+        :param additional_param:        Additional parameters passed as input to the scaling process, specific to the
+                                        VNF being scaled.
+        :return:                        Operation status.
+        """
+        lifecycle_operation_occurrence_id = self.vnf_scale_to_level(vnf_instance_id, instantiation_level_id, scale_info,
+                                                                    additional_param)
+
+        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=self.VNF_SCALE_OUT_TIMEOUT,
+                                                              poll_interval=self.POLL_INTERVAL)
+
+        return operation_status
+
+    @log_entry_exit(LOG)
     def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
                       additional_param=None):
         """
@@ -1322,7 +1358,7 @@ class Mano(object):
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-        return self.mano_adapter.verify_vnf_sw_images(vnf_info)
+        return self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
     def verify_ns_sw_images(self, ns_instance_id, additional_param=None):
@@ -1336,7 +1372,7 @@ class Mano(object):
         """
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         for vnf_info in ns_info.vnf_info:
-            if not self.mano_adapter.verify_vnf_sw_images(vnf_info):
+            if not self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param):
                 LOG.error('Not all VNFCs in VNF with instance ID %s use the correct images' % vnf_info.vnf_instance_id)
                 return False
         return True
@@ -1368,14 +1404,15 @@ class Mano(object):
                 return vnf_info.vnf_instance_id
 
     @log_entry_exit(LOG)
-    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         """
         This function retrieves the management addresses of the VNFCs that belong to the VNF with the given instance ID.
 
-        :param vnf_instance_id: Identifier of the VNF instance.
-        :return:                List of management addresses.
-        """
-        return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id)
+        :param vnf_instance_id:     Identifier of the VNF instance.
+        :param additional_param:    Additional parameters used for filtering.
+        :return:                    List of management addresses.
+        """   
+        return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
     def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param=None):
@@ -1392,3 +1429,50 @@ class Mano(object):
         """
         return self.mano_adapter.verify_ns_vnf_instance_count(ns_instance_id, aspect_id, number_of_steps,
                                                               additional_param)
+
+    @log_entry_exit(LOG)
+    def validate_vnf_instantiation_level(self, vnf_info, instantiation_level_id, additional_param=None):
+        """
+        This function verifies that the number of VNFC instances in the provided VnfInfo information element matches the
+        number of instances indicated by the provided instantiation level ID of the current deployment flavor.
+
+        If the number of instances for a particular VDU is not present in the provided instantiation level ID, the
+        number of instances for that VDU will be compared to the number of instances indicated by the default
+        instantiation level ID of the current deployment flavor.
+
+        :param vnf_info:                VnfInfo information element.
+        :param instantiation_level_id:  ID of the instantiation level.
+        :param additional_param:        Additional parameters used for filtering.
+        :return:                        True if the number of VNFC instances is correct, False otherwise.
+        """
+        return self.mano_adapter.validate_vnf_instantiation_level(vnf_info, instantiation_level_id, additional_param)
+
+    @log_entry_exit(LOG)
+    def validate_ns_instantiation_level(self, ns_info, instantiation_level_list, additional_param):
+        """
+        This function verifies that the number of VNFC instances for each VNF in the provided NsInfo information element
+        matches the number of instances indicated by the instantiation level ID corresponding to that VNF.
+
+        If no instantiation level ID corresponds to a particular VNF, the number of VNFC instances for that VNF will be
+        compared to the number of instances indicated by the default instantiation level ID corresponding to that VNF.
+
+        :param ns_info:                     NsInfo information element.
+        :param instantiation_level_list:    List of dictionaries containing the VNF name and the corresponding target
+                                            instantiation level ID.
+                                            Example: [{'target_vnf_name': 'empirix',
+                                                       'target_instantiation_level_id': 'scaled'}]
+        :param additional_param:            Additional parameters used for filtering.
+        :return:                            True if the number of VNFC instances for each VNF is correct,
+                                            False otherwise.
+        """
+        vnf_name_level_id_mapping = dict()
+        for scale_to_level in instantiation_level_list:
+            vnf_name = scale_to_level['target_vnf_name']
+            target_instantiation_level_id = scale_to_level['target_instantiation_level_id']
+            vnf_name_level_id_mapping[vnf_name] = target_instantiation_level_id
+        for vnf_info in ns_info.vnf_info:
+            instantiation_level_id = vnf_name_level_id_mapping.get(vnf_info.vnf_product_name)
+            if not self.validate_vnf_instantiation_level(vnf_info, instantiation_level_id, additional_param):
+                LOG.debug('Incorrect number of VNFC instances for VNF %s' % vnf_info.vnf_product_name)
+                return False
+        return True

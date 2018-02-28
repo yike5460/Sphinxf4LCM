@@ -305,7 +305,7 @@ class SdlManoAdapter(object):
                 }
 
     @log_entry_exit(LOG)
-    def ns_terminate(self, ns_instance_id, terminate_time=None):
+    def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
         ns_update_dict = self.ns_update_json_mapping[ns_instance_id]
         ns_update_dict['is_enabled'] = False
 

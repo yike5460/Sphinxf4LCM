@@ -38,6 +38,8 @@ echo "2. Running apt-get upgrade" >> /var/log/vnflcv/vnflcv-deployment.log
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
 sudo /usr/bin/apt-get -y upgrade &>> /var/log/vnflcv/vnflcv-deployment.log
 
+sudo apt-get -y install zfsutils-linux &>> /var/log/vnflcv/vnflcv-deployment.log
+
 # Remove the existing LXD packages
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
 /bin/date >> /var/log/vnflcv/vnflcv-deployment.log
@@ -58,7 +60,7 @@ echo "================================================" >> /var/log/vnflcv/vnflc
 /bin/date >> /var/log/vnflcv/vnflcv-deployment.log
 echo "5. Initializing lxd" >> /var/log/vnflcv/vnflcv-deployment.log
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/snap/bin/lxd init --auto >> /var/log/vnflcv/vnflcv-deployment.log
+/snap/bin/lxd init --auto --storage-backend zfs >> /var/log/vnflcv/vnflcv-deployment.log
 OIF=$(ip route get 8.8.8.8 | grep dev | cut -f 5 -d ' ')
 OIF_MTU=$(cat /sys/class/net/${OIF}/mtu)
 /snap/bin/lxc network create lxdbr0 bridge.mtu=${OIF_MTU} ipv4.address=auto ipv4.nat=true ipv6.address=none ipv6.nat=false >> /var/log/vnflcv/vnflcv-deployment.log

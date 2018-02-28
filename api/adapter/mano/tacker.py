@@ -819,7 +819,7 @@ class TackerManoAdapter(object):
         return 'ns', ns_instance_id
 
     @log_entry_exit(LOG)
-    def ns_terminate(self, ns_instance_id, terminate_time=None):
+    def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
         try:
             self.tacker_client.delete_ns(ns_instance_id)
         except tackerclient.common.exceptions.TackerClientException:
@@ -1065,7 +1065,7 @@ class TackerManoAdapter(object):
                 return vnfd_name
 
     @log_entry_exit(LOG)
-    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         try:
             vnf_mgmt_url = self.tacker_client.show_vnf(vnf_instance_id)['vnf']['mgmt_url']
             vnf_mgmt_url_dict = json.loads(vnf_mgmt_url)
