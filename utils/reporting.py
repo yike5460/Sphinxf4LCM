@@ -1,3 +1,4 @@
+import logging
 import os
 
 import prettytable
@@ -6,6 +7,9 @@ import requests
 from api.generic import constants
 
 REPORT_DIR = '/var/log/vnflcv'
+
+# Instantiate logger
+LOG = logging.getLogger(__name__)
 
 
 def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
@@ -150,4 +154,8 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
 
     json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
 
-    requests.post(url='http://' + kibana_srv + ':9200/nfv/tc-exec', json=json_dict)
+    try:
+        requests.post(url='http://' + kibana_srv + ':9200/nfv/tc-exec', json=json_dict)
+    except Exception as e:
+        LOG.debug('Unable to communicate to ElasticSearch server: %s' % kibana_srv)
+        LOG.exception(e)
