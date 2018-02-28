@@ -266,7 +266,7 @@ class RiftManoAdapter(object):
         try:
             response = self.session.get(url=self.url + resource)
             if response.status_code == 204:
-                # vnf-instance-id not found, so assuming NOT_INSTANTIATED
+                # ns-instance-id not found, so assuming NOT_INSTANTIATED
                 ns_info.ns_state = constants.NS_NOT_INSTANTIATED
                 return ns_info
 
@@ -279,7 +279,7 @@ class RiftManoAdapter(object):
         ns_opdata = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]
 
         ns_info.ns_name = str(ns_opdata['name-ref'])
-        ns_info.description = '' # TODO: get from /api/config
+        ns_info.description = ''  # TODO: get from /api/config
         ns_info.nsd_id = str(ns_opdata['nsd-ref'])
 
         if ns_opdata['operational-status'] == 'running':
@@ -528,7 +528,7 @@ class RiftManoAdapter(object):
                 scaling_groups_ids = json_content['rw-project:project']['nsr:ns-instance-config']['nsr'][0][
                     'scaling-group'][0].get('instance', [])
                 if len(scaling_groups_ids) == 0:
-                    raise RiftManoAdapterError('Unable to scale in because no existing scaling group instances')
+                    raise RiftManoAdapterError('Unable to scale in NS because no scaling group instances exist')
 
                 removed_scaling_groups_id = scaling_groups_ids[0]['id']
                 resource = '/api/config/project/%s/ns-instance-config/nsr/%s/scaling-group/%s/instance/%s' \
