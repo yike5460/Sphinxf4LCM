@@ -638,8 +638,6 @@ def traffic_validate():
     if type == 'VNF_TRANSIENT':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
-        user_name = request.forms.get('user_name')
-        session_name = request.forms.get('session_name')
         left_port_location = request.forms.get('left_port_location')
         left_traffic_addr = request.forms.get('left_traffic_addr')
         left_traffic_plen = request.forms.get('left_traffic_plen')
@@ -656,9 +654,7 @@ def traffic_validate():
             port_speed = int(request.forms.get('port_speed'))
         new_traffic = {
             'client_config': {
-                'lab_server_addr': lab_server_addr,
-                'user_name': user_name,
-                'session_name': session_name,
+                'lab_server_addr': lab_server_addr
             },
             'traffic_config': {
                 'type': 'VNF_TRANSIENT',
@@ -688,8 +684,6 @@ def traffic_validate():
     if type == 'VNF_TERMINATED':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
-        user_name = request.forms.get('user_name')
-        session_name = request.forms.get('session_name')
         payload = request.forms.get('payload')
         port_location = request.forms.get('port_location')
         traffic_src_addr = request.forms.get('traffic_src_addr')
@@ -701,9 +695,7 @@ def traffic_validate():
             port_speed = int(request.forms.get('port_speed'))
         new_traffic = {
             'client_config': {
-                'lab_server_addr': lab_server_addr,
-                'user_name': user_name,
-                'session_name': session_name,
+                'lab_server_addr': lab_server_addr
             },
             'traffic_config': {
                 'type': 'VNF_TERMINATED',
@@ -759,8 +751,6 @@ def traffic_delete():
         traffic_info['type'] = traffic_json[traffic_name]['traffic_config']['type']
         if traffic_info['type'] == 'VNF_TRANSIENT':
             traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
-            traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
-            traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
             traffic_info['left_port_location'] = traffic_json[traffic_name]['traffic_config']['left_port_location']
             traffic_info['left_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['left_traffic_addr']
             traffic_info['left_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['left_traffic_plen']
@@ -775,8 +765,6 @@ def traffic_delete():
             traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
         elif traffic_info['type'] == 'VNF_TERMINATED':
             traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
-            traffic_info['user_name'] = traffic_json[traffic_name]['client_config']['user_name']
-            traffic_info['session_name'] = traffic_json[traffic_name]['client_config']['session_name']
             traffic_info['payload'] = traffic_json[traffic_name]['traffic_config']['payload']
             traffic_info['port_location'] = traffic_json[traffic_name]['traffic_config']['port_location']
             traffic_info['traffic_src_addr'] = traffic_json[traffic_name]['traffic_config']['traffic_src_addr']

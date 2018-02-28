@@ -76,8 +76,6 @@
                 <form action="/traffic/delete/" method="post">
                   <% if traffic['type'] == 'VNF_TRANSIENT': %>
                     <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px" readonly value={{traffic['lab_server_addr']}}></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px" readonly value={{traffic['user_name']}}></td></tr>
-                    <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px" readonly value={{traffic['session_name']}}></td></tr>
                     <tr><td>Left Port Location:</td><td><input type="text" name="left_port_location" style="width: 200px" readonly value={{traffic['left_port_location']}}></td></tr>
                     <tr><td>Left Traffic Address:</td><td><input type="text" name="left_traffic_addr" style="width: 200px" readonly value={{traffic['left_traffic_addr']}}></td></tr>
                     <tr><td>Left Traffic Prefix Length:</td><td><input type="text" name="left_traffic_plen" style="width: 200px" readonly value={{traffic['left_traffic_plen']}}></td></tr>
@@ -91,8 +89,6 @@
                     <tr><td>Port Speed:</td><td><input type="number" name="port_speed" style="width: 200px" readonly value={{traffic['port_speed']}}></td></tr>
                   <% elif traffic['type'] == 'VNF_TERMINATED': %>
                     <tr><td>Lab Server Address:</td><td><input type="text" name="lab_server_addr" style="width: 200px" readonly value={{traffic['lab_server_addr']}}></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="user_name" style="width: 200px" readonly value={{traffic['user_name']}}></td></tr>
-                    <tr><td>Session Name:</td><td><input type="text" name="session_name" style="width: 200px" readonly value={{traffic['session_name']}}></td></tr>
                     <% if traffic['payload'] == 'icmp:IcmpEchoRequest': %>
                       <tr><td>Payload:</td><td><select name="payload" style="width: 200px" disabled="disabled"><option value=""></option><option value="icmp:IcmpEchoRequest" selected>icmp:IcmpEchoRequest</option></select></td></tr>
                     <% else: %>
