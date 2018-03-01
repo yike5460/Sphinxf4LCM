@@ -202,7 +202,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
                                                             notification_type=VnfLifecycleChangeNotification,
                                                             notification_pattern={'status': 'SUCCESS|FAILED',
                                                                                   'operation': 'NS_SCALE.*'},
-                                                            timeout=constants.NS_SCALE_OUT_TIMEOUT)
+                                                            timeout=constants.NS_SCALE_TIMEOUT)
         if notification_info is None:
             raise TestRunError('Could not validate that NS scale out finished')
 

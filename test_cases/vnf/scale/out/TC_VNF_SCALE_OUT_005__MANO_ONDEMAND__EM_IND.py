@@ -179,14 +179,14 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         # - the time it takes the NS to scale out
         self.time_record.START('scale_out_ns')
         elapsed_time = 0
-        while elapsed_time < constants.NS_SCALE_OUT_TIMEOUT:
+        while elapsed_time < constants.NS_SCALE_TIMEOUT:
             ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
             if len(ns_info.vnf_info_id) == sp['default_instances'] + sp['increment']:
                 break
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.NS_SCALE_OUT_TIMEOUT:
+            if elapsed_time == constants.NS_SCALE_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('VNFs not added after traffic load was increased to the maximum')
 
@@ -279,14 +279,14 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__EM_IND(TestCase):
         # - the time it takes the NS to scale in
         self.time_record.START('scale_in_ns')
         elapsed_time = 0
-        while elapsed_time < constants.NS_SCALE_IN_TIMEOUT:
+        while elapsed_time < constants.NS_SCALE_TIMEOUT:
             ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
             if len(ns_info.vnf_info_id) == sp['default_instances']:
                 break
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.NS_SCALE_IN_TIMEOUT:
+            if elapsed_time == constants.NS_SCALE_TIMEOUT:
                 self.tc_result['scaling_in']['status'] = 'Fail'
                 raise TestRunError('NS did not scale in')
 
