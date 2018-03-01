@@ -71,8 +71,7 @@ if __name__ == '__main__':
                                                 'port_location': '10.119.19.59/1/1',
                                                 'traffic_src_addr': '10.128.4.90',
                                                 'traffic_dst_addr': '10.128.4.21 10.128.4.22',
-                                                'ingress_cp_name': 'left',
-                                                'port_speed': 100}}}
+                                                'ingress_cp_name': 'left'}}}
 
     # LOG.info('Starting top level script')
     tc_result = TC_VNF_STATE_INST_001(tc_input=openstack).execute()

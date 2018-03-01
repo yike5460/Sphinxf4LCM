@@ -648,10 +648,6 @@ def traffic_validate():
         right_traffic_addr = request.forms.get('right_traffic_addr')
         right_traffic_plen = request.forms.get('right_traffic_plen')
         right_traffic_gw = request.forms.get('right_traffic_gw')
-        if not request.forms.get('port_speed'):
-            port_speed = 0
-        else:
-            port_speed = int(request.forms.get('port_speed'))
         new_traffic = {
             'client_config': {
                 'lab_server_addr': lab_server_addr
@@ -667,8 +663,7 @@ def traffic_validate():
                 'right_port_location': right_port_location,
                 'right_traffic_addr': right_traffic_addr,
                 'right_traffic_plen': right_traffic_plen,
-                'right_traffic_gw': right_traffic_gw,
-                'port_speed': port_speed
+                'right_traffic_gw': right_traffic_gw
             },
             'type': 'stc'
         }
@@ -689,10 +684,6 @@ def traffic_validate():
         traffic_src_addr = request.forms.get('traffic_src_addr')
         traffic_dst_addr = request.forms.get('traffic_dst_addr')
         ingress_cp_name = get_list_by_string(request.forms.get('ingress_cp_name'))
-        if not request.forms.get('port_speed'):
-            port_speed = 0
-        else:
-            port_speed = int(request.forms.get('port_speed'))
         new_traffic = {
             'client_config': {
                 'lab_server_addr': lab_server_addr
@@ -703,8 +694,7 @@ def traffic_validate():
                 'port_location': port_location,
                 'traffic_src_addr': traffic_src_addr,
                 'traffic_dst_addr': traffic_dst_addr,
-                'ingress_cp_name': ingress_cp_name,
-                'port_speed': port_speed
+                'ingress_cp_name': ingress_cp_name
             },
             'type': 'stc'
         }
@@ -762,7 +752,6 @@ def traffic_delete():
             traffic_info['right_traffic_addr'] = traffic_json[traffic_name]['traffic_config']['right_traffic_addr']
             traffic_info['right_traffic_plen'] = traffic_json[traffic_name]['traffic_config']['right_traffic_plen']
             traffic_info['right_traffic_gw'] = traffic_json[traffic_name]['traffic_config']['right_traffic_gw']
-            traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
         elif traffic_info['type'] == 'VNF_TERMINATED':
             traffic_info['lab_server_addr'] = traffic_json[traffic_name]['client_config']['lab_server_addr']
             traffic_info['payload'] = traffic_json[traffic_name]['traffic_config']['payload']
@@ -771,7 +760,6 @@ def traffic_delete():
             traffic_info['traffic_dst_addr'] = traffic_json[traffic_name]['traffic_config']['traffic_dst_addr']
             traffic_info['ingress_cp_name'] = get_string_by_list(traffic_json[traffic_name]['traffic_config'][
                                                                      'ingress_cp_name'])
-            traffic_info['port_speed'] = traffic_json[traffic_name]['traffic_config']['port_speed']
         return template('traffic_delete.html', traffic=traffic_info)
     else:
         traffic_name = request.forms.get('name')
