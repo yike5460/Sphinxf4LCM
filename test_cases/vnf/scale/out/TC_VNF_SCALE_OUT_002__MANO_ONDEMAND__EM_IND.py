@@ -168,14 +168,14 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__EM_IND(TestCase):
         # - the time it takes the NS to scale out
         self.time_record.START('scale_out_ns')
         elapsed_time = 0
-        while elapsed_time < constants.NS_SCALE_OUT_TIMEOUT:
+        while elapsed_time < constants.NS_SCALE_TIMEOUT:
             ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
             if len(ns_info.vnf_info_id) == sp['max_instances']:
                 break
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.NS_SCALE_OUT_TIMEOUT:
+            if elapsed_time == constants.NS_SCALE_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('NS did not scale out to the max')
 
