@@ -1550,7 +1550,8 @@ class CiscoNFVManoAdapter(object):
         return sap_info_list_xml
 
     @log_entry_exit(LOG)
-    def build_nsr(self, ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id, additional_param_for_ns):
+    def build_nsr(self, ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id, additional_param_for_ns,
+                  additional_param_for_vnf):
         nsd_id = self.ns_nsd_mapping[ns_instance_id]
 
         nsr_template_values = {
@@ -1559,7 +1560,7 @@ class CiscoNFVManoAdapter(object):
             'nsd_id': nsd_id,
             'flavor': flavour_id,
             'instantiation_level': ns_instantiation_level_id,
-            'vnf_info_list': self.build_ns_vnf_info_list(ns_instance_id, additional_param_for_ns['vnf_info']),
+            'vnf_info_list': self.build_ns_vnf_info_list(ns_instance_id, additional_param_for_vnf),
             'vl_list': self.build_vl_info_list(additional_param_for_ns['virtual_link_info']),
             'state': 'instantiated',
             'sap_info_list': self.build_sap_info_list(sap_data)
@@ -1592,7 +1593,7 @@ class CiscoNFVManoAdapter(object):
                        additional_affinity_or_anti_affinity_rule=None):
 
         nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id,
-                                 additional_param_for_ns)
+                                 additional_param_for_ns, additional_param_for_vnf)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=nsr_xml)
         except NCClientError as e:
