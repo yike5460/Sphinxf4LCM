@@ -969,8 +969,7 @@ class CiscoNFVManoAdapter(object):
         nsd_xml = netconf_reply.data_xml
         return nsd_xml
 
-    def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
         vnfd = etree.fromstring(vnfd)
@@ -1965,7 +1964,7 @@ class CiscoNFVManoAdapter(object):
             return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def validate_vnf_instantiation_level(self, vnf_info, target_instantiation_level_id, additional_param=None):
+    def validate_vnf_instantiation_level(self, vnf_info, instantiation_level_id, additional_param=None):
         tenant_name = additional_param['tenant']
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_info.vnf_instance_id]
 
@@ -2026,7 +2025,7 @@ class CiscoNFVManoAdapter(object):
                     '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level'
                     '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu="%s"]/'
                     '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances'
-                    % (deployment_flavor, target_instantiation_level_id, vdu_id.text)).text
+                    % (deployment_flavor, instantiation_level_id, vdu_id.text)).text
             except AttributeError:
                 number_of_instances = vnfd_xml.find(
                     './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor'

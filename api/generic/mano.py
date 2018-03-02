@@ -232,8 +232,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-
-        return self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        return self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
     def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
@@ -319,7 +319,7 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id, additional_param):
+    def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
 
@@ -1038,14 +1038,14 @@ class Mano(object):
         return self.mano_adapter.vnf_query(filter, attribute_selector)
 
     @log_entry_exit(LOG)
-    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+    def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         """
         This function scales a VNF horizontally (out/in).
 
         This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
-        :param type:                Defines the type of the scale operation requested (scale out, scale in).
+        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
                                     VNFD.
         :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
@@ -1055,7 +1055,7 @@ class Mano(object):
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.mano_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
+        return self.mano_adapter.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)
     def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
@@ -1295,7 +1295,7 @@ class Mano(object):
                                                           poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
-    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param):
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         """
         This function verifies that the VNF instance(s) that are part of the NS with the provided instance ID have been
         deployed according to the NSD.
@@ -1423,7 +1423,7 @@ class Mano(object):
         :param vnf_instance_id:     Identifier of the VNF instance.
         :param additional_param:    Additional parameters used for filtering.
         :return:                    List of management addresses.
-        """   
+        """
         return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)

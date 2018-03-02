@@ -140,5 +140,5 @@ class TackerEmAdapter(object):
         return construct_adapter(vim_type, module_type='vim', **vim_auth_cred)
 
     @log_entry_exit(LOG)
-    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+    def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         raise NotImplementedError

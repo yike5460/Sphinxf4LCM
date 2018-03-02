@@ -191,8 +191,9 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus, limit_vmem,
-                                                      limit_vc_instances, scaling_policy_name):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus=True,
+                                                      limit_vmem=True, limit_vc_instances=True,
+                                                      scaling_policy_name=None):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the scaling policy properties, if present.
@@ -236,7 +237,7 @@ class TackerManoAdapter(object):
         return reservation_id
 
     @log_entry_exit(LOG)
-    def limit_storage_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name):
+    def limit_storage_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name=None):
         vnfd = self.get_vnfd(vnfd_id)
         # Get the scaling policy properties, if present.
         if scaling_policy_name is not None:
@@ -329,8 +330,7 @@ class TackerManoAdapter(object):
         return yaml.load(tacker_show_nsd)
 
     @log_entry_exit(LOG)
-    def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param=None):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
@@ -461,7 +461,7 @@ class TackerManoAdapter(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
+    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
 
@@ -693,7 +693,7 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
+    def vnf_lifecycle_change_notification_subscribe(self, notification_filter=None):
         # TODO: implement notification filter
         last_vnf_event_id = list(self._get_vnf_events())[-1]['id']
         LOG.debug('Got last event id: %d' % last_vnf_event_id)
