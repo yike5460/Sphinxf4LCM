@@ -151,7 +151,7 @@ class TC_VNFC_SCALE_OUT_005__VNF_MANUAL(TestCase):
         LOG.info('Triggering a resize of the VNF resources to use more specialized hardware by instructing the VNF to '
                  'instruct the MANO to scale out the VNF')
         self.time_record.START('scale_out_vnf')
-        if self.vnf.scale_sync(self.vnf_instance_id, scale_type='out',aspect_id=sp['targets'],
+        if self.vnf.scale_sync(self.vnf_instance_id, scale_type='out', aspect_id=sp['targets'],
                                additional_param={'scaling_policy_name': self.tc_input['scaling_policy_name']}) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_out']['status'] = 'Fail'
