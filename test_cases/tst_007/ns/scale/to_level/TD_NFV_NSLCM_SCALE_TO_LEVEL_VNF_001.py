@@ -62,8 +62,8 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
                vnf_instance_data=self.tc_input.get('vnf_instance_data'),
                nested_ns_instance_data=self.tc_input.get('nested_ns_instance_data'),
                location_constraints=self.tc_input.get('location_constraints'),
-               additional_param_for_ns=self.tc_input.get('additional_param_for_ns'),
-               additional_param_for_vnf=self.tc_input.get('additional_param_for_vnf'),
+               additional_param_for_ns=self.tc_input['mano'].get('additional_param_for_ns'),
+               additional_param_for_vnf=self.tc_input['mano'].get('additional_param_for_vnf'),
                start_time=self.tc_input.get('start_time'),
                ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
                additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
