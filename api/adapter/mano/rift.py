@@ -356,7 +356,7 @@ class RiftManoAdapter(object):
         return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
 
     @log_entry_exit(LOG)
-    def verify_vnf_sw_images(self, vnf_info):
+    def verify_vnf_sw_images(self, vnf_info, additional_param=None):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
