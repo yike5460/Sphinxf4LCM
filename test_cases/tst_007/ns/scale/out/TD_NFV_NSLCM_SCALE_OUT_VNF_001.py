@@ -58,7 +58,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         self.ns_instance_id = self.mano.ns_create_and_instantiate(
                nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
                ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
-               sap_data=self.tc_input.get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
+               sap_data=self.tc_input['mano'].get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
                vnf_instance_data=self.tc_input.get('vnf_instance_data'),
                nested_ns_instance_data=self.tc_input.get('nested_ns_instance_data'),
                location_constraints=self.tc_input.get('location_constraints'),
