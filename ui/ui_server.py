@@ -1026,19 +1026,17 @@ def additional_update():
 
 @route('/twister/')
 def twister():
-    twister_url_raw = requests.get(url='http://localhost:8080/v1.0/config/twister-url')
-    twister_url = twister_url_raw.json()
+    twister_url = 'http://%s:8000' % request.headers['Host'].split(':')[0]
     redirect(twister_url)
 
 
 @route('/kibana/')
 def kibana():
-    kibana_url_raw = requests.get(url='http://localhost:8080/v1.0/config/kibana-url')
-    kibana_url = kibana_url_raw.json()
+    kibana_url = 'http://%s:5601' % request.headers['Host'].split(':')[0]
     redirect(kibana_url)
 
 
-@route('/static/<filename:re:.*\.css>')
+@route('/static/<filename:re:.*\.css|.*\.css\.map>')
 def all_css(filename):
     """
     This function is for bottle to find the path to the .css files used for styling.
