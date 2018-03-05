@@ -73,11 +73,11 @@ class DummyManoAdapter(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def validate_vnf_allocated_vresources(self, vnf_instance_id):
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id):
+    def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
 
         vresources = dict()

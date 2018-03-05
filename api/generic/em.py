@@ -114,7 +114,7 @@ class Em(object):
                                                         vnfc_configuration_data)
 
     @log_entry_exit(LOG)
-    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+    def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         """
         This function is exposed by the EM at the Em-tst interface and is used by the Test System to trigger VNF scale
         operation and check results at the EM.
@@ -125,7 +125,7 @@ class Em(object):
         See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.2.4.
 
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
-        :param type:                Defines the type of the scale operation requested (scale out, scale in).
+        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
                                     VNFD.
         :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
@@ -135,7 +135,7 @@ class Em(object):
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.em_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
+        return self.em_adapter.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)
     def vnf_scale_sync(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
