@@ -479,6 +479,7 @@ class CiscoNFVManoAdapter(object):
         return vnfd_xml
 
     def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
+        vnf_instance_id = vnf_info.vnf_instance_id
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
         vnfd = etree.fromstring(vnfd)
