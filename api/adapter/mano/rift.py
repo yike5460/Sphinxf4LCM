@@ -589,7 +589,7 @@ class RiftManoAdapter(object):
         return False
 
     @log_entry_exit(LOG)
-    def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param)=None:
+    def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param=None):
         validation_result = True
 
         # Get the NSR
