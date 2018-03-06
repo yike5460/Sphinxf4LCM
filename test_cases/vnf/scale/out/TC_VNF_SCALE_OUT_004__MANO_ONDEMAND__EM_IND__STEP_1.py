@@ -156,7 +156,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         # 6 Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -258,7 +258,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         # Since the NS scaled out only desired_scale_out_steps, we are not checking the traffic loss because we do not
         # expect all traffic to go through.
         # Decreasing the traffic load to normal would not be appropriate as it could trigger a scale in.
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
         self.tc_result['scaling_out']['traffic_after'] = 'MAX_TRAFFIC_LOAD'

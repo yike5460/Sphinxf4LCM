@@ -131,7 +131,7 @@ class TC_VNFC_SCALE_OUT_005__EM_ONDEMAND(TestCase):
         # 4. Validate traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic flows through without issues')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -205,7 +205,7 @@ class TC_VNFC_SCALE_OUT_005__EM_ONDEMAND(TestCase):
         # Start the max traffic load.
         self.traffic.start(return_when_emission_starts=True)
 
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -300,7 +300,7 @@ class TC_VNFC_SCALE_OUT_005__EM_ONDEMAND(TestCase):
         self.traffic.start(return_when_emission_starts=True)
 
         # Checking the traffic flow.
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):

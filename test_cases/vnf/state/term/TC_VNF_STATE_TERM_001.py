@@ -112,7 +112,7 @@ class TC_VNF_STATE_TERM_001(TestCase):
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -136,7 +136,7 @@ class TC_VNF_STATE_TERM_001(TestCase):
         # 6. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that no traffic flows once stop is completed')
-        if self.traffic.does_traffic_flow(delay_time=5):
+        if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after it was stopped')
 
         # --------------------------------------------------------------------------------------------------------------

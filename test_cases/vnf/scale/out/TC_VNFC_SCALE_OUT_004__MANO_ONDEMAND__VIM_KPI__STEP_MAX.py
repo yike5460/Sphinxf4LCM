@@ -141,7 +141,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         # 5. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -250,7 +250,7 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__VIM_KPI__STEP_MAX(TestCase):
         # 12. Validate all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):

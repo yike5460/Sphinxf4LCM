@@ -230,7 +230,8 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # Clearing counters so that any packets lost so far don't influence the results
         self.traffic.clear_counters()
 
-        if self.traffic.any_traffic_loss(delay_time=5, tolerance=constants.TRAFFIC_TOLERANCE):
+        if self.traffic.any_traffic_loss(delay_time=constants.TRAFFIC_DELAY_TIME,
+                                         tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
