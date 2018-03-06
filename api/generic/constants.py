@@ -125,3 +125,5 @@ traffic_load_percent_mapping = {'LOW_TRAFFIC_LOAD': 1,
                                 'NORMAL_TRAFFIC_LOAD': 3,
                                 'MAX_TRAFFIC_LOAD': 5}
 TRAFFIC_TOLERANCE = 0.01
+TRAFFIC_DELAY_TIME = 5
+TRAFFIC_STABILIZATION_TIME = 60
