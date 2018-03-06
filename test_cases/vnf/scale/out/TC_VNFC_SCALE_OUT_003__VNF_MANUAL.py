@@ -126,7 +126,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality and all traffic goes through')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -201,7 +201,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         # 9. Validate increased capacity without traffic loss
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating increased capacity without traffic loss')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -273,7 +273,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_MANUAL(TestCase):
         # 14. Validate traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic flows through without issues')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):

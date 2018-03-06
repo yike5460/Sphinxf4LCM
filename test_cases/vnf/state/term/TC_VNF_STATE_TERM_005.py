@@ -114,7 +114,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # 4. Validate the provided functionality
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating the provided functionality')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -167,7 +167,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # Clearing counters as the traffic lost so far influences the results
         self.traffic.clear_counters()
 
-        if self.traffic.does_traffic_flow(delay_time=5):
+        if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after it was stopped')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ class TC_VNF_STATE_TERM_005(TestCase):
         # 10. Validate no traffic has been forwarded while the termination
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic has been forwarded while the termination')
-        if self.traffic.does_traffic_flow(delay_time=5):
+        if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing',
                                err_details='Traffic has been forwarded while the termination')
 

@@ -123,7 +123,7 @@ class TC_VNF_COMPLEX_003(TestCase):
         # 4. Validate that traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that traffic flows through without issues')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -193,7 +193,7 @@ class TC_VNF_COMPLEX_003(TestCase):
         # 8. Validate all traffic flows through and has reached max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating all traffic flows through and has reached max capacity')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -236,7 +236,7 @@ class TC_VNF_COMPLEX_003(TestCase):
         # 11. Validate no traffic flows through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows through')
-        if self.traffic.does_traffic_flow(delay_time=5):
+        if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was terminated')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

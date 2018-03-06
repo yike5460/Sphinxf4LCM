@@ -173,7 +173,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         # Start the max traffic load.
         self.traffic.start(return_when_emission_starts=True)
 
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -212,7 +212,7 @@ class TC_VNF_COMPLEX_001(TestCase):
         # 9. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that no traffic flows once stop is completed')
-        if self.traffic.does_traffic_flow(delay_time=5):
+        if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was stopped')
 
         LOG.info('%s execution completed successfully' % self.tc_name)
