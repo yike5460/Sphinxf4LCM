@@ -78,8 +78,9 @@ class TestCase(object):
     """
     __metaclass__ = TestMeta
 
-    REQUIRED_APIS = []
-    REQUIRED_ELEMENTS = []
+    REQUIRED_APIS = ()
+    REQUIRED_ELEMENTS = ()
+    TESTCASE_EVENTS = ()
 
     def __init__(self, tc_input):
         self.tc_input = tc_input
