@@ -136,6 +136,13 @@ def do_exec():
                       'NS_INSTANTIATE_TIMEOUT', 'NS_SCALE_TIMEOUT', 'NS_UPDATE_TIMEOUT', 'NS_TERMINATE_TIMEOUT',
                       'NS_STABLE_STATE_TIMEOUT', 'POLL_INTERVAL']
 
+    tc_name = tc_exec_request.get('tc_name')
+    try:
+        get_tc_constructor_class(tc_name)
+    except KeyError:
+        response.status = 400
+        return {'error': 'Test case %s not found' % tc_name}
+
     tc_input = tc_exec_request.get('tc_input')
     if tc_input is None:
         active_env = _read_config('active-env')
