@@ -1820,17 +1820,6 @@ class CiscoNFVManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
-        for vnf_info in ns_info.vnf_info:
-            if not self.validate_vnf_allocated_vresources(vnf_info, additional_param):
-                LOG.debug('For VNF instance ID %s expected resources do not match the actual ones'
-                          % vnf_info.vnf_instance_id)
-                return False
-
-        return True
-
-    @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
