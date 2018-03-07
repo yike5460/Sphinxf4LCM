@@ -244,7 +244,14 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-        return self.mano_adapter.validate_ns_allocated_vresources(ns_instance_id, additional_param)
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        for vnf_info in ns_info.vnf_info:
+            if not self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param):
+                LOG.debug('For VNF instance ID %s expected resources do not match the actual ones'
+                          % vnf_info.vnf_instance_id)
+                return False
+
+        return True
 
     @log_entry_exit(LOG)
     def validate_ns_released_vresources(self, ns_info):

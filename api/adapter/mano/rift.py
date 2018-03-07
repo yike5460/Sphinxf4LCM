@@ -384,14 +384,6 @@ class RiftManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
-        for vnf_info in ns_info.vnf_info:
-            if not self.validate_vnf_allocated_vresources(vnf_info):
-                return False
-        return True
-
-    @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         validation_result = True
 
