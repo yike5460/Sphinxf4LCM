@@ -856,53 +856,53 @@ class CiscoNFVManoAdapter(object):
                                                            '{http://www.cisco.com/esc/esc}vm_instance/'
                                                            '{http://www.cisco.com/esc/esc}vm_id' % vm_group)
 
+                # Get the interface ID of the internal connection points that are connected to an external connection
+                # point
+                ext_cp_if_ids = vnfd_xml.findall(
+                    './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
+                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}external-connection-point-descriptor]/'
+                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id' % vdu_id_text)
+
                 # Iterate over the VM IDs in this VM group
                 for vm_id in vm_id_list:
                     vm_id_text = vm_id.text
 
                     # Get the VM name
-                    name = opdata_deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
-                                                      '[{http://www.cisco.com/esc/esc}name="%s"]/'
-                                                      '{http://www.cisco.com/esc/esc}vm_instance'
-                                                      '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
-                                                      '{http://www.cisco.com/esc/esc}name' % (vm_group, vm_id_text))
-                    name_text = name.text
+                    vm_name = opdata_deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                         '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                         '{http://www.cisco.com/esc/esc}vm_instance'
+                                                         '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                         '{http://www.cisco.com/esc/esc}name' % (vm_group, vm_id_text))
+                    vm_name_text = vm_name.text
 
                     # Build the VnfcResourceInfo data structure
                     vnfc_resource_info = VnfcResourceInfo()
-                    vnfc_resource_info.vnfc_instance_id = name_text
+                    vnfc_resource_info.vnfc_instance_id = vm_name_text
                     vnfc_resource_info.vdu_id = vdu_id_text
 
                     vnfc_resource_info.compute_resource = ResourceHandle()
-                    # Cisco ESC only support one VIM. Hardcode the VIM ID to string 'default_vim'
+                    # Cisco ESC only support one VIM. Hard-code the VIM ID to string 'default_vim'
                     vnfc_resource_info.compute_resource.vim_id = 'default_vim'
                     vnfc_resource_info.compute_resource.resource_id = vm_id_text
 
                     # Append the current VnfvResourceInfo element to the VnfcResourceInfo list
                     vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-                    # Get the list NIC IDs for this VM instance
-                    nic_id_list = opdata_deployment_xml.findall('.//{http://www.cisco.com/esc/esc}vm_group'
-                                                                '[{http://www.cisco.com/esc/esc}name="%s"]/'
-                                                                '{http://www.cisco.com/esc/esc}vm_instance'
-                                                                '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
-                                                                '{http://www.cisco.com/esc/esc}interfaces/'
-                                                                '{http://www.cisco.com/esc/esc}interface/'
-                                                                '{http://www.cisco.com/esc/esc}nicid'
-                                                                % (vm_group, vm_id_text))
+                    # Iterate over the interface IDs of the internal connection points that are connected to an external
+                    # connection point
+                    for if_id in ext_cp_if_ids:
+                        if_id_text = if_id.text
 
-                    # Iterate over the NIC IDs
-                    for nic_id in nic_id_list:
-                        nic_id_text = nic_id.text
-
-                        # Get the internal connection point ID from the VNFD that corresponds to this port ID
+                        # Get the external connection point ID from the VNFD that is linked to this interface ID
                         cpd_id = vnfd_xml.find(
                             './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu'
                             '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
                             '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}internal-connection-point-descriptor'
                             '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}interface-id="%s"]/'
-                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id'
-                            % (vdu_id_text, nic_id_text))
+                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}external-connection-point-descriptor'
+                            % (vdu_id_text, if_id_text))
                         cpd_id_text = cpd_id.text
 
                         # Get the port ID
@@ -914,7 +914,7 @@ class CiscoNFVManoAdapter(object):
                                                              '{http://www.cisco.com/esc/esc}interface'
                                                              '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
                                                              '{http://www.cisco.com/esc/esc}port_id'
-                                                             % (vm_group, vm_id_text, nic_id_text))
+                                                             % (vm_group, vm_id_text, if_id_text))
                         port_id_text = port_id.text
 
                         # Get the IP address
@@ -926,7 +926,7 @@ class CiscoNFVManoAdapter(object):
                                                                 '{http://www.cisco.com/esc/esc}interface'
                                                                 '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
                                                                 '{http://www.cisco.com/esc/esc}ip_address'
-                                                                % (vm_group, vm_id_text, nic_id_text))
+                                                                % (vm_group, vm_id_text, if_id_text))
                         ip_address_text = ip_address.text
 
                         # Get the IP address
@@ -938,7 +938,7 @@ class CiscoNFVManoAdapter(object):
                                                                  '{http://www.cisco.com/esc/esc}interface'
                                                                  '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
                                                                  '{http://www.cisco.com/esc/esc}mac_address'
-                                                                 % (vm_group, vm_id_text, nic_id_text))
+                                                                 % (vm_group, vm_id_text, if_id_text))
                         mac_address_text = mac_address.text
 
                         # Build the VnfExtCpInfo data structure

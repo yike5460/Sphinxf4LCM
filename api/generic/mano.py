@@ -1317,8 +1317,8 @@ class Mano(object):
     @log_entry_exit(LOG)
     def get_vnf_ingress_cp_addr_list(self, vnf_info, ingress_cp_list):
         """
-        This function goes through each VNF with the provided instance ID and retrieves the destination address(es) for
-        each connection point in the ingress_cp_list.
+        This function retrieves from the provided VnfInfo information element the destination address(es) for each
+        connection point in the ingress_cp_list.
 
         :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list needs
                                     to be retrieved.
