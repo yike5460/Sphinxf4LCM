@@ -140,7 +140,7 @@ def do_exec():
     try:
         get_tc_constructor_class(tc_name)
     except KeyError:
-        response.status = 400
+        response.status = 404
         return {'error': 'Test case %s not found' % tc_name}
 
     tc_input = tc_exec_request.get('tc_input')
