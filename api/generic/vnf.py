@@ -152,12 +152,9 @@ class Vnf(object):
         lifecycle_operation_occurrence_id = self.scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                        additional_param)
 
-        scale_timeouts = {'out': constants.VNF_SCALE_OUT_TIMEOUT,
-                          'in': constants.VNF_SCALE_IN_TIMEOUT}
-
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=scale_timeouts[scale_type],
+                                                              max_wait_time=constants.VNF_SCALE_TIMEOUT,
                                                               poll_interval=poll_interval)
 
         return operation_status

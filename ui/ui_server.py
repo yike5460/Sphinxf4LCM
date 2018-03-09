@@ -911,8 +911,7 @@ def additional():
     operate_vnf_data = get_str_by_unicode(
         requests.get(url='http://localhost:8080/v1.0/config/operate_vnf_data').json())
     vnf_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT')
-    vnf_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT')
-    vnf_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT')
+    vnf_scale_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_TIMEOUT')
     vnf_stop_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STOP_TIMEOUT')
     vnf_start_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_START_TIMEOUT')
     vnf_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT')
@@ -930,8 +929,7 @@ def additional():
         'desired_scale_out_steps': desired_scale_out_steps.json(),
         'operate_vnf_data': operate_vnf_data,
         'VNF_INSTANTIATE_TIMEOUT': vnf_instantiate_timeout.json(),
-        'VNF_SCALE_OUT_TIMEOUT': vnf_scale_out_timeout.json(),
-        'VNF_SCALE_IN_TIMEOUT': vnf_scale_in_timeout.json(),
+        'VNF_SCALE_TIMEOUT': vnf_scale_timeout.json(),
         'VNF_STOP_TIMEOUT': vnf_stop_timeout.json(),
         'VNF_START_TIMEOUT': vnf_start_timeout.json(),
         'VNF_TERMINATE_TIMEOUT': vnf_terminate_timeout.json(),
@@ -960,8 +958,7 @@ def additional_update():
         desired_scale_out_steps = int(request.forms.get('desired_scale_out_steps') or 0)
         operate_vnf_data = get_list_by_string(request.forms.get('operate_vnf_data'))
         vnf_instantiate_timeout = int(request.forms.get('vnf_instantiate_timeout'))
-        vnf_scale_out_timeout = int(request.forms.get('vnf_scale_out_timeout'))
-        vnf_scale_in_timeout = int(request.forms.get('vnf_scale_in_timeout'))
+        vnf_scale_timeout = int(request.forms.get('vnf_scale_timeout'))
         vnf_stop_timeout = int(request.forms.get('vnf_stop_timeout'))
         vnf_start_timeout = int(request.forms.get('vnf_start_timeout'))
         vnf_terminate_timeout = int(request.forms.get('vnf_terminate_timeout'))
@@ -978,8 +975,7 @@ def additional_update():
         requests.put(url='http://localhost:8080/v1.0/config/desired_scale_out_steps', json=desired_scale_out_steps)
         requests.put(url='http://localhost:8080/v1.0/config/operate_vnf_data', json=operate_vnf_data)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT', json=vnf_instantiate_timeout)
-        requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT', json=vnf_scale_out_timeout)
-        requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT', json=vnf_scale_in_timeout)
+        requests.put(url='http://localhost:8080/v1.0/config/VNF_SCALE_TIMEOUT', json=vnf_scale_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_STOP_TIMEOUT', json=vnf_stop_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_START_TIMEOUT', json=vnf_start_timeout)
         requests.put(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT', json=vnf_terminate_timeout)
@@ -999,8 +995,7 @@ def additional_update():
         operate_vnf_data = get_str_by_unicode(
             requests.get(url='http://localhost:8080/v1.0/config/operate_vnf_data').json())
         vnf_instantiate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_INSTANTIATE_TIMEOUT')
-        vnf_scale_out_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_OUT_TIMEOUT')
-        vnf_scale_in_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_IN_TIMEOUT')
+        vnf_scale_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_SCALE_TIMEOUT')
         vnf_stop_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_STOP_TIMEOUT')
         vnf_start_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_START_TIMEOUT')
         vnf_terminate_timeout = requests.get(url='http://localhost:8080/v1.0/config/VNF_TERMINATE_TIMEOUT')
@@ -1018,8 +1013,7 @@ def additional_update():
             'desired_scale_out_steps': desired_scale_out_steps.json(),
             'operate_vnf_data': operate_vnf_data,
             'VNF_INSTANTIATE_TIMEOUT': vnf_instantiate_timeout.json(),
-            'VNF_SCALE_OUT_TIMEOUT': vnf_scale_out_timeout.json(),
-            'VNF_SCALE_IN_TIMEOUT': vnf_scale_in_timeout.json(),
+            'VNF_SCALE_TIMEOUT': vnf_scale_timeout.json(),
             'VNF_STOP_TIMEOUT': vnf_stop_timeout.json(),
             'VNF_START_TIMEOUT': vnf_start_timeout.json(),
             'VNF_TERMINATE_TIMEOUT': vnf_terminate_timeout.json(),
@@ -1093,8 +1087,7 @@ def all_img(font):
 
 def set_default_additional():
     timers = {'VNF_INSTANTIATE_TIMEOUT': 600,
-              'VNF_SCALE_OUT_TIMEOUT': 360,
-              'VNF_SCALE_IN_TIMEOUT': 360,
+              'VNF_SCALE_TIMEOUT': 360,
               'VNF_START_TIMEOUT': 300,
               'VNF_STOP_TIMEOUT': 300,
               'VNF_TERMINATE_TIMEOUT': 300,

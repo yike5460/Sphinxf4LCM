@@ -47,8 +47,7 @@ class Mano(object):
 
     def set_generic_config(self,
                            VNF_INSTANTIATE_TIMEOUT=constants.VNF_INSTANTIATE_TIMEOUT,
-                           VNF_SCALE_OUT_TIMEOUT=constants.VNF_SCALE_OUT_TIMEOUT,
-                           VNF_SCALE_IN_TIMEOUT=constants.VNF_SCALE_IN_TIMEOUT,
+                           VNF_SCALE_TIMEOUT=constants.VNF_SCALE_TIMEOUT,
                            VNF_STOP_TIMEOUT=constants.VNF_STOP_TIMEOUT,
                            VNF_START_TIMEOUT=constants.VNF_START_TIMEOUT,
                            VNF_TERMINATE_TIMEOUT=constants.VNF_TERMINATE_TIMEOUT,
@@ -60,8 +59,7 @@ class Mano(object):
                            NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
                            POLL_INTERVAL=constants.POLL_INTERVAL):
         self.VNF_INSTANTIATE_TIMEOUT = VNF_INSTANTIATE_TIMEOUT
-        self.VNF_SCALE_OUT_TIMEOUT = VNF_SCALE_OUT_TIMEOUT
-        self.VNF_SCALE_IN_TIMEOUT = VNF_SCALE_IN_TIMEOUT
+        self.VNF_SCALE_TIMEOUT = VNF_SCALE_TIMEOUT
         self.VNF_STOP_TIMEOUT = VNF_STOP_TIMEOUT
         self.VNF_START_TIMEOUT = VNF_START_TIMEOUT
         self.VNF_TERMINATE_TIMEOUT = VNF_TERMINATE_TIMEOUT
@@ -1104,12 +1102,9 @@ class Mano(object):
         lifecycle_operation_occurrence_id = self.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                            additional_param)
 
-        scale_timeouts = {'out': self.VNF_SCALE_OUT_TIMEOUT,
-                          'in': self.VNF_SCALE_IN_TIMEOUT}
-
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=scale_timeouts[scale_type],
+                                                              max_wait_time=self.VNF_SCALE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
@@ -1136,7 +1131,7 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=self.VNF_SCALE_OUT_TIMEOUT,
+                                                              max_wait_time=self.VNF_SCALE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
