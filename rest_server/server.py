@@ -131,10 +131,9 @@ def do_exec():
     Request mapped function that starts the execution of a test case in a new process.
     """
     tc_exec_request = request.json
-    timeout_timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_OUT_TIMEOUT', 'VNF_SCALE_IN_TIMEOUT', 'VNF_STOP_TIMEOUT',
-                      'VNF_START_TIMEOUT', 'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT',
-                      'NS_INSTANTIATE_TIMEOUT', 'NS_SCALE_TIMEOUT', 'NS_UPDATE_TIMEOUT', 'NS_TERMINATE_TIMEOUT',
-                      'NS_STABLE_STATE_TIMEOUT', 'POLL_INTERVAL']
+    timeout_timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_TIMEOUT', 'VNF_STOP_TIMEOUT', 'VNF_START_TIMEOUT',
+                      'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT', 'NS_INSTANTIATE_TIMEOUT', 'NS_SCALE_TIMEOUT',
+                      'NS_UPDATE_TIMEOUT', 'NS_TERMINATE_TIMEOUT', 'NS_STABLE_STATE_TIMEOUT', 'POLL_INTERVAL']
 
     tc_name = tc_exec_request.get('tc_name')
     try:
