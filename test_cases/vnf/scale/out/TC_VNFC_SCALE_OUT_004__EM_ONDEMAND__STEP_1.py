@@ -188,7 +188,7 @@ class TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_1(TestCase):
                                                                       notification_type=VnfLifecycleChangeNotification,
                                                                       notification_pattern={'status': 'STARTED',
                                                                                             'operation': 'VNF_SCALE.*'},
-                                                                      timeout=constants.VNF_SCALE_OUT_TIMEOUT)
+                                                                      timeout=constants.VNF_SCALE_TIMEOUT)
             if notification_info is None:
                 raise TestRunError('Could not validate that VNF scale out started')
             notification_info = self.mano.search_in_notification_queue(
@@ -196,7 +196,7 @@ class TC_VNFC_SCALE_OUT_004__EM_ONDEMAND__STEP_1(TestCase):
                                                                       notification_type=VnfLifecycleChangeNotification,
                                                                       notification_pattern={'status': 'SUCCESS|FAILED',
                                                                                             'operation': 'VNF_SCALE.*'},
-                                                                      timeout=constants.VNF_SCALE_OUT_TIMEOUT)
+                                                                      timeout=constants.VNF_SCALE_TIMEOUT)
             if notification_info is None:
                 raise TestRunError('Could not validate that VNF scale out finished')
 

@@ -149,7 +149,7 @@ class TC_VNFC_SCALE_OUT_002__VNF_ONDEMAND(TestCase):
         # - the time it takes the VNF to scale out
         self.time_record.START('scale_out_vnf')
         elapsed_time = 0
-        while elapsed_time < constants.VNF_SCALE_OUT_TIMEOUT:
+        while elapsed_time < constants.VNF_SCALE_TIMEOUT:
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['max_instances']:
@@ -157,7 +157,7 @@ class TC_VNFC_SCALE_OUT_002__VNF_ONDEMAND(TestCase):
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.VNF_SCALE_OUT_TIMEOUT:
+            if elapsed_time == constants.VNF_SCALE_TIMEOUT:
                 self.tc_result['scaling_out']['status'] = 'Fail'
                 raise TestRunError('VNF has not resized to the max')
 
