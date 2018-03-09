@@ -41,12 +41,8 @@ class Em(object):
         self.set_generic_config(**generic_config)
         self.em_adapter = construct_adapter(vendor, module_type='em', **adapter_config)
 
-    def set_generic_config(self,
-                           VNF_SCALE_OUT_TIMEOUT=constants.VNF_SCALE_OUT_TIMEOUT,
-                           VNF_SCALE_IN_TIMEOUT=constants.VNF_SCALE_IN_TIMEOUT,
-                           POLL_INTERVAL=constants.POLL_INTERVAL):
-        self.VNF_SCALE_OUT_TIMEOUT=VNF_SCALE_OUT_TIMEOUT
-        self.VNF_SCALE_IN_TIMEOUT=VNF_SCALE_IN_TIMEOUT
+    def set_generic_config(self, VNF_SCALE_TIMEOUT=constants.VNF_SCALE_TIMEOUT, POLL_INTERVAL=constants.POLL_INTERVAL):
+        self.VNF_SCALE_TIMEOUT=VNF_SCALE_TIMEOUT
         self.POLL_INTERVAL=POLL_INTERVAL
 
     @log_entry_exit(LOG)
@@ -155,12 +151,9 @@ class Em(object):
         lifecycle_operation_occurrence_id = self.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                            additional_param)
 
-        scale_timeouts = {'out': self.VNF_SCALE_OUT_TIMEOUT,
-                          'in': self.VNF_SCALE_IN_TIMEOUT}
-
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=scale_timeouts[scale_type],
+                                                              max_wait_time=self.VNF_SCALE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
