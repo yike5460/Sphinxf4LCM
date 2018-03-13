@@ -530,4 +530,4 @@ class StcTrafficAdapter(object):
             self.stc.end_session(end_tcsession=self.session)
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError('Unable destroy session - %s' % e)
+            raise StcTrafficAdapterError('Unable to destroy session - %s' % e)
