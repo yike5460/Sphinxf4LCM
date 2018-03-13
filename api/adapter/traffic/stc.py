@@ -37,7 +37,7 @@ class StcTrafficAdapter(object):
             self.stc = stchttp.StcHttp(lab_server_addr, port=lab_server_port)
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create adapter - %s' % e)
         self.session = None
         self.project = None
         self.tx_results = None
@@ -65,7 +65,7 @@ class StcTrafficAdapter(object):
             self.project = self.stc.create(object_type='project')
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create session - %s' % e)
 
     @property
     def attempt_to_start_traffic(self):
@@ -105,7 +105,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create port - %s' % e)
 
         return port
 
@@ -126,7 +126,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create host - %s' % e)
 
         return ipv4_iface
 
@@ -142,7 +142,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create stream - %s' % e)
 
         return stream_block
 
@@ -161,7 +161,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create stream - %s' % e)
 
         return stream_block
 
@@ -187,7 +187,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create stream - %s' % e)
 
         return stream_block
 
@@ -213,7 +213,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create stream - %s' % e)
 
         return stream_block
 
@@ -228,7 +228,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to configure port rate - %s' % e)
 
     @log_entry_exit(LOG)
     def config_traffic_load(self, traffic_load):
@@ -252,7 +252,7 @@ class StcTrafficAdapter(object):
             self.stc.apply()
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to create stream modifier - %s' % e)
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
@@ -304,7 +304,7 @@ class StcTrafficAdapter(object):
             self.rx_results = self.stc.get(self.stream_block, 'children-RxStreamSummaryResults')
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to configure traffic - %s' % e)
 
     @log_entry_exit(LOG)
     def start(self, delay_time, return_when_emission_starts):
@@ -323,7 +323,7 @@ class StcTrafficAdapter(object):
                         resolution_status = self.stc.perform(command='ArpNdStart')['ArpNdState']
                     except Exception as e:
                         LOG.exception(e)
-                        raise StcTrafficAdapterError(e.message)
+                        raise StcTrafficAdapterError('Unable to start ArpNd - %s' % e)
                 LOG.debug('Address resolution status: %s' % resolution_status)
 
             if delay_time > 0:
@@ -334,7 +334,7 @@ class StcTrafficAdapter(object):
                 self.stc.perform(command='StreamBlockStart')
             except Exception as e:
                 LOG.exception(e)
-                raise StcTrafficAdapterError(e.message)
+                raise StcTrafficAdapterError('Unable to start stream - %s' % e)
             self.emission_started = True
 
             LOG.debug('Emission successfully started')
@@ -391,7 +391,7 @@ class StcTrafficAdapter(object):
                     self.stc.perform(command='StreamBlockStop')
                 except Exception as e:
                     LOG.exception(e)
-                    raise StcTrafficAdapterError(e.message)
+                    raise StcTrafficAdapterError('Unable to stop stream - %s' % e)
                 self.emission_started = False
 
             LOG.debug('Emission successfully stopped')
@@ -412,7 +412,7 @@ class StcTrafficAdapter(object):
             rx_frame_rate = int(self.stc.get(self.rx_results)['FrameRate'])
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to get RX frame rate - %s' % e)
         LOG.debug('RX frame rate is: %d' % rx_frame_rate)
         return rx_frame_rate > 0
 
@@ -427,7 +427,7 @@ class StcTrafficAdapter(object):
             rx_results = self.stc.get(self.rx_results)
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to get TX and RX results - %s' % e)
 
         tx_frame_count = int(tx_results['FrameCount'])
         rx_frame_count = int(rx_results['SigFrameCount'])
@@ -483,7 +483,7 @@ class StcTrafficAdapter(object):
             rx_results = self.stc.get(self.rx_results)
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to get TX and RX results - %s' % e)
 
         rx_frame_count = float(rx_results['FrameCount'])
         tx_frame_count = float(tx_results['FrameCount'])
@@ -501,7 +501,7 @@ class StcTrafficAdapter(object):
             rx_results = self.stc.get(self.rx_results)
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to get TX and RX results - %s' % e)
 
         rx_frame_count = float(rx_results['FrameCount'])
         tx_frame_rate = float(tx_results['FrameRate'])
@@ -518,7 +518,7 @@ class StcTrafficAdapter(object):
             self.stc.perform(command='ResultsClearAll')
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable to clear counters - %s' % e)
         self.service_disruption_length = 0
 
     @log_entry_exit(LOG)
@@ -530,4 +530,4 @@ class StcTrafficAdapter(object):
             self.stc.end_session(end_tcsession=self.session)
         except Exception as e:
             LOG.exception(e)
-            raise StcTrafficAdapterError(e.message)
+            raise StcTrafficAdapterError('Unable destroy session - %s' % e)
