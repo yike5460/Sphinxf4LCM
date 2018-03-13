@@ -60,6 +60,24 @@ class TestRequirementsError(TestExecutionError):
     pass
 
 
+class Step(object):
+    index = 0
+
+    @classmethod
+    def generate_index(cls):
+        cls.index += 1
+        return cls.index
+
+    def __init__(self, name, description):
+        self.index = self.generate_index()
+        self.name = name
+        self.description = description
+
+    def __call__(self, run_func):
+        self.run_func = run_func
+        return self
+
+
 class TestMeta(type):
     """
     Meta class that adds the logger object to the class dictionary of the class that is an instance of this meta class.
@@ -69,6 +87,14 @@ class TestMeta(type):
         if bases != (object,):
             originating_module = importlib.import_module(class_dict['__module__'])
             class_dict['_LOG'] = originating_module.LOG
+
+            steps = []
+            for _, attr_value in class_dict.items():
+                if isinstance(attr_value, Step):
+                    steps.append(attr_value)
+            steps.sort(key=lambda x: x.index)
+            class_dict['steps'] = steps
+
         return type.__new__(meta, name, bases, class_dict)
 
 
@@ -147,7 +173,12 @@ class TestCase(object):
         pass
 
     def run(self):
-        pass
+        for step in self.steps:
+            self._LOG.info('Entering step %s' % step.name)
+            try:
+                step.run_func(self)
+            finally:
+                self._LOG.info('Exiting step %s' % step.name)
 
     def register_for_cleanup(self, index, function_reference, *args, **kwargs):
         """
