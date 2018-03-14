@@ -116,7 +116,7 @@ class OpenbatonManoAdapter(object):
         try:
             resp, body = self.do_request(url=url, method=method, data=data)
             assert resp.status_code == 201
-            ns_instance_id = str(body['id'])
+            ns_instance_id = str(body.get('id'))
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to instantantiate NS for NSD ID %s. Reason: %s. '
@@ -151,14 +151,14 @@ class OpenbatonManoAdapter(object):
             method = 'get'
             try:
                 resp, ns_config = self.do_request(url=url, method=method)
-                ns_status = str(ns_config['status'])
+                ns_status = str(ns_config.get('status'))
             except Exception as e:
                 LOG.exception(e)
                 raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
                                                 (resource_id, e.message))
             if ns_status == 'ACTIVE':
                 for vnfr in ns_config['vnfr']:
-                    self.vnf_to_ns_mapping[str(vnfr['id'])] = resource_id
+                    self.vnf_to_ns_mapping[str(vnfr.get('id'))] = resource_id
                 return constants.OPERATION_SUCCESS
             elif ns_status == 'NULL':
                 return constants.OPERATION_PENDING
@@ -170,14 +170,14 @@ class OpenbatonManoAdapter(object):
             method = 'get'
             try:
                 resp, ns_config = self.do_request(url=url, method=method)
-                ns_status = str(ns_config['status'])
                 if resp.status_code == 404:
                     self.vnf_to_ns_mapping = {k:v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
                     return constants.OPERATION_SUCCESS
                 assert resp.status_code == 200
+                ns_status = str(ns_config.get('status'))
             except Exception as e:
                 LOG.exception(e)
-                raise OpenbatonManoAdapterError('Unable to get opdata for NS %s' % resource_id)
+                raise OpenbatonManoAdapterError('Unable to get status for NS %s' % resource_id)
 
             if ns_status == 'ERROR':
                 return constants.OPERATION_FAILED
@@ -202,40 +202,40 @@ class OpenbatonManoAdapter(object):
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
                                             (ns_instance_id, e.message))
-        ns_info.nsd_id = str(ns_config['descriptor_reference'])
+        ns_info.nsd_id = str(ns_config.get('descriptor_reference'))
         ns_info.ns_state = constants.NS_INSTANTIATED
         ns_info.vnf_info = list()
-        for constituent_vnfr in ns_config['vnfr']:
+        for constituent_vnfr in ns_config.get('vnfr'):
             vnf_info = VnfInfo()
-            vnf_info.vnf_instance_id = str(constituent_vnfr['id'])
-            if constituent_vnfr['status'] == 'ACTIVE':
+            vnf_info.vnf_instance_id = str(constituent_vnfr.get('id'))
+            if constituent_vnfr.get('status') == 'ACTIVE':
                 vnf_info.instantiation_state = constants.VNF_INSTANTIATED
             else:
                 vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
-            vnf_info.vnfd_id = str(constituent_vnfr['descriptor_reference'])
-            vnf_info.vnf_instance_name = str(constituent_vnfr['name'])
-            vnf_info.vnf_product_name = str(constituent_vnfr['name'])
+            vnf_info.vnfd_id = str(constituent_vnfr.get('descriptor_reference'))
+            vnf_info.vnf_instance_name = str(constituent_vnfr.get('name'))
+            vnf_info.vnf_product_name = str(constituent_vnfr.get('name'))
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-            if constituent_vnfr['status'] == 'ACTIVE':
+            if constituent_vnfr.get('status') == 'ACTIVE':
                 vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STARTED
             else:
                 vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STOPPED
             vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
             vnf_info.instantiated_vnf_info.ext_cp_info = list()
-            for vdu in constituent_vnfr['vdu']:
-                for vnfc_instance in vdu['vnfc_instance']:
+            for vdu in constituent_vnfr.get('vdu'):
+                for vnfc_instance in vdu.get('vnfc_instance'):
                     vnfc_resource_info = VnfcResourceInfo()
-                    vnfc_resource_info.vnfc_instance_id = str(vnfc_instance['id'])
-                    vnfc_resource_info.vdu_id = str(vdu['id'])
+                    vnfc_resource_info.vnfc_instance_id = str(vnfc_instance.get('id'))
+                    vnfc_resource_info.vdu_id = str(vdu.get('id'))
                     vnfc_resource_info.compute_resource = ResourceHandle()
-                    vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance['vim_id'])
-                    vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance['vc_id'])
+                    vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance.get('vim_id'))
+                    vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance.get('vc_id'))
                     vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
                     vnf_info.instantiated_vnf_info.ext_cp_info = list()
-                    for ext_cp in vnfc_instance['vnfComponent']['connection_point']:
+                    for ext_cp in vnfc_instance.get('vnfComponent').get('connection_point'):
                         vnf_ext_cp_info = VnfExtCpInfo()
-                        vnf_ext_cp_info.cp_instance_id = str(ext_cp['id'])
-                        vnf_ext_cp_info.cpd_id = str(ext_cp['virtual_link_reference_id'])
+                        vnf_ext_cp_info.cp_instance_id = str(ext_cp.get('id'))
+                        vnf_ext_cp_info.cpd_id = str(ext_cp.get('virtual_link_reference_id'))
                         # virtual_link_reference = str(ext_cp['virtual_link_reference'])
                         vnf_ext_cp_info.address = list()
                         # for ip in vnfc_instance['ips']:
@@ -251,56 +251,50 @@ class OpenbatonManoAdapter(object):
         vnf_instance_id = filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id
-        try:
-            ns_instance_id = self.vnf_to_ns_mapping[vnf_instance_id]
-        except KeyError:
-            LOG.debug('Could not find corresponding NS ID for VNF ID %s. Cannot build VnfInfo object.' %
-                      vnf_instance_id)
-            raise OpenbatonManoAdapterError('Could not find corresponding NS ID for VNF ID %s. '
-                                            'Cannot build VnfInfo object.') % vnf_instance_id
+        ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id, '')
         try:
             url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
             method = 'get'
             resp, vnf_config = self.do_request(url=url, method=method)
-            if resp.status_code == 404:
+            if resp.status_code == 400:
                 # vnf-instance-id not found, so assuming NOT_INSTANTIATED
                 vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
                 return vnf_info
-            assert resp.status_code == 200
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve status for VNF with ID %s. Reason: %s' %
                                             (vnf_instance_id, e.message))
-
-        vnf_info.vnf_instance_id = str(vnf_config['id'])
-        if vnf_config['status'] == 'ACTIVE':
+        print resp.status_code
+        print vnf_config
+        vnf_info.vnf_instance_id = str(vnf_config.get('id'))
+        if vnf_config.get('status') == 'ACTIVE':
             vnf_info.instantiation_state = constants.VNF_INSTANTIATED
         else:
             vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
-        vnf_info.vnfd_id = str(vnf_config['descriptor_reference'])
-        vnf_info.vnf_instance_name = str(vnf_config['name'])
-        vnf_info.vnf_product_name = str(vnf_config['name'])
+        vnf_info.vnfd_id = str(vnf_config.get('descriptor_reference'))
+        vnf_info.vnf_instance_name = str(vnf_config.get('name'))
+        vnf_info.vnf_product_name = str(vnf_config.get('name'))
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-        if vnf_config['status'] == 'ACTIVE':
+        if vnf_config.get('status') == 'ACTIVE':
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STARTED
         else:
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STOPPED
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
         vnf_info.instantiated_vnf_info.ext_cp_info = list()
-        for vdu in vnf_config['vdu']:
-            for vnfc_instance in vdu['vnfc_instance']:
+        for vdu in vnf_config.get('vdu'):
+            for vnfc_instance in vdu.get('vnfc_instance'):
                 vnfc_resource_info = VnfcResourceInfo()
-                vnfc_resource_info.vnfc_instance_id = str(vnfc_instance['id'])
-                vnfc_resource_info.vdu_id = str(vdu['id'])
+                vnfc_resource_info.vnfc_instance_id = str(vnfc_instance.get('id'))
+                vnfc_resource_info.vdu_id = str(vdu.get('id'))
                 vnfc_resource_info.compute_resource = ResourceHandle()
-                vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance['vim_id'])
-                vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance['vc_id'])
+                vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance.get('vim_id'))
+                vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance.get('vc_id'))
                 vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
                 vnf_info.instantiated_vnf_info.ext_cp_info = list()
-                for ext_cp in vnfc_instance['vnfComponent']['connection_point']:
+                for ext_cp in vnfc_instance.get('vnfComponent').get('connection_point'):
                     vnf_ext_cp_info = VnfExtCpInfo()
-                    vnf_ext_cp_info.cp_instance_id = str(ext_cp['id'])
-                    vnf_ext_cp_info.cpd_id = str(ext_cp['virtual_link_reference_id'])
+                    vnf_ext_cp_info.cp_instance_id = str(ext_cp.get('id'))
+                    vnf_ext_cp_info.cpd_id = str(ext_cp.get('virtual_link_reference_id'))
                     # virtual_link_reference = str(ext_cp['virtual_link_reference'])
                     vnf_ext_cp_info.address = list()
                     # for ip in vnfc_instance['ips']:
@@ -321,7 +315,7 @@ class OpenbatonManoAdapter(object):
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve config for VIM with ID %s. Reason: %s' %
                                             (vim_id, e.message))
-        if vim_config['type'] == 'openstack':
+        if vim_config.get('type') == 'openstack':
             vim_vendor = 'openstack'
             vim_params = {
                 'auth_url': vim_config.get('authUrl'),
@@ -350,3 +344,37 @@ class OpenbatonManoAdapter(object):
                                             (ns_instance_id, e.message))
 
         return 'ns_terminate', ns_instance_id
+
+    @log_entry_exit(LOG)
+    def ns_delete_id(self, ns_instance_id):
+        LOG.debug('"NS Delete ID" operation is not implemented in Openbaton!')
+
+    @log_entry_exit(LOG)
+    def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
+        if ns_instance_id is None:
+            raise OpenbatonManoAdapterError('NS instance ID is absent')
+        stable_states = ['ACTIVE', 'ERROR']
+        elapsed_time = 0
+
+        while elapsed_time < max_wait_time:
+            url = '/api/v1/ns-records/%s' % ns_instance_id
+            method = 'get'
+            try:
+                resp, ns_config = self.do_request(url=url, method=method)
+                ns_status = ns_config.get('status', 'NOTFOUND')
+                assert resp.status_code == 404
+                return True
+            except Exception as e:
+                LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
+                if ns_status in stable_states:
+                    return True
+                else:
+                    LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
+                    LOG.debug('Sleeping %s seconds' % poll_interval)
+                    time.sleep(poll_interval)
+                    elapsed_time += poll_interval
+                    LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
+
+        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
+        return False
+
