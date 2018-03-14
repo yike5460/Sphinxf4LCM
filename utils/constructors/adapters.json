@@ -5,7 +5,8 @@
     "tacker":     "api.adapter.mano.tacker.TackerManoAdapter",
     "cisconfv45": "api.adapter.mano.cisconfv45.CiscoNFVManoAdapter",
     "cisconfv":   "api.adapter.mano.cisconfv.CiscoNFVManoAdapter",
-    "sdl":        "api.adapter.mano.sdl.SdlManoAdapter"
+    "sdl":        "api.adapter.mano.sdl.SdlManoAdapter",
+    "openbaton":  "api.adapter.mano.openbaton.OpenbatonManoAdapter"
   },
   "vnfm": {
     "dummy":  "api.adapter.vnfm.dummy.DummyVnfmAdapter",
