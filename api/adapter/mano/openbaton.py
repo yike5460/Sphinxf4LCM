@@ -81,8 +81,6 @@ class OpenbatonManoAdapter(object):
         try:
             kwargs.setdefault('data', {})
             kwargs.setdefault('verify', False)
-            # resp, body = self._do_request(self.api_url + url, method, **kwargs)
-            # return resp, body
             resp, body = self._do_request(self.api_url + url, method, **kwargs)
         except OpenbatonManoAdapterUnauthorized:
             self.token = self.get_token(self.username, self.password)
@@ -112,9 +110,8 @@ class OpenbatonManoAdapter(object):
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         url = '/api/v1/ns-records/%s' % nsd_id
         method = 'post'
-        data = {}
         try:
-            resp, body = self.do_request(url=url, method=method, data=data)
+            resp, body = self.do_request(url=url, method=method)
             assert resp.status_code == 201
             ns_instance_id = str(body.get('id'))
         except Exception as e:
@@ -157,7 +154,7 @@ class OpenbatonManoAdapter(object):
                 raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
                                                 (resource_id, e.message))
             if ns_status == 'ACTIVE':
-                for vnfr in ns_config['vnfr']:
+                for vnfr in ns_config.get('vnfr'):
                     self.vnf_to_ns_mapping[str(vnfr.get('id'))] = resource_id
                 return constants.OPERATION_SUCCESS
             elif ns_status == 'NULL':
@@ -203,7 +200,10 @@ class OpenbatonManoAdapter(object):
             raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
                                             (ns_instance_id, e.message))
         ns_info.nsd_id = str(ns_config.get('descriptor_reference'))
-        ns_info.ns_state = constants.NS_INSTANTIATED
+        if ns_config.get('status') == 'ACTIVE':
+            ns_info.ns_state = constants.NS_INSTANTIATED
+        else:
+            ns_info.ns_state = constants.NS_NOT_INSTANTIATED
         ns_info.vnf_info = list()
         for constituent_vnfr in ns_config.get('vnfr'):
             vnf_info = VnfInfo()
