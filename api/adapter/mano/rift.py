@@ -194,7 +194,7 @@ class RiftManoAdapter(object):
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
 
-        resource = '/api/config/project/Spirent/ns-instance-config/nsr'
+        resource = '/api/config/project/%s/ns-instance-config/nsr' % self.project
 
         nsr_metadata = self.nsr_metadata[ns_instance_id]
         nsr_metadata['datacenter'] = additional_param_for_ns['datacenter']
@@ -308,7 +308,7 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
-        resource = '/api/config/project/Spirent/ns-instance-config/nsr/%s' % ns_instance_id
+        resource = '/api/config/project/%s/ns-instance-config/nsr/%s' % (self.project, ns_instance_id)
 
         try:
             response = self.session.delete(url=self.url + resource)
@@ -398,6 +398,8 @@ class RiftManoAdapter(object):
                 'storage-gb': vdu['vm-flavor']['storage-gb'],
                 'nic-count': len(vdu['interface'])
             }
+
+        # TODO: if flavor exists, check flavor in VIM
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
