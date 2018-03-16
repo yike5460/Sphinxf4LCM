@@ -146,7 +146,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             if vnf_info.vnf_product_name in expected_vnfc_count.keys():
                 vnf_info_impacted_list.append(vnf_info)
 
-        sleep(constants.INSTANCE_BOOT_TIME)
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that the additional VNFC instance(s) have been deployed for the VNF by querying the VNFM

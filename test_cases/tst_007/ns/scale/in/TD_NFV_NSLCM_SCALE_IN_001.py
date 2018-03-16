@@ -115,7 +115,7 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
         self.tc_result['events']['scale_out_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_BOOT_TIME)
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that the additional VNF instance(s) have been deployed by querying the VNFM
