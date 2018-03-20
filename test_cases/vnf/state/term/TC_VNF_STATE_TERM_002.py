@@ -148,6 +148,9 @@ class TC_VNF_STATE_TERM_002(TestCase):
         self.unregister_from_cleanup(index=20)
         self.unregister_from_cleanup(index=10)
 
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_delete_id,
+                                  vnf_instance_id=self.vnf_instance_id)
+
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF is terminated and all resources have been released
         # --------------------------------------------------------------------------------------------------------------
