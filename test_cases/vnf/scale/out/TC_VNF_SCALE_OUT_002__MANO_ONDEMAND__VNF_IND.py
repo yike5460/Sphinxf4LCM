@@ -37,11 +37,13 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VNF_IND(TestCase):
     7. Validate NS has resized to the max
     8. Determine if and length of service disruption
     9. Validate max capacity without traffic loss
+    10. Terminate the NS
+    11. Validate that the NS is terminated and that all resources have been released by the VIM
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name')
-    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption')
+    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption', 'terminate_ns')
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -78,6 +80,8 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VNF_IND(TestCase):
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'),
                                   additional_param=self.tc_input['mano'].get('termination_params'))
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
+                                  ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate NS state is INSTANTIATED
@@ -121,7 +125,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VNF_IND(TestCase):
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
-        self.register_for_cleanup(index=20, function_reference=self.traffic.destroy)
+        self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
@@ -131,7 +135,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VNF_IND(TestCase):
 
         self.traffic.start(return_when_emission_starts=True)
 
-        self.register_for_cleanup(index=30, function_reference=self.traffic.stop)
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Validate the provided functionality and all traffic goes through
@@ -240,5 +244,39 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__VNF_IND(TestCase):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Max traffic flew with packet loss')
 
         self.tc_result['scaling_out']['traffic_after'] = 'MAX_TRAFFIC_LOAD'
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 10. Terminate the NS
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Terminating the NS')
+        self.time_record.START('terminate_ns')
+        if self.mano.ns_terminate_and_delete(ns_instance_id=self.ns_instance_id,
+                                             terminate_time=self.tc_input.get('terminate_time'),
+                                             additional_param=self.tc_input['mano'].get('termination_params')) != \
+                constants.OPERATION_SUCCESS:
+            raise TestRunError('Unexpected status for NS termination operation',
+                               err_details='NS termination operation failed')
+
+        self.time_record.END('terminate_ns')
+
+        self.tc_result['events']['terminate_ns']['duration'] = self.time_record.duration('terminate_ns')
+
+        self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 11. Validate that the NS is terminated and that all resources have been released by the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating that the NS is terminated')
+        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+        if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
+            raise TestRunError('Unexpected NS instantiation state',
+                               err_details='NS instantiation state was not "%s" after the NS was terminated'
+                                           % constants.NS_NOT_INSTANTIATED)
+
+        LOG.info('Validating that all resources have been released by the VIM')
+        if not self.mano.validate_ns_released_vresources(ns_info):
+            raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)
