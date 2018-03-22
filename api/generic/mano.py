@@ -1423,7 +1423,7 @@ class Mano(object):
         :param vnf_instance_id:     Identifier of the VNF instance.
         :param additional_param:    Additional parameters used for filtering.
         :return:                    List of management addresses.
-        """   
+        """
         return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
