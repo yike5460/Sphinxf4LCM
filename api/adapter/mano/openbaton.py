@@ -230,8 +230,7 @@ class OpenbatonManoAdapter(object):
                         vnf_ext_cp_info.cp_instance_id, vnf_ext_cp_info.address = self.get_cp_info(
                             port_name=port_name, vim_id=str(vnfc_instance.get('vim_id', '')))
                         virtual_link_reference = str(ext_cp.get('virtual_link_reference', ''))
-                        # TODO Replace this with the ID of the virtual-link from VNFD
-                        vnf_ext_cp_info.cpd_id = virtual_link_reference
+                        vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu.get('name', ''))
                         vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
             ns_info.vnf_info.append(vnf_info)
         return ns_info
@@ -281,8 +280,7 @@ class OpenbatonManoAdapter(object):
                     vnf_ext_cp_info.cp_instance_id, vnf_ext_cp_info.address = self.get_cp_info(
                         port_name=port_name, vim_id=str(vnfc_instance.get('vim_id', '')))
                     virtual_link_reference = str(ext_cp.get('virtual_link_reference', ''))
-                    # TODO Replace this with the ID of the virtual-link from VNFD
-                    vnf_ext_cp_info.cpd_id = virtual_link_reference
+                    vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu.get('name', ''))
                     vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
         return vnf_info
 
@@ -470,16 +468,18 @@ class OpenbatonManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
-        ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id)
-        url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
-        try:
-            resp, vnf_config = self.do_request(url=url, method='get')
-            assert resp.status_code == 200
-        except Exception as e:
-            LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to retrieve config for VNF with ID %s. Reason: %s' %
-                                            (vnf_instance_id, e.message))
-        mgmt_addr_list = [str(addr) for addr in vnf_config.get('vnf_address', [])]
+        LOG.debug('Cannot get VNF management address in Openbaton')
+        mgmt_addr_list = list()
+        # ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id)
+        # url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
+        # try:
+        #     resp, vnf_config = self.do_request(url=url, method='get')
+        #     assert resp.status_code == 200
+        # except Exception as e:
+        #     LOG.exception(e)
+        #     raise OpenbatonManoAdapterError('Unable to retrieve config for VNF with ID %s. Reason: %s' %
+        #                                     (vnf_instance_id, e.message))
+        # mgmt_addr_list = [str(addr) for addr in vnf_config.get('vnf_address', [])]
 
         return mgmt_addr_list
 
