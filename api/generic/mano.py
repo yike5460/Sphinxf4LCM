@@ -632,11 +632,12 @@ class Mano(object):
 
         operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, additional_param)
 
-        LOG.debug('Expected termination operation status %s, got %s' % (constants.OPERATION_SUCCESS, operation_status))
+        if operation_status != constants.OPERATION_SUCCESS:
+            LOG.debug('Expected termination operation status %s, got %s'
+                      % (constants.OPERATION_SUCCESS, operation_status))
+            raise ManoGenericError('NS termination operation failed')
 
         self.ns_delete_id(ns_instance_id)
-
-        return operation_status
 
     @log_entry_exit(LOG)
     def ns_terminate_sync(self, ns_instance_id, terminate_time=None, additional_param=None):
@@ -1172,11 +1173,13 @@ class Mano(object):
         """
         operation_status = self.vnf_terminate_sync(vnf_instance_id, termination_type, graceful_termination_timeout,
                                                    additional_param)
-        LOG.debug('Expected termination operation status %s, got %s' % (constants.OPERATION_SUCCESS, operation_status))
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            LOG.debug('Expected termination operation status %s, got %s'
+                      % (constants.OPERATION_SUCCESS, operation_status))
+            raise ManoGenericError('VNF termination operation failed')
 
         self.vnf_delete_id(vnf_instance_id)
-
-        return operation_status
 
     @log_entry_exit(LOG)
     def vnf_terminate_sync(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
