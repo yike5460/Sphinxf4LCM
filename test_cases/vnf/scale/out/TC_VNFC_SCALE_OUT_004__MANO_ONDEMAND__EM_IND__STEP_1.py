@@ -251,10 +251,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Terminating the VNF')
         self.time_record.START('terminate_vnf')
-        if self.mano.vnf_terminate_and_delete(
-                                         self.vnf_instance_id, termination_type='graceful',
-                                         graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
-                                         additional_param=self.tc_input['mano'].get('termination_params')) != \
+        if self.mano.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful',
+                                        graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
+                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for terminating VNF operation',
                                err_details='VNF terminate operation failed')
@@ -265,6 +264,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
 
         self.unregister_from_cleanup(index=30)
         self.unregister_from_cleanup(index=20)
+
+        self.register_for_cleanup(index=20, function_reference=self.mano.vnf_delete_id,
+                                  vnf_instance_id=self.vnf_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 13. Validate that the VNF is terminated and all resources have been released by the VIM
