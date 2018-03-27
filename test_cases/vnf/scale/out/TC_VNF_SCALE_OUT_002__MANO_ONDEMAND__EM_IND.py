@@ -69,9 +69,6 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__EM_IND(TestCase):
                ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
                additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
-        if self.ns_instance_id is None:
-            raise TestRunError('NS instantiation operation failed')
-
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')

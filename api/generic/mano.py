@@ -420,7 +420,7 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-        :return:                                            NS instantiation operation status.
+        :return:                                            Identifier of the NS instance.
         """
         ns_instance_id = self.ns_create_id(nsd_id, ns_name, ns_description)
         LOG.debug('NS instance ID: %s' % ns_instance_id)
@@ -890,7 +890,7 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :return:                            VNF instantiation operation status.
+        :return:                            Identifier of the VNF instance.
         """
         vnf_instance_id = self.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
         LOG.debug('VNF instance ID: %s' % vnf_instance_id)
@@ -899,7 +899,7 @@ class Mano(object):
                                                      additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            return None
+            raise ManoGenericError('VNF instantiation operation failed')
         return vnf_instance_id
 
     @log_entry_exit(LOG)

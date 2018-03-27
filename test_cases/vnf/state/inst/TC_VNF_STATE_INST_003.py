@@ -69,9 +69,6 @@ class TC_VNF_STATE_INST_003(TestCase):
                                                  localization_language=self.tc_input.get('localization_language'),
                                                  additional_param=self.tc_input['mano'].get('instantiation_params'))
 
-        if self.vnf_instance_id is None:
-            raise TestRunError('VNF instantiation operation failed')
-
         self.time_record.END('instantiate_vnf')
 
         self.register_for_cleanup(index=10, function_reference=self.mano.vnf_terminate_and_delete,
