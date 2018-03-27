@@ -571,7 +571,7 @@ class RiftManoAdapter(object):
             ns_op_status = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]['operational-status']
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_op_status, ns_instance_id))
             if ns_op_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_op_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -579,8 +579,8 @@ class RiftManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise RiftManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                   % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param=None):
