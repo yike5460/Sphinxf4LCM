@@ -256,8 +256,8 @@ class Mano(object):
         """
         This functions validates that the resources allocated to an NS instance have been released.
 
-        :param ns_info:             NsInfo structure holding information about the NS instance.
-        :return:                    True if the resources have been released, False otherwise.
+        :param ns_info: NsInfo structure holding information about the NS instance.
+        :return:        True if the resources have been released, False otherwise.
         """
         for vnf_info in ns_info.vnf_info:
             if not self.validate_vnf_released_vresources(vnf_info):
@@ -269,12 +269,10 @@ class Mano(object):
         """
         This functions validates that the resources allocated to a VNF instance have been released.
 
-        :param vnf_info_initial:            VnfInfo structure holding information about the initial state of the VNF
-                                            instance.
-        :param vnf_info_final:              VnfInfo structure holding information about the final state of the VNF
-                                            instance
-        :return:                            True if the resources allocated to the initial VNF and not allocated to the
-                                            final VNF have been released, False otherwise.
+        :param vnf_info_initial:    VnfInfo structure holding information about the initial state of the VNF instance.
+        :param vnf_info_final:      VnfInfo structure holding information about the final state of the VNF instance
+        :return:                    True if the resources allocated to the initial VNF and not allocated to the final
+                                    VNF have been released, False otherwise.
         """
 
         vnfc_resource_id_list_final = []
@@ -287,7 +285,8 @@ class Mano(object):
                 vim = self.get_vim_helper(vim_id)
                 resource_id = vnfc_resource_info.compute_resource.resource_id
                 try:
-                    virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    LOG.debug('Resource ID %s found in VIM, not as expected' % resource_id)
                     return False
                 except Exception:
                     LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
