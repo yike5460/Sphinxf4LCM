@@ -282,9 +282,9 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Terminating the NS')
         self.time_record.START('terminate_ns')
-        if self.mano.ns_terminate_and_delete(ns_instance_id=self.ns_instance_id,
-                                             terminate_time=self.tc_input.get('terminate_time'),
-                                             additional_param=self.tc_input['mano'].get('termination_params')) != \
+        if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id,
+                                       terminate_time=self.tc_input.get('terminate_time'),
+                                       additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='NS termination operation failed')
@@ -296,6 +296,9 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
         self.unregister_from_cleanup(index=30)
         self.unregister_from_cleanup(index=20)
 
+        self.register_for_cleanup(index=20, function_reference=self.mano.ns_delete_id,
+                                  ns_instance_id=self.ns_instance_id)
+
         # --------------------------------------------------------------------------------------------------------------
         # 15. Validate that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
@@ -306,6 +309,16 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_MAX(TestCase):
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'
                                            % constants.NS_NOT_INSTANTIATED)
+
+        LOG.info('Verifying that all the VNF instance(s) have been terminated')
+        for vnf_info in ns_info.vnf_info:
+            vnf_instance_id = vnf_info.vnf_instance_id
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
+                raise TestRunError(
+                    'VNF instance was not terminated correctly. VNF instance ID %s expected state was %s but got %s'
+                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Validating that all resources have been released by the VIM')
         if not self.mano.validate_ns_released_vresources(ns_info):
