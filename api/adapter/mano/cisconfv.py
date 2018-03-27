@@ -758,4 +758,4 @@ class CiscoNFVManoAdapter(object):
     def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval):
         # Since the NSO VNF deployment state is seen as VNF instantiation state, the VNF termination is always safe, no
         # matter the VNF deployment state in the ESC.
-        return True
+        return

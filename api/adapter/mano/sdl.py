@@ -348,7 +348,7 @@ class SdlManoAdapter(object):
                 raise SdlManoAdapterError(e.message)
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
             if ns_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -356,8 +356,8 @@ class SdlManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise SdlManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                  % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info, additional_param=None):

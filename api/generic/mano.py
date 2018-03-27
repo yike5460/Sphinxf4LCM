@@ -1279,10 +1279,10 @@ class Mano(object):
         requires the VNF to be in a particular state.
 
         :param vnf_instance_id: Identifier of the VNF instance.
-        :return:                True if the VNF reached one of the final states, False otherwise.
+        :return:                None.
         """
-        return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
-                                                           poll_interval=self.POLL_INTERVAL)
+        self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
+                                                    poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id):
@@ -1291,10 +1291,10 @@ class Mano(object):
         requires the NS to be in a particular state.
 
         :param ns_instance_id:  Identifier of the NS instance.
-        :return:                True if the NS reached one of the final states, False otherwise.
+        :return:                None.
         """
-        return self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
-                                                          poll_interval=self.POLL_INTERVAL)
+        self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
+                                                   poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
