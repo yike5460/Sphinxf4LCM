@@ -113,7 +113,7 @@ class OpenbatonManoAdapter(object):
             ns_instance_id = str(body.get('id', ''))
         except Exception as e:
             LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to instantantiate NS for NSD ID %s. Reason: %s. '
+            raise OpenbatonManoAdapterError('Unable to instantiate NS for NSD ID %s. Reason: %s'
                                             % (nsd_id, e.message))
         return ns_instance_id
 
@@ -163,7 +163,7 @@ class OpenbatonManoAdapter(object):
             try:
                 resp, ns_config = self.do_request(url=url, method='get')
                 if resp.status_code == 404:
-                    self.vnf_to_ns_mapping = {k:v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
+                    self.vnf_to_ns_mapping = {k: v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
                     return constants.OPERATION_SUCCESS
                 assert resp.status_code == 200
                 ns_status = str(ns_config.get('status', ''))
@@ -348,7 +348,7 @@ class OpenbatonManoAdapter(object):
                     elapsed_time += poll_interval
                     LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
             except Exception as e:
-                LOG.debug('Could not retrieve status for NS with ID %s' %  ns_instance_id)
+                LOG.debug('Could not retrieve status for NS with ID %s' % ns_instance_id)
                 raise OpenbatonManoAdapterError(e.message)
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
