@@ -1488,3 +1488,45 @@ class Mano(object):
                 LOG.debug('Incorrect number of VNFC instances for VNF %s' % vnf_info.vnf_product_name)
                 return False
         return True
+
+    @log_entry_exit(LOG)
+    def vnf_change_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                           ext_managed_virtual_link=None, vim_connection_info=None, additional_param=None):
+        """
+        This function changes the deployment flavour for a VNF instance.
+        This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 007 v2.4.1 (2018-02).
+        :param vnf_instance_id:             Identifier of the VNF instance to be modified.
+        :param new_flavour_id:              Identifier of the new VNF DF to apply to this VNF instance.
+        :param instantiation_level_id:      Identifier of the instantiation level of the DF to be used. If not present,
+                                            the default instantiation level as declared in the VNFD shall be used.
+        :param ext_virtual_link:            Information about external VLs to connect the VNF to.
+        :param ext_managed_virtual_link:    Information about internal VLs that are managed by other entities than the
+                                            VNFM.
+        :param vim_connection_info:         Information about VIM connection(s) for managing resources for the VNF
+                                            instance, or external/externally-managed virtual links. This attribute shall
+                                            be supported and present if VNF-related resource management in direct mode
+                                            is applicable. In that case, this attribute shall be present if there is the
+                                            need to communicate VIM connection information for external or
+                                            externally-managed virtual links.
+        :param additional_param:            Additional parameters passed by the NFVO as input to the flavour change
+                                            process, specific to the VNF being modified as declared in the VNFD.
+        :return:                            Identifier of the VNF lifecycle operation occurrence.
+        """
+        return self.mano_adapter.vnf_change_flavour(vnf_instance_id, new_flavour_id, instantiation_level_id,
+                                             ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
+                                             additional_param)
+
+    @log_entry_exit(LOG)
+    def validate_vnf_deployment_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id,
+                                        additional_param=None):
+        """
+        This function will return True if the VNF deployment flavour was updated successfully, and False otherwise.
+        :param vnf_instance_id:                  VNF instance ID fo which the deployment flavour was changed
+        :param new_flavour_id:                   The new deployment flavour that was applied to the VNF instance
+        :param instantiation_level_id:           The instantion level id that was applied to the VNF instance
+        :param additional_param:                 Additional parameters
+        :return:                                 True if the new deployment flavour was applied successfully, False
+                                                 otherwise
+        """
+        return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, new_flavour_id,
+                                                                 instantiation_level_id, additional_param)
