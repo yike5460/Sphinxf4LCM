@@ -215,6 +215,25 @@ NSR_DELETE_TEMPLATE = '''
     </nfvo>
 </config>'''
 
+VNFR_DF_TEMPLATE = '''
+<config>
+    <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
+        <vnf-info>
+            <esc xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc">
+                <vnf-deployment>
+                    <tenant>%(tenant)s</tenant>
+                    <deployment-name>%(deployment_name)s</deployment-name>
+                    <esc>%(esc)s</esc>
+                    <vnf-info>
+                        <name>%(vnf_name)s</name>
+                        <vnfd-flavor>%(vnfd_flavour)s</vnfd-flavor>
+                    </vnf-info>
+                </vnf-deployment>
+            </esc>
+        </vnf-info>
+    </nfvo>
+</config>
+'''
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
@@ -430,6 +449,39 @@ class CiscoNFVManoAdapter(object):
             except AttributeError as e:
                 LOG.exception(e)
                 raise CiscoNFVManoAdapterError(e.message)
+
+        if operation_type == 'vnf_change_df':
+            tenant_name = operation_details['tenant_name']
+            deployment_name = operation_details['deployment_name']
+            vm_group_map = operation_details['vm_group_map']
+
+            # Get the number of VM instances belonging to each VM group name and compare it with the one provided
+            for vm_group in vm_group_map.keys():
+                number_of_instances = int(vm_group_map[vm_group])
+                try:
+                    xml = self.esc.get(('xpath',
+                                        '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                        'deployments[deployment_name="%s"]/vm_group[name="%s"]' %
+                                        (tenant_name, deployment_name, vm_group))).data_xml
+                    xml = etree.fromstring(xml)
+                    vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance/'
+                                               '{http://www.cisco.com/esc/esc}name')
+                    actual_number_of_instances = len(vm_name_list)
+                    LOG.debug('ESC reported %s VM instances as part of VM group with name %s; expected %s'
+                              % (actual_number_of_instances, vm_group, number_of_instances))
+                    vm_group_list = list()
+                    vm_group_list.append(vm_group)
+                    vm_group_state = self.get_vm_groups_aggregated_deployment_state(vm_group_list, deployment_name)
+                    if actual_number_of_instances != number_of_instances or vm_group_state != 'reached':
+                        return constants.OPERATION_PENDING
+                except NCClientError as e:
+                    LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                    LOG.exception(e)
+                    raise CiscoNFVManoAdapterError(e.message)
+                except AttributeError as e:
+                    LOG.exception(e)
+                    raise CiscoNFVManoAdapterError(e.message)
+            return constants.OPERATION_SUCCESS
 
         if operation_type == 'ns_instantiate':
             tenant_name = operation_details['tenant_name']
@@ -969,6 +1021,7 @@ class CiscoNFVManoAdapter(object):
         nsd_xml = netconf_reply.data_xml
         return nsd_xml
 
+    @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
         vnfd_id = vnf_info.vnfd_id
@@ -986,6 +1039,7 @@ class CiscoNFVManoAdapter(object):
 
         # Iterate over each VNFC and check that the corresponding flavor name in VNFR and Nova are the same
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
+
 
             # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
@@ -1963,6 +2017,30 @@ class CiscoNFVManoAdapter(object):
                 lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
             return lifecycle_operation_occurrence_id
+        if update_type == 'ChangeVnfDf':
+            operation_list = []
+            for flavour_data in change_vnf_flavour_data:
+                vnf_instance_id = flavour_data.vnf_instance_id
+                new_flavour_id = flavour_data.new_flavour_id
+                instantiation_level_id = flavour_data.instantiation_level_id
+                ext_virtual_link = flavour_data.ext_virtual_link
+                ext_managed_virtual_link = flavour_data.ext_managed_virtual_link
+                additional_param = flavour_data.additional_param
+                vim_connection_info = None
+                operation_id = self.vnf_change_flavour(vnf_instance_id, new_flavour_id, instantiation_level_id,
+                                                       ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
+                                                       additional_param)
+                operation_list.append(operation_id)
+
+            lifecycle_operation_occurrence_id = uuid.uuid4()
+            lifecycle_operation_occurrence_dict = {
+                'operation_type': 'multiple_operations',
+                'resource_id': operation_list
+            }
+            self.lifecycle_operation_occurrence_ids[
+                lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
+
+            return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
     def validate_vnf_instantiation_level(self, vnf_info, target_instantiation_level_id, additional_param=None):
@@ -2054,4 +2132,149 @@ class CiscoNFVManoAdapter(object):
             if actual_vnfc_count[vdu_id] != expected_vnfc_count[vdu_id]:
                 return False
 
+        return True
+
+    @log_entry_exit(LOG)
+    def vnf_change_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                           ext_managed_virtual_link=None, vim_connection_info=None, additional_param=None):
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
+        tenant = additional_param.get('tenant')
+        esc = additional_param.get('esc')
+
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                          'additional_param': {'tenant': tenant}})
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+        vnfd_xml = etree.fromstring(vnfd)
+
+        vm_group_map = dict()
+        instantiation_level_details = vnfd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor/'
+                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id='
+                                                    '"%s"]/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                                    'instantiation-level/[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                                    'id="%s"]' % (new_flavour_id, instantiation_level_id))
+        vdu_instances = instantiation_level_details.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level')
+        for vdu in vdu_instances:
+            vdu_name = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu').text
+            vm_group_name = '%s-%s' % (vnf_name, vdu_name)
+            vdu_num_instances = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances').text
+            vm_group_map[vm_group_name] = vdu_num_instances
+
+        xml_config = self.build_vnf_change_flavour(tenant, deployment_name, esc, vnf_name, new_flavour_id)
+        try:
+            netconf_reply = self.nso.edit_config(target='running', config=xml_config)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+
+        lifecycle_operations_occurrence_id = uuid.uuid4()
+        lifecycle_operations_occurrence_dict = {
+            'operation_type': 'vnf_change_df',
+            'tenant_name': tenant,
+            'deployment_name': deployment_name,
+            'vnfd_flavour': new_flavour_id,
+            'vm_group_map': vm_group_map
+        }
+        self.lifecycle_operation_occurrence_ids[lifecycle_operations_occurrence_id] = \
+            lifecycle_operations_occurrence_dict
+
+        return lifecycle_operations_occurrence_id
+
+    @log_entry_exit(LOG)
+    def build_vnf_change_flavour(self, tenant, deployment_name, esc, vnf_name, vnfd_flavour):
+        vnfr_template_values = {
+            'tenant': tenant,
+            'deployment_name': deployment_name,
+            'esc': esc,
+            'vnf_name': vnf_name,
+            'vnfd_flavour': vnfd_flavour
+        }
+        vnfr_df_xml = VNFR_DF_TEMPLATE % vnfr_template_values
+
+        return vnfr_df_xml
+
+    @log_entry_exit(LOG)
+    def validate_vnf_deployment_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id,
+                                        additional_param=None):
+        tenant_name = additional_param['tenant']
+        deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnfd_id = vnf_info.vnfd_id
+        vnfd = self.get_vnfd(vnfd_id)
+        vnfd_xml = etree.fromstring(vnfd)
+
+        vm_group_map = dict()
+        instantiation_level_details = vnfd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor/'
+                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id='
+                                                    '"%s"]/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                                    'instantiation-level/[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
+                                                    'id="%s"]' % (new_flavour_id, instantiation_level_id))
+        vdu_instances = instantiation_level_details.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level')
+        for vdu in vdu_instances:
+            vdu_name = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu').text
+            vm_group_name = '%s-%s' % (vnf_name, vdu_name)
+            vdu_num_instances = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances').text
+            vm_group_map[vm_group_name] = vdu_num_instances
+
+        # Get the deployment XML
+        try:
+            deployment_xml = self.nso.get(('xpath',
+                                           '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
+                                           % (tenant_name, deployment_name))).data_xml
+            deployment_xml = etree.fromstring(deployment_xml)
+        except NCClientError as e:
+            LOG.debug('Error occurred while communicating with the ESC Netconf server')
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Find the current instantiation level ID
+        try:
+            current_instantiation_level_id = deployment_xml.find(
+                './/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name="%s"]/'
+                '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}instantiation-level' % vnf_name).text
+        except AttributeError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        # Validating if the expected and current deployment flavour and instantiation level id are matching
+        LOG.debug('Cisco NSO restores the initial deployment flavour, based on the value present in the NSD, so we '
+                  'cannot validate that the new flavour id is configurend on the VNF instance. Validating instead that'
+                  ' the number of VM instances is according to the new flavour')
+        if current_instantiation_level_id != instantiation_level_id:
+            LOG.debug('VNF instance ID: %s: expected instantation level id %s, current instantation level id %s' %
+                      (vnf_instance_id, instantiation_level_id, current_instantiation_level_id))
+            return False
+
+        # Validating if the number of VM instances for each VDU are matching the instantiation level id specified in
+        # the VNFD
+
+        for vm_group in vm_group_map.keys():
+            number_of_instances = int(vm_group_map[vm_group])
+            try:
+                xml = self.esc.get(('xpath',
+                                    '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
+                                    'deployments[deployment_name="%s"]/vm_group[name="%s"]' %
+                                    (tenant_name, deployment_name, vm_group))).data_xml
+                xml = etree.fromstring(xml)
+                vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance/'
+                                           '{http://www.cisco.com/esc/esc}name')
+                actual_number_of_instances = len(vm_name_list)
+                LOG.debug('ESC reported %s VM instances as part of VM group with name %s; expected %s'
+                          % (actual_number_of_instances, vm_group, number_of_instances))
+                if actual_number_of_instances != number_of_instances:
+                    return False
+            except NCClientError as e:
+                LOG.debug('Error occurred while communicating with the ESC Netconf server')
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
         return True
