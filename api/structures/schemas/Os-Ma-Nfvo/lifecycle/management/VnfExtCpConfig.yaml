@@ -1,0 +1,32 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.3.4.26 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+VnfExtCpConfig:
+  description: The VnfExtCpConfig information element represents an externally provided link port or network address information per instance of a VNF external connection point. In case a link port is provided, the NFVO shall use that link port when connecting the VNF external CP to the external VL. In case no link port is provided, the NFVO or VNFM shall create a link port on the external VL, and use that link port to connect the VNF external CP to the external VL.
+  attributes:
+    cp_instance_id:
+      description: Identifier of the external CP instance to which this set of configuration parameters is requested to be applied. Shall be present if this instance has already been created.
+      type: Identifier
+      required: false
+
+    link_port_id:
+      description: Identifier of a pre-configured link port to which the external CP will be associated.
+      type: Identifier
+      required: false
+
+    cp_protocol_data:
+      description: Parameters for configuring fixed and dynamic network addresses on the link port that connects the CP to a VL, including the information on applicable layer protocol(s). For dynamic addresses, it should be possible to define per parameter set the number of network addresses to be assigned dynamically. Other parameters could be, e.g. valid address ranges or subnets.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
