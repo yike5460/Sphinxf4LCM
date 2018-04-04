@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.8.7 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.8.7 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 InstantiationLevel:
   description: The InstantiationLevel information element describes a given level of resources to be instantiated within a DF in term of the number of VNFC instances to be created from each VDU. All the VDUs referenced in the level shall be part of the corresponding DF and their number shall be within the range (min/max) for this DF.
@@ -31,6 +31,13 @@ InstantiationLevel:
       required: true
       constraints:
         entry_type: VduLevel
+
+    virtual_link_bitrate_level:
+      description: Specifies bitrate requirements applicable to virtual links created from particular virtual link descriptors for this level.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualLinkBitrateLevel
 
     scale_info:
       description:

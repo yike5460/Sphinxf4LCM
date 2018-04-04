@@ -10,15 +10,22 @@
 #
 
 
-# This structure was written in accordance with section 7.1.9.2.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.9.2.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VirtualComputeDesc:
   description: The VirtualComputeDesc information element supports the specification of requirements related to virtual compute resources.
   attributes:
     virtual_compute_desc_id:
-      description: CPU architecture type. Examples are x86, ARM. The cardinality can be 0 during the allocation request, if no particular CPU architecture type is requested.
+      description: CPU architecture type. Examples are x86, ARM. The cardinality can be 0 during the allocation request, if no particular CPU architecture type is requested. Unique identifier of this  VirtualComputeDesc in the VNFD
       type: Identifier
       required: true
+
+    logical_node:
+      description: The logical Node requirements.
+      type: List
+      required: true
+      constraints:
+        entry_type: LogicalNodeData
 
     request_additional_capabilities:
       description: Number of virtual CPUs.
@@ -26,6 +33,13 @@ VirtualComputeDesc:
       required: false
       constraints:
         entry_type: RequestedAdditionalCapabilityData
+
+    compute_requirements:
+      description: Specifies compute requirements.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
 
     virtual_memory:
       description: Minimum virtual CPU clock rate (e.g. in MHz). The cardinality can be 0 during the allocation request, if no particular value is requested.

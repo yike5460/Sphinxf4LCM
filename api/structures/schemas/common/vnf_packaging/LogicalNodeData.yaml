@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 7.1.6.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2017-02).
+
+LogicalNodeData:
+  description: This information element describes compute, memory and I/O requirements that are to be associated with the logical node of infrastructure. The logical node requirements are a sub-component of the VDU level requirements. As an example for illustration purposes, a logical node correlates to the concept of a NUMA cell in libvirt terminology.
+  attributes:
+    logical_node_requirements:
+      description: The logical node-level compute, memory and I/O requirements. An array of key-value pairs that articulate the deployment requirements. This could include the number of CPU cores on this logical node, a memory configuration specific to a logical node (e.g. such as available in the Linux  kernel via the libnuma library) or a requirement related to the association of an I/O device with the logical node.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified

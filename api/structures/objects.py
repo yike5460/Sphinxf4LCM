@@ -306,6 +306,10 @@ class InformationElementWithExternalSchema(InformationElement):
     __metaclass__ = SchemaLoader
 
 
+class LogicalNodeData(InformationElementWithExternalSchema):
+    pass
+
+
 class VnfExtCpInfo(InformationElementWithExternalSchema):
     pass
 
@@ -582,15 +586,15 @@ class VnfLifecycleChangeNotification(InformationElementWithExternalSchema):
     pass
 
 
-class ScalingAspect(InformationElementWithExternalSchema):
-    pass
-
-
 class L3AddressData(InformationElementWithExternalSchema):
     pass
 
 
 class AddressData(InformationElementWithExternalSchema):
+    pass
+
+
+class CpProtocolData(InformationElementWithExternalSchema):
     pass
 
 
@@ -623,6 +627,22 @@ class LocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
 
 
 class VduLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkBitrateLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingDelta(InformationElementWithExternalSchema):
+    pass
+
+
+class AspectDeltaDetails(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingAspect(InformationElementWithExternalSchema):
     pass
 
 
@@ -691,6 +711,14 @@ class VirtualLinkProfile(InformationElementWithExternalSchema):
 
 
 class InstantiationLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class ChangeVnfFlavourOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class ChangeExtVnfConnectivityOpConfig(InformationElementWithExternalSchema):
     pass
 
 
