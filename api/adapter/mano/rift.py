@@ -25,6 +25,7 @@ from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, VnfExtCpInfo
 from utils.logging_module import log_entry_exit
+from api.structures.objects import *
 
 LOG = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -187,6 +188,89 @@ class RiftManoAdapter(object):
         vnfd.pop('rw-project-vnfd:meta')
 
         return vnfd
+
+    @log_entry_exit(LOG)
+    def get_vnfd_generic(self, vnfd_id):
+        resource = '/api/config/project/vnfd-catalog/vnfd/%s' % vnfd_id
+
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VNFD %s' % vnfd_id)
+
+        vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
+        vnfd.pop('rw-project-vnfd:meta')
+
+        ###Build empty generic Vnfd object
+        vnfd_generic = Vnfd()
+
+        ###Data mapping
+
+        ##Nested level 0
+        vnfd_generic.vnf_product_name = str(vnfd['name'])
+        vnfd_generic.vnf_product_info_name = str(vnfd.get('name'))
+        vnfd_generic.vnf_product_info_description = str(vnfd.get('description'))
+        vnfd_generic.vnfd_id = str(vnfd['id'])
+        vnfd_generic.vnf_provider = str(vnfd['vendor'])
+        vnfd_generic.vnfd_version = str(vnfd['version'])
+
+        ##Nested levels 1+
+
+        # VDU data
+
+        generic_vdus = []
+        generic_virtual_compute_descs = []
+        generic_virtual_storage_descs = []
+
+        for index, vdu in enumerate(vnfd["vdu"]):
+            generic_vdus = generic_vdus + [Vdu()]
+            generic_virtual_compute_descs = generic_virtual_compute_descs + [VirtualComputeDesc()]
+            generic_virtual_storage_descs = generic_virtual_storage_descs + [VirtualStorageDesc()]
+
+            generic_vdus[index].name = str(vdu['name'])
+            generic_vdus[index].vdu_id = str(vdu['id'])
+
+            generic_vdus[index].sw_image_desc = SwImageDesc()
+            generic_vdus[index].sw_image_desc.name = str(vdu.get('image'))
+
+            cpu_pinning_policy_exists = False
+            if ("guest-epa" in vdu.keys()):
+                generic_virtual_compute_descs[index].virtual_cpu = VirtualCpuData()
+                generic_virtual_compute_descs[index].virtual_cpu.virtual_cpu_pinning = VirtualCpuPinningData()
+                cpu_pinning_policy_exists = True
+                if vdu["guest-epa"]["cpu-pinning-policy"] == "SHARED":
+                    generic_virtual_compute_descs[
+                        index].virtual_cpu.virtual_cpu_pinning.virtual_cpu_pinning_policy = "dynamic"
+                else:
+                    generic_virtual_compute_descs[index].virtual_cpu.num_virtual_cpu = vdu["vm-flavor"]["vcpu-count"]
+                generic_virtual_compute_descs[index].virtual_compute_desc_id = str(vdu["id"])
+
+            generic_virtual_compute_descs[index].virtual_memory = VirtualMemoryData()
+            generic_virtual_compute_descs[index].virtual_memory.virtual_mem_size = int(vdu["vm-flavor"]["memory-mb"])
+
+            generic_virtual_storage_descs[index].size_of_storage = int(vdu["vm-flavor"].get("storage-gb"))
+            generic_virtual_storage_descs[index].id = str(vdu.get("id"))
+
+        # VNFD's external connection points
+
+        generic_vnf_ext_cpds = []
+        for index, connection in enumerate(vnfd["connection-point"]):
+            generic_vnf_ext_cpds = generic_vnf_ext_cpds + [VnfExtCpd()]
+            generic_vnf_ext_cpds[index].cpd_id = str(vnfd["connection-point"][index]["name"])
+
+        ###Populate nested levels of the generic Vnfd object
+
+        vnfd_generic.vdu = generic_vdus
+        vnfd_generic.virtual_compute_desc = generic_virtual_compute_descs
+        vnfd_generic.virtual_storage_desc = generic_virtual_storage_descs
+        vnfd_generic.vnf_ext_cpd = generic_vnf_ext_cpds
+
+        return vnfd_generic
+
+
 
     @log_entry_exit(LOG)
     def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
