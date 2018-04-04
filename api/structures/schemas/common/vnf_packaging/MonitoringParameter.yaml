@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.11.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.11.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2017-02).
 
 MonitoringParameter:
   description: This information element specifies the virtualised resource related performance metrics to be monitored.
@@ -29,3 +29,8 @@ MonitoringParameter:
       description: Defines the virtualised resource performance metric. The VNFM collects the performance metrics defined in this attribute from the VIM using one or more PM Jobs.
       type: String
       required: true
+
+    collection_period:
+      description: An attribute that describes the recommended periodicity at which to collect the performance information. VNFM determines if this parameter is considered. The vendor may provide this information as a guidance for creating PmJobs if needed.
+      type: NotSpecified
+      required: false

@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.10.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.10.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 ScalingAspect:
   description: The ScalingAspect information element describes the details of an aspect used for horizontal scaling.
@@ -39,3 +39,9 @@ ScalingAspect:
       description: The maximum scaleLevel for total number of scaling steps that can be applied w.r.t. this aspect. The value of this attribute corresponds to the number of scaling steps can be applied to this aspect when scaling it from the minimum scale level (i.e. 0) to the maximum scale level defined by this attribute.
       type: PositiveInteger
       required: true
+
+    aspectDeltaDetails:
+      description: A specification of the deltas in terms of number of instances of VNFCs and virtual link bit rates that correspond to the scaling steps of this aspect. A cardinality of zero indicates that this mapping has to be specified in a lifecycle management script or be otherwise known to the VNFM.  The information in this attribute, if provided, shall be consistent with the information provided in the "InstantiationLevel" information element. If this attribute is provided, it shall be provided for all scaling
+      type: AspectDeltaDetails
+      required: false
+

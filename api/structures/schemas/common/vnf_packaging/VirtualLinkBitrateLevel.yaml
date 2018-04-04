@@ -1,0 +1,30 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 7.1.8.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+
+VirtualLinkBitrateLevel:
+  description: The VirtualLinkBitRateLevel information element specifies bitrate requirements applicable to a virtual link instantiated from a particular VnfVirtualLinkDesc.
+  attributes:
+    vnf_virtual_link_desc_id:
+      description: Uniquely identifies a VnfVirtualLinkDesc.
+      type: Identifier
+      required: true
+
+    bit_rate_requirements:
+      description: Bitrate requirements for an instantiation level or bitrate delta for a scaling step.
+      type: LinkBitrateRequirements
+      required: true
+
+
+
+

@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.13 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.13 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 LifeCycleManagementScript:
   description: This clause defines the information elements related to the lifecycle management script for the VNF.
@@ -18,7 +18,14 @@ LifeCycleManagementScript:
     event:
       description: Describes VNF lifecycle event(s) or an external stimulus detected on a VNFM reference point.
       type: List
-      required: true
+      required: false
+      constraints:
+        entry_type: String
+
+    lcm_transition_event:
+      description: Describes the transition VNF lifecycle event(s) that cannot be mapped to any of the enumerated values defined for the event attribute. See note 1.
+      type: List
+      required: false
       constraints:
         entry_type: String
 
@@ -26,3 +33,15 @@ LifeCycleManagementScript:
       description: Includes a VNF LCM script (e.g. written in a DSL as specified in requirement VNF_PACK.LCM.001) triggered to react to one of the events listed in the event attribute.
       type: NotSpecified
       required: true
+
+    script_dsl:
+      description: Defines the domain specific language (i.e. the type) of script that is provided. Types of scripts could include bash, python, etc.
+      type: String
+      required: true
+
+    script_input:
+      description: Array of KVP requirements with the key as the parameter name and the value as the parameter that need to be passed as an input to the script. See note 3.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified

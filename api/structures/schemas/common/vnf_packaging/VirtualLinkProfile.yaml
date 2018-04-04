@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.8.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.8.4 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VirtualLinkProfile:
   description: The VirtualLinkProfile describes additional instantiation data for a given VL used in a DF.
@@ -38,3 +38,13 @@ VirtualLinkProfile:
       required: false
       constraints:
         entry_type: Identifier
+
+    max_bit_rate_requirements:
+      description: Specifies the maximum bitrate requirements for a VL instantiated according to this profile. See clause 7.1.8.6. See note 2.
+      type: LinkBitrateRequirements
+      required: true
+
+    min_bit_rate_requirements:
+      description: Specifies the minimum bitrate requirements for a VL instantiated according to this profile. See clause 7.1.8.6. See note 2.
+      type: LinkBitrateRequirements
+      required: true
