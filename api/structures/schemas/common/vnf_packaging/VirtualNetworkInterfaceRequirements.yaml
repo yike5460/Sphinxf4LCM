@@ -39,4 +39,3 @@ VirtualNetworkInterfaceRequirements:
       description: This references (couples) the CPD with any logical node I/O requirements (for network devices) that may have been created. Linking these attributes is necessary so that so that I/O requirements that need to be articulated at the logical node level can be associated with the network interface requirements associated with the CPD.
       type: Identifier
       required: false
-

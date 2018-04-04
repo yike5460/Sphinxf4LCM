@@ -43,5 +43,3 @@ VduProfile:
       required: false
       constraints:
         entry_type: Identifier
-
-

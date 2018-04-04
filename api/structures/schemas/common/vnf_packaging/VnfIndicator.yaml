@@ -39,4 +39,3 @@ VnfIndicator:
       constraints:
         valid_values: [ VNF, EM, Both ]
         entry_type: String
-

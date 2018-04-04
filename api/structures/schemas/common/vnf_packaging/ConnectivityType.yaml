@@ -27,5 +27,3 @@ ConnectivityType:
       description: Identifies the flow pattern of the connectivity (Line, Tree, Mesh).
       type: String
       required: false
-
-

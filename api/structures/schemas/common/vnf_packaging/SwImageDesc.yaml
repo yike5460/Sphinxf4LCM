@@ -76,4 +76,3 @@ SwImageDesc:
       required: false
       constraints:
         entry_type: String
-

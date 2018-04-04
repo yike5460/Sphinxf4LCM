@@ -50,4 +50,3 @@ VnfVirtualLinkDesc:
       required: false
       constraints:
         entry_type: MonitoringParameter
-

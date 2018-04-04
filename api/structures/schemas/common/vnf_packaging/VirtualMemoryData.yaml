@@ -36,6 +36,3 @@ VirtualMemoryData:
       description: It specifies the memory allocation to be cognisant of the relevant process/core allocation. The cardinality can be 0 during the allocation request, if no particular value is requested.
       type: Boolean
       required: false
-
-
-

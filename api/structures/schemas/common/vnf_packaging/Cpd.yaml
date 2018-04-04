@@ -49,6 +49,3 @@ Cpd:
       description: Information about whether the CP instantiated from this CPD is in Trunk mode (802.1Q or other).
       type: Boolean
       required: true
-
-
-

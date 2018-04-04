@@ -44,4 +44,3 @@ ScalingAspect:
       description: A specification of the deltas in terms of number of instances of VNFCs and virtual link bit rates that correspond to the scaling steps of this aspect. A cardinality of zero indicates that this mapping has to be specified in a lifecycle management script or be otherwise known to the VNFM.  The information in this attribute, if provided, shall be consistent with the information provided in the "InstantiationLevel" information element. If this attribute is provided, it shall be provided for all scaling
       type: AspectDeltaDetails
       required: false
-

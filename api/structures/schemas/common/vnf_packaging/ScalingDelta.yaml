@@ -28,4 +28,3 @@ ScalingDelta:
       required: false
       constraints:
         entry_type: VirtualLinkBitrateLevel
-

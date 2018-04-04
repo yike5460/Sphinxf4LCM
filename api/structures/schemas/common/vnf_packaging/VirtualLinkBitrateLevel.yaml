@@ -24,7 +24,3 @@ VirtualLinkBitrateLevel:
       description: Bitrate requirements for an instantiation level or bitrate delta for a scaling step.
       type: LinkBitrateRequirements
       required: true
-
-
-
-

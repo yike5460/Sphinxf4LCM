@@ -45,4 +45,3 @@ InstantiationLevel:
       required: false
       constraints:
         entry_type: ScaleInfo
-
