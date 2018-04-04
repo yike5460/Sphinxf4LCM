@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.9.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.9.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VirtualMemoryData:
   description: The VirtualMemoryData information element supports the specification of requirements related to virtual memory of a virtual compute resource.
@@ -24,6 +24,13 @@ VirtualMemoryData:
       description: The memory core oversubscription policy in terms of virtual memory to physical memory on the platform. The cardinality can be 0 during the allocation request, if no particular value is requested.
       type: NotSpecified
       required: false
+
+    vdu_mem_requirements:
+      description: Array of key-value pair requirements to the memory for the VDU.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
 
     numa_enabled:
       description: It specifies the memory allocation to be cognisant of the relevant process/core allocation. The cardinality can be 0 during the allocation request, if no particular value is requested.

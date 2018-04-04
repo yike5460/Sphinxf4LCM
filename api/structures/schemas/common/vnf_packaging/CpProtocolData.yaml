@@ -1,0 +1,31 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 7.1.6.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+
+CpProtocolData:
+  description: A CpProtocolData information element describes and associates the protocol layer that a CP uses together with other protocol and connection point information.
+  attributes:
+    associated_layer_protocol:
+      description: One of the values of the attribute layerProtocol of the Cpd IE (refer to clause 7.1.6.3).
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ Ethernet, MPLS, ODU2, IPV4, IPV6, Pseudo-Wire ]
+
+    address_data:
+      description: Provides information on the addresses to be assigned to the CP(s) instantiated from the CPD.
+      type: List
+      required: false
+      constraints:
+        entry_type: AddressData
