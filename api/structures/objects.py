@@ -752,7 +752,11 @@ class Vnfd(InformationElementWithExternalSchema):
 
 class SoftwareImageInformation(InformationElementWithExternalSchema):
     pass
-  
-  
+
+
 class OperateVnfData(InformationElementWithExternalSchema):
+    pass
+
+
+class NsdInfo(InformationElementWithExternalSchema):
     pass

@@ -1,0 +1,97 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.2.2 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+
+NsdInfo:
+  description: This information element provides the details of an NsdInfo information element.
+  attributes:
+    nsd_info_id:
+      description: Identifier of the NSD information object.
+      type: Identifier
+      required: true
+
+    nsd_id:
+      description: Identifier of the on-boarded NSD.
+      type: Identifier
+      required: false
+
+    name:
+      description: Name of the on-boarded NSD.
+      type: String
+      required: false
+
+    version:
+      description: Version of the on-boarded NSD.
+      type: Version
+      required: false
+
+    designer:
+      description: Designer of the on-boarded NSD.
+      type: String
+      required: false
+
+    nsd:
+      description: Reference to the on-boarded NSD details, e.g. URL to the on-boarded NSD.
+      type: Identifier
+      required: false
+
+    vnf_pkg_info_id:
+      description: Identifies the VnfPkgInfo objects for the VNFD referenced by the on-boarded NSD.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    pnfd_info_id:
+      description: Identifies the PNFD information object for the PNFD referenced by the on-boarded NSD.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    nested_nsd_info_id:
+      description: Identifies the NSD information object for the nested NSD referenced by the on-boarded NSD.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    onboarding_state:
+      description: On-boarding state of the NSD.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ CREATED, UPLOADING, PROCESSING, ONBOARDED ]
+
+    operational_state:
+      description: Operational state of the NSD.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ENABLED, DISABLED ]
+
+    usage_state:
+      description: Usage state of the NSD.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ IN_USE, NOT_IN_USE ]
+
+    user_defined_data:
+      description: User defined data for the NSD.
+      type: Mapping
+      required: false
+
