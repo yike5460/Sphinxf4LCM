@@ -94,4 +94,3 @@ NsdInfo:
       description: User defined data for the NSD.
       type: Mapping
       required: false
-
