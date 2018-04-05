@@ -21,7 +21,8 @@ from ncclient import manager, NCClientError
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, NsInfo
+from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
+    NsInfo, NsdInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -215,6 +216,15 @@ NSR_DELETE_TEMPLATE = '''
     </nfvo>
 </config>'''
 
+NSD_DELETE_TEMPLATE = '''
+<config>
+    <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
+        <nsd xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete">
+            <id>%(nsd_id)s</id>
+        </nsd>
+    </nfvo>
+</config>'''
+
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
@@ -250,6 +260,7 @@ class CiscoNFVManoAdapter(object):
         self.ns_nsd_mapping = dict()
         self.lifecycle_operation_occurrence_ids = dict()
         self.vnf_instance_id_metadata = dict()
+        self.nsd_info_ids = dict()
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -1034,15 +1045,15 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def build_day0_config(self, day0_config):
-        day0_config__xml = ''
+        day0_config_xml = ''
         if 'destination' in day0_config and 'url' in day0_config:
             day0_config_template_values = {
                 'day0_dest': day0_config['destination'],
                 'day0_url': day0_config['url']
             }
-            day0_config__xml = DAY0_TEMPLATE % day0_config_template_values
+            day0_config_xml = DAY0_TEMPLATE % day0_config_template_values
 
-        return day0_config__xml
+        return day0_config_xml
 
     @log_entry_exit(LOG)
     def build_vdu_list(self, vdu_params):
@@ -2044,3 +2055,98 @@ class CiscoNFVManoAdapter(object):
                 return False
 
         return True
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        # Generating a UUID
+        nsd_info_id = str(uuid.uuid4())
+
+        # Populate the NsdInfo object
+        nsd_info = NsdInfo()
+        nsd_info.nsd_info_id = nsd_info_id
+        nsd_info.user_defined_data = user_defined_data
+
+        # Store the mapping between the NsdInfo object and its UUID
+        self.nsd_info_ids[nsd_info_id] = nsd_info
+
+        return nsd_info_id
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        nsd_info_id = filter['nsd_info_id']
+        return self.nsd_info_ids.get(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd_xml):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise CiscoNFVManoAdapter('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Uploading the NSD to the NSO
+        try:
+            netconf_reply = self.nso.edit_config(target='running', config=nsd_xml)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError(e.message)
+
+        if '<ok/>' not in netconf_reply.xml:
+            raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+        LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+        # Retrieving details about the on-boarded NSD
+        nsd_xml = etree.fromstring(nsd_xml)
+        nsd_id = nsd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd/'
+                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
+
+        # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
+        nsd_info.nsd_id = nsd_id
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Get the NSD corresponding to the provided nsd_info_id
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is None:
+            raise CiscoNFVManoAdapterError('NsdInfo object with ID %s does not have the NsdId attribute set'
+                                           % nsd_info_id)
+        nsd = self.get_nsd(nsd_id)
+
+        return nsd
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id_list):
+        for nsd_info_id in nsd_info_id_list:
+            # Get the NsdInfo object corresponding to this nsd_info_id
+            nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+            if nsd_info is None:
+                raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+            # If the NsdInfo object holds information about an NSD, delete it
+            nsd_id = nsd_info.nsd_id
+            if nsd_id is not None:
+                # Build the NSD_DELETE_TEMPLATE
+                nsd_template_values = {'nsd_id': nsd_id}
+                nsd_delete_xml = NSD_DELETE_TEMPLATE % nsd_template_values
+
+                # Delete the NSD from the NSO
+                try:
+                    netconf_reply = self.nso.edit_config(target='running', config=nsd_delete_xml)
+                except NCClientError as e:
+                    LOG.exception(e)
+                    raise CiscoNFVManoAdapterError(e.message)
+
+                if '<ok/>' not in netconf_reply.xml:
+                    raise CiscoNFVManoAdapterError('NSO replied with an error')
+
+                LOG.debug('NSO reply: %s' % netconf_reply.xml)
+
+            # Delete the NsdInfo object
+            self.nsd_info_ids.pop(nsd_info_id)
+
+        return nsd_info_id_list
