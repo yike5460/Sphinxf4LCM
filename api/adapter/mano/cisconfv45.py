@@ -2064,7 +2064,6 @@ class CiscoNFVManoAdapter(object):
         # Populate the NsdInfo object
         nsd_info = NsdInfo()
         nsd_info.nsd_info_id = nsd_info_id
-        nsd_info.user_defined_data = user_defined_data
 
         # Store the mapping between the NsdInfo object and its UUID
         self.nsd_info_ids[nsd_info_id] = nsd_info
