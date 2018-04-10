@@ -29,7 +29,7 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
     """
 
     REQUIRED_APIS = ('mano', )
-    REQUIRED_ELEMENTS = ('nsd', 'nsd_params')
+    REQUIRED_ELEMENTS = ('nsd', )
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -38,7 +38,7 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
         # 1. Trigger the on-boarding of the NSD on MANO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Creating the NSD information object')
-        nsd_info_id = self.mano.nsd_info_create(self.tc_input['nsd_params'])
+        nsd_info_id = self.mano.nsd_info_create(self.tc_input.get('nsd_params'))
 
         LOG.info('Triggering the on-boarding of the NSD on MANO')
         self.mano.nsd_upload(nsd_info_id, self.tc_input['nsd'])
@@ -49,8 +49,7 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
         # 2. Verify that NSD is successfully on-boarded in MANO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NSD is successfully on-boarded in MANO')
-        nsd = self.mano.nsd_fetch(nsd_info_id)
-        # TODO: Add NSD to tc_result
+        self.tc_result['nsd'] = self.mano.nsd_fetch(nsd_info_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 3. Verify that all VLDs and VNFFGDs referenced in the NSD have been successfully on-boarded in MANO
