@@ -167,7 +167,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get NSD %s' % nsd_id)
 
         nsd = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd'][0]
-        nsd.pop('rw-project-nsd:meta')
+        nsd.pop('rw-project-nsd:meta', None)
 
         return nsd
 
@@ -184,7 +184,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get VNFD %s' % vnfd_id)
 
         vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
-        vnfd.pop('rw-project-vnfd:meta')
+        vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
 
