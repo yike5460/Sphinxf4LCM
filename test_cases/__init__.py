@@ -72,6 +72,7 @@ class Step(object):
         self.index = self.generate_index()
         self.name = name
         self.description = description
+        self.status = 'SKIP'
 
     def __call__(self, run_func):
         self.run_func = run_func
@@ -123,6 +124,7 @@ class TestCase(object):
         self.tc_result['scaling_to_level'] = dict()
         self.tc_result['scaling_from_level'] = dict()
         self.tc_result['timestamps'] = collections.OrderedDict()
+        self.tc_result['steps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.em = None
@@ -177,6 +179,13 @@ class TestCase(object):
             self._LOG.info('Entering step %s' % step.name)
             try:
                 step.run_func(self)
+                step.status = 'PASS'
+            except TestRunError as e:
+                step.status = 'FAIL'
+                raise e
+            except Exception as e:
+                step.status = 'ERROR'
+                raise e
             finally:
                 self._LOG.info('Exiting step %s' % step.name)
 
@@ -229,6 +238,16 @@ class TestCase(object):
         """
         self.tc_result['timestamps'].update(self.time_record.dump_data())
 
+    def steps_summary(self):
+        """
+            This method creates a dict containing the summary of steps executions and stores it in tc_result
+        """
+        for step in self.steps:
+            self.tc_result['steps'][step.name] = {
+                'description': step.description,
+                'status': step.status
+            }
+
     def execute(self):
         """
         This method implements the test case execution logic.
@@ -272,5 +291,6 @@ class TestCase(object):
                 self._LOG.exception(e)
             finally:
                 self.collect_timestamps()
+                self.steps_summary()
                 self._LOG.info('RESULT: %s' % self.tc_result['overall_status'])
                 return self.tc_result
