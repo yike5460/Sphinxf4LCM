@@ -2076,15 +2076,15 @@ class CiscoNFVManoAdapter(object):
         return self.nsd_info_ids.get(nsd_info_id)
 
     @log_entry_exit(LOG)
-    def nsd_upload(self, nsd_info_id, nsd_xml):
+    def nsd_upload(self, nsd_info_id, nsd):
         # Get the NsdInfo object corresponding to the provided nsd_info_id
         nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
         if nsd_info is None:
-            raise CiscoNFVManoAdapter('No NsdInfo object with ID %s' % nsd_info_id)
+            raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
         # Uploading the NSD to the NSO
         try:
-            netconf_reply = self.nso.edit_config(target='running', config=nsd_xml)
+            netconf_reply = self.nso.edit_config(target='running', config=nsd)
         except NCClientError as e:
             LOG.exception(e)
             raise CiscoNFVManoAdapterError(e.message)
@@ -2095,7 +2095,7 @@ class CiscoNFVManoAdapter(object):
         LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
         # Retrieving details about the on-boarded NSD
-        nsd_xml = etree.fromstring(nsd_xml)
+        nsd_xml = etree.fromstring(nsd)
         nsd_id = nsd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd/'
                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
 
