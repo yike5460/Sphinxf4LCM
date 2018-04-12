@@ -43,7 +43,7 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
         LOG.info('Triggering the on-boarding of the NSD on MANO')
         self.mano.nsd_upload(nsd_info_id, self.tc_input['nsd'])
 
-        self.register_for_cleanup(index=10, function_reference=self.mano.nsd_delete, nsd_info_id=[nsd_info_id])
+        self.register_for_cleanup(index=10, function_reference=self.mano.nsd_delete, nsd_info_id=nsd_info_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that NSD is successfully on-boarded in MANO
