@@ -2119,33 +2119,32 @@ class CiscoNFVManoAdapter(object):
         return nsd
 
     @log_entry_exit(LOG)
-    def nsd_delete(self, nsd_info_id_list):
-        for nsd_info_id in nsd_info_id_list:
-            # Get the NsdInfo object corresponding to this nsd_info_id
-            nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
-            if nsd_info is None:
-                raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+    def nsd_delete(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
-            # If the NsdInfo object holds information about an NSD, delete it
-            nsd_id = nsd_info.nsd_id
-            if nsd_id is not None:
-                # Build the NSD_DELETE_TEMPLATE
-                nsd_template_values = {'nsd_id': nsd_id}
-                nsd_delete_xml = NSD_DELETE_TEMPLATE % nsd_template_values
+        # If the NsdInfo object holds information about an NSD, delete it
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is not None:
+            # Build the NSD_DELETE_TEMPLATE
+            nsd_template_values = {'nsd_id': nsd_id}
+            nsd_delete_xml = NSD_DELETE_TEMPLATE % nsd_template_values
 
-                # Delete the NSD from the NSO
-                try:
-                    netconf_reply = self.nso.edit_config(target='running', config=nsd_delete_xml)
-                except NCClientError as e:
-                    LOG.exception(e)
-                    raise CiscoNFVManoAdapterError(e.message)
+            # Delete the NSD from the NSO
+            try:
+                netconf_reply = self.nso.edit_config(target='running', config=nsd_delete_xml)
+            except NCClientError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError(e.message)
 
-                if '<ok/>' not in netconf_reply.xml:
-                    raise CiscoNFVManoAdapterError('NSO replied with an error')
+            if '<ok/>' not in netconf_reply.xml:
+                raise CiscoNFVManoAdapterError('NSO replied with an error')
 
-                LOG.debug('NSO reply: %s' % netconf_reply.xml)
+            LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
-            # Delete the NsdInfo object
-            self.nsd_info_ids.pop(nsd_info_id)
+        # Delete the NsdInfo object
+        self.nsd_info_ids.pop(nsd_info_id)
 
-        return nsd_info_id_list
+        return nsd_info_id
