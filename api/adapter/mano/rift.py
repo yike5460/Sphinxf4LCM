@@ -385,46 +385,63 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
-        validation_result = True
-
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_resources = {}
-        for vdu in vnfd['vdu']:
-            expected_vdu_resources[vdu['id']] = {
-                'vcpu-count': vdu['vm-flavor']['vcpu-count'],
-                'memory-mb': vdu['vm-flavor']['memory-mb'],
-                'storage-gb': vdu['vm-flavor']['storage-gb'],
-                'nic-count': len(vdu['interface'])
-            }
-
-        # TODO: if flavor exists, check flavor in VIM
+        resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_info.vnf_instance_id
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VNFR data for VNF %s' % vnf_info.vnf_instance_id)
+        vnfr = json_content['rw-project:project']['vnfr:vnfr-catalog']['vnfr'][0]
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-            vdu_id = vnfc_resource_info.vdu_id
 
             # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
 
-            resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            # Get the name of the flavor associated to this VNFC from Nova
+            server_id = vnfc_resource_info.compute_resource.resource_id
+            server_details = vim.server_get(server_id)
+            server_flavor_id = server_details['flavor_id']
+            flavor_details = vim.flavor_get(server_flavor_id)
+            flavor_name_nova = str(flavor_details['name'])
 
-            actual_vdu_resources = {
-                'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
-                'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
-                'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
-                'nic-count': len(virtual_compute.virtual_network_interface)
-            }
+            # Get the name of the flavor associated to this VNFC from the VNFR
+            vdu_id = vnfc_resource_info.vdu_id
+            flavor_name_vnfr = ''
+            for vdur in vnfr['vdur']:
+                if vdur['vdu-id-ref'] == vdu_id:
+                    flavor_name_vnfr = str(vdur['vm-flavor']['rw-vnfr:vm-flavor-name'])
+                    break
 
-            for resource_name, actual_value in actual_vdu_resources.items():
-                expected_value = expected_vdu_resources[vdu_id][resource_name]
-                if actual_value != expected_value:
-                    LOG.debug('Unexpected value for %s: %s. Expected: %s'
-                              % (resource_name, actual_value, expected_value))
-                    validation_result = False
+            # Check that the the two flavor names are the same
+            if flavor_name_nova != flavor_name_vnfr:
+                return False
 
-        return validation_result
+            # Get the number of ports reported by Nova for the current VNFC
+            port_dict = vim.port_list(device_id=server_id)
+            for port_list in port_dict:
+                try:
+                    port_number_nova = len(port_list['ports'])
+                except KeyError:
+                    raise RiftManoAdapterError(
+                        'Unable to iterate the port list dict returned by Nova for server with ID %s' % server_id)
+
+            # Get the number of ports in the VNFD for the VDU type that corresponds to the current VNFC type
+            port_number_vnfd = 0
+            for vdu in vnfd['vdu']:
+                if str(vdu['name']) == vdu_id:
+                    port_number_vnfd = len(vdu['interface'])
+                    break
+            if port_number_nova != port_number_vnfd:
+                return False
+            # TODO: Check NIC type
+
+        return True
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
