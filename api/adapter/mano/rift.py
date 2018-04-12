@@ -23,7 +23,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, VnfExtCpInfo
+from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, \
+    VnfExtCpInfo, NsdInfo
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class RiftManoAdapter(object):
         self.session.verify = False
 
         self.nsr_metadata = {}
+        self.nsd_info_ids = dict()
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -636,3 +638,85 @@ class RiftManoAdapter(object):
                 validation_result = False
 
         return validation_result
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        # Generating a UUID
+        nsd_info_id = str(uuid.uuid4())
+
+        # Populate the NsdInfo object
+        nsd_info = NsdInfo()
+        nsd_info.nsd_info_id = nsd_info_id
+
+        # Store the mapping between the NsdInfo object and its UUID
+        self.nsd_info_ids[nsd_info_id] = nsd_info
+
+        return nsd_info_id
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        nsd_info_id = filter['nsd_info_id']
+        return self.nsd_info_ids.get(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Uploading the NSD
+        resource = '/api/config/project/%s/nsd-catalog' % self.project
+        request_body = {'nsd': [nsd]}
+        try:
+            response = self.session.post(url=self.url + resource, json=request_body)
+            assert response.status_code == 201
+            assert 'ok' in response.json().get('rpc-reply', {})
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to upload the NSD')
+
+        # Retrieving details about the on-boarded NSD
+        nsd_id = nsd['id']
+
+        # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
+        nsd_info.nsd_id = nsd_id
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Get the NSD corresponding to the provided nsd_info_id
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is None:
+            raise RiftManoAdapterError('NsdInfo object with ID %s does not have the NsdId attribute set' % nsd_info_id)
+        nsd = self.get_nsd(nsd_id)
+
+        return nsd
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # If the NsdInfo object holds information about an NSD, delete it
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is not None:
+            resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
+
+            try:
+                response = self.session.delete(url=self.url + resource)
+                assert response.status_code == 201
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to deleted NSD %s' % nsd_id)
+
+        # Delete the NsdInfo object
+        self.nsd_info_ids.pop(nsd_info_id)
+
+        return nsd_info_id
