@@ -698,26 +698,25 @@ class RiftManoAdapter(object):
         return nsd
 
     @log_entry_exit(LOG)
-    def nsd_delete(self, nsd_info_id_list):
-        for nsd_info_id in nsd_info_id_list:
-            # Get the NsdInfo object corresponding to this nsd_info_id
-            nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
-            if nsd_info is None:
-                raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+    def nsd_delete(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
-            # If the NsdInfo object holds information about an NSD, delete it
-            nsd_id = nsd_info.nsd_id
-            if nsd_id is not None:
-                resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
+        # If the NsdInfo object holds information about an NSD, delete it
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is not None:
+            resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
 
-                try:
-                    response = self.session.delete(url=self.url + resource)
-                    assert response.status_code == 201
-                except Exception as e:
-                    LOG.exception(e)
-                    raise RiftManoAdapterError('Unable to deleted NSD %s' % nsd_id)
+            try:
+                response = self.session.delete(url=self.url + resource)
+                assert response.status_code == 201
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to deleted NSD %s' % nsd_id)
 
-            # Delete the NsdInfo object
-            self.nsd_info_ids.pop(nsd_info_id)
+        # Delete the NsdInfo object
+        self.nsd_info_ids.pop(nsd_info_id)
 
-        return nsd_info_id_list
+        return nsd_info_id
