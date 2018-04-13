@@ -2079,7 +2079,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def nsd_upload(self, nsd_info_id, nsd):
         # Get the NsdInfo object corresponding to the provided nsd_info_id
-        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
         if nsd_info is None:
             raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
@@ -2113,7 +2113,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def nsd_fetch(self, nsd_info_id):
         # Get the NsdInfo object corresponding to the provided nsd_info_id
-        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
         if nsd_info is None:
             raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
@@ -2129,7 +2129,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def nsd_delete(self, nsd_info_id):
         # Get the NsdInfo object corresponding to the provided nsd_info_id
-        nsd_info = self.nsd_info_query(filter={'nsd_info_id': nsd_info_id})
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
         if nsd_info is None:
             raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
