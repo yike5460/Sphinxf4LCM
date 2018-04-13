@@ -402,18 +402,26 @@ class RiftManoAdapter(object):
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
-            resource_id = vnfc_resource_info.compute_resource.resource_id
+            # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
-            server_details = vim.server_get(resource_id)
-            server_flavor_id = server_details['flavor_id']
-            flavor_details = vim.flavor_get(server_flavor_id)
-            flavor_name_nova = str(flavor_details['name'])
+
+            resource_id = vnfc_resource_info.compute_resource.resource_id
+
+            # Get the flavor name from the VNFD
             flavor_name_vnfd = expected_vdu_resources[vdu_id]['vm-flavor-name']
-            if flavor_name_vnfd:
-                if flavor_name_nova != flavor_name_vnfd:
-                            return False
+            if flavor_name_vnfd is not None:
+
+                # Get the flavor name from the VIM
+                server_details = vim.server_get(resource_id)
+                server_flavor_id = server_details['flavor_id']
+                flavor_details = vim.flavor_get(server_flavor_id)
+                flavor_name_nova = str(flavor_details['name'])
+
+                # Compare the flavor name in the VNFD to the flavor name of the VM
+                if flavor_name_vnfd is not None:
+                    if flavor_name_nova != flavor_name_vnfd:
+                        return False
             else:
-                # Get VIM adapter object
                 virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
                 actual_vdu_resources = {
