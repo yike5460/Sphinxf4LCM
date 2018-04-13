@@ -393,9 +393,9 @@ class RiftManoAdapter(object):
         expected_vdu_resources = {}
         for vdu in vnfd['vdu']:
             expected_vdu_resources[vdu['id']] = {
-                'vcpu-count': vdu['vm-flavor']['vcpu-count'],
-                'memory-mb': vdu['vm-flavor']['memory-mb'],
-                'storage-gb': vdu['vm-flavor']['storage-gb'],
+                'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
+                'memory-mb': vdu['vm-flavor'].get('memory-mb'),
+                'storage-gb': vdu['vm-flavor'].get('storage-gb'),
                 'nic-count': len(vdu['interface']),
                 'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
             }
