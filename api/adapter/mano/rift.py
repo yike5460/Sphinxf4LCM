@@ -390,13 +390,9 @@ class RiftManoAdapter(object):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_resources = {}
+        expected_vdu_flavor = {}
         for vdu in vnfd['vdu']:
-            expected_vdu_resources[vdu['id']] = {
-                'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
-                'memory-mb': vdu['vm-flavor'].get('memory-mb'),
-                'storage-gb': vdu['vm-flavor'].get('storage-gb'),
-                'nic-count': len(vdu['interface']),
+            expected_vdu_flavor[vdu['id']] = {
                 'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
             }
 
@@ -408,7 +404,7 @@ class RiftManoAdapter(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
 
             # Get the flavor name from the VNFD
-            flavor_name_vnfd = expected_vdu_resources[vdu_id]['vm-flavor-name']
+            flavor_name_vnfd = expected_vdu_flavor[vdu_id]['vm-flavor-name']
             if flavor_name_vnfd is not None:
 
                 # Get the flavor name from the VIM
@@ -418,11 +414,22 @@ class RiftManoAdapter(object):
                 flavor_name_nova = str(flavor_details['name'])
 
                 # Compare the flavor name in the VNFD to the flavor name of the VM
-                if flavor_name_vnfd is not None:
-                    if flavor_name_nova != flavor_name_vnfd:
-                        return False
+                if flavor_name_nova != flavor_name_vnfd:
+                    validation_result = False
             else:
                 virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+                # Get expected VDU vresources as per VNFD
+                expected_vdu_resources = dict()
+                for vdu in vnfd['vdu']:
+                    if vdu['id'] == vdu_id:
+                        expected_vdu_resources = {
+                            'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
+                            'memory-mb': vdu['vm-flavor'].get('memory-mb'),
+                            'storage-gb': vdu['vm-flavor'].get('storage-gb'),
+                            'nic-count': len(vdu['interface']),
+                        }
+                        break
 
                 actual_vdu_resources = {
                     'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
@@ -432,7 +439,7 @@ class RiftManoAdapter(object):
                 }
 
                 for resource_name, actual_value in actual_vdu_resources.items():
-                    expected_value = expected_vdu_resources[vdu_id][resource_name]
+                    expected_value = expected_vdu_resources[resource_name]
                     if actual_value != expected_value:
                         LOG.debug('Unexpected value for %s: %s. Expected: %s'
                                   % (resource_name, actual_value, expected_value))
