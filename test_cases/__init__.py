@@ -61,18 +61,17 @@ class TestRequirementsError(TestExecutionError):
 
 
 class Step(object):
-    index = 0
+    global_index = 0
 
     @classmethod
     def generate_index(cls):
-        cls.index += 1
-        return cls.index
+        cls.global_index += 1
+        return cls.global_index
 
     def __init__(self, name, description):
         self.index = self.generate_index()
         self.name = name
         self.description = description
-        self.status = 'SKIP'
 
     def __call__(self, run_func):
         self.run_func = run_func
@@ -94,6 +93,12 @@ class TestMeta(type):
                 if isinstance(attr_value, Step):
                     steps.append(attr_value)
             steps.sort(key=lambda x: x.index)
+
+            normalized_index = 1
+            for step in steps:
+                step.index = normalized_index
+                normalized_index += 1
+
             class_dict['steps'] = steps
 
         return type.__new__(meta, name, bases, class_dict)
@@ -171,6 +176,14 @@ class TestCase(object):
         for event in self.TESTCASE_EVENTS:
             self.tc_result['events'][event] = dict()
 
+    def initialize_steps(self):
+        for step in self.steps:
+            self.tc_result['steps'][step.index] = {
+                'name': step.name,
+                'description': step.description,
+                'status': 'SKIP'
+            }
+
     def setup(self):
         pass
 
@@ -179,14 +192,15 @@ class TestCase(object):
             self._LOG.info('Entering step %s' % step.name)
             try:
                 step.run_func(self)
-                step.status = 'PASS'
+                step_status = 'PASS'
             except TestRunError as e:
-                step.status = 'FAIL'
+                step_status = 'FAIL'
                 raise e
             except Exception as e:
-                step.status = 'ERROR'
+                step_status = 'ERROR'
                 raise e
             finally:
+                self.tc_result['steps'][step.index]['status'] = step_status
                 self._LOG.info('Exiting step %s' % step.name)
 
     def register_for_cleanup(self, index, function_reference, *args, **kwargs):
@@ -238,16 +252,6 @@ class TestCase(object):
         """
         self.tc_result['timestamps'].update(self.time_record.dump_data())
 
-    def steps_summary(self):
-        """
-            This method creates a dict containing the summary of steps executions and stores it in tc_result
-        """
-        for step in self.steps:
-            self.tc_result['steps'][step.name] = {
-                'description': step.description,
-                'status': step.status
-            }
-
     def execute(self):
         """
         This method implements the test case execution logic.
@@ -256,6 +260,7 @@ class TestCase(object):
             self.check_requirements()
             self.build_apis()
             self.initialize_events()
+            self.initialize_steps()
             self.setup()
             self.run()
         except TestRequirementsError as e:
@@ -291,6 +296,5 @@ class TestCase(object):
                 self._LOG.exception(e)
             finally:
                 self.collect_timestamps()
-                self.steps_summary()
                 self._LOG.info('RESULT: %s' % self.tc_result['overall_status'])
                 return self.tc_result
