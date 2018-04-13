@@ -38,7 +38,7 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
         # 1. Trigger the on-boarding of the NSD on MANO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Creating the NSD information object')
-        nsd_info_id = self.mano.nsd_info_create(self.tc_input.get('nsd_params'))
+        nsd_info_id = self.mano.nsd_info_create(self.tc_input.get('nsd_params', {}))
 
         LOG.info('Triggering the on-boarding of the NSD on MANO')
         self.mano.nsd_upload(nsd_info_id, self.tc_input['nsd'])

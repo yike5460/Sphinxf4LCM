@@ -647,6 +647,7 @@ class RiftManoAdapter(object):
         # Populate the NsdInfo object
         nsd_info = NsdInfo()
         nsd_info.nsd_info_id = nsd_info_id
+        nsd_info.user_defined_data = user_defined_data
 
         # Store the mapping between the NsdInfo object and its UUID
         self.nsd_info_ids[nsd_info_id] = nsd_info
@@ -666,8 +667,15 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
         # Uploading the NSD
+        if nsd is not None:
+            raise NotImplementedError('Rift does not support ETSI NSD format')
+
+        vendor_nsd = nsd_info.user_defined_data.get('vendor_nsd')
+        if vendor_nsd is None:
+            raise RiftManoAdapterError('Vendor NSD not present in user_defined_data')
+
         resource = '/api/config/project/%s/nsd-catalog' % self.project
-        request_body = {'nsd': [nsd]}
+        request_body = {'nsd': [vendor_nsd]}
         try:
             response = self.session.post(url=self.url + resource, json=request_body)
             assert response.status_code == 201
@@ -677,7 +685,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to upload the NSD')
 
         # Retrieving details about the on-boarded NSD
-        nsd_id = nsd['id']
+        nsd_id = vendor_nsd['id']
 
         # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
         nsd_info.nsd_id = nsd_id
