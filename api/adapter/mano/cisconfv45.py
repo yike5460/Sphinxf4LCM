@@ -2064,6 +2064,7 @@ class CiscoNFVManoAdapter(object):
         # Populate the NsdInfo object
         nsd_info = NsdInfo()
         nsd_info.nsd_info_id = nsd_info_id
+        nsd_info.user_defined_data = user_defined_data
 
         # Store the mapping between the NsdInfo object and its UUID
         self.nsd_info_ids[nsd_info_id] = nsd_info
@@ -2082,9 +2083,16 @@ class CiscoNFVManoAdapter(object):
         if nsd_info is None:
             raise CiscoNFVManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
 
-        # Uploading the NSD to the NSO
+        # Uploading the NSD
+        if nsd is not None:
+            raise NotImplementedError('Cisco NSO 4.5 does not support ETSI NSD format')
+
+        vendor_nsd = nsd_info.user_defined_data.get('vendor_nsd')
+        if vendor_nsd is None:
+            raise CiscoNFVManoAdapterError('Vendor NSD not present in the user_defined_data')
+
         try:
-            netconf_reply = self.nso.edit_config(target='running', config=nsd)
+            netconf_reply = self.nso.edit_config(target='running', config=vendor_nsd)
         except NCClientError as e:
             LOG.exception(e)
             raise CiscoNFVManoAdapterError(e.message)
@@ -2095,7 +2103,7 @@ class CiscoNFVManoAdapter(object):
         LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
         # Retrieving details about the on-boarded NSD
-        nsd_xml = etree.fromstring(nsd)
+        nsd_xml = etree.fromstring(vendor_nsd)
         nsd_id = nsd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd/'
                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
 
