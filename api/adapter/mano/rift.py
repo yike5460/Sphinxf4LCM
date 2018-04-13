@@ -714,7 +714,16 @@ class RiftManoAdapter(object):
                 assert response.status_code == 201
             except Exception as e:
                 LOG.exception(e)
-                raise RiftManoAdapterError('Unable to deleted NSD %s' % nsd_id)
+                raise RiftManoAdapterError('Unable to delete NSD %s' % nsd_id)
+
+            # Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking
+            # that the NSD has been deleted.
+            try:
+                self.get_nsd(nsd_id)
+            except RiftManoAdapterError:
+                LOG.debug('NSD %s has been deleted' % nsd_id)
+            else:
+                raise RiftManoAdapterError('NSD %s has not been deleted' % nsd_id)
 
         # Delete the NsdInfo object
         self.nsd_info_ids.pop(nsd_info_id)
