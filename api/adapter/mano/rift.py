@@ -390,10 +390,17 @@ class RiftManoAdapter(object):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_flavor = {}
+        expected_vdu_flavor = dict()
+        expected_vdu_resources = dict()
         for vdu in vnfd['vdu']:
             expected_vdu_flavor[vdu['id']] = {
                 'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
+            }
+            expected_vdu_resources[vdu['id']] = {
+                'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
+                'memory-mb': vdu['vm-flavor'].get('memory-mb'),
+                'storage-gb': vdu['vm-flavor'].get('storage-gb'),
+                'nic-count': len(vdu['interface']),
             }
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
@@ -419,18 +426,6 @@ class RiftManoAdapter(object):
             else:
                 virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-                # Get expected VDU vresources as per VNFD
-                expected_vdu_resources = dict()
-                for vdu in vnfd['vdu']:
-                    if vdu['id'] == vdu_id:
-                        expected_vdu_resources = {
-                            'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
-                            'memory-mb': vdu['vm-flavor'].get('memory-mb'),
-                            'storage-gb': vdu['vm-flavor'].get('storage-gb'),
-                            'nic-count': len(vdu['interface']),
-                        }
-                        break
-
                 actual_vdu_resources = {
                     'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
                     'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
@@ -439,7 +434,7 @@ class RiftManoAdapter(object):
                 }
 
                 for resource_name, actual_value in actual_vdu_resources.items():
-                    expected_value = expected_vdu_resources[resource_name]
+                    expected_value = expected_vdu_resources[vdu_id][resource_name]
                     if actual_value != expected_value:
                         LOG.debug('Unexpected value for %s: %s. Expected: %s'
                                   % (resource_name, actual_value, expected_value))
