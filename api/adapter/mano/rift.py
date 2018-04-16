@@ -400,7 +400,7 @@ class RiftManoAdapter(object):
                 'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
                 'memory-mb': vdu['vm-flavor'].get('memory-mb'),
                 'storage-gb': vdu['vm-flavor'].get('storage-gb'),
-                'nic-count': len(vdu['interface']),
+                'nic-count': len(vdu['interface'])
             }
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
