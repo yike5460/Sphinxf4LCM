@@ -111,5 +111,13 @@
   "VnfIndicator":                             "schemas/common/vnf_packaging/VnfIndicator.yaml",
   "VnfInfoModifiableAttributes":              "schemas/common/vnf_packaging/VnfInfoModifiableAttributes.yaml",
   "VnfLcmOperationsConfiguration":            "schemas/common/vnf_packaging/VnfLcmOperationsConfiguration.yaml",
-  "VnfVirtualLinkDesc":                       "schemas/common/vnf_packaging/VnfVirtualLinkDesc.yaml"
+  "VnfVirtualLinkDesc":                       "schemas/common/vnf_packaging/VnfVirtualLinkDesc.yaml",
+  "LogicalNodeData":                          "schemas/common/vnf_packaging/LogicalNodeData.yaml",
+  "ScalingDelta":                             "schemas/common/vnf_packaging/ScalingDelta.yaml",
+  "VirtualLinkBitrateLevel":                  "schemas/common/vnf_packaging/VirtualLinkBitrateLevel.yaml",
+  "CpProtocolData":                           "schemas/common/vnf_packaging/CpProtocolData.yaml",
+  "ScaleInfo":                                "schemas/common/vnf_packaging/ScaleInfo.yaml",
+  "ChangeExtVnfConnectivityOpConfig":         "schemas/common/vnf_packaging/ChangeExtVnfConnectivityOpConfig.yaml",
+  "ChangeVnfFlavourOpConfig":                 "schemas/common/vnf_packaging/ChangeVnfFlavourOpConfig.yaml",
+  "AspectDeltaDetails":                       "schemas/common/vnf_packaging/AspectDeltaDetails.yaml"
 }

@@ -57,9 +57,6 @@ class TC_VNF_STATE_TERM_003(TestCase):
                                                  localization_language=self.tc_input.get('localization_language'),
                                                  additional_param=self.tc_input['mano'].get('instantiation_params'))
 
-        if self.vnf_instance_id is None:
-            raise TestRunError('VNF instantiation operation failed')
-
         self.time_record.END('instantiate_vnf')
 
         self.tc_result['events']['instantiate_vnf']['duration'] = self.time_record.duration('instantiate_vnf')
@@ -149,15 +146,23 @@ class TC_VNF_STATE_TERM_003(TestCase):
         self.unregister_from_cleanup(index=20)
         self.unregister_from_cleanup(index=10)
 
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_delete_id,
+                                  vnf_instance_id=self.vnf_instance_id)
+
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate VNF is terminated and all resources have been released
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating VNF is terminated and all resources have been released')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                               'additional_param': self.tc_input['mano'].get('query_params')})
-        if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
-            raise TestRunError('Unexpected status for terminating VNF operation',
-                               err_details='VNF terminate operation failed')
+        LOG.info('Validating VNF is terminated')
+        vnf_info_final = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                                     'additional_param': self.tc_input['mano'].get('query_params')})
+        if vnf_info_final.instantiation_state != constants.VNF_NOT_INSTANTIATED:
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was terminated'
+                                           % constants.VNF_NOT_INSTANTIATED)
+
+        LOG.info('Validating and all resources have been released')
+        if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info):
+            raise TestRunError('Allocated resources have not been released by the VIM')
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Validate that no traffic flows once stop is completed

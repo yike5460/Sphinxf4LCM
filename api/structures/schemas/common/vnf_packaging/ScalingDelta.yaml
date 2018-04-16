@@ -1,0 +1,30 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 7.1.8.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+
+ScalingDelta:
+  description: For a particular scaling aspect, the ScalingDelta.yaml information element defines the number of instances per VNFC and the bitrate delta per virtual link that corresponds to a single scaling step. When scaling out by one step, this delta is added to the resources of the VNF instance, whereas when scaling in, this delta is removed.
+  attributes:
+    vdu_delta:
+      description: The number of VNFC instances based on particular VDUs to be created or removed.
+      type: List
+      required: false
+      constraints:
+        entry_type: VduLevel
+
+    virtual_link_bit_rate_delta:
+      description:  The bitrate to be added or removed to virtual links created from particular virtual link. descriptors.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualLinkBitrateLevel

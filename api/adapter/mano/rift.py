@@ -167,7 +167,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get NSD %s' % nsd_id)
 
         nsd = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd'][0]
-        nsd.pop('rw-project-nsd:meta')
+        nsd.pop('rw-project-nsd:meta', None)
 
         return nsd
 
@@ -184,7 +184,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get VNFD %s' % vnfd_id)
 
         vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
-        vnfd.pop('rw-project-vnfd:meta')
+        vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
 
@@ -194,7 +194,7 @@ class RiftManoAdapter(object):
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
 
-        resource = '/api/config/project/Spirent/ns-instance-config/nsr'
+        resource = '/api/config/project/%s/ns-instance-config/nsr' % self.project
 
         nsr_metadata = self.nsr_metadata[ns_instance_id]
         nsr_metadata['datacenter'] = additional_param_for_ns['datacenter']
@@ -308,7 +308,7 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
-        resource = '/api/config/project/Spirent/ns-instance-config/nsr/%s' % ns_instance_id
+        resource = '/api/config/project/%s/ns-instance-config/nsr/%s' % (self.project, ns_instance_id)
 
         try:
             response = self.session.delete(url=self.url + resource)
@@ -398,6 +398,8 @@ class RiftManoAdapter(object):
                 'storage-gb': vdu['vm-flavor']['storage-gb'],
                 'nic-count': len(vdu['interface'])
             }
+
+        # TODO: if flavor exists, check flavor in VIM
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
@@ -569,7 +571,7 @@ class RiftManoAdapter(object):
             ns_op_status = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]['operational-status']
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_op_status, ns_instance_id))
             if ns_op_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_op_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -577,8 +579,8 @@ class RiftManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise RiftManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                   % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param=None):

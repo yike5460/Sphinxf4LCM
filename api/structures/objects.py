@@ -94,13 +94,10 @@ class StaticTypeAttribute(Attribute):
 
 
 class CoercedList(MutableSequence):
-    def __init__(self, entry_type, data):
+    def __init__(self, entry_type_validator, data):
         super(CoercedList, self).__init__()
-        self._entry_type_validator = TypeValidator(entry_type)
-        if data is None:
-            self._list = list()
-        else:
-            self._list = list(data)
+        self._entry_type_validator = entry_type_validator
+        self._list = list(data)
 
     def __delitem__(self, key):
         self._list.__delitem__(key)
@@ -149,7 +146,7 @@ class List(StaticTypeAttribute):
         super(List, self).__init__()
 
     def _coerce(self, value):
-        return CoercedList(self.entry_type, value)
+        return CoercedList(self._entry_type_validator, value)
 
     def _validate(self, value):
         super(List, self)._validate(value)
@@ -307,6 +304,10 @@ class InformationElement(object):
 
 class InformationElementWithExternalSchema(InformationElement):
     __metaclass__ = SchemaLoader
+
+
+class LogicalNodeData(InformationElementWithExternalSchema):
+    pass
 
 
 class VnfExtCpInfo(InformationElementWithExternalSchema):
@@ -585,15 +586,15 @@ class VnfLifecycleChangeNotification(InformationElementWithExternalSchema):
     pass
 
 
-class ScalingAspect(InformationElementWithExternalSchema):
-    pass
-
-
 class L3AddressData(InformationElementWithExternalSchema):
     pass
 
 
 class AddressData(InformationElementWithExternalSchema):
+    pass
+
+
+class CpProtocolData(InformationElementWithExternalSchema):
     pass
 
 
@@ -626,6 +627,22 @@ class LocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
 
 
 class VduLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkBitrateLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingDelta(InformationElementWithExternalSchema):
+    pass
+
+
+class AspectDeltaDetails(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingAspect(InformationElementWithExternalSchema):
     pass
 
 
@@ -694,6 +711,14 @@ class VirtualLinkProfile(InformationElementWithExternalSchema):
 
 
 class InstantiationLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class ChangeVnfFlavourOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class ChangeExtVnfConnectivityOpConfig(InformationElementWithExternalSchema):
     pass
 
 

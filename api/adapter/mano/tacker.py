@@ -792,12 +792,13 @@ class TackerManoAdapter(object):
                 # the NotFound exception
                 vnf_status = 'NOTFOUND'
             except tackerclient.common.exceptions.TackerClientException:
-                return constants.OPERATION_PENDING
+                LOG.debug('Communication error between Tacker client and server')
+                vnf_status = 'UNKNOWN'
             except Exception as e:
                 raise TackerManoAdapterError(e.message)
             LOG.debug('Got VNF status %s for VNF with ID %s' % (vnf_status, vnf_instance_id))
             if vnf_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected VNF status to be one of %s, got %s' % (stable_states, vnf_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -805,8 +806,8 @@ class TackerManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('VNF with ID %s did not reach a stable state after %s' % (vnf_instance_id, max_wait_time))
-        return False
+        raise TackerManoAdapterError('VNF with ID %s did not reach a stable state after %s'
+                                     % (vnf_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
@@ -864,7 +865,7 @@ class TackerManoAdapter(object):
                 raise TackerManoAdapterError(e.message)
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
             if ns_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -872,8 +873,8 @@ class TackerManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise TackerManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                     % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):

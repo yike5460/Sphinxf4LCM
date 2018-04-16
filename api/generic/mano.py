@@ -256,8 +256,8 @@ class Mano(object):
         """
         This functions validates that the resources allocated to an NS instance have been released.
 
-        :param ns_info:             NsInfo structure holding information about the NS instance.
-        :return:                    True if the resources have been released, False otherwise.
+        :param ns_info: NsInfo structure holding information about the NS instance.
+        :return:        True if the resources have been released, False otherwise.
         """
         for vnf_info in ns_info.vnf_info:
             if not self.validate_vnf_released_vresources(vnf_info):
@@ -269,12 +269,10 @@ class Mano(object):
         """
         This functions validates that the resources allocated to a VNF instance have been released.
 
-        :param vnf_info_initial:            VnfInfo structure holding information about the initial state of the VNF
-                                            instance.
-        :param vnf_info_final:              VnfInfo structure holding information about the final state of the VNF
-                                            instance
-        :return:                            True if the resources allocated to the initial VNF and not allocated to the
-                                            final VNF have been released, False otherwise.
+        :param vnf_info_initial:    VnfInfo structure holding information about the initial state of the VNF instance.
+        :param vnf_info_final:      VnfInfo structure holding information about the final state of the VNF instance
+        :return:                    True if the resources allocated to the initial VNF and not allocated to the final
+                                    VNF have been released, False otherwise.
         """
 
         vnfc_resource_id_list_final = []
@@ -287,7 +285,8 @@ class Mano(object):
                 vim = self.get_vim_helper(vim_id)
                 resource_id = vnfc_resource_info.compute_resource.resource_id
                 try:
-                    virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    LOG.debug('Resource ID %s found in VIM, not as expected' % resource_id)
                     return False
                 except Exception:
                     LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
@@ -421,7 +420,7 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-        :return:                                            NS instantiation operation status.
+        :return:                                            Identifier of the NS instance.
         """
         ns_instance_id = self.ns_create_id(nsd_id, ns_name, ns_description)
         LOG.debug('NS instance ID: %s' % ns_instance_id)
@@ -891,7 +890,7 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :return:                            VNF instantiation operation status.
+        :return:                            Identifier of the VNF instance.
         """
         vnf_instance_id = self.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
         LOG.debug('VNF instance ID: %s' % vnf_instance_id)
@@ -900,7 +899,7 @@ class Mano(object):
                                                      additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            return None
+            raise ManoGenericError('VNF instantiation operation failed')
         return vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -1279,10 +1278,10 @@ class Mano(object):
         requires the VNF to be in a particular state.
 
         :param vnf_instance_id: Identifier of the VNF instance.
-        :return:                True if the VNF reached one of the final states, False otherwise.
+        :return:                None.
         """
-        return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
-                                                           poll_interval=self.POLL_INTERVAL)
+        self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
+                                                    poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id):
@@ -1291,10 +1290,10 @@ class Mano(object):
         requires the NS to be in a particular state.
 
         :param ns_instance_id:  Identifier of the NS instance.
-        :return:                True if the NS reached one of the final states, False otherwise.
+        :return:                None.
         """
-        return self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
-                                                          poll_interval=self.POLL_INTERVAL)
+        self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
+                                                   poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):

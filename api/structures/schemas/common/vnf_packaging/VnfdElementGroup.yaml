@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.4 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VnfdElementGroup:
   description: A VNFD Element Group is a mechanism for associating elements of a VNFD (Vdus and VnfVirtualLinkDesc(s)) for a certain purpose, for example, scaling aspects.

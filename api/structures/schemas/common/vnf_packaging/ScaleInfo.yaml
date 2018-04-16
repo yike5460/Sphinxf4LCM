@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 7.1.5.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+
+ScaleInfo:
+    description: The ScaleInfo information element represents a scale level for a particular level for a particular scaling aspect.
+    attributes:
+        aspect_id:
+            description: Reference to the scaling aspect.
+            type: Identifier
+            required: true
+
+        scale_level:
+            description: The scale level, greater than or equal to 0.
+            type: Number
+            required: true
