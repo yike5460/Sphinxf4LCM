@@ -392,39 +392,55 @@ class RiftManoAdapter(object):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_resources = {}
+        expected_vdu_flavor = dict()
+        expected_vdu_resources = dict()
         for vdu in vnfd['vdu']:
+            expected_vdu_flavor[vdu['id']] = {
+                'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
+            }
             expected_vdu_resources[vdu['id']] = {
-                'vcpu-count': vdu['vm-flavor']['vcpu-count'],
-                'memory-mb': vdu['vm-flavor']['memory-mb'],
-                'storage-gb': vdu['vm-flavor']['storage-gb'],
+                'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
+                'memory-mb': vdu['vm-flavor'].get('memory-mb'),
+                'storage-gb': vdu['vm-flavor'].get('storage-gb'),
                 'nic-count': len(vdu['interface'])
             }
 
-        # TODO: if flavor exists, check flavor in VIM
-
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
-
             # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            actual_vdu_resources = {
-                'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
-                'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
-                'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
-                'nic-count': len(virtual_compute.virtual_network_interface)
-            }
+            # Get the flavor name from the VNFD
+            flavor_name_vnfd = expected_vdu_flavor[vdu_id]['vm-flavor-name']
+            if flavor_name_vnfd is not None:
 
-            for resource_name, actual_value in actual_vdu_resources.items():
-                expected_value = expected_vdu_resources[vdu_id][resource_name]
-                if actual_value != expected_value:
-                    LOG.debug('Unexpected value for %s: %s. Expected: %s'
-                              % (resource_name, actual_value, expected_value))
+                # Get the flavor name from the VIM
+                server_details = vim.server_get(resource_id)
+                server_flavor_id = server_details['flavor_id']
+                flavor_details = vim.flavor_get(server_flavor_id)
+                flavor_name_nova = str(flavor_details['name'])
+
+                # Compare the flavor name in the VNFD to the flavor name of the VM
+                if flavor_name_nova != flavor_name_vnfd:
                     validation_result = False
+            else:
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+                actual_vdu_resources = {
+                    'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
+                    'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
+                    'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
+                    'nic-count': len(virtual_compute.virtual_network_interface)
+                }
+
+                for resource_name, actual_value in actual_vdu_resources.items():
+                    expected_value = expected_vdu_resources[vdu_id][resource_name]
+                    if actual_value != expected_value:
+                        LOG.debug('Unexpected value for %s: %s. Expected: %s'
+                                  % (resource_name, actual_value, expected_value))
+                        validation_result = False
 
         return validation_result
 
