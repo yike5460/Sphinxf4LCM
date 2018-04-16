@@ -60,6 +60,24 @@ class TestRequirementsError(TestExecutionError):
     pass
 
 
+class Step(object):
+    global_index = 0
+
+    @classmethod
+    def generate_index(cls):
+        cls.global_index += 1
+        return cls.global_index
+
+    def __init__(self, name, description):
+        self.index = self.generate_index()
+        self.name = name
+        self.description = description
+
+    def __call__(self, run_func):
+        self.run_func = run_func
+        return self
+
+
 class TestMeta(type):
     """
     Meta class that adds the logger object to the class dictionary of the class that is an instance of this meta class.
@@ -69,6 +87,20 @@ class TestMeta(type):
         if bases != (object,):
             originating_module = importlib.import_module(class_dict['__module__'])
             class_dict['_LOG'] = originating_module.LOG
+
+            steps = []
+            for _, attr_value in class_dict.items():
+                if isinstance(attr_value, Step):
+                    steps.append(attr_value)
+            steps.sort(key=lambda x: x.index)
+
+            normalized_index = 1
+            for step in steps:
+                step.index = normalized_index
+                normalized_index += 1
+
+            class_dict['steps'] = steps
+
         return type.__new__(meta, name, bases, class_dict)
 
 
@@ -97,6 +129,7 @@ class TestCase(object):
         self.tc_result['scaling_to_level'] = dict()
         self.tc_result['scaling_from_level'] = dict()
         self.tc_result['timestamps'] = collections.OrderedDict()
+        self.tc_result['steps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.em = None
@@ -143,11 +176,32 @@ class TestCase(object):
         for event in self.TESTCASE_EVENTS:
             self.tc_result['events'][event] = dict()
 
+    def initialize_steps(self):
+        for step in self.steps:
+            self.tc_result['steps'][step.index] = {
+                'name': step.name,
+                'description': step.description,
+                'status': 'SKIP'
+            }
+
     def setup(self):
         pass
 
     def run(self):
-        pass
+        for step in self.steps:
+            self._LOG.info('Entering step %s' % step.name)
+            try:
+                step.run_func(self)
+                step_status = 'PASS'
+            except TestRunError as e:
+                step_status = 'FAIL'
+                raise e
+            except Exception as e:
+                step_status = 'ERROR'
+                raise e
+            finally:
+                self.tc_result['steps'][step.index]['status'] = step_status
+                self._LOG.info('Exiting step %s' % step.name)
 
     def register_for_cleanup(self, index, function_reference, *args, **kwargs):
         """
@@ -206,6 +260,7 @@ class TestCase(object):
             self.check_requirements()
             self.build_apis()
             self.initialize_events()
+            self.initialize_steps()
             self.setup()
             self.run()
         except TestRequirementsError as e:
