@@ -2152,6 +2152,13 @@ class CiscoNFVManoAdapter(object):
 
             LOG.debug('NSO reply: %s' % netconf_reply.xml)
 
+            # Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking
+            # that the NSD has been deleted.
+            nsd = self.get_nsd(nsd_id)
+            nsd_xml = etree.fromstring(nsd)
+            if nsd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}nsd') is not None:
+                raise CiscoNFVManoAdapterError('NSD %s has not been deleted' % nsd_id)
+
         # Delete the NsdInfo object
         self.nsd_info_ids.pop(nsd_info_id)
 
