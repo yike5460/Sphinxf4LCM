@@ -1489,3 +1489,75 @@ class Mano(object):
                 LOG.debug('Incorrect number of VNFC instances for VNF %s' % vnf_info.vnf_product_name)
                 return False
         return True
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        """
+        This function will create an NSD information object in the NFVO for the NSD to be uploaded.
+
+        This function was written in accordance with section 7.2.16 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param user_defined_data:   User defined data for the NSD to be uploaded.
+        :return:                    Identifier of the created NSD information object.
+        """
+
+        return self.mano_adapter.nsd_info_create(user_defined_data)
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        """
+        This function will enable the OSS/BSS to query the NFVO concerning details of one or more NSD information
+        objects.
+
+        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param filter:              Filter defining the NSD information objects on which the query applies, based on
+                                    attributes of the NSD information objects. It can also be used to specify one or
+                                    more NSD information objects to be queried by providing their identifiers.
+        :param attribute_selector:  Provides a list of attribute names of the NSD information objects. If present, only
+                                    these attributes are returned for the NSD information objects matching the filter.
+                                    If absent, the complete NSD information objects are returned.
+        :return:                    Details of the NSD information objects matching the input filter.
+        """
+
+        return self.mano_adapter.nsd_info_query(filter, attribute_selector)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd):
+        """
+        This function will upload an NSD to the NFVO.
+
+        This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param nsd_info_id: Identifier of the NSD information object associated with the NSD to be uploaded.
+        :param nsd:         NSD to be uploaded.
+        :return:            None.
+        """
+
+        return self.mano_adapter.nsd_upload(nsd_info_id, nsd)
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        """
+        This function will fetch an NSD from the NFVO.
+
+        This function was written in accordance with section 7.2.17 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param nsd_info_id: Identifier of the NSD information object associated with the NSD to be fetched.
+        :return:            The fetched NSD.
+        """
+
+        return self.mano_adapter.nsd_fetch(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id):
+        """
+        This function will delete one or more NSD(s). The associated NSD information objects will be deleted as well.
+
+        This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param nsd_info_id: Identifier of the NSD information objects to be deleted.
+        :return:            Identifier of the deleted NSD information objects.
+        """
+
+        return self.mano_adapter.nsd_delete(nsd_info_id)
