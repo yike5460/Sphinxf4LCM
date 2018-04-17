@@ -243,7 +243,8 @@ class TestCase(object):
                 function.function_reference(*function.function_args, **function.function_kwargs)
             except Exception as e:
                 self._LOG.exception(e)
-                raise TestCleanupError(e.message)
+                raise TestCleanupError('Unable to call function %s.%s during cleanup - %s'
+                                   % (function.function_reference.__module__, function.function_reference.__name__, e))
         self._LOG.info('Finished main cleanup')
 
     def collect_timestamps(self):
@@ -282,12 +283,12 @@ class TestCase(object):
             self._LOG.error('%s execution crashed' % self.tc_name)
             self._LOG.exception(e)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e)
         except Exception as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
             self._LOG.exception(e)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e)
         finally:
             try:
                 self.cleanup()
