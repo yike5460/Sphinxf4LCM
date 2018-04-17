@@ -65,9 +65,8 @@ class TackerManoAdapter(object):
             self.password = password
 
         except Exception as e:
-            LOG.error('Unable to create %s instance' % self.__class__.__name__)
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -94,7 +93,7 @@ class TackerManoAdapter(object):
                 return constants.OPERATION_PENDING
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get status for VNF %s - %s' % (resource_id, e))
 
             return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_vnf_status]
 
@@ -104,7 +103,7 @@ class TackerManoAdapter(object):
                 tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get details for stack %s - %s' % (resource_id, e))
 
             # Get VIM object
             vim_id = tacker_show_vnf['vim_id']
@@ -128,7 +127,7 @@ class TackerManoAdapter(object):
                 return constants.OPERATION_SUCCESS
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get status for NS %s - %s' % (resource_id, e))
 
             return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
@@ -298,7 +297,7 @@ class TackerManoAdapter(object):
             vim_details = self.tacker_client.show_vim(vim_id)['vim']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for VIM %s - %s' % (vim_id, e))
         vim_auth_cred = vim_details['auth_cred']
         vim_type = vim_details['type']
 
@@ -315,7 +314,7 @@ class TackerManoAdapter(object):
             tacker_show_vnfd = self.tacker_client.show_vnfd(vnfd)['vnfd']['attributes']['vnfd']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get VNFD %s - %s' % (vnfd, e))
         return yaml.load(tacker_show_vnfd)
 
     @log_entry_exit(LOG)
@@ -326,7 +325,7 @@ class TackerManoAdapter(object):
             tacker_show_nsd = self.tacker_client.show_nsd(nsd)['nsd']['attributes']['nsd']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get NSD %s - %s' % (nsd, e))
         return yaml.load(tacker_show_nsd)
 
     @log_entry_exit(LOG)
@@ -436,7 +435,7 @@ class TackerManoAdapter(object):
                 self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to update VNF %s - %s' % (vnf_instance_id, e))
 
         # Poll on the VNF status until it reaches one of the final states
         operation_pending = True
@@ -470,7 +469,7 @@ class TackerManoAdapter(object):
             LOG.debug('Response from VNFM:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to create VNF - %s' % e)
         return vnf_instance['vnf']['id']
 
     @log_entry_exit(LOG)
@@ -495,7 +494,7 @@ class TackerManoAdapter(object):
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for VNF %s - %s' % (vnf_instance_id, e))
 
         # Get VIM object
         vim_id = tacker_show_vnf['vim_id']
@@ -535,7 +534,7 @@ class TackerManoAdapter(object):
             return vnf_info
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for VNF %s - %s' % (vnf_instance_id, e))
         # Get the Heat stack ID
         stack_id = tacker_show_vnf['instance_id']
 
@@ -651,7 +650,7 @@ class TackerManoAdapter(object):
                 return vnf_info
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get allocated resources for VNF %s - %s' % (vnf_instance_id, e))
 
         return vnf_info
 
@@ -665,13 +664,13 @@ class TackerManoAdapter(object):
             body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
             self.tacker_client.scale_vnf(vnf_instance_id, body)
         except tackerclient.common.exceptions.NotFound as e:
-            LOG.debug('Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s"' %
-                      (vnf_instance_id, additional_param['scaling_policy_name']))
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError(
+                'Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s" - %s'
+                    % (vnf_instance_id, additional_param['scaling_policy_name'], e))
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to scale VNF %s - %s' % (vnf_instance_id, e))
 
         return 'vnf', vnf_instance_id
 
@@ -685,7 +684,8 @@ class TackerManoAdapter(object):
             # of the cleanup procedure)
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
         except Exception as e:
-            raise TackerManoAdapterError(e.message)
+            LOG.exception(e)
+            raise TackerManoAdapterError('Unable to delete VNF %s - %s' % (vnf_instance_id, e))
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -769,7 +769,8 @@ class TackerManoAdapter(object):
         try:
             vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
         except Exception as e:
-            raise TackerManoAdapterError(e.message)
+            LOG.exception(e)
+            raise TackerManoAdapterError('Unable to get VNF events - %s' % e)
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
 
@@ -795,7 +796,8 @@ class TackerManoAdapter(object):
                 LOG.debug('Communication error between Tacker client and server')
                 vnf_status = 'UNKNOWN'
             except Exception as e:
-                raise TackerManoAdapterError(e.message)
+                LOG.exception(e)
+                raise TackerManoAdapterError('Unable to get status for VNF %s - %s' % (vnf_instance_id, e))
             LOG.debug('Got VNF status %s for VNF with ID %s' % (vnf_status, vnf_instance_id))
             if vnf_status in stable_states:
                 return
@@ -819,7 +821,7 @@ class TackerManoAdapter(object):
             LOG.debug('Response from NFVO:\n%s' % json.dumps(ns_instance, indent=4, separators=(',', ': ')))
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to create NS - %s' % e)
         return ns_instance['ns']['id']
 
     @log_entry_exit(LOG)
@@ -840,7 +842,8 @@ class TackerManoAdapter(object):
             # of the cleanup procedure)
             LOG.debug('NS with instance ID %s could not be found' % ns_instance_id)
         except Exception as e:
-            raise TackerManoAdapterError(e.message)
+            LOG.exception(e)
+            raise TackerManoAdapterError('Unable to delete NS %s - %s' % (ns_instance_id, e))
         return 'ns', ns_instance_id
 
     @log_entry_exit(LOG)
@@ -862,7 +865,8 @@ class TackerManoAdapter(object):
             except tackerclient.common.exceptions.TackerClientException:
                 ns_status = 'NOTFOUND'
             except Exception as e:
-                raise TackerManoAdapterError(e.message)
+                LOG.exception(e)
+                raise TackerManoAdapterError('Unable to get status for NS %s - %s' % (ns_instance_id, e))
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
             if ns_status in stable_states:
                 return
@@ -922,7 +926,7 @@ class TackerManoAdapter(object):
             return ns_info
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for NS %s - %s' % (ns_instance_id, e))
 
         ns_info.ns_name = tacker_show_ns['name'].encode()
         ns_info.description = tacker_show_ns['description'].encode()
@@ -1009,7 +1013,7 @@ class TackerManoAdapter(object):
             vnf_mgmt_url_dict = json.loads(vnf_mgmt_url)
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get management URL for VNF %s - %s' % (vnf_instance_id, e))
 
         mgmt_addr_list = list()
         for vnf_mgmt_url_elem in vnf_mgmt_url_dict.values():
