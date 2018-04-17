@@ -1281,9 +1281,9 @@ class CiscoNFVManoAdapter(object):
                                                  '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]'
                                                  % (deployment_flavor, instantiation_level_id)))
             if instantiation_level_xml is None:
-                raise CiscoNFVManoAdapterError('No instantiation level ID named %s defined in VNFD %s, under '
-                                               'deployment flavor %s' % (instantiation_level_id, vnfd_id,
-                                                                         deployment_flavor))
+                raise CiscoNFVManoAdapterError(
+                    'No instantiation level ID named %s defined in VNFD %s, under deployment flavor %s'
+                        % (instantiation_level_id, vnfd_id, deployment_flavor))
 
             # Get the list of VDU in this instantiation level
             vdu_list = instantiation_level_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level/'
