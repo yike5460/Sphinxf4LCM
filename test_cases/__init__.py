@@ -243,7 +243,7 @@ class TestCase(object):
                 function.function_reference(*function.function_args, **function.function_kwargs)
             except Exception as e:
                 self._LOG.exception(e)
-                raise TestCleanupError('Unable to call function %s.%s during cleanup - %s'
+                raise TestCleanupError('Function %s.%s crashed during cleanup - %s'
                                    % (function.function_reference.__module__, function.function_reference.__name__, e))
         self._LOG.info('Finished main cleanup')
 
