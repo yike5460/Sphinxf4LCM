@@ -10,13 +10,13 @@
 #
 
 
-# This structure was written in accordance with section 7.1.5.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.5.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 InstantiateVnfOpConfig:
   description: This information element defines attributes that affect the invocation of the InstantiateVnf operation.
   attributes:
     parameter:
-      description: VNF-specific parameter to be passed when invoking the InstantiateVnf operation.
+      description: Array of KVP requirements for VNF-specific parameters to be passed when invoking the InstantiateVnf operation.
       type: List
       required: false
       constraints:

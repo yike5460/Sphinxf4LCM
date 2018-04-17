@@ -12,7 +12,7 @@
 
 # This structure was written in accordance with section 7.1.11.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2017-02).
 
-MonitoringParameter:
+VnfMonitoringParameter:
   description: This information element specifies the virtualised resource related performance metrics to be monitored.
   attributes:
     id:
