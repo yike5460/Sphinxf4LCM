@@ -396,7 +396,7 @@ def validate(resource):
             construct_adapter(request.json['type'], resource, **request.json['client_config'])
         except Exception as e:
             response.status = 504
-            return {'warning': e.message}
+            return {'warning': '%s' % e}
         response.status = 200
         return {'message': "Object validated."}
 
