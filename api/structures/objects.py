@@ -618,11 +618,11 @@ class LinkBitrateRequirements(InformationElementWithExternalSchema):
     pass
 
 
-class QoS(InformationElementWithExternalSchema):
+class VnfQoS(InformationElementWithExternalSchema):
     pass
 
 
-class LocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
+class VnfLocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
     pass
 
 
@@ -674,7 +674,7 @@ class SwImageDesc(InformationElementWithExternalSchema):
     pass
 
 
-class MonitoringParameter(InformationElementWithExternalSchema):
+class VnfMonitoringParameter(InformationElementWithExternalSchema):
     pass
 
 
@@ -706,7 +706,7 @@ class VduProfile(InformationElementWithExternalSchema):
     pass
 
 
-class VirtualLinkProfile(InformationElementWithExternalSchema):
+class VnfVirtualLinkProfile(InformationElementWithExternalSchema):
     pass
 
 
@@ -726,7 +726,7 @@ class VnfLcmOperationsConfiguration(InformationElementWithExternalSchema):
     pass
 
 
-class AffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
+class VnfAffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
     pass
 
 
@@ -762,7 +762,7 @@ class VnfInfoModifiableAttributes(InformationElementWithExternalSchema):
     pass
 
 
-class LifeCycleManagementScript(InformationElementWithExternalSchema):
+class VnfLifeCycleManagementScript(InformationElementWithExternalSchema):
     pass
 
 
@@ -780,7 +780,115 @@ class Vnfd(InformationElementWithExternalSchema):
 
 class SoftwareImageInformation(InformationElementWithExternalSchema):
     pass
-  
-  
+
+
+class NsToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class Dependencies(InformationElementWithExternalSchema):
+    pass
+
+
+class NsQoS(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkConnectivity(InformationElementWithExternalSchema):
+    pass
+
+
+class NsProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class NsScalingAspect(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
+    pass
+
+
+class NsAffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class PnfProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class SecurityParameters(InformationElementWithExternalSchema):
+    pass
+
+
+class NsDf(InformationElementWithExternalSchema):
+    pass
+
+
 class OperateVnfData(InformationElementWithExternalSchema):
+    pass
+
+
+class NsMonitoringParameter(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfIndicatorData(InformationElementWithExternalSchema):
+    pass
+
+
+class MonitoredData(InformationElementWithExternalSchema):
+    pass
+
+
+class Nfpd(InformationElementWithExternalSchema):
+    pass
+
+
+class Vnffgd(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkDf(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkDesc(InformationElementWithExternalSchema):
+    pass
+
+
+class Sapd(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLifeCycleManagementScript(InformationElementWithExternalSchema):
+    pass
+
+
+class Nsd(InformationElementWithExternalSchema):
     pass
