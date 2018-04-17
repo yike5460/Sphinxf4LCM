@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.6 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+MonitoredData:
+  description: The MonitoredData information element identifies information to be monitored during the lifetime of a network service instance.
+  attributes:
+    vnf_indicator_info:
+      description: Uniquely identifies this VNF Indicator information element.
+      type: VnfIndicatorData
+      required: false
+
+    monitoring_parameter:
+      description: Specifies the virtualised resource related performance metric to be monitored on an NS level or VNF level.
+      type: NsMonitoringParameter
+      required: false

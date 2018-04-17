@@ -1,0 +1,34 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.5.4 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+VirtualLinkDf:
+  description: The VirtualLinkDf information element specifies properties for instantiating a VL according to a specific flavour.
+  attributes:
+    flavour_id:
+      description: Identifies this VirtualLinkDf information element within a VLD.
+      type: Identifier
+      required: true
+
+    qos:
+      description: QoS information element specifies quality of service parameters applicable to a VL.
+      type: NsQoS
+      required: false
+
+    service_availability_level:
+      description: Specifies one of the three levels defined in ETSI GS NFV-REL 001 [ Level 1, 2, 3 ].
+      type: Enum
+      required: false
+      constraints:
+        entry_type: String
+        valid_values: [ Level1, Level2, Level3 ]

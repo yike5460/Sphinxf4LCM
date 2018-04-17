@@ -1,0 +1,33 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.6 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+PnfProfile:
+  description: The PnfProfile information element describes additional data for a given PNF instance used in a DF.
+  attributes:
+    pnf_profile_id:
+      description: Identifier of this PnfProfile information element. It uniquely identifies a PnfProfile.
+      type: Identifier
+      required: true
+
+    pnfd_id:
+      description: References a PNFD
+      type: Identifier
+      required: true
+
+    pnf_virtual_link_connectivity:
+      description: Defines the connection information of the PNF, it contains connection relationship between a PNF connection point and a NS Virtual Link.
+      type: List
+      required: true
+      constraints:
+        entry_type: NsVirtualLinkConnectivity

@@ -1,0 +1,30 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.12 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+Dependencies:
+  description: The Dependencies information element provides indications on the order in which VNFs associated to different VNF Profiles and/or nested NSs associated to different NS Profiles are to be instantiated.
+  attributes:
+    primary_id:
+      description: References a VnfProfile or NsProfile.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    secondary_id:
+      description: References a VnfProfile or NsProfile.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier

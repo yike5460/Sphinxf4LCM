@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.7 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsVirtualLinkConnectivity:
+  description: The NsVirtualLinkConnectivity information element describes connection information between a connection point and a NS Virtual Link.
+  attributes:
+    virtual_link_profile_id:
+      description: Reference an NS Vl profile.
+      type: Identifier
+      required: true
+
+    cpd_id:
+      description: References the descriptor of a connection point on a VNF/PNF or a SAP which connects to virtual links instantiated from the profile identified in the virtualLinkProfileId attribute.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier

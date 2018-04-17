@@ -1,0 +1,31 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.5 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+SecurityParameters:
+  description: The SecurityParameters information element contains the signature of a NSD, VLD, PNFD or VNFFGD instance together with information required to validate the signature.
+  attributes:
+    signature:
+      description: Provides the signature of the signed part of the descriptor.
+      type: String
+      required: true
+
+    algorithm:
+      description: Identifies the algorithm used to compute the signature.
+      type: String
+      required: true
+
+    certificate:
+      description: Provides a certificate or a reference to a certificate to validate the signature.
+      type: NotSpecified
+      required: false

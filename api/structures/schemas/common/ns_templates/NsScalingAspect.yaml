@@ -1,0 +1,38 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.7.2 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsScalingAspect:
+  description: The PnfProfile information element describes additional data for a given PNF instance used in a DF.
+  attributes:
+    ns_scaling_aspect_id:
+      description: Identifier of this NsScalingAspect information element. It Uniquely identifies the NS scaling aspect in an NSD.
+      type: Identifier
+      required: true
+
+    name:
+      description: Provides a human readable name of the NS scaling aspect.
+      type: String
+      required: true
+
+    description:
+      description: Provides a human readable description of the NS scaling aspect.
+      type: String
+      required: true
+
+    ns_scale_level:
+      description: Describes the details of an NS level.
+      type: List
+      required: true
+      constraints:
+        entry_type: NsLevel

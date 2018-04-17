@@ -1,0 +1,32 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.8 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsLocalAffinityOrAntiAffinityRule:
+  description: The LocalAffinityOrAntiAffinityRule describes the affinity or anti-affinity rule applicable between the virtualization containers to be created based on a particular VDU, or be tween internal VLs to be created based on a particular VnfVirtualLinkDesc. Per VNF, the affinity/anti-affinity rules defined using this information element, using the AffinityOrAntiAffinityGroup information element, and using the placement constraints in the GrantLifecycleOperation as defined in ETSI GS NFV-IFA 007 [i.3] should be conflict-free. In case of conflicts, the placement constraints in the GrantLifecycleOperation shall take precedence.
+  attributes:
+    affinity_or_antiaffinity_rule:
+      description: Specifies whether the rule is an "affinity" rule or an "anti-affinity" rule.
+      type: Enum
+      required: true
+      constraints:
+        valid_values: [ affinity, anti-affinity ]
+        entry_type: String
+
+    scope:
+      description: Specifies the scope of the rule, possible values are "NFVI-PoP", "NFVI-node", etc.
+      type: Enum
+      required: true
+      constraints:
+        valid_values: [ NFVI-PoP, Zone, ZoneGroup, NFVI-node ]
+        entry_type: String
