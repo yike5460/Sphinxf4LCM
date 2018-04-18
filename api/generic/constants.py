@@ -101,7 +101,7 @@ VNF_STATE['ESC_DEPLOYMENT_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
 
 # Mapping between Openbaton VNF deployment states and ETSI VNF states
 VNF_STATE['OPENBATON_VNF_STATE'] = {'ACTIVE': VNF_STARTED,
-                                           'INACTIVE': VNF_STOPPED}
+                                    'INACTIVE': VNF_STOPPED}
 
 # Test results
 TEST_FAILED = 'FAILED'
