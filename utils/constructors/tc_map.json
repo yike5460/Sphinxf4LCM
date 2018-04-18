@@ -104,5 +104,7 @@
   "TD_NFV_NSLCM_SCALE_IN_001":                              "test_cases.tst_007.ns.scale.in.TD_NFV_NSLCM_SCALE_IN_001",
   "TD_NFV_NSLCM_SCALE_OUT_001":                             "test_cases.tst_007.ns.scale.out.TD_NFV_NSLCM_SCALE_OUT_001",
   "TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001":                    "test_cases.tst_007.ns.scale.to_level.TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001",
-  "TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001":                  "test_cases.tst_007.ns.scale.from_level.TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001"
+  "TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001":                  "test_cases.tst_007.ns.scale.from_level.TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001",
+  "TD_NFV_BASE_ONBOARD_NSD_001":                            "test_cases.plugtests.base.onboard.TD_NFV_BASE_ONBOARD_NSD_001",
+  "TD_NFV_BASE_TEARDOWN_DELETE_NSD_001":                    "test_cases.plugtests.base.delete.TD_NFV_BASE_TEARDOWN_DELETE_NSD_001"
 }

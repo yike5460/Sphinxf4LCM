@@ -13,7 +13,7 @@
 import logging
 
 from api.generic import constants
-from test_cases import TestCase, TestRunError
+from test_cases import TestCase, TestRunError, Step
 from utils.misc import generate_name
 
 # Instantiate logger
@@ -39,7 +39,9 @@ class TC_VNF_STATE_TERM_001(TestCase):
     REQUIRED_ELEMENTS = ('vnfd_id',)
     TESTCASE_EVENTS = ('instantiate_vnf', 'terminate_vnf')
 
-    def run(self):
+    @Step(name='Instantiate the VNF', description='Instantiate the VNF')
+    def step1(self):
+        # TODO: Move this in generic?
         LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -48,15 +50,15 @@ class TC_VNF_STATE_TERM_001(TestCase):
         LOG.info('Instantiating the VNF')
         self.time_record.START('instantiate_vnf')
         self.vnf_instance_id = self.mano.vnf_create_and_instantiate(
-                                                 vnfd_id=self.tc_input['vnfd_id'],
-                                                 flavour_id=self.tc_input.get('flavour_id'),
-                                                 vnf_instance_name=generate_name(self.tc_name),
-                                                 vnf_instance_description=self.tc_input.get('vnf_instance_description'),
-                                                 instantiation_level_id=self.tc_input.get('instantiation_level_id'),
-                                                 ext_virtual_link=self.tc_input.get('ext_virtual_link'),
-                                                 ext_managed_virtual_link=self.tc_input.get('ext_managed_virtual_link'),
-                                                 localization_language=self.tc_input.get('localization_language'),
-                                                 additional_param=self.tc_input['mano'].get('instantiation_params'))
+            vnfd_id=self.tc_input['vnfd_id'],
+            flavour_id=self.tc_input.get('flavour_id'),
+            vnf_instance_name=generate_name(self.tc_name),
+            vnf_instance_description=self.tc_input.get('vnf_instance_description'),
+            instantiation_level_id=self.tc_input.get('instantiation_level_id'),
+            ext_virtual_link=self.tc_input.get('ext_virtual_link'),
+            ext_managed_virtual_link=self.tc_input.get('ext_managed_virtual_link'),
+            localization_language=self.tc_input.get('localization_language'),
+            additional_param=self.tc_input['mano'].get('instantiation_params'))
 
         self.time_record.END('instantiate_vnf')
 
@@ -69,23 +71,28 @@ class TC_VNF_STATE_TERM_001(TestCase):
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_vnf_stable_state,
                                   vnf_instance_id=self.vnf_instance_id)
 
+    @Step(name='Validate VNF instantiation state',
+          description='Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED')
+    def step2(self):
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+        self.vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
                                                'additional_param': self.tc_input['mano'].get('query_params')})
-        if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
+        if self.vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_INSTANTIATED)
 
         LOG.info('Validating VNF state is STARTED')
-        if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
+        if self.vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
             raise TestRunError('Unexpected VNF state',
                                err_details='VNF state was not "%s" after the VNF was instantiated'
                                            % constants.VNF_STARTED)
 
+    @Step(name='Start traffic', description='Start the low traffic load')
+    def step3(self):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Start the low traffic load
         # --------------------------------------------------------------------------------------------------------------
@@ -97,14 +104,16 @@ class TC_VNF_STATE_TERM_001(TestCase):
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
-                                                          vnf_info,
-                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
+            self.vnf_info,
+            self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
 
         self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
+    @Step(name='Validate traffic flows', description='Validate the provided functionality and all traffic goes through')
+    def step4(self):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Validate the provided functionality and all traffic goes through
         # --------------------------------------------------------------------------------------------------------------
@@ -120,15 +129,19 @@ class TC_VNF_STATE_TERM_001(TestCase):
             raise TestRunError('Allocated vResources could not be validated')
 
         self.tc_result['resources']['Initial'] = self.mano.get_allocated_vresources(
-                                                                              self.vnf_instance_id,
-                                                                              self.tc_input['mano'].get('query_params'))
+            self.vnf_instance_id,
+            self.tc_input['mano'].get('query_params'))
 
+    @Step(name='Stop traffic', description='Stop the low traffic load')
+    def step5(self):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Stop the low traffic load
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Stopping the low traffic load')
         self.traffic.stop()
 
+    @Step(name='Validate no traffic flows', description='Validating that no traffic flows once stop is completed')
+    def step6(self):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Validate that no traffic flows once stop is completed
         # --------------------------------------------------------------------------------------------------------------
@@ -136,6 +149,8 @@ class TC_VNF_STATE_TERM_001(TestCase):
         if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after it was stopped')
 
+    @Step(name='Terminate the VNF', description='Terminate the VNF')
+    def step7(self):
         # --------------------------------------------------------------------------------------------------------------
         # 7. Terminate the VNF
         # --------------------------------------------------------------------------------------------------------------
@@ -156,10 +171,13 @@ class TC_VNF_STATE_TERM_001(TestCase):
 
         self.unregister_from_cleanup(index=20)
         self.unregister_from_cleanup(index=10)
-
+        
         self.register_for_cleanup(index=10, function_reference=self.mano.vnf_delete_id,
                                   vnf_instance_id=self.vnf_instance_id)
 
+    @Step(name='Validate VNF is terminated',
+          description='Validate VNF is terminated and all resources have been released')
+    def step8(self):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Validate VNF is terminated and all resources have been released
         # --------------------------------------------------------------------------------------------------------------
@@ -175,4 +193,5 @@ class TC_VNF_STATE_TERM_001(TestCase):
         if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info):
             raise TestRunError('Allocated resources have not been released by the VIM')
 
+        # TODO: move this in generic?
         LOG.info('%s execution completed successfully' % self.tc_name)

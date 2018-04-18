@@ -87,9 +87,8 @@ class OpenstackVimAdapter(object):
                                                               user_domain_name=user_domain_name)
 
         except Exception as e:
-            LOG.debug('Unable to create %s instance' % self.__class__.__name__)
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
     @log_entry_exit(LOG)
     def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
@@ -121,7 +120,7 @@ class OpenstackVimAdapter(object):
             project_id = self.nova_client.client.session.auth.auth_ref._data['token']['project']['id']
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get project ID - %s' % e)
         return project_id.encode()
 
     @log_entry_exit(LOG)
@@ -181,7 +180,7 @@ class OpenstackVimAdapter(object):
             neutron_ports = self.neutron_client.list_ports(retrieve_all=False, **query_filter)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get the list of ports - %s' % e)
         return neutron_ports
 
     @log_entry_exit(LOG)
@@ -197,7 +196,7 @@ class OpenstackVimAdapter(object):
             nova_servers = self.nova_client.servers.list(search_opts=query_filter)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get the list of servers - %s' % e)
         return nova_servers
 
     @log_entry_exit(LOG)
@@ -212,7 +211,7 @@ class OpenstackVimAdapter(object):
             server = self.nova_client.servers.get(server_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get details for server %s - %s' % (server_id, e))
 
         server_details = dict()
         server_details['flavor_id'] = server.flavor['id'].encode()
@@ -233,7 +232,7 @@ class OpenstackVimAdapter(object):
             stack_state = self.heat_client.stacks.get(stack_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get details for stack %s - %s' % (stack_id, e))
         return stack_state
 
     @log_entry_exit(LOG)
@@ -245,7 +244,7 @@ class OpenstackVimAdapter(object):
             self.heat_client.actions.resume(stack_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to resume stack %s - %s' % (stack_id, e))
 
     @log_entry_exit(LOG)
     def stack_suspend(self, stack_id):
@@ -256,7 +255,7 @@ class OpenstackVimAdapter(object):
             self.heat_client.actions.suspend(stack_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to suspend stack %s - %s' % (stack_id, e))
 
     @log_entry_exit(LOG)
     def stack_resource_list(self, stack_id):
@@ -270,7 +269,7 @@ class OpenstackVimAdapter(object):
             stack_resource_list = self.heat_client.resources.list(stack_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get resources for stack %s - %s' % (stack_id, e))
         return stack_resource_list
 
     @log_entry_exit(LOG)
@@ -286,7 +285,7 @@ class OpenstackVimAdapter(object):
             nova_limits = self.nova_client.limits.get().absolute
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get compute capacity - %s' % e)
         for nova_limit in nova_limits:
             if nova_limit.name == 'totalCoresUsed':
                 limits['vcpu']['used'] = nova_limit.value
@@ -316,7 +315,7 @@ class OpenstackVimAdapter(object):
             cinder_limits = self.cinder_client.limits.get().absolute
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get storage capacity - %s' % e)
         for cinder_limit in cinder_limits:
             if cinder_limit.name == 'totalGigabytesUsed':
                 limits['vstorage']['used'] = cinder_limit.value
@@ -335,7 +334,7 @@ class OpenstackVimAdapter(object):
             quotas = self.nova_client.quotas.get(tenant_id=project_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get compute resource quota - %s' % e)
         virtual_compute_quota = VirtualComputeQuota()
         virtual_compute_quota.resource_group_id = quotas._info['id'].encode()
         resources = {'num_vcpus': quotas.cores, 'num_vc_instances': quotas.instances, 'virtual_mem_size': quotas.ram}
@@ -355,7 +354,7 @@ class OpenstackVimAdapter(object):
             quotas = self.neutron_client.show_quota(project_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get network resource quota - %s' % e)
         virtual_network_quota = VirtualNetworkQuota()
         virtual_network_quota.resource_group_id = project_id.encode()
         resources = {'num_public_ips': quotas['quota']['floatingip'], 'num_ports': quotas['quota']['port'],
@@ -376,7 +375,7 @@ class OpenstackVimAdapter(object):
             quotas = self.cinder_client.quotas.get(project_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get storage resource quota - %s' % e)
         virtual_storage_quota = VirtualStorageQuota()
         virtual_storage_quota.resource_group_id = project_id.encode()
         resources = {'storage_size': quotas.gigabytes, 'num_snapshots': quotas.snapshots,
@@ -398,7 +397,7 @@ class OpenstackVimAdapter(object):
             flavor = self.nova_client.flavors.get(flavor_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get details for flavor %s - %s' % (flavor_id, e))
 
         flavor_details = dict()
         flavor_details['name'] = flavor.name
@@ -414,7 +413,7 @@ class OpenstackVimAdapter(object):
             image = self.glance_client.images.get(image_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError(e.message)
+            raise OpenstackVimAdapterError('Unable to get details for image %s - %s' % (image_id, e))
 
         software_image_information = SoftwareImageInformation()
         software_image_information.id = image_id

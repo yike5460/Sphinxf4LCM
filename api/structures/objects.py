@@ -892,3 +892,7 @@ class NsLifeCycleManagementScript(InformationElementWithExternalSchema):
 
 class Nsd(InformationElementWithExternalSchema):
     pass
+  
+  
+class NsdInfo(InformationElementWithExternalSchema):
+    pass

@@ -23,7 +23,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, VnfExtCpInfo
+from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, \
+    VnfExtCpInfo, NsdInfo
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class RiftManoAdapter(object):
         self.session.verify = False
 
         self.nsr_metadata = {}
+        self.nsd_info_ids = dict()
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -167,7 +169,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get NSD %s' % nsd_id)
 
         nsd = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd'][0]
-        nsd.pop('rw-project-nsd:meta')
+        nsd.pop('rw-project-nsd:meta', None)
 
         return nsd
 
@@ -184,7 +186,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get VNFD %s' % vnfd_id)
 
         vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
-        vnfd.pop('rw-project-vnfd:meta')
+        vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
 
@@ -390,39 +392,55 @@ class RiftManoAdapter(object):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_resources = {}
+        expected_vdu_flavor = dict()
+        expected_vdu_resources = dict()
         for vdu in vnfd['vdu']:
+            expected_vdu_flavor[vdu['id']] = {
+                'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
+            }
             expected_vdu_resources[vdu['id']] = {
-                'vcpu-count': vdu['vm-flavor']['vcpu-count'],
-                'memory-mb': vdu['vm-flavor']['memory-mb'],
-                'storage-gb': vdu['vm-flavor']['storage-gb'],
+                'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
+                'memory-mb': vdu['vm-flavor'].get('memory-mb'),
+                'storage-gb': vdu['vm-flavor'].get('storage-gb'),
                 'nic-count': len(vdu['interface'])
             }
 
-        # TODO: if flavor exists, check flavor in VIM
-
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
-
             # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            actual_vdu_resources = {
-                'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
-                'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
-                'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
-                'nic-count': len(virtual_compute.virtual_network_interface)
-            }
+            # Get the flavor name from the VNFD
+            flavor_name_vnfd = expected_vdu_flavor[vdu_id]['vm-flavor-name']
+            if flavor_name_vnfd is not None:
 
-            for resource_name, actual_value in actual_vdu_resources.items():
-                expected_value = expected_vdu_resources[vdu_id][resource_name]
-                if actual_value != expected_value:
-                    LOG.debug('Unexpected value for %s: %s. Expected: %s'
-                              % (resource_name, actual_value, expected_value))
+                # Get the flavor name from the VIM
+                server_details = vim.server_get(resource_id)
+                server_flavor_id = server_details['flavor_id']
+                flavor_details = vim.flavor_get(server_flavor_id)
+                flavor_name_nova = str(flavor_details['name'])
+
+                # Compare the flavor name in the VNFD to the flavor name of the VM
+                if flavor_name_nova != flavor_name_vnfd:
                     validation_result = False
+            else:
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+                actual_vdu_resources = {
+                    'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
+                    'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
+                    'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
+                    'nic-count': len(virtual_compute.virtual_network_interface)
+                }
+
+                for resource_name, actual_value in actual_vdu_resources.items():
+                    expected_value = expected_vdu_resources[vdu_id][resource_name]
+                    if actual_value != expected_value:
+                        LOG.debug('Unexpected value for %s: %s. Expected: %s'
+                                  % (resource_name, actual_value, expected_value))
+                        validation_result = False
 
         return validation_result
 
@@ -636,3 +654,102 @@ class RiftManoAdapter(object):
                 validation_result = False
 
         return validation_result
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        # Generating a UUID
+        nsd_info_id = str(uuid.uuid4())
+
+        # Populate the NsdInfo object
+        nsd_info = NsdInfo()
+        nsd_info.nsd_info_id = nsd_info_id
+        nsd_info.user_defined_data = user_defined_data
+
+        # Store the mapping between the NsdInfo object and its UUID
+        self.nsd_info_ids[nsd_info_id] = nsd_info
+
+        return nsd_info_id
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        nsd_info_id = filter['nsd_info_id']
+        return self.nsd_info_ids.get(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Uploading the NSD
+        if nsd is not None:
+            raise NotImplementedError('Rift does not support ETSI NSD format')
+
+        vendor_nsd = nsd_info.user_defined_data.get('vendor_nsd')
+        if vendor_nsd is None:
+            raise RiftManoAdapterError('Vendor NSD not present in user_defined_data')
+
+        resource = '/api/config/project/%s/nsd-catalog' % self.project
+        request_body = {'nsd': [vendor_nsd]}
+        try:
+            response = self.session.post(url=self.url + resource, json=request_body)
+            assert response.status_code == 201
+            assert 'ok' in response.json().get('rpc-reply', {})
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to upload the NSD')
+
+        # Retrieving details about the on-boarded NSD
+        nsd_id = vendor_nsd['id']
+
+        # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
+        nsd_info.nsd_id = nsd_id
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Get the NSD corresponding to the provided nsd_info_id
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is None:
+            raise RiftManoAdapterError('NsdInfo object with ID %s does not have the NsdId attribute set' % nsd_info_id)
+        nsd = self.get_nsd(nsd_id)
+
+        return nsd
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # If the NsdInfo object holds information about an NSD, delete it
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is not None:
+            resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
+
+            try:
+                response = self.session.delete(url=self.url + resource)
+                assert response.status_code == 201
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to delete NSD %s' % nsd_id)
+
+            # Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking
+            # that the NSD has been deleted.
+            try:
+                self.get_nsd(nsd_id)
+            except RiftManoAdapterError:
+                LOG.debug('NSD %s has been deleted' % nsd_id)
+            else:
+                raise RiftManoAdapterError('NSD %s has not been deleted' % nsd_id)
+
+        # Delete the NsdInfo object
+        self.nsd_info_ids.pop(nsd_info_id)
+
+        return nsd_info_id
