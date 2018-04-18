@@ -1,0 +1,87 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.6 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsDf:
+  description: The NsDf information element specifies the properties of a variant of an NS.
+  attributes:
+    ns_df_id:
+      description: Identifies this NsDf information element. It identifies a NS DF within the NSD.
+      type: Identifier
+      required: true
+
+    flavour_key:
+      description: Assurance parameter against which this flavour is being described. The key can be a combination of multiple assurance parameters with a logical relationship between them. The parameters should be present as a monitoredInfo attribute in the NSD.
+      type: String
+      required: true
+
+    vnf_profile:
+      description: VNF profile to be used for the NS flavour.
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfProfile
+
+    pnf_profile:
+      description: PNF profile to be used for the NS flavour.
+      type: List
+      required: false
+      constraints:
+        entry_type: PnfProfile
+
+    virtual_link_profile:
+      description: VL profile to be used for the NS flavour. There shall be at most one profile per constituent VNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsVirtualLinkProfile
+
+    scaling_aspect:
+      description: The scaling aspects supported by this DF of the NS.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsScalingAspect
+
+    affinity_or_anti_affinity_group:
+      description: Specifies affinity or anti-affinity relationship applicable between the VNF instances created using different VNFDs, the Virtual Link instances created using different NsVirtualLinkDescs or the nested NS instances created using different NSDs in the same affinity or anti-affinity group.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsAffinityOrAntiAffinityGroup
+
+    ns_instantiation_level:
+      description: Describes the details of an NS level.
+      type: List
+      required: true
+      constraints:
+        entry_type: NsLevel
+
+    default_ns_instantiation_level_id:
+      description: Identifies the NS level which represents the default NS instantiation level for this DF. It shall be present if there are multiple "nsIinstantiationLevel" entries.
+      type: Identifier
+      required: false
+
+    ns_profile:
+      description: Specifies a NS Profile supported by this NS DF.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsProfile
+
+    dependencies:
+      description: Specifies the order in which instances of the VNFs and/or nested NSs have to be created.
+      type: List
+      required: false
+      constraints:
+        entry_type: Dependencies

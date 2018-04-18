@@ -12,7 +12,7 @@
 
 # This structure was written in accordance with section 7.1.13 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
-LifeCycleManagementScript:
+VnfLifeCycleManagementScript:
   description: This clause defines the information elements related to the lifecycle management script for the VNF.
   attributes:
     event:

@@ -1,0 +1,67 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.3 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+VnfProfile:
+  description: The VnfProfile information element specifies a profile for isntantiating VNFs of a particular NS DF according to a specific VNFD and VNF DF.
+  attributes:
+    vnf_profile_id:
+      description: Identifier of this vnfProfile information element. It uniquely identifies a VnfProfile.
+      type: Identifier
+      required: true
+
+    vnfd_id:
+      description: References a VNFD.
+      type: Identifier
+      required: true
+
+    flavour_id:
+      description: Identifies a flavour within the VNFD.
+      type: Identifier
+      required: true
+
+    instantiation_level:
+      description: Identifier of the instantiation level of the VNF DF to be used for instantiation. If not present, the default instantiation level as declared in the VNFD shall be used.
+      type: Identifier
+      required: false
+
+    min_number_of_instances:
+      description: Minimum number of instances of the VNF based on this VNFD that is permitted to exist for this VnfProfile.
+      type: Integer
+      required: true
+
+    max_number_of_instances:
+      description: Maximum number of instances of the VNF based oon this VNFD that is permitted to exist for this VnfProfile.
+      type: Integer
+      required: true
+
+    local_affinity_or_anti_affinity_rule:
+      description: Specifies affinity and anti-affinity rules applicable between VNF instances created from this profile.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsLocalAffinityOrAntiAffinityRule
+
+    affinity_or_anti_affinity_group_id:
+      description: Identifier(s) of the affinity or anti-affinity group(s) the VnfProfile belongs to.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    ns_virtual_link_connectivity:
+      description: Defines the connection information of the VNF, it contains connection relationship between a VNF connection point and a NS Virtual Link.
+      type: List
+      required: true
+      constraints:
+        entry_type: NsVirtualLinkConnectivity

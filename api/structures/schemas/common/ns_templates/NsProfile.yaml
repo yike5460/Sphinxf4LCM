@@ -1,0 +1,55 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.11 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsProfile:
+  description: The NsLevel information element describes the details of an NS level. An NS level consists of a list of involved entities, i.e. VNFs, VLs and/or nested NSs. For each involved VNF/nested NS, the number of instances required by the NS level is specified. For each involved VL, the bitrate requirements corresponding to the NS level are specified.
+  attributes:
+    ns_profile_id:
+      description: Identifier of this NsLevel information element. It uniquely identifies an NS level within the DF.
+      type: Identifier
+      required: true
+
+    nsd_id:
+      description: Identifies the NSD applicable to NS instantiated according to this profile.
+      type: Identifier
+      required: true
+
+    ns_instantiation_level_id:
+      description: Identifies the NS level within the referenced NS DF to be used in the context of the parent NS instantiation. If not present, the default NS instantiation level as declared in the referenced NSD shall be used.
+      type: Identifier
+      required: false
+
+    min_number_of_instances:
+      description: Minimum number of nested NS instances based on the referenced NSD that is permitted to exist for this NsProfile.
+      type: Integer
+      required: true
+
+    max_number_of_instances:
+      description: Maximum number of nested NS instances based on the referenced NSD that is permitted to exist for this NSProfile.
+      type: Integer
+      required: true
+
+    affinity_or_anti_affinity_group_id:
+      description: Identifies an affinity or anti-affinity group the NSs created according to this NSProfile belong to.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    ns_virtual_link_connectivity:
+      description: Defines the connection information of the NS, it contains connection relationship between an NS SAP and a NS virtual Link of the composite NS.
+      type: List
+      required: true
+      constraints:
+        entry_type: NsVirtualLinkConnectivity

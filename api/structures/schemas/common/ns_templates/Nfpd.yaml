@@ -1,0 +1,33 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.4.3 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+Nfpd:
+  description: The Nfpd information element associates traffic flow criteria to a list of descriptors associated to the connection points and service access points to be visited by traffic flows matching these criteria
+  attributes:
+    nfp_id:
+      description: Identifies this nfpd information element within a VNFFGD.
+      type: Identifier
+      required: true
+
+    nfp_rule:
+      description: Provides an NFP classification and selection rule.  The rule may be expressed as a criteria constructed out of atomic assertions linked by Boolean operators AND, OR and NOT.
+      type: Rule
+      required: false
+
+    cpd:
+      description: References the descriptor of a connection point to be traversed by the traffic flows matching the criteria. This shall be a connection point attached to one of the constituent VNFs and PNFs of the parent VNFFG, or a SAP of one of the constituent nested NSs of the parent VNFFG. See note 2.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier

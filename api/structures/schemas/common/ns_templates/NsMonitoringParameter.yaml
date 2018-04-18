@@ -1,0 +1,33 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.8 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsMonitoringParameter:
+  description: The MonitoringParameter information specifies a virtualised resource related performance metric to be monitored.
+  attributes:
+    monitoring_parameter_id:
+      description: Unique identifier of this monitoring parameter information element.
+      type: Identifier
+      required: true
+
+    name:
+      description: Human readable name of the monitoring parameter.
+      type: String
+      required: false
+
+    performance_metric:
+      description: Defines the virtualised resource-related performance metric.
+      type: String
+      required: true
+
+

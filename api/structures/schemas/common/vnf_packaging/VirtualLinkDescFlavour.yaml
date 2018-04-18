@@ -22,5 +22,5 @@ VirtualLinkDescFlavour:
 
     qos:
       description: QoS of the VL.
-      type: QoS
+      type: VnfQoS
       required: false

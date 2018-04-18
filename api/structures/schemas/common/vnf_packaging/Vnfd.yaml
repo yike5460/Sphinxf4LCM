@@ -133,7 +133,7 @@ Vnfd:
       type: List
       required: false
       constraints:
-        entry_type: LifeCycleManagementScript
+        entry_type: VnfLifeCycleManagementScript
 
     element_group:
       description: Describes the associated elements of a VNFD for a certain purpose during VNF lifecycle management.

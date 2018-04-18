@@ -37,7 +37,7 @@ VnfDf:
       type: List
       required: false
       constraints:
-        entry_type: VirtualLinkProfile
+        entry_type: VnfVirtualLinkProfile
 
     instantiation_level:
       description: Describes the various levels of resources that can be used to instantiate the VNF using this flavour. Examples - Small, Medium, Large. If there is only one instantiationLevel entry, it shall be treated as the default instantiation level for this DF.
@@ -68,14 +68,14 @@ VnfDf:
       type: List
       required: false
       constraints:
-        entry_type: AffinityOrAntiAffinityGroup
+        entry_type: VnfAffinityOrAntiAffinityGroup
 
     monitoring_parameter:
       description: Defines the virtualised resources monitoring parameters on VNF level.
       type: List
       required: false
       constraints:
-        entry_type: MonitoringParameter
+        entry_type: VnfMonitoringParameter
 
     scaling_aspect:
       description: The scaling aspects supported by this DF of the VNF. scalingAspect shall be present if the VNF supports scaling.

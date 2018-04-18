@@ -1,0 +1,29 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.9 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsLifeCycleManagementScript:
+  description: The LifeCycleManagementScript information element specifies a script for the NS.
+  attributes:
+    event:
+      description: Describes NS lifecycle event(s) or an external stimulus detected on an NFVO reference point.
+      type: List
+      required: true
+      constraints:
+        entry_type: String
+
+    script:
+      description: Includes an NS LCM script (e.g. written in a DSL) triggered to react to one of the events listed in the event attribute.
+      type: NotSpecified
+      required: true
+

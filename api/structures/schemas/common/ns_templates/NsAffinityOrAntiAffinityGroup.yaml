@@ -1,0 +1,37 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.5 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+
+NsAffinityOrAntiAffinityGroup:
+  description: The AffinityOrAntiAffinityGroup describes the affinity or anti-affinity relationship applicable between the VNF instances created using different VnfProfiles, the Virtual Link instances created using different VlProfiles or the nested NS instances created using different NsProfiles.
+  attributes:
+    group_id:
+      description: Identifier of this AffinityOrAntiAffinityGroup information element.
+      type: Identifier
+      required: true
+
+    affinity_or_anti_affinity:
+      description: Specifies the type of relationship that the members of the group have - "affinity" or "anti-affinity".
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ affinity, anti-affinity]
+
+    scope:
+      description: Specifies the scope of the rule, possible values are NFVI-PoP, Zone, ZoneGroup, NFVI-node.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ NFVI-PoP, Zone, ZoneGroup, NFVI-node ]
