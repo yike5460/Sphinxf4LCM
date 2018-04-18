@@ -35,7 +35,7 @@ VduProfile:
       type: List
       required: false
       constraints:
-        entry_type: LocalAffinityOrAntiAffinityRule
+        entry_type: VnfLocalAffinityOrAntiAffinityRule
 
     affinity_or_anti_affinity_group_id:
       description: Identifier(s) of the affinity or anti-affinity group(s) the VDU belongs to.

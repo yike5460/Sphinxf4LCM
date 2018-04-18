@@ -10,10 +10,10 @@
 #
 
 
-# This structure was written in accordance with section 7.1.8.10 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+# This structure was written in accordance with section 6.5.6 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
 
-QoS:
-  description: The QoS information element describes QoS data for a given VL used in a DF.
+NsQoS:
+  description: The QoS information element specifies quality of service parameters applicable to a VL.
   attributes:
     latency:
       description: Maximum latency in ms.
@@ -28,4 +28,9 @@ QoS:
     packet_loss_ratio:
       description: Maximum packet loss ratio. Cardinality is 0 if no packetLossRatio requirement exists.
       type: Number
+      required: false
+
+    priority:
+      description: Specifies the priority level in case of congestion on the underlying physical links.
+      type: Integer
       required: false

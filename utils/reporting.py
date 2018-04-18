@@ -41,6 +41,14 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
+        # Write steps summary
+        report_file.write('* Steps summary:\n')
+        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Status'])
+        for step_index, step_details in tc_result.get('steps', {}).items():
+            t.add_row([step_index, step_details['name'], step_details['description'], step_details['status']])
+        report_file.write(t.get_string())
+        report_file.write('\n\n')
+
         # Write test case environment
         report_file.write('*** Test case environment ***')
         report_file.write('\n\n')

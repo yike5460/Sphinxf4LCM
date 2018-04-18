@@ -1,0 +1,56 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.4.2 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+Vnffgd:
+  description: The Vnffgd information element specifies a topology of connectivity of a NS and optionally forwarding rules applicable to the traffic conveyed over this topology.
+  attributes:
+    vnffgd_id:
+      description: Identifier of this Vnffgd information element. It uniquely identifies a VNFFGD.
+      type: Identifier
+      required: true
+
+    vnfd_id:
+      description: References the VNFD of a constituent VNF.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    pnfd_id:
+      description: References the PNFD of a constituent PNF.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    virtual_link_desc_id:
+      description: References the VLD of a constituent VL.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    cpd_pool_id:
+      description: A reference to a pool of descriptors of connection points attached to one of the constituent VNFs and PNFs and/or one of the SAPs of the parent NS or of a nested NS.
+      type: List
+      required: true
+      constraints:
+        entry_type: Identifier
+
+    nfpd:
+      description: The network forwarding path associated to the VNFFG.
+      type: List
+      required: false
+      constraints:
+        entry_type: Nfpd

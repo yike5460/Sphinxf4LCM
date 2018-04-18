@@ -71,7 +71,7 @@ Vdu:
       type: List
       required: false
       constraints:
-        entry_type: MonitoringParameter
+        entry_type: VnfMonitoringParameter
 
     configurable_properties:
       description: Describes the configurable properties of all VNFC instances based on this VDU.

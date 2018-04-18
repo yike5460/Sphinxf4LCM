@@ -6,7 +6,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.5.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+# This structure was written in accordance with section 7.1.5.9 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 ChangeVnfFlavourOpConfig:
     description: This information element defines attributes that affect the invocation of the ChangeVnfFlavour operation.

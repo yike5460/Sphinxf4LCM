@@ -345,7 +345,7 @@ class SdlManoAdapter(object):
                 ns_instance_dict = response.json()
                 ns_status = ns_instance_dict['state']
             except Exception as e:
-                raise SdlManoAdapterError(e.message)
+                raise SdlManoAdapterError('Unable to get details for NS %s - %s' % (ns_instance_id, e))
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
             if ns_status in stable_states:
                 return

@@ -1,0 +1,33 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.3 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+Sapd:
+  description: The Sapd information element specifies the information used to instantiate the service access points of an NS. A Sapd inherits from the corresponding Cpd Class. All attributes of the Cpd are also attributes of the Sapd.
+  inherits: [ Cpd ]
+  attributes:
+    sap_address_assignment:
+      description: Specify whether the SAP address assignment is under the responsability of management and orchestration functions or not. If it is set to True, management and orchestration functions are responsible for assigning addresses to the access points instantiated from this SAPD.
+      type: Boolean
+      required: true
+
+    ns_virtual_link_desc_id:
+      description: References the descriptor of the NS VL instance to which the SAP instantiated from this SAPD connects to.
+      type: Identifier
+      required: false
+
+    associated_cpd_id:
+      description: References the descriptor of VNF external connection points or the descriptor of PNF external connection points or the descriptor of the SAP of a nested NS of this NS.
+      type: Identifier
+      required: false
+

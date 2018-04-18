@@ -49,4 +49,4 @@ VnfVirtualLinkDesc:
       type: List
       required: false
       constraints:
-        entry_type: MonitoringParameter
+        entry_type: VnfMonitoringParameter

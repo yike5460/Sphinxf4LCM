@@ -12,7 +12,7 @@
 
 # This structure was written in accordance with section 7.1.8.4 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
-VirtualLinkProfile:
+VnfVirtualLinkProfile:
   description: The VirtualLinkProfile describes additional instantiation data for a given VL used in a DF.
   attributes:
     vnf_virtual_link_desc_id:
@@ -30,7 +30,7 @@ VirtualLinkProfile:
       type: List
       required: false
       constraints:
-        entry_type: LocalAffinityOrAntiAffinityRule
+        entry_type: VnfLocalAffinityOrAntiAffinityRule
 
     affinity_or_anti_affinity_group_id:
       description: Identifier(s) of the affinity or anti-affinity group(s) the VnfVirtualLinkDesc belongs to.

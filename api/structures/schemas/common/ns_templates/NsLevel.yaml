@@ -1,0 +1,47 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.3.5 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsLevel:
+  description: The NsLevel information element describes the details of an NS level. An NS level consists of a list of involved entities, i.e. VNFs, VLs and/or nested NSs. For each involved VNF/nested NS, the number of instances required by the NS level is specified. For each involved VL, the bitrate requirements corresponding to the NS level are specified.
+  attributes:
+    ns_level_id:
+      description: Identifier of this NsLevel information element. It uniquely identifies an NS level within the DF.
+      type: Identifier
+      required: true
+
+    description:
+      description: Human readable description of the NS level.
+      type: String
+      required: true
+
+    vnf_to_level_mapping:
+      description: Specifies the profile of the VNFs involved in this NS level and, for each of them, the required number of instances.
+      type: List
+      required: false
+      constraints:
+        entry_type: VnfToLevelMapping
+
+    virtual_link_to_level_mapping:
+      description: Specifies the profile of the VLs involved in this NS level and, for each of them, the needed bandwidth.
+      type: List
+      required: false
+      constraints:
+        entry_type: VirtualLinkToLevelMapping
+
+    ns_to_level_mapping:
+      description: Specifies the profile of the nested NSs involved in this NS level and, for each of them, the required number of instances.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsToLevelMapping
