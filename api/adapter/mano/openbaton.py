@@ -14,14 +14,13 @@ import logging
 import time
 
 import requests
-
 from requests.auth import HTTPBasicAuth
+
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import ResourceHandle, InstantiatedVnfInfo, NsInfo, VnfInfo, VnfExtCpInfo, VnfcResourceInfo
 from utils.logging_module import log_entry_exit
-import json
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -42,8 +41,8 @@ class OpenbatonManoAdapterUnauthorized(Exception):
 
 
 class OpenbatonManoAdapter(object):
-    def __init__(self, api_url, username, password, project):
-        self.api_url = api_url
+    def __init__(self, url, username, password, project):
+        self.url = url
         self.username = username
         self.password = password
         self.project = project
@@ -61,16 +60,16 @@ class OpenbatonManoAdapter(object):
         http_headers = {
             "Accept": "application/json",
         }
-        body = (('username', username), ('password', password), ('grant_type', 'password'))
+        body = {'username': username, 'password': password, 'grant_type': 'password'}
         try:
-            response = requests.post(url=self.api_url + '/oauth/token',
+            response = requests.post(url=self.url + '/oauth/token',
                                      auth=HTTPBasicAuth('openbatonOSClient', 'secret'),
                                      data=body, headers=http_headers, verify=False)
             assert response.status_code == 200
         except Exception as e:
             LOG.debug(e)
             raise OpenbatonManoAdapterError('Unable to fetch Authorization token from %s' %
-                                            self.api_url + '/oauth/token')
+                                            self.url + '/oauth/token')
         token = str('Bearer ' + response.json()['access_token'])
         return token
 
@@ -81,12 +80,12 @@ class OpenbatonManoAdapter(object):
         try:
             kwargs.setdefault('data', {})
             kwargs.setdefault('verify', False)
-            resp, body = self._do_request(self.api_url + url, method, **kwargs)
+            status_code, body = self._do_request(self.url + url, method, **kwargs)
         except OpenbatonManoAdapterUnauthorized:
             self.token = self.get_token(self.username, self.password)
             self.session.headers['Authorization'] = self.token
-            resp, body = self._do_request(self.api_url + url, method, **kwargs)
-        return resp, body
+            status_code, body = self._do_request(self.url + url, method, **kwargs)
+        return status_code, body
 
     @log_entry_exit(LOG)
     def _do_request(self, url, method, **kwargs):
@@ -94,27 +93,34 @@ class OpenbatonManoAdapter(object):
         verify = kwargs.pop('verify', False)
         try:
             resp = self.session.request(url=url, method=method, data=data, verify=verify)
-            body = json.loads(resp.text)
-        except ValueError:
-            body = {}
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to run request on %s, method %s. Reason: %s' % (url, method, e))
-        if resp.status_code == 401:
+
+        status_code = resp.status_code
+        if status_code == 401:
             raise OpenbatonManoAdapterUnauthorized("Access token %s is invalid" % self.token)
-        return resp, body
+
+        try:
+            body = resp.json()
+        except ValueError:
+            body = None
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenbatonManoAdapterError('Unable to parse response. Reason: %s' % e)
+
+        return status_code, body
 
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         url = '/api/v1/ns-records/%s' % nsd_id
         try:
-            resp, body = self.do_request(url=url, method='post')
-            assert resp.status_code == 201
+            status_code, body = self.do_request(url=url, method='post')
+            assert status_code == 201
             ns_instance_id = str(body.get('id', ''))
         except Exception as e:
             LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to instantiate NS for NSD ID %s. Reason: %s'
-                                            % (nsd_id, e.message))
+            raise OpenbatonManoAdapterError('Unable to instantiate NS for NSD ID %s. Reason: %s.' % (nsd_id, e))
         return ns_instance_id
 
     @log_entry_exit(LOG)
@@ -148,7 +154,7 @@ class OpenbatonManoAdapter(object):
             except Exception as e:
                 LOG.exception(e)
                 raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
-                                                (resource_id, e.message))
+                                                (resource_id, e))
             if ns_status == 'ACTIVE':
                 for vnfr in ns_config.get('vnfr', []):
                     self.vnf_to_ns_mapping[str(vnfr.get('id', ''))] = resource_id
@@ -161,11 +167,11 @@ class OpenbatonManoAdapter(object):
         if operation_type == 'ns_terminate':
             url = '/api/v1/ns-records/%s' % resource_id
             try:
-                resp, ns_config = self.do_request(url=url, method='get')
-                if resp.status_code == 404:
-                    self.vnf_to_ns_mapping = {k: v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
+                status_code, ns_config = self.do_request(url=url, method='get')
+                if status_code == 404:
+                    self.vnf_to_ns_mapping = {k:v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
                     return constants.OPERATION_SUCCESS
-                assert resp.status_code == 200
+                assert status_code == 200
                 ns_status = str(ns_config.get('status', ''))
             except Exception as e:
                 LOG.exception(e)
@@ -183,16 +189,16 @@ class OpenbatonManoAdapter(object):
         ns_info.ns_instance_id = ns_instance_id
         try:
             url = '/api/v1/ns-records/%s' % ns_instance_id
-            resp, ns_config = self.do_request(url=url, method='get')
-            if resp.status_code == 404:
+            status_code, ns_config = self.do_request(url=url, method='get')
+            if status_code == 404:
                 # ns-instance-id not found, so assuming NOT_INSTANTIATED
                 ns_info.ns_state = constants.NS_NOT_INSTANTIATED
                 return ns_info
-            assert resp.status_code == 200
+            assert status_code == 200
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
-                                            (ns_instance_id, e.message))
+                                            (ns_instance_id, e))
         ns_info.nsd_id = str(ns_config.get('descriptor_reference', ''))
         if ns_config.get('status') == 'ACTIVE':
             ns_info.ns_state = constants.NS_INSTANTIATED
@@ -212,7 +218,7 @@ class OpenbatonManoAdapter(object):
             vnf_info.vnf_product_name = str(constituent_vnfr.get('type', ''))
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
             vnf_info.instantiated_vnf_info.vnf_state = \
-                constants.VNF_STATE['OPENBATON_DEPLOYMENT_STATE'][constituent_vnfr.get('status')]
+                constants.VNF_STATE['OPENBATON_VNF_STATE'][constituent_vnfr.get('status')]
             vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
             vnf_info.instantiated_vnf_info.ext_cp_info = list()
             for vdu in constituent_vnfr.get('vdu', []):
@@ -243,15 +249,15 @@ class OpenbatonManoAdapter(object):
         ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id, '')
         try:
             url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
-            resp, vnf_config = self.do_request(url=url, method='get')
-            if resp.status_code == 400:
+            status_code, vnf_config = self.do_request(url=url, method='get')
+            if status_code == 400:
                 # vnf-instance-id not found, so assuming NOT_INSTANTIATED
                 vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
                 return vnf_info
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve status for VNF with ID %s. Reason: %s' %
-                                            (vnf_instance_id, e.message))
+                                            (vnf_instance_id, e))
         vnf_info.vnf_instance_id = str(vnf_config.get('id', ''))
         if vnf_config.get('status', '') not in ['ACTIVE', 'INACTIVE']:
             vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
@@ -262,7 +268,7 @@ class OpenbatonManoAdapter(object):
         vnf_info.vnf_product_name = str(vnf_config.get('type', ''))
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
         vnf_info.instantiated_vnf_info.vnf_state = \
-            constants.VNF_STATE['OPENBATON_DEPLOYMENT_STATE'][vnf_config.get('status')]
+            constants.VNF_STATE['OPENBATON_VNF_STATE'][vnf_config.get('status')]
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
         vnf_info.instantiated_vnf_info.ext_cp_info = list()
         for vdu in vnf_config.get('vdu', []):
@@ -288,12 +294,12 @@ class OpenbatonManoAdapter(object):
     def get_vim_helper(self, vim_id):
         url = '/api/v1/datacenters/%s' % vim_id
         try:
-            resp, vim_config = self.do_request(url=url, method='get')
-            assert resp.status_code == 200
+            status_code, vim_config = self.do_request(url=url, method='get')
+            assert status_code == 200
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve config for VIM with ID %s. Reason: %s' %
-                                            (vim_id, e.message))
+                                            (vim_id, e))
         if vim_config.get('type', '') == 'openstack':
             vim_vendor = 'openstack'
             vim_params = {
@@ -314,12 +320,12 @@ class OpenbatonManoAdapter(object):
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
         url = '/api/v1/ns-records/%s' % ns_instance_id
         try:
-            resp, ns_term = self.do_request(url=url, method='delete')
-            assert resp.status_code == 204
+            status_code, ns_term = self.do_request(url=url, method='delete')
+            assert status_code == 204
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to terminate NS instance ID %s. Reason: %s' %
-                                            (ns_instance_id, e.message))
+                                            (ns_instance_id, e))
 
         return 'ns_terminate', ns_instance_id
 
@@ -349,7 +355,7 @@ class OpenbatonManoAdapter(object):
                     LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
             except Exception as e:
                 LOG.debug('Could not retrieve status for NS with ID %s' % ns_instance_id)
-                raise OpenbatonManoAdapterError(e.message)
+                raise OpenbatonManoAdapterError(e)
         LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
         return False
 
@@ -357,12 +363,12 @@ class OpenbatonManoAdapter(object):
     def get_vnfd(self, vnfd_id):
         url = '/api/v1/vnf-descriptors/%s' % vnfd_id
         try:
-            resp, vnfd = self.do_request(url=url, method='get')
-            assert resp.status_code == 200
+            status_code, vnfd = self.do_request(url=url, method='get')
+            assert status_code == 200
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve config for VNFD with ID %s. Reason: %s' %
-                                            (vnfd_id, e.message))
+                                            (vnfd_id, e))
         return vnfd
 
     @log_entry_exit(LOG)
@@ -458,12 +464,12 @@ class OpenbatonManoAdapter(object):
     def get_nsd(self, nsd_id):
         url = '/api/v1/ns-descriptors/%s' % nsd_id
         try:
-            resp, nsd = self.do_request(url=url, method='get')
-            assert resp.status_code == 200
+            status_code, nsd = self.do_request(url=url, method='get')
+            assert status_code == 200
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve config for NSD with ID %s. Reason: %s' %
-                                            (nsd_id, e.message))
+                                            (nsd_id, e))
         return nsd
 
     @log_entry_exit(LOG)
@@ -473,12 +479,12 @@ class OpenbatonManoAdapter(object):
         # ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id)
         # url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
         # try:
-        #     resp, vnf_config = self.do_request(url=url, method='get')
-        #     assert resp.status_code == 200
+        #     status_code, vnf_config = self.do_request(url=url, method='get')
+        #     assert status_code == 200
         # except Exception as e:
         #     LOG.exception(e)
         #     raise OpenbatonManoAdapterError('Unable to retrieve config for VNF with ID %s. Reason: %s' %
-        #                                     (vnf_instance_id, e.message))
+        #                                     (vnf_instance_id, e))
         # mgmt_addr_list = [str(addr) for addr in vnf_config.get('vnf_address', [])]
 
         return mgmt_addr_list
