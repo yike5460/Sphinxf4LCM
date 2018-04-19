@@ -74,21 +74,21 @@ class OpenbatonManoAdapter(object):
         return token
 
     @log_entry_exit(LOG)
-    def do_request(self, url, method, **kwargs):
+    def request(self, url, method, **kwargs):
         # Perform the request once. If we get a 401 back then it might be because the auth token expired, so try to
         # re-authenticate and try again. If it still fails, bail.
         try:
             kwargs.setdefault('data', {})
             kwargs.setdefault('verify', False)
-            status_code, body = self._do_request(self.url + url, method, **kwargs)
+            status_code, body = self.do_request(self.url + url, method, **kwargs)
         except OpenbatonManoAdapterUnauthorized:
             self.token = self.get_token(self.username, self.password)
             self.session.headers['Authorization'] = self.token
-            status_code, body = self._do_request(self.url + url, method, **kwargs)
+            status_code, body = self.do_request(self.url + url, method, **kwargs)
         return status_code, body
 
     @log_entry_exit(LOG)
-    def _do_request(self, url, method, **kwargs):
+    def do_request(self, url, method, **kwargs):
         data = kwargs.pop('data', {})
         verify = kwargs.pop('verify', False)
         try:
@@ -115,9 +115,9 @@ class OpenbatonManoAdapter(object):
     def ns_create_id(self, nsd_id, ns_name, ns_description):
         url = '/api/v1/ns-records/%s' % nsd_id
         try:
-            status_code, body = self.do_request(url=url, method='post')
+            status_code, body = self.request(url=url, method='post')
             assert status_code == 201
-            ns_instance_id = str(body.get('id', ''))
+            ns_instance_id = str(body['id'])
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to instantiate NS for NSD ID %s. Reason: %s.' % (nsd_id, e))
@@ -149,15 +149,15 @@ class OpenbatonManoAdapter(object):
         if operation_type == 'ns_instantiate':
             url = '/api/v1/ns-records/%s' % resource_id
             try:
-                resp, ns_config = self.do_request(url=url, method='get')
-                ns_status = str(ns_config.get('status', ''))
+                resp, ns_config = self.request(url=url, method='get')
+                ns_status = str(ns_config['status'])
             except Exception as e:
                 LOG.exception(e)
                 raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
                                                 (resource_id, e))
             if ns_status == 'ACTIVE':
-                for vnfr in ns_config.get('vnfr', []):
-                    self.vnf_to_ns_mapping[str(vnfr.get('id', ''))] = resource_id
+                for vnfr in ns_config['vnfr']:
+                    self.vnf_to_ns_mapping[str(vnfr['id'])] = resource_id
                 return constants.OPERATION_SUCCESS
             elif ns_status == 'ERROR':
                 return constants.OPERATION_FAILED
@@ -167,12 +167,12 @@ class OpenbatonManoAdapter(object):
         if operation_type == 'ns_terminate':
             url = '/api/v1/ns-records/%s' % resource_id
             try:
-                status_code, ns_config = self.do_request(url=url, method='get')
+                status_code, ns_config = self.request(url=url, method='get')
                 if status_code == 404:
                     self.vnf_to_ns_mapping = {k:v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
                     return constants.OPERATION_SUCCESS
                 assert status_code == 200
-                ns_status = str(ns_config.get('status', ''))
+                ns_status = str(ns_config['status'])
             except Exception as e:
                 LOG.exception(e)
                 raise OpenbatonManoAdapterError('Unable to get status for NS %s' % resource_id)
@@ -189,7 +189,7 @@ class OpenbatonManoAdapter(object):
         ns_info.ns_instance_id = ns_instance_id
         try:
             url = '/api/v1/ns-records/%s' % ns_instance_id
-            status_code, ns_config = self.do_request(url=url, method='get')
+            status_code, ns_config = self.request(url=url, method='get')
             if status_code == 404:
                 # ns-instance-id not found, so assuming NOT_INSTANTIATED
                 ns_info.ns_state = constants.NS_NOT_INSTANTIATED
@@ -199,44 +199,44 @@ class OpenbatonManoAdapter(object):
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
                                             (ns_instance_id, e))
-        ns_info.nsd_id = str(ns_config.get('descriptor_reference', ''))
-        if ns_config.get('status') == 'ACTIVE':
+        ns_info.nsd_id = str(ns_config['descriptor_reference'])
+        if ns_config['status'] == 'ACTIVE':
             ns_info.ns_state = constants.NS_INSTANTIATED
         else:
             ns_info.ns_state = constants.NS_NOT_INSTANTIATED
         ns_info.vnf_info = list()
-        for constituent_vnfr in ns_config.get('vnfr', []):
+        for constituent_vnfr in ns_config['vnfr']:
             vnf_info = VnfInfo()
-            vnf_info.vnf_instance_id = str(constituent_vnfr.get('id', ''))
-            if constituent_vnfr.get('status', '') not in ['ACTIVE', 'INACTIVE']:
+            vnf_info.vnf_instance_id = str(constituent_vnfr['id'])
+            if constituent_vnfr['status'] not in ['ACTIVE', 'INACTIVE']:
                 vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
                 ns_info.vnf_info.append(vnf_info)
                 continue
             vnf_info.instantiation_state = constants.VNF_INSTANTIATED
-            vnf_info.vnfd_id = str(constituent_vnfr.get('descriptor_reference', ''))
-            vnf_info.vnf_instance_name = str(constituent_vnfr.get('name', ''))
-            vnf_info.vnf_product_name = str(constituent_vnfr.get('type', ''))
+            vnf_info.vnfd_id = str(constituent_vnfr['descriptor_reference'])
+            vnf_info.vnf_instance_name = str(constituent_vnfr['name'])
+            vnf_info.vnf_product_name = str(constituent_vnfr['type'])
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
             vnf_info.instantiated_vnf_info.vnf_state = \
-                constants.VNF_STATE['OPENBATON_VNF_STATE'][constituent_vnfr.get('status')]
+                constants.VNF_STATE['OPENBATON_VNF_STATE'][constituent_vnfr['status']]
             vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
             vnf_info.instantiated_vnf_info.ext_cp_info = list()
-            for vdu in constituent_vnfr.get('vdu', []):
-                for vnfc_instance in vdu.get('vnfc_instance', []):
+            for vdu in constituent_vnfr['vdu']:
+                for vnfc_instance in vdu['vnfc_instance']:
                     vnfc_resource_info = VnfcResourceInfo()
-                    vnfc_resource_info.vnfc_instance_id = str(vnfc_instance.get('id', ''))
-                    vnfc_resource_info.vdu_id = str(vdu.get('parent_vdu', ''))
+                    vnfc_resource_info.vnfc_instance_id = str(vnfc_instance['id'])
+                    vnfc_resource_info.vdu_id = str(vdu['parent_vdu'])
                     vnfc_resource_info.compute_resource = ResourceHandle()
-                    vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance.get('vim_id', ''))
-                    vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance.get('vc_id', ''))
+                    vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance['vim_id'])
+                    vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance['vc_id'])
                     vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
-                    for ext_cp in vnfc_instance.get('vnfComponent', {}).get('connection_point', []):
+                    for ext_cp in vnfc_instance['vnfComponent']['connection_point']:
                         vnf_ext_cp_info = VnfExtCpInfo()
-                        port_name = 'VNFD-' + str(ext_cp.get('id', ''))
+                        port_name = 'VNFD-' + str(ext_cp['id'])
                         vnf_ext_cp_info.cp_instance_id, vnf_ext_cp_info.address = self.get_cp_info(
-                            port_name=port_name, vim_id=str(vnfc_instance.get('vim_id', '')))
-                        virtual_link_reference = str(ext_cp.get('virtual_link_reference', ''))
-                        vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu.get('name', ''))
+                            port_name=port_name, vim_id=str(vnfc_instance['vim_id']))
+                        virtual_link_reference = str(ext_cp['virtual_link_reference'])
+                        vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu['name'])
                         vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
             ns_info.vnf_info.append(vnf_info)
         return ns_info
@@ -249,7 +249,7 @@ class OpenbatonManoAdapter(object):
         ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id, '')
         try:
             url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
-            status_code, vnf_config = self.do_request(url=url, method='get')
+            status_code, vnf_config = self.request(url=url, method='get')
             if status_code == 400:
                 # vnf-instance-id not found, so assuming NOT_INSTANTIATED
                 vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
@@ -258,35 +258,35 @@ class OpenbatonManoAdapter(object):
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve status for VNF with ID %s. Reason: %s' %
                                             (vnf_instance_id, e))
-        vnf_info.vnf_instance_id = str(vnf_config.get('id', ''))
-        if vnf_config.get('status', '') not in ['ACTIVE', 'INACTIVE']:
+        vnf_info.vnf_instance_id = str(vnf_config['id'])
+        if vnf_config['status'] not in ['ACTIVE', 'INACTIVE']:
             vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
             return vnf_info
         vnf_info.instantiation_state = constants.VNF_INSTANTIATED
-        vnf_info.vnfd_id = str(vnf_config.get('descriptor_reference', ''))
-        vnf_info.vnf_instance_name = str(vnf_config.get('name', ''))
-        vnf_info.vnf_product_name = str(vnf_config.get('type', ''))
+        vnf_info.vnfd_id = str(vnf_config['descriptor_reference'])
+        vnf_info.vnf_instance_name = str(vnf_config['name'])
+        vnf_info.vnf_product_name = str(vnf_config['type'])
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
         vnf_info.instantiated_vnf_info.vnf_state = \
-            constants.VNF_STATE['OPENBATON_VNF_STATE'][vnf_config.get('status')]
+            constants.VNF_STATE['OPENBATON_VNF_STATE'][vnf_config['status']]
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
         vnf_info.instantiated_vnf_info.ext_cp_info = list()
-        for vdu in vnf_config.get('vdu', []):
-            for vnfc_instance in vdu.get('vnfc_instance', []):
+        for vdu in vnf_config['vdu']:
+            for vnfc_instance in vdu['vnfc_instance']:
                 vnfc_resource_info = VnfcResourceInfo()
-                vnfc_resource_info.vnfc_instance_id = str(vnfc_instance.get('id', ''))
-                vnfc_resource_info.vdu_id = str(vdu.get('id', ''))
+                vnfc_resource_info.vnfc_instance_id = str(vnfc_instance['id'])
+                vnfc_resource_info.vdu_id = str(vdu['id'])
                 vnfc_resource_info.compute_resource = ResourceHandle()
-                vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance.get('vim_id', ''))
-                vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance.get('vc_id', ''))
+                vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance['vim_id'])
+                vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance['vc_id'])
                 vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
-                for ext_cp in vnfc_instance.get('vnfComponent', {}).get('connection_point', []):
+                for ext_cp in vnfc_instance['vnfComponent']['connection_point']:
                     vnf_ext_cp_info = VnfExtCpInfo()
-                    port_name = 'VNFD-' + str(ext_cp.get('id', ''))
+                    port_name = 'VNFD-' + str(ext_cp['id'])
                     vnf_ext_cp_info.cp_instance_id, vnf_ext_cp_info.address = self.get_cp_info(
-                        port_name=port_name, vim_id=str(vnfc_instance.get('vim_id', '')))
-                    virtual_link_reference = str(ext_cp.get('virtual_link_reference', ''))
-                    vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu.get('name', ''))
+                        port_name=port_name, vim_id=str(vnfc_instance['vim_id']))
+                    virtual_link_reference = str(ext_cp['virtual_link_reference'])
+                    vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu['name'])
                     vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
         return vnf_info
 
@@ -294,25 +294,25 @@ class OpenbatonManoAdapter(object):
     def get_vim_helper(self, vim_id):
         url = '/api/v1/datacenters/%s' % vim_id
         try:
-            status_code, vim_config = self.do_request(url=url, method='get')
+            status_code, vim_config = self.request(url=url, method='get')
             assert status_code == 200
         except Exception as e:
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve config for VIM with ID %s. Reason: %s' %
                                             (vim_id, e))
-        if vim_config.get('type', '') == 'openstack':
+        if vim_config['type'] == 'openstack':
             vim_vendor = 'openstack'
             vim_params = {
-                'auth_url': vim_config.get('authUrl', ''),
-                'username': vim_config.get('username', ''),
-                # 'password': vim_config.get('password'),
+                'auth_url': vim_config['authUrl'],
+                'username': vim_config['username'],
+                # 'password': vim_config['password'],
                 'password': 'admin',
                 'project_domain_name': 'default',
                 'project_name': 'admin',
                 'user_domain_name': 'default'
             }
         else:
-            raise OpenbatonManoAdapterError('Unsupported VIM type: %s' % vim_config.get('type', ''))
+            raise OpenbatonManoAdapterError('Unsupported VIM type: %s' % vim_config['type'])
 
         return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
 
@@ -320,7 +320,7 @@ class OpenbatonManoAdapter(object):
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
         url = '/api/v1/ns-records/%s' % ns_instance_id
         try:
-            status_code, ns_term = self.do_request(url=url, method='delete')
+            status_code, ns_term = self.request(url=url, method='delete')
             assert status_code == 204
         except Exception as e:
             LOG.exception(e)
@@ -343,7 +343,7 @@ class OpenbatonManoAdapter(object):
         while elapsed_time < max_wait_time:
             url = '/api/v1/ns-records/%s' % ns_instance_id
             try:
-                resp, ns_config = self.do_request(url=url, method='get')
+                resp, ns_config = self.request(url=url, method='get')
                 ns_status = ns_config.get('status', 'NOTFOUND')
                 if ns_status in stable_states:
                     return True
@@ -363,7 +363,7 @@ class OpenbatonManoAdapter(object):
     def get_vnfd(self, vnfd_id):
         url = '/api/v1/vnf-descriptors/%s' % vnfd_id
         try:
-            status_code, vnfd = self.do_request(url=url, method='get')
+            status_code, vnfd = self.request(url=url, method='get')
             assert status_code == 200
         except Exception as e:
             LOG.exception(e)
@@ -377,8 +377,8 @@ class OpenbatonManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
 
         expected_vdu_images = {}
-        for vdu in vnfd.get('vdu', []):
-            expected_vdu_images[vdu.get('id', '')] = vdu.get('vm_image', '')
+        for vdu in vnfd['vdu']:
+            expected_vdu_images[vdu['id']] = vdu['vm_image']
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
@@ -416,15 +416,15 @@ class OpenbatonManoAdapter(object):
         vnfd = self.get_vnfd(vnfd_id)
 
         expected_vdu_flavours = {}
-        for vdu in vnfd.get('vdu', []):
-            vdu_id = str(vdu.get('id', ''))
+        for vdu in vnfd['vdu']:
+            vdu_id = str(vdu['id'])
             expected_vdu_flavours[vdu_id] = list()
             if vdu.get('computation_requirement') is not None:
                 vdu_flavour = str(vdu.get('computation_requirement', ''))
                 expected_vdu_flavours[vdu_id].append(vdu_flavour)
             else:
-                for flavour in vnfd.get('deployment_flavour', []):
-                    vdu_flavour = str(flavour.get('flavour_key', ''))
+                for flavour in vnfd['deployment_flavour']:
+                    vdu_flavour = str(flavour['flavour_key'])
                     expected_vdu_flavours[vdu_id].append(vdu_flavour)
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
@@ -449,9 +449,9 @@ class OpenbatonManoAdapter(object):
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
         expected_vnf_vnfd_mapping = dict()
-        for vnfd in nsd.get('vnfd', []):
-            vnf_product_name = str(vnfd.get('type', ''))
-            expected_vnf_vnfd_mapping[vnf_product_name] = str(vnfd.get('id', ''))
+        for vnfd in nsd['vnfd']:
+            vnf_product_name = str(vnfd['type'])
+            expected_vnf_vnfd_mapping[vnf_product_name] = str(vnfd['id'])
 
         for vnf_info in ns_info.vnf_info:
             vnf_product_name = vnf_info.vnf_product_name
@@ -464,7 +464,7 @@ class OpenbatonManoAdapter(object):
     def get_nsd(self, nsd_id):
         url = '/api/v1/ns-descriptors/%s' % nsd_id
         try:
-            status_code, nsd = self.do_request(url=url, method='get')
+            status_code, nsd = self.request(url=url, method='get')
             assert status_code == 200
         except Exception as e:
             LOG.exception(e)
@@ -479,13 +479,13 @@ class OpenbatonManoAdapter(object):
         # ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id)
         # url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
         # try:
-        #     status_code, vnf_config = self.do_request(url=url, method='get')
+        #     status_code, vnf_config = self.request(url=url, method='get')
         #     assert status_code == 200
         # except Exception as e:
         #     LOG.exception(e)
         #     raise OpenbatonManoAdapterError('Unable to retrieve config for VNF with ID %s. Reason: %s' %
         #                                     (vnf_instance_id, e))
-        # mgmt_addr_list = [str(addr) for addr in vnf_config.get('vnf_address', [])]
+        # mgmt_addr_list = [str(addr) for addr in vnf_config['vnf_address']]
 
         return mgmt_addr_list
 
@@ -493,12 +493,13 @@ class OpenbatonManoAdapter(object):
     def get_cp_info(self, port_name, vim_id):
         vim = self.get_vim_helper(vim_id)
         port_dict = vim.port_list(name=port_name)
+        port_id = ''
+        mac_address = list()
         for port in port_dict:
-            port_info = port.get('ports', [])
+            port_info = port['ports']
             if len(port_info) == 0:
                 LOG.debug('Could not find port with name %s in VIM' % port_name)
                 raise OpenbatonManoAdapterError('Could not find port with name %s in VIM' % port_name)
-            port_id = str(port_info[0].get('id'))
-            mac_address = [str(port_info[0].get('mac_address'))]
+            port_id = str(port_info[0]['id'])
+            mac_address = [str(port_info[0]['mac_address'])]
         return port_id, mac_address
-
