@@ -99,6 +99,10 @@ NS_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'] = {'reached': NS_INSTANTIATED,
 VNF_STATE['ESC_DEPLOYMENT_STATE'] = {'SERVICE_ACTIVE_STATE': VNF_STARTED,
                                      'SERVICE_STOPPED_STATE': VNF_STOPPED}
 
+# Mapping between Openbaton VNF deployment states and ETSI VNF states
+VNF_STATE['OPENBATON_VNF_STATE'] = {'ACTIVE': VNF_STARTED,
+                                    'INACTIVE': VNF_STOPPED}
+
 # Test results
 TEST_FAILED = 'FAILED'
 TEST_PASSED = 'PASSED'
