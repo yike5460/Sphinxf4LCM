@@ -264,7 +264,10 @@ class RiftManoAdapter(object):
         for connection_point in vnfr['connection-point']:
             vnf_ext_cp_info = VnfExtCpInfo()
             vnf_ext_cp_info.cp_instance_id = str(connection_point['connection-point-id'])
-            vnf_ext_cp_info.address = [str(connection_point['mac-address'])]
+            vnf_ext_cp_info.address = {
+                'mac': [str(connection_point['mac-address'])],
+                'ip': [str(connection_point['ip-address'])]
+            }
             vnf_ext_cp_info.cpd_id = str(connection_point['name'])
             vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
@@ -424,6 +427,7 @@ class RiftManoAdapter(object):
 
                 # Compare the flavor name in the VNFD to the flavor name of the VM
                 if flavor_name_nova != flavor_name_vnfd:
+                    LOG.debug('Unexpected value for flavor: %s. Expected: %s' % (flavor_name_vnfd, flavor_name_nova))
                     validation_result = False
             else:
                 virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
