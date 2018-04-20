@@ -454,14 +454,14 @@ class OpenbatonManoAdapter(object):
                     for port_list in port_dict:
                         for port in port_list['ports']:
                             vnf_ext_cp_info = VnfExtCpInfo()
-                            vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                            vnf_ext_cp_info.cp_instance_id = str(port['id'])
                             vnf_ext_cp_info.address = {
-                                'mac': [port['mac_address'].encode()],
+                                'mac': [str(port['mac_address'])],
                                 'ip': []
                             }
 
                             for fixed_ip in port['fixed_ips']:
-                                vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
+                                vnf_ext_cp_info.address['ip'].append(str(fixed_ip['ip_address']))
 
                     virtual_link_reference = str(ext_cp['virtual_link_reference'])
                     vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu['name'])
