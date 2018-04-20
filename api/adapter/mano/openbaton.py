@@ -413,51 +413,58 @@ class OpenbatonManoAdapter(object):
         return mgmt_addr_list
 
     @log_entry_exit(LOG)
-    def get_cp_info(self, port_name, vim_id):
-        vim = self.get_vim_helper(vim_id)
-        port_dict = vim.port_list(name=port_name)
-        port_id = ''
-        mac_address = list()
-        for port in port_dict:
-            port_info = port['ports']
-            if len(port_info) == 0:
-                LOG.debug('Could not find port with name %s in VIM' % port_name)
-                raise OpenbatonManoAdapterError('Could not find port with name %s in VIM' % port_name)
-            port_id = str(port_info[0]['id'])
-            mac_address = [str(port_info[0]['mac_address'])]
-        return port_id, mac_address
-
-    @log_entry_exit(LOG)
     def build_vnf_info(self, vnf_config):
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_config['id'])
         if vnf_config['status'] not in ['ACTIVE', 'INACTIVE']:
             vnf_info.instantiation_state = constants.VNF_NOT_INSTANTIATED
             return vnf_info
+
         vnf_info.instantiation_state = constants.VNF_INSTANTIATED
         vnf_info.vnfd_id = str(vnf_config['descriptor_reference'])
         vnf_info.vnf_instance_name = str(vnf_config['name'])
         vnf_info.vnf_product_name = str(vnf_config['type'])
+
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
-        vnf_info.instantiated_vnf_info.vnf_state = \
-            constants.VNF_STATE['OPENBATON_VNF_STATE'][vnf_config['status']]
+        vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENBATON_VNF_STATE'][vnf_config['status']]
+
         vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
         vnf_info.instantiated_vnf_info.ext_cp_info = list()
+
         for vdu in vnf_config['vdu']:
             for vnfc_instance in vdu['vnfc_instance']:
                 vnfc_resource_info = VnfcResourceInfo()
                 vnfc_resource_info.vnfc_instance_id = str(vnfc_instance['id'])
                 vnfc_resource_info.vdu_id = str(vdu['parent_vdu'])
+
                 vnfc_resource_info.compute_resource = ResourceHandle()
                 vnfc_resource_info.compute_resource.vim_id = str(vnfc_instance['vim_id'])
                 vnfc_resource_info.compute_resource.resource_id = str(vnfc_instance['vc_id'])
+
                 vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
+
                 for ext_cp in vnfc_instance['vnfComponent']['connection_point']:
                     vnf_ext_cp_info = VnfExtCpInfo()
                     port_name = 'VNFD-' + str(ext_cp['id'])
-                    vnf_ext_cp_info.cp_instance_id, vnf_ext_cp_info.address = self.get_cp_info(
-                        port_name=port_name, vim_id=str(vnfc_instance['vim_id']))
+                    vim_id = str(vnfc_instance['vim_id'])
+
+                    vim = self.get_vim_helper(vim_id)
+                    port_dict = vim.port_list(name=port_name)
+
+                    for port_list in port_dict:
+                        for port in port_list['ports']:
+                            vnf_ext_cp_info = VnfExtCpInfo()
+                            vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                            vnf_ext_cp_info.address = {
+                                'mac': [port['mac_address'].encode()],
+                                'ip': []
+                            }
+
+                            for fixed_ip in port['fixed_ips']:
+                                vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
+
                     virtual_link_reference = str(ext_cp['virtual_link_reference'])
                     vnf_ext_cp_info.cpd_id = virtual_link_reference + '@' + str(vdu['name'])
                     vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
+
         return vnf_info
