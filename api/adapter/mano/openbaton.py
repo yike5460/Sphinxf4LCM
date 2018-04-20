@@ -75,23 +75,19 @@ class OpenbatonManoAdapter(object):
         return token
 
     @log_entry_exit(LOG)
-    def request(self, url, method, **kwargs):
+    def request(self, url, method, data=None, verify=False):
         # Perform the request once. If we get a 401 back then it might be because the auth token expired, so try to
         # re-authenticate and try again. If it still fails, bail.
         try:
-            kwargs.setdefault('data', {})
-            kwargs.setdefault('verify', False)
-            status_code, body = self.do_request(self.url + url, method, **kwargs)
+            status_code, body = self.do_request(self.url + url, method, data, verify)
         except OpenbatonManoAdapterUnauthorized:
             self.token = self.get_token(self.username, self.password)
             self.session.headers['Authorization'] = self.token
-            status_code, body = self.do_request(self.url + url, method, **kwargs)
+            status_code, body = self.do_request(self.url + url, method, data, verify)
         return status_code, body
 
     @log_entry_exit(LOG)
-    def do_request(self, url, method, **kwargs):
-        data = kwargs.pop('data', {})
-        verify = kwargs.pop('verify', False)
+    def do_request(self, url, method, data=None, verify=False):
         try:
             resp = self.session.request(url=url, method=method, data=data, verify=verify)
         except Exception as e:
@@ -332,15 +328,6 @@ class OpenbatonManoAdapter(object):
 
         return True
 
-    # TODO This function is already in api.mano.generic in the master branch. To be deleted before merge in master.
-    @log_entry_exit(LOG)
-    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
-        for vnf_info in ns_info.vnf_info:
-            if not self.validate_vnf_allocated_vresources(vnf_info):
-                return False
-        return True
-
     @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_info):
         validation_result = True
@@ -409,6 +396,9 @@ class OpenbatonManoAdapter(object):
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         LOG.debug('Cannot get VNF management address in Openbaton')
         mgmt_addr_list = list()
+        # TODO The rest of the function is commented because Openbaton populates vnf_address field with the IP addresses
+        # TODO of all interfaces, hence the tests fail when we ping the management addresses. The comments should be
+        # TODO removed when Openbaton will populate vnf_address field only with the management interface IP address.
         # ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id)
         # url = '/api/v1/ns-records/%s/vnfrecords/%s' % (ns_instance_id, vnf_instance_id)
         # try:
