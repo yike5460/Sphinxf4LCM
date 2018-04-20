@@ -41,11 +41,12 @@ class OpenbatonManoAdapterUnauthorized(Exception):
 
 
 class OpenbatonManoAdapter(object):
-    def __init__(self, url, username, password, project):
+    def __init__(self, url, username, password, project, vim_info):
         self.url = url
         self.username = username
         self.password = password
         self.project = project
+        self.vim_info = vim_info
         self.session = requests.Session()
         self.token = self.get_token(username, password)
         self.session.headers = {
@@ -239,21 +240,14 @@ class OpenbatonManoAdapter(object):
             LOG.exception(e)
             raise OpenbatonManoAdapterError('Unable to retrieve config for VIM with ID %s. Reason: %s' %
                                             (vim_id, e))
-        if vim_config['type'] == 'openstack':
-            vim_vendor = 'openstack'
-            vim_params = {
-                'auth_url': vim_config['authUrl'],
-                'username': vim_config['username'],
-                # 'password': vim_config['password'],
-                'password': 'admin',
-                'project_domain_name': 'default',
-                'project_name': 'admin',
-                'user_domain_name': 'default'
-            }
-        else:
-            raise OpenbatonManoAdapterError('Unsupported VIM type: %s' % vim_config['type'])
+        try:
+            vim_params = self.vim_info[vim_config['name']]
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenbatonManoAdapterError('Input Error. The VIM where the resource is instantiated is %s. '
+                                            'Information about this VIM were not provided.' % str(vim_config['name']))
 
-        return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+        return construct_adapter(vendor=vim_params['type'], module_type='vim', **vim_params['client_config'])
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
