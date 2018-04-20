@@ -150,29 +150,9 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the NS is successfully instantiated by running the end-to-end functional test
         # --------------------------------------------------------------------------------------------------------------
-        if 'left_port_vnf' in self.tc_input['traffic']['traffic_config']:
-            for vnf_info in ns_info.vnf_info:
-                if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['left_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
-                                                                 self.tc_input['mano'].get('query_params'))[0]
-                    self.tc_input['traffic']['traffic_config']['left_port_location'] = dest_addr + \
-                                                                                       self.tc_input['traffic'][
-                                                                                           'traffic_config'][
-                                                                                           'left_port_location']
-
-        if 'right_port_vnf' in self.tc_input['traffic']['traffic_config']:
-            for vnf_info in ns_info.vnf_info:
-                if vnf_info.vnf_product_name == self.tc_input['traffic']['traffic_config']['right_port_vnf']:
-                    dest_addr = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
-                                                                 self.tc_input['mano'].get('query_params'))[0]
-                    self.tc_input['traffic']['traffic_config']['right_port_location'] = dest_addr + \
-                                                                                       self.tc_input['traffic'][
-                                                                                           'traffic_config'][
-                                                                                           'right_port_location']
-
         LOG.info('Verifying that the NS is successfully instantiated by running the end-to-end functional test')
-        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic']['traffic_config'])
+        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info, data=self.tc_input['traffic']['traffic_config'])
+        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD', traffic_config=resolved_traffic_config)
 
         self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
