@@ -1317,14 +1317,16 @@ class Mano(object):
         :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list needs
                                     to be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
-                                    Expected format: ['CP1', 'CP2', ...]
+                                    Expected format: ['CP1:ip', 'CP2:mac', ...]
         :return:                    String with space-separated addresses.
         """
         dest_addr_list = ''
 
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id in ingress_cp_list:
-                dest_addr_list += ext_cp_info.address[0] + ' '
+            for addr_type, addr_value in ext_cp_info.address.items():
+                cp_details = '%s:%s' % (ext_cp_info.cpd_id, addr_type)
+                if cp_details in ingress_cp_list:
+                    dest_addr_list += ' '.join(addr_value)
 
         return dest_addr_list
 
@@ -1337,28 +1339,28 @@ class Mano(object):
         :param ns_info:             NsInfo information element for the NS for which the ingress CP address list needs to
                                     be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
-                                    Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
+                                    Expected format: ['VNF1:CP1:ip', 'VNF1:CP2:mac', 'VNF2:CP2:ip' ...]
         :return:                    String containing space-separated addresses.
         """
         # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
         # values lists with CPs whose addresses need to be retrieved
         # Example:
-        # ingress_cp_list = ['VNF1:CP1', 'VNF2:CP2', 'VNF1:CP3']
-        # ns_ingress_cps = {'VNF1': ['CP1', 'CP3'],
-        #                   'VNF2': ['CP2']}
+        # ingress_cp_list = ['VNF1:CP1:ip', 'VNF2:CP2:mac', 'VNF1:CP3:ip']
+        # ns_ingress_cps = {'VNF1': ['CP1:ip', 'CP3:ip'],
+        #                   'VNF2': ['CP2:mac']}
         ns_ingress_cps = dict()
         for ingress_cp in ingress_cp_list:
-            vnf_name, cp_name = ingress_cp.split(':')
+            vnf_name, cp_details = ingress_cp.split(':', 1)
             if vnf_name not in ns_ingress_cps.keys():
                 ns_ingress_cps[vnf_name] = list()
-            ns_ingress_cps[vnf_name].append(cp_name)
+            ns_ingress_cps[vnf_name].append(cp_details)
 
         # Build the list with the destination addresses
         dest_addr_list = ''
         for vnf_info in ns_info.vnf_info:
             if vnf_info.vnf_product_name in ns_ingress_cps.keys():
                 dest_addr_list += self.get_vnf_ingress_cp_addr_list(vnf_info, ns_ingress_cps[vnf_info.vnf_product_name])
-        return dest_addr_list
+        return dest_addr_list.strip()
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_instance_id, additional_param=None):
