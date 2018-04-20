@@ -329,7 +329,7 @@ class OpenbatonManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_vnf_allocated_vresources(self, vnf_info):
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         validation_result = True
 
         vnfd_id = vnf_info.vnfd_id
