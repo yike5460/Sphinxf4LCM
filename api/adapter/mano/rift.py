@@ -10,6 +10,7 @@
 #
 
 
+import json
 import logging
 import random
 import time
@@ -694,6 +695,12 @@ class RiftManoAdapter(object):
         if vendor_nsd is None:
             raise RiftManoAdapterError('Vendor NSD not present in user_defined_data')
 
+        try:
+            vendor_nsd = json.loads(vendor_nsd)
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to parse vendor NSD')
+
         resource = '/api/config/project/%s/nsd-catalog' % self.project
         request_body = {'nsd': [vendor_nsd]}
         try:
@@ -705,7 +712,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to upload the NSD')
 
         # Retrieving details about the on-boarded NSD
-        nsd_id = vendor_nsd['id']
+        nsd_id = str(vendor_nsd['id'])
 
         # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
         nsd_info.nsd_id = nsd_id
@@ -736,7 +743,6 @@ class RiftManoAdapter(object):
         nsd_id = nsd_info.nsd_id
         if nsd_id is not None:
             resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
-
             try:
                 response = self.session.delete(url=self.url + resource)
                 assert response.status_code == 201
