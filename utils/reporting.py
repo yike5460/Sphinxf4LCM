@@ -158,6 +158,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['tc_end_time'] = tc_result['tc_end_time']
     json_dict['tc_duration'] = tc_result['tc_duration']
     json_dict['tc_status'] = tc_result['overall_status']
+    json_dict['error_info'] = tc_result['error_info']
 
     json_dict['environment'] = dict()
     json_dict['environment']['vim'] = 'OpenStack'
