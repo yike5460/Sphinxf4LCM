@@ -1570,9 +1570,10 @@ class Mano(object):
         """
         This function will search for pattern like ${vnf_name:cp_name:addr_type} (e.g ${VNF1:east:ip}) recursively
         inside 'data' and resolve them using information found in 'ns_info'
+
         :param ns_info:     NsInfo information element.
         :param data:        Data structure containing patterns that may need resolving
-        :return:            Date structure with resolved patterns
+        :return:            Data structure with resolved patterns
         """
         
         pattern = '\$\{(.*?)\}'
