@@ -19,7 +19,7 @@ from api.adapter import construct_adapter
 from api.generic import ApiGenericError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
-from utils.misc import tee
+from utils.misc import recursive_map, tee
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -1564,3 +1564,21 @@ class Mano(object):
         """
 
         return self.mano_adapter.nsd_delete(nsd_info_id)
+
+    @recursive_map
+    def resolve_ns_cp_addr(self, ns_info, data):
+        """
+        This function will search for pattern like ${vnf_name:cp_name:addr_type} (e.g ${VNF1:east:ip}) recursively
+        inside 'data' and resolve them using information found in 'ns_info'
+
+        :param ns_info:     NsInfo information element.
+        :param data:        Data structure containing patterns that may need resolving
+        :return:            Data structure with resolved patterns
+        """
+        
+        pattern = '\$\{(.*?)\}'
+
+        data = re.sub(pattern, lambda x: self.get_ns_ingress_cp_addr_list(ns_info, [x.group(1)]), data)
+        data = re.sub(pattern, '\\1', data)
+
+        return data

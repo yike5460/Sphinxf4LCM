@@ -207,8 +207,8 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NS has been scaled out by running the end-to-end functional test in relevance to the '
                  'VNF scale and capacity')
-        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic']['traffic_config'])
+        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info, data=self.tc_input['traffic']['traffic_config'])
+        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD', traffic_config=resolved_traffic_config)
 
         self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
