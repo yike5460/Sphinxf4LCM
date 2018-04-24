@@ -176,27 +176,6 @@ class RiftManoAdapter(object):
         return nsd
 
     @log_entry_exit(LOG)
-    def get_all_nsd(self):
-        resource = '/api/config/project/nsd-catalog/nsd'
-
-        try:
-            response = self.session.get(url=self.url + resource)
-            assert response.status_code == 200
-            json_content = response.json()
-        except Exception as e:
-            LOG.exception(e)
-            raise RiftManoAdapterError('Unable to get NSD list')
-
-        nsds = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd']
-
-        list_of_nsd_id = []
-        for nsd in nsds:
-            nsd.pop('rw-project-vnfd:meta', None)
-            list_of_nsd_id = list_of_nsd_id + [str(nsd['id'])]
-
-        return list_of_nsd_id
-
-    @log_entry_exit(LOG)
     def get_nsd_generic(self, nsd_id):
         resource = '/api/config/project/nsd-catalog/nsd/%s' % nsd_id
 
@@ -288,28 +267,6 @@ class RiftManoAdapter(object):
         vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
-
-    @log_entry_exit(LOG)
-    def get_all_vnfd(self):
-        resource = '/api/config/project/vnfd-catalog/vnfd'
-
-        try:
-            response = self.session.get(url=self.url + resource)
-            assert response.status_code == 200
-            json_content = response.json()
-        except Exception as e:
-            LOG.exception(e)
-            raise RiftManoAdapterError('Unable to get VNFD')
-
-        vnfds = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd']
-
-        list_of_vnfd_id = []
-        for vnfd in vnfds:
-            vnfd.pop('rw-project-vnfd:meta', None)
-            list_of_vnfd_id = list_of_vnfd_id + [str(vnfd['id'])]
-
-        return list_of_vnfd_id
-
 
     @log_entry_exit(LOG)
     def get_vnfd_generic(self, vnfd_id):
