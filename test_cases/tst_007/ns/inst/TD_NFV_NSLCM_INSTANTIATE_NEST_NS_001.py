@@ -85,9 +85,10 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 2. Verify that NS1 is instantiated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NS1 is instantiated')
-        ns_info_1 = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_1,
-                                               'additional_param': self.tc_input['mano'].get('query_params_ns1')})
-        if ns_info_1.ns_state != constants.NS_INSTANTIATED:
+        ns_info_1_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_1,
+                                                                   'additional_param': self.tc_input['mano'].get(
+                                                                       'query_params_ns1')})
+        if ns_info_1_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS1 instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
@@ -142,9 +143,10 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                                           self.tc_input['mano'].get('query_params_ns2')):
             raise TestRunError('Allocated vResources could not be validated')
 
-        ns_info_2 = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_2,
-                                               'additional_param': self.tc_input['mano'].get('query_params_ns2')})
-        for vnf_info in ns_info_2.vnf_info:
+        ns_info_2_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_2,
+                                                                   'additional_param': self.tc_input['mano'].get(
+                                                                       'query_params_ns2')})
+        for vnf_info in ns_info_2_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id,
@@ -161,7 +163,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 7. Verify that existing VNF instance(s) in NS1 are running and reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that existing VNF instance(s) in NS1 are running and reachable via the management network')
-        for vnf_info in ns_info_1.vnf_info:
+        for vnf_info in ns_info_1_after_instantiation.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
                                                               self.tc_input['mano'].get('query_params_ns1'))
             for mgmt_addr in mgmt_addr_list:
@@ -173,7 +175,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 8. Verify that the VNF instance(s) in NS2 are running and reachable through the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance(s) in NS2 are running and reachable through the management network')
-        for vnf_info in ns_info_2.vnf_info:
+        for vnf_info in ns_info_2_after_instantiation.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
                                                               self.tc_input['mano'].get('query_params_ns2'))
             for mgmt_addr in mgmt_addr_list:
@@ -200,7 +202,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 11. Verify that the NFVO indicates NS2 instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS2 instantiation operation result as successful')
-        if ns_info_2.ns_state != constants.NS_INSTANTIATED:
+        if ns_info_2_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS2 state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
@@ -218,10 +220,10 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
 
         # Configure stream destination address(es)
         dest_addr_list_ns1 = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info_1,
+                                                          ns_info_1_after_instantiation,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         dest_addr_list_ns2 = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info_2,
+                                                          ns_info_2_after_instantiation,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         dest_addr_list = dest_addr_list_ns1 + dest_addr_list_ns2
         self.traffic.reconfig_traffic_dest(dest_addr_list)
@@ -264,15 +266,16 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 14. Verify that NS2 is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NS2 is terminated')
-        ns_info_2_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_2,
-                                                     'additional_param': self.tc_input['mano'].get('query_params_ns2')})
-        if ns_info_2_final.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_2_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_2,
+                                                                 'additional_param': self.tc_input['mano'].get(
+                                                                     'query_params_ns2')})
+        if ns_info_2_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS2 instantiation state was not "%s" after the NS was terminated'
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all NS2 VNF instance(s) have been terminated')
-        for vnf_info in ns_info_2.vnf_info:
+        for vnf_info in ns_info_2_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params_ns2')})
@@ -281,7 +284,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all NS2 resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info_2):
+        if not self.mano.validate_ns_released_vresources(ns_info_2_after_instantiation):
             raise TestRunError('NS2 allocated resources have not been released by the VIM')
 
         # --------------------------------------------------------------------------------------------------------------
@@ -305,15 +308,16 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 16. Verify that NS1 is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NS1 is terminated')
-        ns_info_1_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_1,
-                                                     'additional_param': self.tc_input['mano'].get('query_params_ns1')})
-        if ns_info_1_final.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_1_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_1,
+                                                                 'additional_param': self.tc_input['mano'].get(
+                                                                     'query_params_ns1')})
+        if ns_info_1_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS1 instantiation state was not "%s" after the NS was terminated'
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all NS1 VNF instance(s) have been terminated')
-        for vnf_info in ns_info_1.vnf_info:
+        for vnf_info in ns_info_1_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params_ns1')})
@@ -322,7 +326,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all NS1 resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info_1):
+        if not self.mano.validate_ns_released_vresources(ns_info_1_after_instantiation):
             raise TestRunError('NS1 allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)
