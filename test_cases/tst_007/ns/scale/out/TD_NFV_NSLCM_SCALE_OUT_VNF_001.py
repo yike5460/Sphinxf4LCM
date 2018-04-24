@@ -267,9 +267,10 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # 12. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
-        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                               'additional_param': self.tc_input['mano'].get(
+                                                                   'query_params')})
+        if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'
                                            % constants.NS_NOT_INSTANTIATED)

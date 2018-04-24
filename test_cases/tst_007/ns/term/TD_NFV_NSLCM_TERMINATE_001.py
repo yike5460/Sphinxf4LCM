@@ -140,11 +140,12 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # 6. Verify that the NFVO indicates NS instance operation termination operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instance operation termination operation result as successful')
-        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                               'additional_param': self.tc_input['mano'].get(
+                                                                   'query_params')})
+        if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError(
                 'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s'
-                % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info_final.ns_state))
+                % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info_after_termination.ns_state))
 
         LOG.info('%s execution completed successfully' % self.tc_name)
