@@ -26,7 +26,8 @@ from api.generic import constants
 from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, \
     VnfExtCpInfo, NsdInfo
 from utils.logging_module import log_entry_exit
-from api.structures.objects import *
+from api.structures.objects import Nsd, VnfProfile, NsDf, NsVirtualLinkDesc, NsVirtualLinkConnectivity, Vnfd, Vdu, VirtualComputeDesc, VirtualStorageDesc, SwImageDesc, VirtualCpuData, VirtualCpuPinningData, VirtualMemoryData, VnfExtCpd
+
 
 LOG = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -175,6 +176,103 @@ class RiftManoAdapter(object):
         return nsd
 
     @log_entry_exit(LOG)
+    def get_all_nsd(self):
+        resource = '/api/config/project/nsd-catalog/nsd'
+
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get NSD list')
+
+        nsds = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd']
+
+        list_of_nsd_id = []
+        for nsd in nsds:
+            nsd.pop('rw-project-vnfd:meta', None)
+            list_of_nsd_id = list_of_nsd_id + [str(nsd['id'])]
+
+        return list_of_nsd_id
+
+    @log_entry_exit(LOG)
+    def get_nsd_generic(self, nsd_id):
+        resource = '/api/config/project/nsd-catalog/nsd/%s' % nsd_id
+
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get NSD %s' % nsd_id)
+
+        nsd = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd'][0]
+
+        nsd_generic = Nsd()
+
+        nsd_generic.nsd_identifier = str(nsd['id'])
+        nsd_generic.nsd_name = str(nsd['name'])
+        nsd_generic.version = str(nsd['version'])
+        nsd_generic.designer = str(nsd['vendor'])
+
+        # VNFD data
+        generic_vnfd_id_list = []
+        generic_vnf_profile_id_list = []
+        generic_vnf_profile_list = []
+
+        for index, entry in enumerate(nsd['constituent-vnfd']):
+            generic_vnfd_id_list = generic_vnfd_id_list + [str(entry['vnfd-id-ref'])]
+            generic_vnf_profile_id_list = generic_vnf_profile_id_list + [str(entry['member-vnf-index'])]
+            generic_vnf_profile_list = generic_vnf_profile_list + [VnfProfile()]
+            generic_vnf_profile_list[index].vnf_profile_id = str(entry['member-vnf-index'])
+            generic_vnf_profile_list[index].vnfd_id = str(entry['vnfd-id-ref'])
+
+        nsd_generic.vnfd_id = list(set(generic_vnfd_id_list))
+        nsdf_list = [NsDf()]
+        nsd_generic.nsdf = nsdf_list
+
+        # Initialize empty ns_vlc data structure
+        ns_vlc = {}
+        for id in generic_vnf_profile_id_list:
+            ns_vlc[id] = {}
+            ns_vlc[id]['cpd_list'] = []
+            ns_vlc[id]['vl_list'] = []
+        # VLD data
+        if 'vld' in nsd.keys():
+            generic_vld_list = []
+            for index, entry in enumerate(nsd['vld']):
+                generic_vld_list = generic_vld_list + [NsVirtualLinkDesc()]
+                generic_vld_list[index].virtual_link_desc_id = str(entry["id"])
+                generic_vld_list[index].virtual_link_desc_version = str(entry.get("version"))
+                generic_vld_list[index].description = str(entry.get("description"))
+
+                for ind, en in enumerate(entry['vnfd-connection-point-ref']):
+                    ns_vlc[str(en["member-vnf-index-ref"])]['cpd_list'].append(str(en['vnfd-connection-point-ref']))
+                    ns_vlc[str(en["member-vnf-index-ref"])]['vl_list'].append(str(entry["id"]))
+            nsd_generic.virtual_link_desc = generic_vld_list
+
+        # Populate vnf profiles with NsVirtualLinkConnectivity information elements
+        for id in ns_vlc:
+            ns_virtual_link_connectivity_list = []
+
+            for index, vlc in enumerate(ns_vlc[id]['vl_list']):
+                ns_virtual_link_connectivity_list = ns_virtual_link_connectivity_list + [NsVirtualLinkConnectivity()]
+                ns_virtual_link_connectivity_list[index].virtual_link_profile_id = vlc
+                ns_virtual_link_connectivity_list[index].cpd_id = [ns_vlc[id]['cpd_list'][index]]
+
+            generic_vnf_profile_list[int(id) - 1].ns_virtual_link_connectivity = ns_virtual_link_connectivity_list
+            del ns_virtual_link_connectivity_list
+
+        #Add nsdf information element
+        nsdf_list[0].vnf_profile = generic_vnf_profile_list
+        nsdf_list[0].ns_df_id = str(nsd['name'])
+        nsd_generic.nsdf = nsdf_list
+
+        return nsd_generic
+
+    @log_entry_exit(LOG)
     def get_vnfd(self, vnfd_id):
         resource = '/api/config/project/vnfd-catalog/vnfd/%s' % vnfd_id
 
@@ -190,6 +288,28 @@ class RiftManoAdapter(object):
         vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
+
+    @log_entry_exit(LOG)
+    def get_all_vnfd(self):
+        resource = '/api/config/project/vnfd-catalog/vnfd'
+
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+            json_content = response.json()
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to get VNFD')
+
+        vnfds = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd']
+
+        list_of_vnfd_id = []
+        for vnfd in vnfds:
+            vnfd.pop('rw-project-vnfd:meta', None)
+            list_of_vnfd_id = list_of_vnfd_id + [str(vnfd['id'])]
+
+        return list_of_vnfd_id
+
 
     @log_entry_exit(LOG)
     def get_vnfd_generic(self, vnfd_id):
@@ -271,8 +391,6 @@ class RiftManoAdapter(object):
         vnfd_generic.vnf_ext_cpd = generic_vnf_ext_cpds
 
         return vnfd_generic
-
-
 
     @log_entry_exit(LOG)
     def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
