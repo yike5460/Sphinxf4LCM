@@ -91,14 +91,15 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info.ns_state != constants.NS_INSTANTIATED:
+        ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                 'additional_param': self.tc_input['mano'].get(
+                                                                     'query_params')})
+        if ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -141,15 +142,17 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 4. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if not self.mano.validate_ns_instantiation_level(ns_info, self.tc_input['scale_to_level_list'],
+        ns_info_before_scale_from_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                     'additional_param': self.tc_input['mano'].get(
+                                                                         'query_params')})
+        if not self.mano.validate_ns_instantiation_level(ns_info_before_scale_from_level,
+                                                         self.tc_input['scale_to_level_list'],
                                                          self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNFCs')
 
-        for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['%s (After scale to level)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (After scale to level)' % vnf_info.vnf_product_name].update(
+        for vnf_info in ns_info_before_scale_from_level.vnf_info:
+            self.tc_result['resources']['%s (Before scale from level)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (Before scale from level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # TODO Add self.tc_result['scaling_to_level']['level']. We should do this only for the VNF(s) that we scaled
@@ -200,13 +203,15 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 6. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if not self.mano.validate_ns_instantiation_level(ns_info, self.tc_input['scale_from_level_list'],
+        ns_info_after_scale_from_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                    'additional_param': self.tc_input['mano'].get(
+                                                                        'query_params')})
+        if not self.mano.validate_ns_instantiation_level(ns_info_after_scale_from_level,
+                                                         self.tc_input['scale_from_level_list'],
                                                          self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNFCs')
 
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_scale_from_level.vnf_info:
             self.tc_result['resources']['%s (After scale from level)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (After scale from level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -227,7 +232,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 8. Verify that all VNFC instance(s) are running and reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that all VNFC instance(s) are running and reachable via the management network')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_scale_from_level.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
                                                               self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
@@ -259,14 +264,15 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verify that NS has been scaled by running the end-to-end functional test in relevance to the VNF '
                  'scale and capacity')
-        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info, data=self.tc_input['traffic']['traffic_config'])
+        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info_after_scale_from_level,
+                                                               data=self.tc_input['traffic']['traffic_config'])
         self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD', traffic_config=resolved_traffic_config)
 
         self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info,
+                                                          ns_info_after_scale_from_level,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
@@ -323,7 +329,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_scale_from_level.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
@@ -333,7 +339,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                     % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info):
+        if not self.mano.validate_ns_released_vresources(ns_info_after_scale_from_level):
             raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

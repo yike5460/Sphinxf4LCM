@@ -96,9 +96,10 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                                                           self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        for vnf_info in ns_info.vnf_info:
+        ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                 'additional_param': self.tc_input['mano'].get(
+                                                                     'query_params')})
+        for vnf_info in ns_info_after_instantiation.vnf_info:
 
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
@@ -115,7 +116,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 5. Verify that the VNF instance(s) are reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance(s) are reachable via the management network')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_instantiation.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
                                                               self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
@@ -142,7 +143,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 8. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        if ns_info.ns_state != constants.NS_INSTANTIATED:
+        if ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
@@ -151,14 +152,15 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 9. Verify that the NS is successfully instantiated by running the end-to-end functional test
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is successfully instantiated by running the end-to-end functional test')
-        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info, data=self.tc_input['traffic']['traffic_config'])
+        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info_after_instantiation,
+                                                               data=self.tc_input['traffic']['traffic_config'])
         self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD', traffic_config=resolved_traffic_config)
 
         self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info,
+                                                          ns_info_after_instantiation,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
@@ -208,7 +210,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
@@ -218,7 +220,7 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                     % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info):
+        if not self.mano.validate_ns_released_vresources(ns_info_after_instantiation):
             raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)
