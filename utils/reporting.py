@@ -168,10 +168,14 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['environment']['em'] = 'None'
 
     durations = dict()
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration')
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or \
+                               tc_result.get('events', {}).get('instantiate_ns', {}).get('duration')
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
+                        tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration')
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \
+                             tc_result.get('events', {}).get('scale_out_ns', {}).get('duration')
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration') or \
+                            tc_result.get('events', {}).get('scale_in_ns', {}).get('duration')
     durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
     durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
 
