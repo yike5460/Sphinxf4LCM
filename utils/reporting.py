@@ -170,7 +170,8 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     durations = dict()
     durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or \
                                tc_result.get('events', {}).get('instantiate_ns', {}).get('duration')
-    durations['terminate'] = tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
+    durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
+                             tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
     durations['start'] = tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
                         tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
     durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
