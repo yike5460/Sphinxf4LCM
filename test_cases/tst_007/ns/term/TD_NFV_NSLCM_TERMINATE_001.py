@@ -77,14 +77,15 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # 2. Verify that the NS is instantiated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS instantiation state is INSTANTIATED')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info.ns_state != constants.NS_INSTANTIATED:
+        ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                 'additional_param': self.tc_input['mano'].get(
+                                                                     'query_params')})
+        if ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -119,7 +120,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         LOG.info('Sleeping 60 seconds to allow MANO to finalize termination of resources')
         sleep(60)
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
@@ -132,18 +133,19 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # 5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the resources allocated to the NS and VNF instance(s) have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info):
+        if not self.mano.validate_ns_released_vresources(ns_info_after_instantiation):
             raise TestRunError('NS resources have not been released by the VIM')
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the NFVO indicates NS instance operation termination operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instance operation termination operation result as successful')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                               'additional_param': self.tc_input['mano'].get(
+                                                                   'query_params')})
+        if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError(
                 'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s'
-                % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info.ns_state))
+                % (self.ns_instance_id, constants.NS_NOT_INSTANTIATED, ns_info_after_termination.ns_state))
 
         LOG.info('%s execution completed successfully' % self.tc_name)
