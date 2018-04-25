@@ -58,6 +58,7 @@ class OpenbatonManoAdapter(object):
         }
         self.vnf_to_ns_mapping = dict()
         self.nsd_info_ids = dict()
+        self.nsd_info_id_to_vnfd_ids = dict()
 
     @log_entry_exit(LOG)
     def get_token(self, username, password):
@@ -505,6 +506,12 @@ class OpenbatonManoAdapter(object):
         # Retrieving details about the on-boarded NSD
         nsd_id = str(body['id'])
 
+        # Storing the IDs of the VNFDs to be deleted after the NSD is deleted
+        constituent_vnfd_ids = list()
+        for vnfd in body['vnfd']:
+            constituent_vnfd_ids.append(vnfd['id'])
+        self.nsd_info_id_to_vnfd_ids[nsd_info_id] = constituent_vnfd_ids
+
         # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
         nsd_info.nsd_id = nsd_id
 
@@ -553,5 +560,16 @@ class OpenbatonManoAdapter(object):
 
         # Delete the NsdInfo object
         self.nsd_info_ids.pop(nsd_info_id)
+
+        # Delete the VNFDs on-boarded together with the NSD
+        constituent_vnfd_ids = self.nsd_info_id_to_vnfd_ids[nsd_info_id]
+        for vnfd_id in constituent_vnfd_ids:
+            url = '/api/v1/vnf-descriptors/%s' % vnfd_id
+            try:
+                status_code, _ = self.request(url=url, method='delete')
+                assert status_code == 204
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenbatonManoAdapterError('Unable to delete VNFD %s' % vnfd_id)
 
         return nsd_info_id
