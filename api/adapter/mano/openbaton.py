@@ -12,6 +12,7 @@
 
 import logging
 import time
+import uuid
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -19,7 +20,8 @@ from requests.auth import HTTPBasicAuth
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import ResourceHandle, InstantiatedVnfInfo, NsInfo, VnfInfo, VnfExtCpInfo, VnfcResourceInfo
+from api.structures.objects import ResourceHandle, InstantiatedVnfInfo, NsInfo, VnfInfo, VnfExtCpInfo, \
+    VnfcResourceInfo, NsdInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -55,6 +57,8 @@ class OpenbatonManoAdapter(object):
             'Authorization': self.token
         }
         self.vnf_to_ns_mapping = dict()
+        self.nsd_info_ids = dict()
+        self.nsd_info_id_to_vnfd_ids = dict()
 
     @log_entry_exit(LOG)
     def get_token(self, username, password):
@@ -69,8 +73,7 @@ class OpenbatonManoAdapter(object):
             assert response.status_code == 200
         except Exception as e:
             LOG.debug(e)
-            raise OpenbatonManoAdapterError('Unable to fetch Authorization token from %s' %
-                                            self.url + '/oauth/token')
+            raise OpenbatonManoAdapterError('Unable to fetch Authorization token from %s' % self.url + '/oauth/token')
         token = str('Bearer ' + response.json()['access_token'])
         return token
 
@@ -150,8 +153,7 @@ class OpenbatonManoAdapter(object):
                 ns_status = str(ns_config['status'])
             except Exception as e:
                 LOG.exception(e)
-                raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' %
-                                                (resource_id, e))
+                raise OpenbatonManoAdapterError('Unable to retrieve status for NS ID %s. Reason: %s' % (resource_id, e))
             if ns_status == 'ACTIVE':
                 for vnfr in ns_config['vnfr']:
                     self.vnf_to_ns_mapping[str(vnfr['id'])] = resource_id
@@ -166,7 +168,7 @@ class OpenbatonManoAdapter(object):
             try:
                 status_code, ns_config = self.request(url=url, method='get')
                 if status_code == 404:
-                    self.vnf_to_ns_mapping = {k:v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
+                    self.vnf_to_ns_mapping = {k: v for k, v in self.vnf_to_ns_mapping.items() if v != resource_id}
                     return constants.OPERATION_SUCCESS
                 assert status_code == 200
                 ns_status = str(ns_config['status'])
@@ -234,8 +236,7 @@ class OpenbatonManoAdapter(object):
             assert status_code == 200
         except Exception as e:
             LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to retrieve config for VIM with ID %s. Reason: %s' %
-                                            (vim_id, e))
+            raise OpenbatonManoAdapterError('Unable to retrieve config for VIM with ID %s. Reason: %s' % (vim_id, e))
         try:
             vim_params = self.vim_info[vim_config['name']]
         except Exception as e:
@@ -253,8 +254,7 @@ class OpenbatonManoAdapter(object):
             assert status_code == 204
         except Exception as e:
             LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to terminate NS instance ID %s. Reason: %s' %
-                                            (ns_instance_id, e))
+            raise OpenbatonManoAdapterError('Unable to terminate NS instance ID %s. Reason: %s' % (ns_instance_id, e))
 
         return 'ns_terminate', ns_instance_id
 
@@ -296,8 +296,7 @@ class OpenbatonManoAdapter(object):
             assert status_code == 200
         except Exception as e:
             LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to retrieve config for VNFD with ID %s. Reason: %s' %
-                                            (vnfd_id, e))
+            raise OpenbatonManoAdapterError('Unable to retrieve config for VNFD with ID %s. Reason: %s' % (vnfd_id, e))
         return vnfd
 
     @log_entry_exit(LOG)
@@ -388,8 +387,7 @@ class OpenbatonManoAdapter(object):
             assert status_code == 200
         except Exception as e:
             LOG.exception(e)
-            raise OpenbatonManoAdapterError('Unable to retrieve config for NSD with ID %s. Reason: %s' %
-                                            (nsd_id, e))
+            raise OpenbatonManoAdapterError('Unable to retrieve config for NSD with ID %s. Reason: %s' % (nsd_id, e))
         return nsd
 
     @log_entry_exit(LOG)
@@ -468,3 +466,117 @@ class OpenbatonManoAdapter(object):
                     vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
         return vnf_info
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        # Generating a UUID
+        nsd_info_id = str(uuid.uuid4())
+
+        # Populate the NsdInfo object
+        nsd_info = NsdInfo()
+        nsd_info.nsd_info_id = nsd_info_id
+        nsd_info.user_defined_data = user_defined_data
+
+        # Store the mapping between the NsdInfo object and its UUID
+        self.nsd_info_ids[nsd_info_id] = nsd_info
+
+        return nsd_info_id
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        nsd_info_id = filter['nsd_info_id']
+        return self.nsd_info_ids.get(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise OpenbatonManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Uploading the NSD
+        if nsd is not None:
+            raise NotImplementedError('Openbaton does not support ETSI NSD format')
+
+        vendor_nsd = nsd_info.user_defined_data.get('vendor_nsd')
+        if vendor_nsd is None:
+            raise OpenbatonManoAdapterError('Vendor NSD not present in the user_defined_data')
+
+        url = '/api/v1/ns-descriptors'
+        try:
+            status_code, body = self.request(url=url, method='post', data=vendor_nsd)
+            assert status_code == 201
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenbatonManoAdapterError('Unable to upload the NSD')
+
+        # Retrieving details about the on-boarded NSD
+        nsd_id = str(body['id'])
+
+        # Storing the IDs of the VNFDs to be deleted after the NSD is deleted
+        constituent_vnfd_ids = list()
+        for vnfd in body['vnfd']:
+            constituent_vnfd_ids.append(vnfd['id'])
+        self.nsd_info_id_to_vnfd_ids[nsd_info_id] = constituent_vnfd_ids
+
+        # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
+        nsd_info.nsd_id = nsd_id
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise OpenbatonManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Get the NSD corresponding to the provided nsd_info_id
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is None:
+            raise OpenbatonManoAdapterError('NsdInfo object with ID %s does not have the NsdId attribute set'
+                                            % nsd_info_id)
+        nsd = self.get_nsd(nsd_id)
+
+        return nsd
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise OpenbatonManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # If the NsdInfo object holds information about an NSD, delete it
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is not None:
+            url = '/api/v1/ns-descriptors/%s' % nsd_id
+            try:
+                status_code, _ = self.request(url=url, method='delete')
+                assert status_code == 204
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenbatonManoAdapterError('Unable to delete NSD %s' % nsd_id)
+
+            # Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking
+            # that the NSD has been deleted.
+            try:
+                self.get_nsd(nsd_id)
+            except OpenbatonManoAdapterError:
+                LOG.debug('NSD %s has been deleted' % nsd_id)
+            else:
+                raise OpenbatonManoAdapterError('NSD %s has not been deleted' % nsd_id)
+
+        # Delete the NsdInfo object
+        self.nsd_info_ids.pop(nsd_info_id)
+
+        # Delete the VNFDs on-boarded together with the NSD
+        constituent_vnfd_ids = self.nsd_info_id_to_vnfd_ids[nsd_info_id]
+        for vnfd_id in constituent_vnfd_ids:
+            url = '/api/v1/vnf-descriptors/%s' % vnfd_id
+            try:
+                status_code, _ = self.request(url=url, method='delete')
+                assert status_code == 204
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenbatonManoAdapterError('Unable to delete VNFD %s' % vnfd_id)
+
+        return nsd_info_id
