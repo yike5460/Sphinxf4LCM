@@ -13,7 +13,7 @@ applications:
     charm: "cs:~carpalex/xenial/elasticsearch-0"
     num_units: 1
   kibanaspirent:
-    charm: "cs:~carpalex/xenial/kibanaspirent-5"
+    charm: "cs:~carpalex/xenial/kibanaspirent-6"
     num_units: 1
 relations:
   - - "vnflcv:elasticsearch"
