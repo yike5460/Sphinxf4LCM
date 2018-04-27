@@ -269,7 +269,14 @@ class SdlManoAdapter(object):
                     if match is not None:
                         vnf_ext_cp_info = VnfExtCpInfo()
                         vnf_ext_cp_info.cp_instance_id = str(port['id'])
-                        vnf_ext_cp_info.address = [str(port['mac_address'])]
+                        vnf_ext_cp_info.address = {
+                            'mac': [port['mac_address'].encode()],
+                            'ip': []
+                        }
+
+                        for fixed_ip in port['fixed_ips']:
+                            vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
+
                         vnf_ext_cp_info.cpd_id = str(match.groups()[0])
                         vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 

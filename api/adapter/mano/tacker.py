@@ -635,7 +635,13 @@ class TackerManoAdapter(object):
                         for port in port_list['ports']:
                             vnf_ext_cp_info = VnfExtCpInfo()
                             vnf_ext_cp_info.cp_instance_id = port['id'].encode()
-                            vnf_ext_cp_info.address = [port['mac_address'].encode()]
+                            vnf_ext_cp_info.address = {
+                                'mac': [port['mac_address'].encode()],
+                                'ip': []
+                            }
+
+                            for fixed_ip in port['fixed_ips']:
+                                vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
 
                             # Extract the CP ID from the port name
                             match = re.search('CP\d+', port['name'])

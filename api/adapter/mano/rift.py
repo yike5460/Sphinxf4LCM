@@ -10,6 +10,7 @@
 #
 
 
+import json
 import logging
 import random
 import time
@@ -264,7 +265,10 @@ class RiftManoAdapter(object):
         for connection_point in vnfr['connection-point']:
             vnf_ext_cp_info = VnfExtCpInfo()
             vnf_ext_cp_info.cp_instance_id = str(connection_point['connection-point-id'])
-            vnf_ext_cp_info.address = [str(connection_point['mac-address'])]
+            vnf_ext_cp_info.address = {
+                'mac': [str(connection_point['mac-address'])],
+                'ip': [str(connection_point['ip-address'])]
+            }
             vnf_ext_cp_info.cpd_id = str(connection_point['name'])
             vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
@@ -424,6 +428,7 @@ class RiftManoAdapter(object):
 
                 # Compare the flavor name in the VNFD to the flavor name of the VM
                 if flavor_name_nova != flavor_name_vnfd:
+                    LOG.debug('Unexpected value for flavor: %s. Expected: %s' % (flavor_name_vnfd, flavor_name_nova))
                     validation_result = False
             else:
                 virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
@@ -690,6 +695,12 @@ class RiftManoAdapter(object):
         if vendor_nsd is None:
             raise RiftManoAdapterError('Vendor NSD not present in user_defined_data')
 
+        try:
+            vendor_nsd = json.loads(vendor_nsd)
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to parse vendor NSD')
+
         resource = '/api/config/project/%s/nsd-catalog' % self.project
         request_body = {'nsd': [vendor_nsd]}
         try:
@@ -701,7 +712,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to upload the NSD')
 
         # Retrieving details about the on-boarded NSD
-        nsd_id = vendor_nsd['id']
+        nsd_id = str(vendor_nsd['id'])
 
         # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
         nsd_info.nsd_id = nsd_id
@@ -732,7 +743,6 @@ class RiftManoAdapter(object):
         nsd_id = nsd_info.nsd_id
         if nsd_id is not None:
             resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
-
             try:
                 response = self.session.delete(url=self.url + resource)
                 assert response.status_code == 201

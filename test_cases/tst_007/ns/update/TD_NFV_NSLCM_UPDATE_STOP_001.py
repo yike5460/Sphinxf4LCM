@@ -83,14 +83,14 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # 2. Verify that the NS is instantiated
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS instantiation state is INSTANTIATED')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info.ns_state != constants.NS_INSTANTIATED:
+        ns_info_before_stop = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
+        if ns_info_before_stop.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_before_stop.vnf_info:
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -100,7 +100,7 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering the NFVO to stop the target VNF instance inside the NS instance')
         operate_vnf_data_list = list()
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_before_stop.vnf_info:
             if vnf_info.vnf_product_name in self.tc_input['operate_vnf_data']:
                 vnf_data = OperateVnfData()
                 vnf_data.vnf_instance_id = vnf_info.vnf_instance_id
@@ -147,9 +147,9 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that other existing compute resources have not been affected by the performed operation by '
                  'querying the VIM')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        for vnf_info in ns_info.vnf_info:
+        ns_info_after_stop = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                        'additional_param': self.tc_input['mano'].get('query_params')})
+        for vnf_info in ns_info_after_stop.vnf_info:
             if vnf_info.vnf_product_name not in self.tc_input['operate_vnf_data']:
                 if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STARTED:
                     raise TestRunError('Other compute resources have been affected by the VNF stop operation',
@@ -190,15 +190,16 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # 9. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
-        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                               'additional_param': self.tc_input['mano'].get(
+                                                                   'query_params')})
+        if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in ns_info_after_stop.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
@@ -207,7 +208,7 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info):
+        if not self.mano.validate_ns_released_vresources(ns_info_after_stop):
             raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

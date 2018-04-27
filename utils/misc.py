@@ -12,6 +12,7 @@
 
 import collections
 import datetime
+import functools
 
 from threading import Lock
 
@@ -46,3 +47,17 @@ def tee(iterable, n=2):
             yield mydeque.popleft()
 
     return tuple(gen(d) for d in deques)
+
+
+def recursive_map(func):
+    @functools.wraps(func)
+    def mapper(*args, **kwargs):
+        data = kwargs.pop('data')
+
+        if isinstance(data, dict):
+            return {k: mapper(data=v, *args, **kwargs) for k, v in data.iteritems()}
+        if isinstance(data, list):
+            return map(lambda e: mapper(data=e, *args, **kwargs), data)
+        return func(data=data, *args, **kwargs)
+
+    return mapper

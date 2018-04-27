@@ -158,6 +158,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['tc_end_time'] = tc_result['tc_end_time']
     json_dict['tc_duration'] = tc_result['tc_duration']
     json_dict['tc_status'] = tc_result['overall_status']
+    json_dict['error_info'] = tc_result['error_info']
 
     json_dict['environment'] = dict()
     json_dict['environment']['vim'] = 'OpenStack'
@@ -167,10 +168,20 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['environment']['em'] = 'None'
 
     durations = dict()
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration')
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or \
+                               tc_result.get('events', {}).get('instantiate_ns', {}).get('duration')
+    durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
+                             tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
+    durations['start'] = tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
+                        tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
+                        tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration')
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \
+                             tc_result.get('events', {}).get('scale_out_ns', {}).get('duration')
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration') or \
+                            tc_result.get('events', {}).get('scale_in_ns', {}).get('duration')
+    durations['scale_to_level'] = tc_result.get('events', {}).get('scale_to_level_ns', {}).get('duration')
+    durations['scale_from_level'] = tc_result.get('events', {}).get('scale_from_level_ns', {}).get('duration')
     durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
     durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
 

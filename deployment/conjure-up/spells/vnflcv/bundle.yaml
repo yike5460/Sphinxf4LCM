@@ -1,21 +1,21 @@
 series: xenial
-applications: 
-  vnflcv: 
+applications:
+  vnflcv:
     charm: "cs:~carpalex/xenial/vnflcv-8"
     num_units: 1
-  twister: 
+  twister:
     charm: "cs:~carpalex/xenial/twister-13"
     num_units: 1
-  mysql: 
+  mysql:
     charm: "cs:xenial/mysql-57"
     num_units: 1
-  elasticsearch: 
+  elasticsearch:
     charm: "cs:~carpalex/xenial/elasticsearch-0"
     num_units: 1
-  kibanaspirent: 
-    charm: "cs:~carpalex/xenial/kibanaspirent-4"
+  kibanaspirent:
+    charm: "cs:~carpalex/xenial/kibanaspirent-6"
     num_units: 1
-relations: 
+relations:
   - - "vnflcv:elasticsearch"
     - "elasticsearch:elasticsearch"
   - - "vnflcv:restapi"

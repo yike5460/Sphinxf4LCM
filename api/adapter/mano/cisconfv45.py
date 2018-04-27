@@ -931,7 +931,7 @@ class CiscoNFVManoAdapter(object):
                                                                 % (vm_group, vm_id_text, if_id_text))
                         ip_address_text = ip_address.text
 
-                        # Get the IP address
+                        # Get the MAC address
                         mac_address = opdata_deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
                                                                  '[{http://www.cisco.com/esc/esc}name="%s"]/'
                                                                  '{http://www.cisco.com/esc/esc}vm_instance'
@@ -946,7 +946,10 @@ class CiscoNFVManoAdapter(object):
                         # Build the VnfExtCpInfo data structure
                         vnf_ext_cp_info = VnfExtCpInfo()
                         vnf_ext_cp_info.cp_instance_id = port_id_text
-                        vnf_ext_cp_info.address = [mac_address_text]
+                        vnf_ext_cp_info.address = {
+                            'ip': [ip_address_text],
+                            'mac': [mac_address_text]
+                        }
                         vnf_ext_cp_info.cpd_id = cpd_id_text
 
                         # Append the current VnfExtCpInfo element to the VnfExtCpInfo list
