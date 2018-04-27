@@ -1548,14 +1548,13 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def build_nested_ns_info_list(self, nested_ns_info_params):
         nested_ns_info_list_xml = ''
-        if nested_ns_info_params is not None:
-            for nested_ns_info_id in nested_ns_info_params:
-                nested_ns_info_template_values = {
-                    'ns_info': nested_ns_info_id
-                }
+        for nested_ns_info_id in nested_ns_info_params:
+            nested_ns_info_template_values = {
+                'ns_info': nested_ns_info_id
+            }
 
-                nested_ns_info_xml = NESTED_NS_INFO_TEMPLATE % nested_ns_info_template_values
-                nested_ns_info_list_xml += nested_ns_info_xml
+            nested_ns_info_xml = NESTED_NS_INFO_TEMPLATE % nested_ns_info_template_values
+            nested_ns_info_list_xml += nested_ns_info_xml
 
         return nested_ns_info_list_xml
 
