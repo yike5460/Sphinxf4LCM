@@ -22,33 +22,26 @@ from utils.net import ping
 LOG = logging.getLogger(__name__)
 
 
-class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
+class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
     """
-    TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001 Verify that a NS referencing an existing nested NS can be successfully
-    instantiated
+    TD_NFV_NSLCM_TERMINATE_NESTED_NS_001 Verify that a NS referencing an existing nested NS can be successfully
+    terminated
 
     Sequence:
     1. Trigger nested NS instantiation on the NFVO
     2. Verify that the nested NS is instantiated
     3. Trigger nesting NS instantiation on the NFVO
-    4. Verify that the software images of the VNF(s) referenced in the nesting NSD have been successfully added to the
-       image repository managed by the VIM
-    5. Verify that resources associated to the nesting NS have been allocated by the VIM according to the descriptors
-    6. Verify that the VNF instance(s) have been deployed according to the nesting NSD (i.e. query the VIM and VNFM for
-       VMs, VLs and CPs)
-    7. Verify that existing VNF instance(s) in the nested NS are running and reachable via the management network
-    8. Verify that the VNF instance(s) in the nesting NS are running and reachable through the management network
-    9. Verify that the VNF instances(s) in the nesting NS have been configured according to the VNFD(s) by querying the
-       VNFM
-    10. Verify that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected according to the
-        descriptors
-    11. Verify that the NFVO indicates the nesting NS instantiation operation result as successful
-    12. Verify that the nensting NS is successfully instantiated by running an end-to-end functional test re-using the
-        functionality of VNF instance(s) inside the nested NS
-    13. Trigger the termination of the nesting NS instance on the NFVO
-    14. Verify that the nesting NS is terminated and that all resources have been released by the VIM
-    15. Trigger the termination of the nested NS instance on the NFVO
-    16. Verify that the nested NS is terminated and that all resources have been released by the VIM
+    4. Verify that the nesting NS is instantiated
+    5. Trigger nesting NS instance termination on the NFVO
+    6. Verify that the resources that were allocated to the VNF instance(s) inside the nesting NS have been released by
+       the VIM
+    7. Verify that VNF instance(s) inside the nested NS are still running and reachable through the management network
+    8. Verify that all VNF instance(s) in the nesting NS have been terminated by querying the VNFM
+    9. Verify that the NFVO indicates the nesting NS instance termination operation result as successful
+    10. Verify that the nested NS instance was unaffected by the nesting NS instance termination by running an
+        end-to-end functional test factoring in the functionality of VNF instance(s) in nested NS
+    11. Trigger nested NS instance termination on the NFVO
+    12. Verify that the nested NS is terminated and that all resources have been released by the VIM
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
@@ -129,126 +122,26 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                   ns_instance_id=self.ns_instance_id_nesting)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Verify that the software images of the VNF(s) referenced in the nesting NSD have been successfully added to
-        #    the image repository managed by the VIM
+        # 4. Verify that the nesting NS is instantiated
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the software images of the VNF(s) referenced in the nesting NSD have been successfully'
-                 ' added to the image repository managed by the VIM')
-        if not self.mano.verify_ns_sw_images(self.ns_instance_id_nesting, self.tc_input['mano'].get('query_params')):
-            raise TestRunError('Nesting NS VNFCs do not use the correct images')
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 5. Verify that resources associated to the nesting NS have been allocated by the VIM according to the
-        #    descriptors
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that resources associated to the nesting NS have been allocated by the VIM according to the'
-                 ' descriptors')
-        if not self.mano.validate_ns_allocated_vresources(self.ns_instance_id_nesting,
-                                                          self.tc_input['mano'].get('query_params')):
-            raise TestRunError('Nesting NS allocated vResources could not be validated')
-
+        LOG.info('Verifying that the nesting NS is instantiated')
         ns_info_nesting_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nesting,
                                                                          'additional_param': self.tc_input['mano'].get(
                                                                              'query_params')})
+        if ns_info_nesting_after_instantiation.ns_state != constants.NS_INSTANTIATED:
+            raise TestRunError('Unexpected NS instantiation state',
+                               err_details='Nesting NS instantiation state was not "%s" after the NS was instantiated'
+                                           % constants.NS_INSTANTIATED)
+
         for vnf_info in ns_info_nesting_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Verify that the VNF instance(s) have been deployed according to the nesting NSD
+        # 5. Trigger nesting NS instance termination on the NFVO
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance(s) have been deployed according to the nesting NSD')
-        if not self.mano.verify_vnf_nsd_mapping(self.ns_instance_id_nesting, self.tc_input['mano'].get('query_params')):
-            raise TestRunError('Nesting NS VNF instance(s) have not been deployed according to the nesting NSD')
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 7. Verify that existing VNF instance(s) in the nested NS are running and reachable via the management network
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that existing VNF instance(s) in the nested NS are running and reachable via the management'
-                 ' network')
-        for vnf_info in ns_info_nested_after_instantiation.vnf_info:
-            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
-                                                              nested_ns_params.get('query_params'))
-            for mgmt_addr in mgmt_addr_list:
-                if not ping(mgmt_addr):
-                    raise TestRunError('Unable to PING IP address %s belonging to the nested NS VNF %s'
-                                       % (mgmt_addr, vnf_info.vnf_product_name))
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 8. Verify that the VNF instance(s) in the nesting NS are running and reachable through the management network
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance(s) in the nesting NS are running and reachable through the management'
-                 ' network')
-        for vnf_info in ns_info_nesting_after_instantiation.vnf_info:
-            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
-                                                              self.tc_input['mano'].get('query_params'))
-            for mgmt_addr in mgmt_addr_list:
-                if not ping(mgmt_addr):
-                    raise TestRunError('Unable to PING IP address %s belonging to the nesting NS VNF %s'
-                                       % (mgmt_addr, vnf_info.vnf_product_name))
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 9. Verify that the VNF instances(s) in the nesting NS have been configured according to the VNFD(s) by
-        #    querying the VNFM
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instances(s) in the nesting NS have been configured according to the VNFD(s) '
-                 'by querying the VNFM')
-        # TODO
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 10. Verify that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected according to the
-        #     descriptors
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected '
-                 'according to the descriptors')
-        # TODO
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 11. Verify that the NFVO indicates the nesting NS instantiation operation result as successful
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the NFVO indicates the nesting NS instantiation operation result as successful')
-        if ns_info_nesting_after_instantiation.ns_state != constants.NS_INSTANTIATED:
-            raise TestRunError('Unexpected NS state',
-                               err_details='Nesting NS state was not "%s" after the NS was instantiated'
-                                           % constants.NS_INSTANTIATED)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 12. Verify that the nesting NS is successfully instantiated by running an end-to-end functional test re-using
-        #     the functionality of VNF instance(s) inside the nested NS
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the nesting NS is successfully instantiated by running an end-to-end functional test '
-                 're-using the functionality of VNF instance(s) inside the nested NS')
-        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic']['traffic_config'])
-
-        self.register_for_cleanup(index=50, function_reference=self.traffic.destroy)
-
-        # Configure stream destination address(es)
-        dest_addr_list_nested_ns = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info_nested_after_instantiation,
-                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
-        dest_addr_list_nesting_ns = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info_nesting_after_instantiation,
-                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
-        dest_addr_list = dest_addr_list_nested_ns + dest_addr_list_nesting_ns
-        self.traffic.reconfig_traffic_dest(dest_addr_list)
-
-        self.traffic.start(return_when_emission_starts=True)
-
-        self.register_for_cleanup(index=60, function_reference=self.traffic.stop)
-
-        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_STABILIZATION_TIME):
-            raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
-
-        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
-            raise TestRunError('Traffic is flowing with packet loss',
-                               err_details='Normal traffic flew with packet loss')
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 13. Trigger the termination of the nesting NS instance on the NFVO
-        # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering the termination of the nesting NS instance on the NFVO')
+        LOG.info('Triggering nesting NS instance termination on the NFVO')
         self.time_record.START('terminate_ns')
         if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id_nesting,
                                        terminate_time=self.tc_input.get('terminate_time'),
@@ -269,18 +162,11 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                   ns_instance_id=self.ns_instance_id_nesting)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 14. Verify that the nesting NS is terminated and that all resources have been released by the VIM
+        # 6. Verify that the resources that were allocated to the VNF instance(s) inside the nesting NS have been
+        #    released by the VIM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the nesting NS is terminated')
-        ns_info_nesting_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nesting,
-                                                                       'additional_param': self.tc_input['mano'].get(
-                                                                           'query_params')})
-        if ns_info_nesting_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
-            raise TestRunError('Unexpected NS instantiation state',
-                               err_details='Nesting NS instantiation state was not "%s" after the NS was terminated'
-                                           % constants.NS_NOT_INSTANTIATED)
-
-        LOG.info('Verifying that all nesting NS VNF instance(s) have been terminated')
+        LOG.info('Verify that the resources that were allocated to the VNF instance(s) inside the nesting NS have been '
+                 'released by the VIM')
         for vnf_info in ns_info_nesting_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
@@ -290,14 +176,72 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                     'Nesting NS VNF instance %s was not terminated correctly. Expected state was %s but got %s'
                     % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
-        LOG.info('Verifying that all nesting NS resources have been released by the VIM')
+        # --------------------------------------------------------------------------------------------------------------
+        # 7. Verify that VNF instance(s) inside the nested NS are still running and reachable through the management
+        #    network
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that VNF instance(s) inside the nested NS are still running and reachable through the '
+                 'management network')
+        for vnf_info in ns_info_nested_after_instantiation.vnf_info:
+            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                              nested_ns_params.get('query_params'))
+            for mgmt_addr in mgmt_addr_list:
+                if not ping(mgmt_addr):
+                    raise TestRunError('Unable to PING IP address %s belonging to nested NS VNF %s'
+                                       % (mgmt_addr, vnf_info.vnf_product_name))
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 8. Verify that all VNF instance(s) in the nesting NS have been terminated by querying the VNFM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that all VNF instance(s) in nesting NS have been terminated by querying the VNFM')
         if not self.mano.validate_ns_released_vresources(ns_info_nesting_after_instantiation):
             raise TestRunError('Nesting NS allocated resources have not been released by the VIM')
 
         # --------------------------------------------------------------------------------------------------------------
-        # 15. Trigger the termination of the nested NS instance on the NFVO
+        # 9. Verify that the NFVO indicates the nesting NS instance termination operation result as successful
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering the termination of the nested NS instance on the NFVO')
+        LOG.info('Verifying that the NFVO indicates the nesting NS instance termination operation result as successful')
+        ns_info_nesting_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nesting,
+                                                                       'additional_param': self.tc_input['mano'].get(
+                                                                           'query_params')})
+        if ns_info_nesting_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
+            raise TestRunError('Unexpected NS instantiation state',
+                               err_details='Nesting NS instantiation state was not "%s" after the NS was terminated'
+                                           % constants.NS_NOT_INSTANTIATED)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 10. Verify that the nested NS instance was unaffected by the nesting NS instance termination by running an
+        #     end-to-end functional test factoring in the functionality of VNF instance(s) in the nested NS
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that the nested NS instance was unaffected by the nesting NS instance termination by '
+                 'running an end-to-end functional test factoring in the functionality of VNF instance(s) in the nested'
+                 ' NS')
+        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
+                               traffic_config=self.tc_input['traffic']['traffic_config'])
+
+        self.register_for_cleanup(index=40, function_reference=self.traffic.destroy)
+
+        # Configure stream destination address(es)
+        dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
+                                                          ns_info_nested_after_instantiation,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
+        self.traffic.reconfig_traffic_dest(dest_addr_list)
+
+        self.traffic.start(return_when_emission_starts=True)
+
+        self.register_for_cleanup(index=50, function_reference=self.traffic.stop)
+
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_STABILIZATION_TIME):
+            raise TestRunError('Traffic is not flowing', err_details='Normal traffic did not flow')
+
+        if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
+            raise TestRunError('Traffic is flowing with packet loss',
+                               err_details='Normal traffic flew with packet loss')
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 11. Trigger nested NS instance termination on the NFVO
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Triggering nested NS instance termination on the NFVO')
         if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id_nested,
                                        terminate_time=nested_ns_params.get('terminate_time'),
                                        additional_param=nested_ns_params.get('termination_params')) != \
@@ -312,7 +256,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                   ns_instance_id=self.ns_instance_id_nested)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 16. Verify that the nested NS is terminated and that all resources have been released by the VIM
+        # 12. Verify that the nested NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the nested NS is terminated')
         ns_info_nested_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nested,
