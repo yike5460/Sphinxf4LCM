@@ -205,9 +205,9 @@ SAP_INFO_TEMPLATE = '''
         </sap-info>'''
 
 NESTED_NS_INFO_TEMPLATE = '''
-    <nested-ns-info>
-      <ns-info>%(ns_info)s</ns-info>
-    </nested-ns-info>'''
+                    <nested-ns-info>
+                        <ns-info>%(ns_info)s</ns-info>
+                    </nested-ns-info>'''
 
 NSR_DELETE_TEMPLATE = '''
 <config>
