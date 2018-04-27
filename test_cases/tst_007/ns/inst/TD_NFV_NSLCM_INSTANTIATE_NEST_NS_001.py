@@ -29,7 +29,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
 
     Sequence:
     1. Trigger nested NS instantiation on the NFVO
-    2. Verify that the nested is instantiated
+    2. Verify that the nested NS is instantiated
     3. Trigger nesting NS instantiation on the NFVO
     4. Verify that the software images of the VNF(s) referenced in the nesting NSD have been successfully added to the
        image repository managed by the VIM
