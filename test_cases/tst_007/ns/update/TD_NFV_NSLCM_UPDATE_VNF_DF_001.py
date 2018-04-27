@@ -29,13 +29,13 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
     can be changed.
 
     Sequence:
-    1.  Trigger NS instantiation on the NFVO
-    2.  Verify that the NS is instantiated
-    3.  Trigger a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS instance on NFVO
-    4.  Verify that the virtualised resources have been updated by the VIM according to the new deployment flavor
-    5.  Verify that the impacted VNF instance(s) are running and reachable through the management network
-    6.  Verify that the NFVO indicates the VNF DF update operation as successful
-    7.  Verify that the NS has been updated by runnning the end-to-end functional test factoring the new VNF DF
+    1. Trigger NS instantiation on the NFVO
+    2. Verify that the NS is instantiated
+    3. Trigger a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS instance on NFVO
+    4. Verify that the virtualized resources have been updated by the VIM according to the new deployment flavor
+    5. Verify that the impacted VNF instance(s) are running and reachable through the management network
+    6. Verify that the NFVO indicates the VNF DF update operation as successful
+    7. Verify that the NS has been updated by running the end-to-end functional test factoring the new VNF DF
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
@@ -73,17 +73,17 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
-        # self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
-        #                           ns_instance_id=self.ns_instance_id,
-        #                           terminate_time=self.tc_input.get('terminate_time'),
-        #                           additional_param=self.tc_input['mano'].get('termination_params'))
-        # self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
-        #                           ns_instance_id=self.ns_instance_id)
+        self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
+                                  ns_instance_id=self.ns_instance_id,
+                                  terminate_time=self.tc_input.get('terminate_time'),
+                                  additional_param=self.tc_input['mano'].get('termination_params'))
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
+                                  ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that the NS is instantiated
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating NS instantiation state is INSTANTIATED')
+        LOG.info('Validating that the NS is instantiated')
         ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
                                              'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info.ns_state != constants.NS_INSTANTIATED:
@@ -100,7 +100,8 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
         # 3. Trigger a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS instance on
         #    NFVO
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering the NFVO to change the deployment flavour of the target VNF instance inside the NS')
+        LOG.info('Trigger a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS '
+                 'instance on NFVO')
         change_vnf_flavour_data_list = list()
         for vnf_info in ns_info.vnf_info:
             if vnf_info.vnf_product_name in self.tc_input.get('change_vnf_deployment_flavour').get('vnfs').keys():
@@ -118,7 +119,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
 
         if self.mano.ns_update_sync(ns_instance_id=self.ns_instance_id, update_type='ChangeVnfDf',
                                     change_vnf_flavour_data=change_vnf_flavour_data_list) != \
-                                    constants.OPERATION_SUCCESS:
+                constants.OPERATION_SUCCESS:
             raise TestRunError('Unexpected status for NS update operation',
                                err_details='NS update operation failed')
 
@@ -128,9 +129,9 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
         self.tc_result['events']['ns_update_vnf_df']['details'] = 'Success'
 
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Verify that the virtualised resources have been updated by the VIM according to the new deployment flavor
+        # 4. Verify that the virtualized resources have been updated by the VIM according to the new deployment flavor
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the virtualised resources have been updated by the VIM according to the new deployment'
+        LOG.info('Verifying that the virtualized resources have been updated by the VIM according to the new deployment'
                  ' flavour')
         if not self.mano.validate_ns_allocated_vresources(self.ns_instance_id,
                                                           self.tc_input['mano'].get('query_params')):
@@ -158,13 +159,12 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                                              change_vnf_flavour_data.new_flavour_id,
                                                              change_vnf_flavour_data.instantiation_level_id,
                                                              change_vnf_flavour_data.additional_param):
-                raise TestRunError('Operation of changing deployment flavour for VNF instance ID %s was not successfull'
-                                   '- new flavour ID %s, new instantiation level ID %s' %
+                raise TestRunError('Could not update VNF %s DF to flavor_id %s, instantiation level ID %s' %
                                    (change_vnf_flavour_data.vnf_instance_id, change_vnf_flavour_data.new_flavour_id,
                                     change_vnf_flavour_data.instantiation_level_id))
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Verify that the NS has been updated by runnning the end-to-end functional test factoring the new VNF DF
+        # 7. Verify that the NS has been updated by running the end-to-end functional test factoring the new VNF DF
         # --------------------------------------------------------------------------------------------------------------
         if 'left_port_vnf' in self.tc_input['traffic']['traffic_config']:
             for vnf_info in ns_info.vnf_info:
@@ -186,9 +186,8 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                                                                             'traffic_config'][
                                                                                             'right_port_location']
 
-        LOG.info(
-            'Verifying that the NS functionality that utilizes the started VNF instance operates successfully by'
-            ' running the end-to-end functional test')
+        LOG.info('Verify that the NS has been updated by running the end-to-end functional test factoring the new VNF '
+                 'DF')
         self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
@@ -196,8 +195,8 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
-            ns_info,
-            self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
+                                                          ns_info,
+                                                          self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
         self.traffic.start(return_when_emission_starts=True)
