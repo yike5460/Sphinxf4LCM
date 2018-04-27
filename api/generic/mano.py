@@ -1423,7 +1423,7 @@ class Mano(object):
         :param vnf_instance_id:     Identifier of the VNF instance.
         :param additional_param:    Additional parameters used for filtering.
         :return:                    List of management addresses.
-        """   
+        """
         return self.mano_adapter.get_vnf_mgmt_addr_list(vnf_instance_id, additional_param)
 
     @log_entry_exit(LOG)
@@ -1493,8 +1493,10 @@ class Mano(object):
     def vnf_change_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                            ext_managed_virtual_link=None, vim_connection_info=None, additional_param=None):
         """
-        This function changes the deployment flavour for a VNF instance.
+        This function changes the deployment flavour of a VNF instance.
+
         This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 007 v2.4.1 (2018-02).
+
         :param vnf_instance_id:             Identifier of the VNF instance to be modified.
         :param new_flavour_id:              Identifier of the new VNF DF to apply to this VNF instance.
         :param instantiation_level_id:      Identifier of the instantiation level of the DF to be used. If not present,
@@ -1513,20 +1515,20 @@ class Mano(object):
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
         return self.mano_adapter.vnf_change_flavour(vnf_instance_id, new_flavour_id, instantiation_level_id,
-                                             ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
-                                             additional_param)
+                                                    ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
+                                                    additional_param)
 
     @log_entry_exit(LOG)
     def validate_vnf_deployment_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id,
                                         additional_param=None):
         """
         This function will return True if the VNF deployment flavour was updated successfully, and False otherwise.
-        :param vnf_instance_id:                  VNF instance ID fo which the deployment flavour was changed
-        :param new_flavour_id:                   The new deployment flavour that was applied to the VNF instance
-        :param instantiation_level_id:           The instantion level id that was applied to the VNF instance
-        :param additional_param:                 Additional parameters
-        :return:                                 True if the new deployment flavour was applied successfully, False
-                                                 otherwise
+
+        :param vnf_instance_id:         VNF instance ID fo which the deployment flavour was changed
+        :param new_flavour_id:          The new deployment flavour that was applied to the VNF instance
+        :param instantiation_level_id:  The instantiation level id that was applied to the VNF instance
+        :param additional_param:        Additional parameters
+        :return:                        True if the new deployment flavour was applied successfully, False otherwise
         """
         return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, new_flavour_id,
                                                                  instantiation_level_id, additional_param)

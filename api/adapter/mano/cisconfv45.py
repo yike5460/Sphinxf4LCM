@@ -215,7 +215,7 @@ NSR_DELETE_TEMPLATE = '''
     </nfvo>
 </config>'''
 
-VNFR_DF_TEMPLATE = '''
+VNFR_DF_UPDATE_TEMPLATE = '''
 <config>
     <nfvo xmlns="http://tail-f.com/pkg/tailf-etsi-rel2-nfvo">
         <vnf-info>
@@ -232,8 +232,8 @@ VNFR_DF_TEMPLATE = '''
             </esc>
         </vnf-info>
     </nfvo>
-</config>
-'''
+</config>'''
+
 
 class CiscoNFVManoAdapterError(ManoAdapterError):
     """
@@ -461,8 +461,8 @@ class CiscoNFVManoAdapter(object):
                 try:
                     xml = self.esc.get(('xpath',
                                         '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                        'deployments[deployment_name="%s"]/vm_group[name="%s"]' %
-                                        (tenant_name, deployment_name, vm_group))).data_xml
+                                            'deployments[deployment_name="%s"]/vm_group[name="%s"]' %
+                                            (tenant_name, deployment_name, vm_group))).data_xml
                     xml = etree.fromstring(xml)
                     vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance/'
                                                '{http://www.cisco.com/esc/esc}name')
@@ -1039,7 +1039,6 @@ class CiscoNFVManoAdapter(object):
 
         # Iterate over each VNFC and check that the corresponding flavor name in VNFR and Nova are the same
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-
 
             # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
@@ -2017,6 +2016,7 @@ class CiscoNFVManoAdapter(object):
                 lifecycle_operation_occurrence_id] = lifecycle_operation_occurrence_dict
 
             return lifecycle_operation_occurrence_id
+
         if update_type == 'ChangeVnfDf':
             operation_list = []
             for flavour_data in change_vnf_flavour_data:
@@ -2149,10 +2149,10 @@ class CiscoNFVManoAdapter(object):
 
         vm_group_map = dict()
         instantiation_level_details = vnfd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor/'
-                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id='
-                                                    '"%s"]/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                                    'instantiation-level/[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                                    'id="%s"]' % (new_flavour_id, instantiation_level_id))
+                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                                                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}instantiation-level/'
+                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]'
+                                                    % (new_flavour_id, instantiation_level_id))
         vdu_instances = instantiation_level_details.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level')
         for vdu in vdu_instances:
             vdu_name = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu').text
@@ -2171,7 +2171,6 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError('NSO replied with an error')
 
         LOG.debug('NSO reply: %s' % netconf_reply.xml)
-
 
         lifecycle_operations_occurrence_id = uuid.uuid4()
         lifecycle_operations_occurrence_dict = {
@@ -2195,7 +2194,7 @@ class CiscoNFVManoAdapter(object):
             'vnf_name': vnf_name,
             'vnfd_flavour': vnfd_flavour
         }
-        vnfr_df_xml = VNFR_DF_TEMPLATE % vnfr_template_values
+        vnfr_df_xml = VNFR_DF_UPDATE_TEMPLATE % vnfr_template_values
 
         return vnfr_df_xml
 
@@ -2211,10 +2210,10 @@ class CiscoNFVManoAdapter(object):
 
         vm_group_map = dict()
         instantiation_level_details = vnfd_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}deployment-flavor/'
-                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id='
-                                                    '"%s"]/{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                                    'instantiation-level/[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}'
-                                                    'id="%s"]' % (new_flavour_id, instantiation_level_id))
+                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
+                                                    '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}instantiation-level/'
+                                                    '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]'
+                                                    % (new_flavour_id, instantiation_level_id))
         vdu_instances = instantiation_level_details.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu-level')
         for vdu in vdu_instances:
             vdu_name = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu').text
@@ -2245,10 +2244,10 @@ class CiscoNFVManoAdapter(object):
 
         # Validating if the expected and current deployment flavour and instantiation level id are matching
         LOG.debug('Cisco NSO restores the initial deployment flavour, based on the value present in the NSD, so we '
-                  'cannot validate that the new flavour id is configurend on the VNF instance. Validating instead that'
+                  'cannot validate that the new flavour id is configured on the VNF instance. Validating instead that'
                   ' the number of VM instances is according to the new flavour')
         if current_instantiation_level_id != instantiation_level_id:
-            LOG.debug('VNF instance ID: %s: expected instantation level id %s, current instantation level id %s' %
+            LOG.debug('VNF instance ID: %s: expected instantiation level id %s, current instantiation level id %s' %
                       (vnf_instance_id, instantiation_level_id, current_instantiation_level_id))
             return False
 
@@ -2260,8 +2259,8 @@ class CiscoNFVManoAdapter(object):
             try:
                 xml = self.esc.get(('xpath',
                                     '/esc_datamodel/opdata/tenants/tenant[name="%s"]/'
-                                    'deployments[deployment_name="%s"]/vm_group[name="%s"]' %
-                                    (tenant_name, deployment_name, vm_group))).data_xml
+                                    'deployments[deployment_name="%s"]/vm_group[name="%s"]'
+                                    % (tenant_name, deployment_name, vm_group))).data_xml
                 xml = etree.fromstring(xml)
                 vm_name_list = xml.findall('.//{http://www.cisco.com/esc/esc}vm_instance/'
                                            '{http://www.cisco.com/esc/esc}name')
