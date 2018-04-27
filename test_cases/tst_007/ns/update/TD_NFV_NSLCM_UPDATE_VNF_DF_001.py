@@ -159,7 +159,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                                              change_vnf_flavour_data.new_flavour_id,
                                                              change_vnf_flavour_data.instantiation_level_id,
                                                              change_vnf_flavour_data.additional_param):
-                raise TestRunError('Could not update VNF %s DF to flavor_id %s, instantiation level ID %s' %
+                raise TestRunError('VNF %s DF was not updated to flavor_id %s, instantiation level ID %s' %
                                    (change_vnf_flavour_data.vnf_instance_id, change_vnf_flavour_data.new_flavour_id,
                                     change_vnf_flavour_data.instantiation_level_id))
 
