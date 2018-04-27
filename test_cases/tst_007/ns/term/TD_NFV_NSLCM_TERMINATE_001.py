@@ -27,7 +27,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
 
     Sequence:
     1. Trigger NS instantiation on the NFVO
-    2. Verify that the NS is instantiated and started
+    2. Verify that the NS is instantiated
     3. Trigger the termination of the NS instance on the NFVO
     4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
     5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
@@ -76,7 +76,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that the NS is instantiated
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Validating NS instantiation state is INSTANTIATED')
+        LOG.info('Verifying that the NS is instantiated')
         ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
                                                                  'additional_param': self.tc_input['mano'].get(
                                                                      'query_params')})
@@ -125,9 +125,8 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
-                raise TestRunError(
-                    'VNF instance was not terminated correctly. VNF instance ID %s expected state was %s but got %s'
-                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
+                raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
+                                   % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM

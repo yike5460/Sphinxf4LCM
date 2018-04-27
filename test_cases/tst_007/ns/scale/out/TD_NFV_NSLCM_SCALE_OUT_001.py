@@ -254,9 +254,8 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
-                raise TestRunError(
-                    'VNF instance was not terminated correctly. VNF instance ID %s expected state was %s but got %s'
-                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
+                raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
+                                   % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all resources have been released by the VIM')
         if not self.mano.validate_ns_released_vresources(ns_info_after_scale_out):

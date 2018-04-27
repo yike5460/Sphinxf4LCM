@@ -173,6 +173,7 @@ NSR_TEMPLATE = '''
                     %(vnf_info_list)s
                     %(vl_list)s
                     %(sap_info_list)s
+                    %(nested_ns_info_list)s
                     <state>%(state)s</state>
                 </ns-info>
             </esc>
@@ -202,6 +203,11 @@ SAP_INFO_TEMPLATE = '''
             <sapd>%(sapd)s</sapd>
             <network-name>%(network_name)s</network-name>
         </sap-info>'''
+
+NESTED_NS_INFO_TEMPLATE = '''
+                    <nested-ns-info>
+                        <ns-info>%(ns_info)s</ns-info>
+                    </nested-ns-info>'''
 
 NSR_DELETE_TEMPLATE = '''
 <config>
@@ -1543,8 +1549,21 @@ class CiscoNFVManoAdapter(object):
         return sap_info_list_xml
 
     @log_entry_exit(LOG)
-    def build_nsr(self, ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id, additional_param_for_ns,
-                  additional_param_for_vnf):
+    def build_nested_ns_info_list(self, nested_ns_info_params):
+        nested_ns_info_list_xml = ''
+        for nested_ns_info_id in nested_ns_info_params:
+            nested_ns_info_template_values = {
+                'ns_info': nested_ns_info_id
+            }
+
+            nested_ns_info_xml = NESTED_NS_INFO_TEMPLATE % nested_ns_info_template_values
+            nested_ns_info_list_xml += nested_ns_info_xml
+
+        return nested_ns_info_list_xml
+
+    @log_entry_exit(LOG)
+    def build_nsr(self, ns_instance_id, flavour_id, sap_data, nested_ns_instance_data, ns_instantiation_level_id,
+                  additional_param_for_ns, additional_param_for_vnf):
         nsd_id = self.ns_nsd_mapping[ns_instance_id]
 
         nsr_template_values = {
@@ -1556,7 +1575,8 @@ class CiscoNFVManoAdapter(object):
             'vnf_info_list': self.build_ns_vnf_info_list(ns_instance_id, additional_param_for_vnf),
             'vl_list': self.build_vl_info_list(additional_param_for_ns['virtual_link_info']),
             'state': 'instantiated',
-            'sap_info_list': self.build_sap_info_list(sap_data)
+            'sap_info_list': self.build_sap_info_list(sap_data),
+            'nested_ns_info_list': self.build_nested_ns_info_list(nested_ns_instance_data)
         }
 
         nsr_xml = NSR_TEMPLATE % nsr_template_values
@@ -1585,8 +1605,8 @@ class CiscoNFVManoAdapter(object):
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
 
-        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, ns_instantiation_level_id,
-                                 additional_param_for_ns, additional_param_for_vnf)
+        nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, nested_ns_instance_data,
+                                 ns_instantiation_level_id, additional_param_for_ns, additional_param_for_vnf)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=nsr_xml)
         except NCClientError as e:
