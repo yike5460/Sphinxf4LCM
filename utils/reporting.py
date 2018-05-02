@@ -52,11 +52,11 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         # Write test case environment
         report_file.write('*** Test case environment ***')
         report_file.write('\n\n')
-        t = prettytable.PrettyTable(['Module', 'Type'])
-        t.add_row(['MANO', tc_input.get('mano', {}).get('type')])
-        t.add_row(['VIM', 'openstack'])
-        t.add_row(['VNF', 'vcpe'])
-        t.add_row(['Traffic', tc_input.get('traffic', {}).get('type')])
+        t = prettytable.PrettyTable(['Module', 'Type', 'Name'])
+        t.add_row(['MANO', tc_input.get('mano', {}).get('type'), tc_input.get('mano', {}).get('name', 'N/A')])
+        t.add_row(['VIM', 'openstack', tc_input.get('vim', {}).get('name', 'N/A')])
+        t.add_row(['VNF', 'vcpe', tc_input.get('vnf', {}).get('name', 'N/A')])
+        t.add_row(['Traffic', tc_input.get('traffic', {}).get('type'), tc_input.get('traffic', {}).get('name', 'N/A')])
         report_file.write(t.get_string())
         report_file.write('\n\n')
 

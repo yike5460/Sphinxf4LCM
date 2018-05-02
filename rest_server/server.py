@@ -154,6 +154,7 @@ def do_exec():
             resource_params = _read_resource(resource_type, resource_name)
             tc_input[resource_type] = dict()
             tc_input[resource_type]['type'] = resource_params['type']
+            tc_input[resource_type]['name'] = resource_name
             tc_input[resource_type]['adapter_config'] = resource_params['client_config']
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
