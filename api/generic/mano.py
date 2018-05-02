@@ -13,6 +13,7 @@
 import logging
 import re
 import time
+from collections import OrderedDict
 from threading import Thread, Event, Lock
 
 from api.adapter import construct_adapter
@@ -344,7 +345,7 @@ class Mano(object):
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
             resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
-            vresources[resource_string] = dict()
+            vresources[resource_string] = OrderedDict()
 
             num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
             virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
