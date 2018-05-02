@@ -115,7 +115,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         # Write VNF resources
         report_file.write('* VNF resources:\n')
         t_outside = prettytable.PrettyTable(
-                                         ['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
+                                         ['VNF', 'VNFC', 'Resource type', 'Expected', 'Actual', 'Validation'],
                                          hrules=prettytable.ALL)
         t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
@@ -124,17 +124,17 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
                 # t_inside = [prettytable.PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
                 t_inside = dict()
                 t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Expected size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Actual size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Expected'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Actual'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 t_inside['Validation'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 for resource_type, resource_size in vnfc_resources.items():
                     t_inside['Resource type'].add_row([resource_type])
-                    t_inside['Expected size'].add_row([resource_size])
-                    t_inside['Actual size'].add_row([resource_size])
+                    t_inside['Expected'].add_row([resource_size])
+                    t_inside['Actual'].add_row([resource_size])
                     t_inside['Validation'].add_row(['OK'])
                 row.append(t_inside['Resource type'])
-                row.append(t_inside['Expected size'])
-                row.append(t_inside['Actual size'])
+                row.append(t_inside['Expected'])
+                row.append(t_inside['Actual'])
                 row.append(t_inside['Validation'])
                 t_outside.add_row(row)
         report_file.write(t_outside.get_string())

@@ -13,6 +13,7 @@
 import logging
 import re
 import time
+from collections import OrderedDict
 from threading import Thread, Event, Lock
 
 from api.adapter import construct_adapter
@@ -344,17 +345,21 @@ class Mano(object):
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
             resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
-            vresources[resource_string] = dict()
+            vresources[resource_string] = OrderedDict()
 
             num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
             virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
             size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
             num_vnics = len(virtual_compute.virtual_network_interface)
+            vc_image_id = virtual_compute.vc_image_id
+            software_image_information = vim.query_image(vc_image_id)
+            vc_image_name = software_image_information.name
 
             vresources[resource_string]['vCPU'] = num_virtual_cpu
             vresources[resource_string]['vMemory'] = str(virtual_memory) + ' MB'
             vresources[resource_string]['vStorage'] = str(size_of_storage) + ' GB'
             vresources[resource_string]['vNIC'] = str(num_vnics)
+            vresources[resource_string]['Image name'] = str(vc_image_name)
 
         return vresources
 
@@ -1575,7 +1580,7 @@ class Mano(object):
         :param data:        Data structure containing patterns that may need resolving
         :return:            Data structure with resolved patterns
         """
-        
+
         pattern = '\$\{(.*?)\}'
 
         data = re.sub(pattern, lambda x: self.get_ns_ingress_cp_addr_list(ns_info, [x.group(1)]), data)
