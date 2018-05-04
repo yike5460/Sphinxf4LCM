@@ -14,7 +14,7 @@ import logging
 from time import sleep
 
 from api.generic import constants
-from test_cases import TestCase, TestRunError
+from test_cases import TestCase, TestRunError, Step
 from utils.misc import generate_name
 
 # Instantiate logger
@@ -27,7 +27,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
 
     Sequence:
     1. Trigger NS instantiation on the NFVO
-    2. Verify that the NS is instantiated
+    2. Verify that the NFVO indicates NS instantiation operation result as successful
     3. Trigger the termination of the NS instance on the NFVO
     4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
     5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
@@ -38,7 +38,8 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
     REQUIRED_ELEMENTS = ('nsd_id',)
     TESTCASE_EVENTS = ('instantiate_ns', 'terminate_ns')
 
-    def run(self):
+    @Step(name='Instantiate the NS', description='Trigger NS instantiation on the NFVO')
+    def step1(self):
         LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -73,23 +74,28 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
+    @Step(name='Verify NS instantiation was successful',
+          description='Verify that the NFVO indicates NS instantiation operation result as successful')
+    def step2(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 2. Verify that the NS is instantiated
+        # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the NS is instantiated')
-        ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                 'additional_param': self.tc_input['mano'].get(
-                                                                     'query_params')})
-        if ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
+        LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
+        self.ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                      'additional_param': self.tc_input['mano'].get(
+                                                                          'query_params')})
+        if self.ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        for vnf_info in ns_info_after_instantiation.vnf_info:
+        for vnf_info in self.ns_info_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
+    @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
+    def step3(self):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Trigger the termination of the NS instance on the NFVO
         # --------------------------------------------------------------------------------------------------------------
@@ -113,6 +119,9 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_delete_id,
                                   ns_instance_id=self.ns_instance_id)
 
+    @Step(name='Verify VNF VNF instance(s) have been terminated',
+          description='Verify that all the VNF instance(s) have been terminated by querying the VNFM')
+    def step4(self):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
@@ -120,7 +129,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         LOG.info('Sleeping 60 seconds to allow MANO to finalize termination of resources')
         sleep(60)
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info_after_instantiation.vnf_info:
+        for vnf_info in self.ns_info_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
@@ -128,13 +137,19 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
                 raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
+    @Step(name='Verify allocated resources have been released',
+          description='Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM')
+    def step5(self):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the resources allocated to the NS and VNF instance(s) have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info_after_instantiation):
+        if not self.mano.validate_ns_released_vresources(self.ns_info_after_instantiation):
             raise TestRunError('NS resources have not been released by the VIM')
 
+    @Step(name='Verify NS termination was successful',
+          description='Verify that the NFVO indicates NS instance operation termination operation result as successful')
+    def step6(self):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the NFVO indicates NS instance operation termination operation result as successful
         # --------------------------------------------------------------------------------------------------------------
