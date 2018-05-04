@@ -160,8 +160,8 @@ class RiftManoAdapter(object):
             #     return constants.OPERATION_PENDING
             # else:
             #     return constants.OPERATION_FAILED
-            resource = '/api/operational/project/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
-                       (ns_instance_id, scaling_group_record_id)
+            resource = '/api/operational/project/%s/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
+                       (self.project, ns_instance_id, scaling_group_record_id)
             try:
                 response = self.session.get(url=self.url + resource)
                 assert response.status_code == 200
@@ -170,11 +170,10 @@ class RiftManoAdapter(object):
                 LOG.exception(e)
                 raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
                                            (scaling_group_record_id, ns_instance_id))
-            scaling_group_record = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0].\
-                get('scaling-group-record')
+            scaling_group_record = json_content.get('nsr:scaling-group-record')
             if scaling_group_record == None:
                 return constants.OPERATION_SUCCESS
-            elif 'instance' in scaling_group_record[0]:
+            elif 'instance' in scaling_group_record:
                 return constants.OPERATION_PENDING
             else:
                 return constants.OPERATION_FAILED
