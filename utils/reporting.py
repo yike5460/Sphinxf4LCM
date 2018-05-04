@@ -43,7 +43,8 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write steps summary
         report_file.write('* Steps summary:\n')
-        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Status'])
+        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Status'], hrules=prettytable.ALL)
+        t.max_width = 32
         for step_index, step_details in tc_result.get('steps', {}).items():
             t.add_row([step_index, step_details['name'], step_details['description'], step_details['status']])
         report_file.write(t.get_string())
@@ -121,7 +122,6 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
                 row = [key, vnfc_id]
-                # t_inside = [prettytable.PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
                 t_inside = dict()
                 t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 t_inside['Expected'] = prettytable.PrettyTable(['resource'], border=False, header=False)
@@ -144,6 +144,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write('*** Test case results ***')
         report_file.write('\n\n')
         t = prettytable.PrettyTable(['Overall status', 'Error info'])
+        t.max_width = 32
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
