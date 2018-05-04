@@ -96,6 +96,7 @@ def execute_test(tc_exec_request, tc_input, queue):
     timestamp = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now())
     log_file_name = '%s_%s.log' % (timestamp, str(tc_name))
     report_file_name = '%s_%s.txt' % (timestamp, str(tc_name))
+    html_report_file_name = '%s_%s.html' % (timestamp, str(tc_name))
 
     root_logger = logging.getLogger()
     logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name)
@@ -115,7 +116,7 @@ def execute_test(tc_exec_request, tc_input, queue):
         reporting.kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result)
 
     reporting.report_test_case(report_file_name, tc_exec_request, tc_input, tc_result)
-
+    reporting.html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result)
 
 @route('/version')
 def get_version():
