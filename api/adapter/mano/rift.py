@@ -142,24 +142,6 @@ class RiftManoAdapter(object):
 
         if operation_type == 'scaling_group_terminate':
             ns_instance_id, scaling_group_record_id = resource_id
-            # resource = '/api/operational/project/%s/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
-            #            (self.project, ns_instance_id, scaling_group_record_id)
-            # headers = {
-            #     'Accept': 'application/vnd.yang.collection+json',
-            #     'Content-type': 'application/vnd.yang.data+json'
-            # }
-            # try:
-            #     response = self.session.get(url=self.url + resource, headers = headers)
-            # except Exception as e:
-            #     LOG.exception(e)
-            #     raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
-            #                                (scaling_group_record_id, ns_instance_id))
-            # if response.status_code == 204:
-            #     return constants.OPERATION_SUCCESS
-            # elif response.status_code == 200:
-            #     return constants.OPERATION_PENDING
-            # else:
-            #     return constants.OPERATION_FAILED
             resource = '/api/operational/project/%s/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
                        (self.project, ns_instance_id, scaling_group_record_id)
             try:
