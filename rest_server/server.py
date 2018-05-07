@@ -454,7 +454,7 @@ def wait_for_step(execution_id):
         return msg
 
 
-@route('/v1.0/step/<execution_id>', method='PUT')
+@route('/v1.0/step/<execution_id>', method='POST')
 def trigger_step(execution_id):
     try:
         step_trigger = step_triggers[execution_id]
@@ -463,11 +463,11 @@ def trigger_step(execution_id):
         return {'error': 'NOT_FOUND'}
 
     if step_trigger is None:
-        response.status_code = 204
+        response.status = 204
         return {'error': 'Not running in debug mode'}
     else:
         step_trigger.set()
-        response.status_code = 200
+        response.status = 200
         return {}
 
 
