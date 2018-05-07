@@ -12,6 +12,7 @@
 
 import collections
 import importlib
+import time
 
 from api import ApiError
 from api.generic import constants, construct_generic
@@ -207,6 +208,7 @@ class TestCase(object):
                 self.message_queue.put(step_dict)
 
             try:
+                step_start_time = time.time()
                 step.run_func(self)
                 step_status = 'PASS'
             except TestRunError as e:
@@ -216,10 +218,13 @@ class TestCase(object):
                 step_status = 'ERROR'
                 raise e
             finally:
+                step_end_time = time.time()
+                step_duration = step_end_time - step_start_time
                 if self.message_queue is not None:
                     step_dict['status'] = step_status
                     self.message_queue.put(step_dict)
                 self.tc_result['steps'][step.index]['status'] = step_status
+                self.tc_result['steps'][step.index]['duration'] = step_duration
                 self._LOG.info('Exiting step %s' % step.name)
 
     def register_for_cleanup(self, index, function_reference, *args, **kwargs):
