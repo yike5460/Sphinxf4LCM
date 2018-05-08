@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.9.2.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.9.2.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VirtualCpuData:
   description: The VirtualCpuData information element supports the specification of requirements related to virtual CPU(s) of a virtual compute resource.
@@ -34,6 +34,11 @@ VirtualCpuData:
       description: The CPU core oversubscription policy e.g. the relation of virtual CPU cores to physical CPU cores/threads. The cardinality can be 0 during the allocation request, if no particular value is requested.
       type: NotSpecified
       required: false
+
+    vdu_cpu_requirements:
+      description: The CPU core oversubscription policy e.g. the relation of virtual CPU cores to physical CPU cores/threads. The cardinality can be 0 during the allocation request, if no particular value is requested.
+      type: NotSpecified
+      required: true
 
     virtual_cpu_pinning:
       description: The virtual CPU pinning configuration for the virtualised compute resource.

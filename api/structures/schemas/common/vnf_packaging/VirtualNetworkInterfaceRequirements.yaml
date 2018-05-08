@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.6.6 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.6.6 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VirtualNetworkInterfaceRequirements:
   description: This information element specifies requirements on a virtual network interface.
@@ -30,7 +30,12 @@ VirtualNetworkInterfaceRequirements:
       type: Boolean
       required: true
 
-    requirement:
-      description: Specifies a requirement such as the support of SR-IOV, a particular data plane acceleration library, an API to be exposed by a NIC, etc.
+    network_interface_requirements:
+      description: The network interface requirements. An element from an array of key-value pairs that articulate the network interface deployment requirements.
       type: NotSpecified
       required: true
+
+    nic_io_requirements:
+      description: This references (couples) the CPD with any logical node I/O requirements (for network devices) that may have been created. Linking these attributes is necessary so that so that I/O requirements that need to be articulated at the logical node level can be associated with the network interface requirements associated with the CPD.
+      type: Identifier
+      required: false

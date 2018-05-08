@@ -16,7 +16,7 @@ ScaleVnfToLevelOpConfig:
   description: This information element defines attributes that affect the invocation of the ScaleVnf operation.
   attributes:
     parameter:
-      description: VNF-specific parameter to be passed when invoking the ScaleVnfToLevel operation.
+      description: Array of KVP requirements for VNF-specific parameters to be passed when invoking the ScaleVnfToLevel operation.
       type: List
       required: false
       constraints:

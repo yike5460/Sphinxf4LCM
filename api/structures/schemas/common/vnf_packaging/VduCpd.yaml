@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.6.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.6.4 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VduCpd:
   description: A VduCpd information element is a type of Cpd and describes network connectivity between a VNFC instance (based on this VDU) and an internal VL.

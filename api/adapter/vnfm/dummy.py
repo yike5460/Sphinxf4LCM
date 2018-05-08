@@ -70,7 +70,8 @@ class DummyVnfmAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None):
+    def vnf_operate(self, vnf_instance_id, change_state_to, stop_type=None, graceful_stop_timeout=None,
+                    additional_param=None):
         lifecycle_operation_occurrence_id = '12346'
 
         LOG.debug('Lifecycle operation occurrence ID: %s' % lifecycle_operation_occurrence_id)
@@ -87,7 +88,7 @@ class DummyVnfmAdapter(object):
         return vnf_info
 
     @log_entry_exit(LOG)
-    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+    def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         lifecycle_operation_occurrence_id = 'vnf_scale_operation_id'
 
         return lifecycle_operation_occurrence_id
@@ -99,7 +100,8 @@ class DummyVnfmAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None):
+    def vnf_terminate(self, vnf_instance_id, termination_type, graceful_termination_timeout=None,
+                      additional_param=None):
         lifecycle_operation_occurrence_id = 'vnf_vnf_terminate_operation_id'
 
         return lifecycle_operation_occurrence_id

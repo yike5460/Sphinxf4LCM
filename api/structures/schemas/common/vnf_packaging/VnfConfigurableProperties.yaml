@@ -10,17 +10,17 @@
 #
 
 
-# This structure was written in accordance with section 7.1.12 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.12 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VnfConfigurableProperties:
   description: This information element defines the configurable properties of a VNF (e.g. related to auto scaling and auto healing). For a VNF instance, the value of these properties can be modified by the VNFM.
   attributes:
-    auto_scalable:
+    is_auto_scale_enables:
       description: It permits to enable (TRUE) / disable (FALSE) the auto-scaling functionality.
       type: Boolean
       required: false
 
-    auto_healable:
+    is_auto_heal_enabled:
       description: It permits to enable (TRUE) / disable (FALSE) the auto-healing functionality.
       type: Boolean
       required: false

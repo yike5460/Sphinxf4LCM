@@ -29,6 +29,8 @@ class TC_VNF_STATE_INST_007(TestCase):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
     REQUIRED_APIS = ('mano', 'vim')
@@ -83,6 +85,43 @@ class TC_VNF_STATE_INST_007(TestCase):
 
         self.tc_result['events']['instantiate_vnf']['details'] = vnf_info.metadata['error_reason']
 
+        # --------------------------------------------------------------------------------------------------------------
+        # 3. Terminate the VNF
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Terminating the VNF')
+        self.time_record.START('terminate_vnf')
+        if self.mano.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful',
+                                        graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
+                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
+                constants.OPERATION_SUCCESS:
+            raise TestRunError('Unexpected status for terminating VNF operation',
+                               err_details='VNF terminate operation failed')
+
+        self.time_record.END('terminate_vnf')
+
+        self.tc_result['events']['terminate_vnf']['duration'] = self.time_record.duration('terminate_vnf')
+
+        self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
+
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_delete_id,
+                                  vnf_instance_id=self.vnf_instance_id)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 4. Validate that the VNF is terminated and all resources have been released by the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating that the VNF is terminated')
+        vnf_info_final = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                                     'additional_param': self.tc_input['mano'].get('query_params')})
+        if vnf_info_final.instantiation_state != constants.VNF_NOT_INSTANTIATED:
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was terminated'
+                                           % constants.VNF_NOT_INSTANTIATED)
+
+        LOG.info('Validating that all resources have been released by the VIM')
+        if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info):
+            raise TestRunError('Allocated resources have not been released by the VIM')
+
         LOG.info('%s execution completed successfully' % self.tc_name)
 
 
@@ -93,7 +132,8 @@ class TC_VNF_STATE_INST_007_001(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
-
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
 
@@ -104,6 +144,8 @@ class TC_VNF_STATE_INST_007_002(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
 
@@ -114,6 +156,8 @@ class TC_VNF_STATE_INST_007_003(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
 
@@ -125,6 +169,8 @@ class TC_VNF_STATE_INST_007_004(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
 
@@ -135,6 +181,8 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
     def setup(self):
@@ -159,6 +207,8 @@ class TC_VNF_STATE_INST_007_006(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
 
@@ -169,6 +219,8 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
     def setup(self):
@@ -192,6 +244,8 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
     Sequence:
     1. Instantiate the VNF
     2. Validate MANO reports no VNF instance and the error
+    3. Terminate the VNF
+    4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
     def setup(self):

@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.7.6 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsToLevelMapping:
+  description: The NsToLevelMapping information element specifies the profile to be used for a nested NS involved in a given NS level and the required number of instances.
+  attributes:
+    ns_profile_id:
+      description: Identifies the profile to be used for a nested NS involved in the NS level.
+      type: Identifier
+      required: true
+
+    number_of_instances:
+      description: Specifies the number of nested NS instances required for the NS scale level.
+      type: Integer
+      required: true

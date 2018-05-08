@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.6.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.6.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 Cpd:
   description: A Cpd information element describes network connectivity to a compute resource or a VL. This is an abstract class used as parent for the various Cpd classes.
@@ -38,9 +38,14 @@ Cpd:
       type: String
       required: false
 
-    address_data:
-      description: Provides information on the addresses to be assigned to the CP(s) instantiated from this CPD.
+    cp_protocol:
+      description: Provides human-readble information on the purpose of the CP (e.g. CP for control plane traffic).
       type: List
       required: false
       constraints:
-        entry_type: AddressData
+        entry_type: CpProtocolData
+
+    trunk_mode:
+      description: Information about whether the CP instantiated from this CPD is in Trunk mode (802.1Q or other).
+      type: Boolean
+      required: true

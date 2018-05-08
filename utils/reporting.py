@@ -41,14 +41,25 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
+        # Write steps summary
+        report_file.write('* Steps summary:\n')
+        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Duration (sec)', 'Status'],
+                                    hrules=prettytable.ALL)
+        t.max_width = 32
+        for step_index, step_details in tc_result.get('steps', {}).items():
+            t.add_row([step_index, step_details['name'], step_details['description'], '%.3f' % step_details['duration'],
+                       step_details['status']])
+        report_file.write(t.get_string())
+        report_file.write('\n\n')
+
         # Write test case environment
         report_file.write('*** Test case environment ***')
         report_file.write('\n\n')
-        t = prettytable.PrettyTable(['Module', 'Type'])
-        t.add_row(['MANO', tc_input.get('mano', {}).get('type')])
-        t.add_row(['VIM', 'openstack'])
-        t.add_row(['VNF', 'vcpe'])
-        t.add_row(['Traffic', tc_input.get('traffic', {}).get('type')])
+        t = prettytable.PrettyTable(['Module', 'Type', 'Name'])
+        t.add_row(['MANO', tc_input.get('mano', {}).get('type'), tc_input.get('mano', {}).get('name', 'N/A')])
+        t.add_row(['VIM', tc_input.get('vim', {}).get('type'), tc_input.get('vim', {}).get('name', 'N/A')])
+        # t.add_row(['VNF', 'vcpe', tc_input.get('vnf', {}).get('name', 'N/A')])
+        t.add_row(['Traffic', tc_input.get('traffic', {}).get('type'), tc_input.get('traffic', {}).get('name', 'N/A')])
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
@@ -107,26 +118,25 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         # Write VNF resources
         report_file.write('* VNF resources:\n')
         t_outside = prettytable.PrettyTable(
-                                         ['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
-                                         hrules=prettytable.ALL)
+            ['VNF', 'VNFC', 'Resource type', 'Expected', 'Actual', 'Validation'],
+            hrules=prettytable.ALL)
         t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
                 row = [key, vnfc_id]
-                # t_inside = [prettytable.PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
                 t_inside = dict()
                 t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Expected size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Actual size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Expected'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Actual'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 t_inside['Validation'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 for resource_type, resource_size in vnfc_resources.items():
                     t_inside['Resource type'].add_row([resource_type])
-                    t_inside['Expected size'].add_row([resource_size])
-                    t_inside['Actual size'].add_row([resource_size])
+                    t_inside['Expected'].add_row([resource_size])
+                    t_inside['Actual'].add_row([resource_size])
                     t_inside['Validation'].add_row(['OK'])
                 row.append(t_inside['Resource type'])
-                row.append(t_inside['Expected size'])
-                row.append(t_inside['Actual size'])
+                row.append(t_inside['Expected'])
+                row.append(t_inside['Actual'])
                 row.append(t_inside['Validation'])
                 t_outside.add_row(row)
         report_file.write(t_outside.get_string())
@@ -136,6 +146,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write('*** Test case results ***')
         report_file.write('\n\n')
         t = prettytable.PrettyTable(['Overall status', 'Error info'])
+        t.max_width = 32
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
@@ -150,6 +161,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['tc_end_time'] = tc_result['tc_end_time']
     json_dict['tc_duration'] = tc_result['tc_duration']
     json_dict['tc_status'] = tc_result['overall_status']
+    json_dict['error_info'] = tc_result['error_info']
 
     json_dict['environment'] = dict()
     json_dict['environment']['vim'] = 'OpenStack'
@@ -159,10 +171,20 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['environment']['em'] = 'None'
 
     durations = dict()
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration')
+    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or \
+                               tc_result.get('events', {}).get('instantiate_ns', {}).get('duration')
+    durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
+                             tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
+    durations['start'] = tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
+                         tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
+    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
+                        tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration')
+    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \
+                             tc_result.get('events', {}).get('scale_out_ns', {}).get('duration')
+    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration') or \
+                            tc_result.get('events', {}).get('scale_in_ns', {}).get('duration')
+    durations['scale_to_level'] = tc_result.get('events', {}).get('scale_to_level_ns', {}).get('duration')
+    durations['scale_from_level'] = tc_result.get('events', {}).get('scale_from_level_ns', {}).get('duration')
     durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
     durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
 

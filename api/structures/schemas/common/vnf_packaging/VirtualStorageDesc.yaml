@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.9.4 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.9.4 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VirtualStorageDesc:
   description: The VirtualStorageDesc information element supports the specifications of requirements related to virtual storage resources.
@@ -29,6 +29,13 @@ VirtualStorageDesc:
       description: Size of virtualised storage resource (e.g. size of volume, in GB).
       type: Number
       required: true
+
+    vdu_storage_requirements:
+      description: An array of key value pairs that articulate the storage deployment requirements.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified
 
     rdma_enabled:
       description: Indicate if the storage support RDMA.

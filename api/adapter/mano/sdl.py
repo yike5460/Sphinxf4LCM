@@ -269,7 +269,14 @@ class SdlManoAdapter(object):
                     if match is not None:
                         vnf_ext_cp_info = VnfExtCpInfo()
                         vnf_ext_cp_info.cp_instance_id = str(port['id'])
-                        vnf_ext_cp_info.address = [str(port['mac_address'])]
+                        vnf_ext_cp_info.address = {
+                            'mac': [port['mac_address'].encode()],
+                            'ip': []
+                        }
+
+                        for fixed_ip in port['fixed_ips']:
+                            vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
+
                         vnf_ext_cp_info.cpd_id = str(match.groups()[0])
                         vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
@@ -345,10 +352,10 @@ class SdlManoAdapter(object):
                 ns_instance_dict = response.json()
                 ns_status = ns_instance_dict['state']
             except Exception as e:
-                raise SdlManoAdapterError(e.message)
+                raise SdlManoAdapterError('Unable to get details for NS %s - %s' % (ns_instance_id, e))
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
             if ns_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -356,8 +363,8 @@ class SdlManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise SdlManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                  % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info, additional_param=None):
@@ -397,15 +404,7 @@ class SdlManoAdapter(object):
         return response.json()
 
     @log_entry_exit(LOG)
-    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
-        for vnf_info in ns_info.vnf_info:
-            if not self.validate_vnf_allocated_vresources(vnf_info):
-                return False
-        return True
-
-    @log_entry_exit(LOG)
-    def validate_vnf_allocated_vresources(self, vnf_info):
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         validation_result = True
 
         vnfd_id = vnf_info.vnfd_id
@@ -497,7 +496,7 @@ class SdlManoAdapter(object):
         return validation_result
 
     @log_entry_exit(LOG)
-    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         vnf_mgmt_addr_list = list()
 
         response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)

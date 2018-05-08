@@ -36,11 +36,14 @@ class TC_VNF_COMPLEX_002(TestCase):
     9. Stop the VNF
     10. Validate VNF instantiation state is INSTANTIATED and VNF state is STOPPED
     11. Validate no traffic flows through
+    12. Terminate the VNF
+    13. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name')
-    TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'service_disruption', 'stop_vnf', 'traffic_deactivation')
+    TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'service_disruption', 'stop_vnf', 'traffic_deactivation',
+                       'terminate_vnf')
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -63,9 +66,6 @@ class TC_VNF_COMPLEX_002(TestCase):
                                                  ext_managed_virtual_link=self.tc_input.get('ext_managed_virtual_link'),
                                                  localization_language=self.tc_input.get('localization_language'),
                                                  additional_param=self.tc_input['mano'].get('instantiation_params'))
-
-        if self.vnf_instance_id is None:
-            raise TestRunError('VNF instantiation operation failed')
 
         self.time_record.END('instantiate_vnf')
 
@@ -122,7 +122,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 4. Validate that traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that traffic flows through without issues')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -192,7 +192,7 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 8. Validate all traffic flows through and has reached max capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating all traffic flows through and has reached max capacity')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -239,7 +239,44 @@ class TC_VNF_COMPLEX_002(TestCase):
         # 11. Validate no traffic flows through
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating no traffic flows through')
-        if self.traffic.does_traffic_flow(delay_time=5):
+        if self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is still flowing', err_details='Traffic still flew after VNF was stopped')
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 12. Terminate the VNF
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Terminating the VNF')
+        self.time_record.START('terminate_vnf')
+        if self.mano.vnf_terminate_sync(self.vnf_instance_id, termination_type='graceful',
+                                        graceful_termination_timeout=self.tc_input.get('graceful_termination_timeout'),
+                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
+                constants.OPERATION_SUCCESS:
+            raise TestRunError('Unexpected status for terminating VNF operation',
+                               err_details='VNF terminate operation failed')
+
+        self.time_record.END('terminate_vnf')
+
+        self.tc_result['events']['terminate_vnf']['duration'] = self.time_record.duration('terminate_vnf')
+
+        self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
+
+        self.register_for_cleanup(index=10, function_reference=self.mano.vnf_delete_id,
+                                  vnf_instance_id=self.vnf_instance_id)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 13. Validate that the VNF is terminated and all resources have been released by the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating that the VNF is terminated')
+        vnf_info_final = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
+                                                     'additional_param': self.tc_input['mano'].get('query_params')})
+        if vnf_info_final.instantiation_state != constants.VNF_NOT_INSTANTIATED:
+            raise TestRunError('Unexpected VNF instantiation state',
+                               err_details='VNF instantiation state was not "%s" after the VNF was terminated'
+                                           % constants.VNF_NOT_INSTANTIATED)
+
+        LOG.info('Validating that all resources have been released by the VIM')
+        if not self.mano.validate_vnf_released_vresources(vnf_info_initial=vnf_info):
+            raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

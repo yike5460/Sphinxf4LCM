@@ -12,6 +12,7 @@
 
 import collections
 import importlib
+import time
 
 from api import ApiError
 from api.generic import constants, construct_generic
@@ -60,6 +61,24 @@ class TestRequirementsError(TestExecutionError):
     pass
 
 
+class Step(object):
+    global_index = 0
+
+    @classmethod
+    def generate_index(cls):
+        cls.global_index += 1
+        return cls.global_index
+
+    def __init__(self, name, description):
+        self.index = self.generate_index()
+        self.name = name
+        self.description = description
+
+    def __call__(self, run_func):
+        self.run_func = run_func
+        return self
+
+
 class TestMeta(type):
     """
     Meta class that adds the logger object to the class dictionary of the class that is an instance of this meta class.
@@ -69,6 +88,20 @@ class TestMeta(type):
         if bases != (object,):
             originating_module = importlib.import_module(class_dict['__module__'])
             class_dict['_LOG'] = originating_module.LOG
+
+            steps = []
+            for _, attr_value in class_dict.items():
+                if isinstance(attr_value, Step):
+                    steps.append(attr_value)
+            steps.sort(key=lambda x: x.index)
+
+            normalized_index = 1
+            for step in steps:
+                step.index = normalized_index
+                normalized_index += 1
+
+            class_dict['steps'] = steps
+
         return type.__new__(meta, name, bases, class_dict)
 
 
@@ -78,8 +111,9 @@ class TestCase(object):
     """
     __metaclass__ = TestMeta
 
-    REQUIRED_APIS = []
-    REQUIRED_ELEMENTS = []
+    REQUIRED_APIS = ()
+    REQUIRED_ELEMENTS = ()
+    TESTCASE_EVENTS = ()
 
     def __init__(self, tc_input):
         self.tc_input = tc_input
@@ -96,16 +130,17 @@ class TestCase(object):
         self.tc_result['scaling_to_level'] = dict()
         self.tc_result['scaling_from_level'] = dict()
         self.tc_result['timestamps'] = collections.OrderedDict()
+        self.tc_result['steps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.em = None
         self.mano = None
         self.vim = None
         self.vnf = None
-        self.vnf_instance_id = None
-        self.ns_instance_id = None
         self.vnfm = None
         self.cleanup_registrations = dict()
+        self.message_queue = None
+        self.step_trigger = None
 
     # @classmethod
     # def initialize(cls):
@@ -142,11 +177,55 @@ class TestCase(object):
         for event in self.TESTCASE_EVENTS:
             self.tc_result['events'][event] = dict()
 
+    def initialize_steps(self):
+        for step in self.steps:
+            self.tc_result['steps'][step.index] = {
+                'name': step.name,
+                'description': step.description,
+                'status': 'SKIP'
+            }
+
     def setup(self):
         pass
 
     def run(self):
-        pass
+        for step in self.steps:
+            step_dict = {
+                'name': step.name,
+                'description': step.description,
+                'index': step.index
+            }
+
+            if self.step_trigger is not None:
+                step_dict['status'] = 'PAUSED'
+                self.message_queue.put(step_dict)
+                self.step_trigger.wait()
+                self.step_trigger.clear()
+
+            self._LOG.info('Entering step %s' % step.name)
+            if self.message_queue is not None:
+                step_dict['status'] = 'RUNNING'
+                self.message_queue.put(step_dict)
+
+            try:
+                step_start_time = time.time()
+                step.run_func(self)
+                step_status = 'PASS'
+            except TestRunError as e:
+                step_status = 'FAIL'
+                raise e
+            except Exception as e:
+                step_status = 'ERROR'
+                raise e
+            finally:
+                step_end_time = time.time()
+                step_duration = step_end_time - step_start_time
+                if self.message_queue is not None:
+                    step_dict['status'] = step_status
+                    self.message_queue.put(step_dict)
+                self.tc_result['steps'][step.index]['status'] = step_status
+                self.tc_result['steps'][step.index]['duration'] = step_duration
+                self._LOG.info('Exiting step %s' % step.name)
 
     def register_for_cleanup(self, index, function_reference, *args, **kwargs):
         """
@@ -188,7 +267,8 @@ class TestCase(object):
                 function.function_reference(*function.function_args, **function.function_kwargs)
             except Exception as e:
                 self._LOG.exception(e)
-                raise TestCleanupError(e.message)
+                raise TestCleanupError('Function %s.%s crashed during cleanup - %s'
+                                   % (function.function_reference.__module__, function.function_reference.__name__, e))
         self._LOG.info('Finished main cleanup')
 
     def collect_timestamps(self):
@@ -205,6 +285,7 @@ class TestCase(object):
             self.check_requirements()
             self.build_apis()
             self.initialize_events()
+            self.initialize_steps()
             self.setup()
             self.run()
         except TestRequirementsError as e:
@@ -226,12 +307,12 @@ class TestCase(object):
             self._LOG.error('%s execution crashed' % self.tc_name)
             self._LOG.exception(e)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e)
         except Exception as e:
             self._LOG.error('%s execution crashed' % self.tc_name)
             self._LOG.exception(e)
             self.tc_result['overall_status'] = constants.TEST_ERROR
-            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e.message)
+            self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e)
         finally:
             try:
                 self.cleanup()

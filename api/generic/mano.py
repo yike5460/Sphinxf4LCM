@@ -13,13 +13,14 @@
 import logging
 import re
 import time
+from collections import OrderedDict
 from threading import Thread, Event, Lock
 
 from api.adapter import construct_adapter
 from api.generic import ApiGenericError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
-from utils.misc import tee
+from utils.misc import recursive_map, tee
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -47,8 +48,7 @@ class Mano(object):
 
     def set_generic_config(self,
                            VNF_INSTANTIATE_TIMEOUT=constants.VNF_INSTANTIATE_TIMEOUT,
-                           VNF_SCALE_OUT_TIMEOUT=constants.VNF_SCALE_OUT_TIMEOUT,
-                           VNF_SCALE_IN_TIMEOUT=constants.VNF_SCALE_IN_TIMEOUT,
+                           VNF_SCALE_TIMEOUT=constants.VNF_SCALE_TIMEOUT,
                            VNF_STOP_TIMEOUT=constants.VNF_STOP_TIMEOUT,
                            VNF_START_TIMEOUT=constants.VNF_START_TIMEOUT,
                            VNF_TERMINATE_TIMEOUT=constants.VNF_TERMINATE_TIMEOUT,
@@ -60,8 +60,7 @@ class Mano(object):
                            NS_STABLE_STATE_TIMEOUT=constants.NS_STABLE_STATE_TIMEOUT,
                            POLL_INTERVAL=constants.POLL_INTERVAL):
         self.VNF_INSTANTIATE_TIMEOUT = VNF_INSTANTIATE_TIMEOUT
-        self.VNF_SCALE_OUT_TIMEOUT = VNF_SCALE_OUT_TIMEOUT
-        self.VNF_SCALE_IN_TIMEOUT = VNF_SCALE_IN_TIMEOUT
+        self.VNF_SCALE_TIMEOUT = VNF_SCALE_TIMEOUT
         self.VNF_STOP_TIMEOUT = VNF_STOP_TIMEOUT
         self.VNF_START_TIMEOUT = VNF_START_TIMEOUT
         self.VNF_TERMINATE_TIMEOUT = VNF_TERMINATE_TIMEOUT
@@ -232,8 +231,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-
-        return self.mano_adapter.validate_vnf_allocated_vresources(vnf_instance_id, additional_param)
+        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        return self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
     def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
@@ -244,15 +243,22 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-        return self.mano_adapter.validate_ns_allocated_vresources(ns_instance_id, additional_param)
+        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        for vnf_info in ns_info.vnf_info:
+            if not self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param):
+                LOG.debug('For VNF instance ID %s expected resources do not match the actual ones'
+                          % vnf_info.vnf_instance_id)
+                return False
+
+        return True
 
     @log_entry_exit(LOG)
     def validate_ns_released_vresources(self, ns_info):
         """
         This functions validates that the resources allocated to an NS instance have been released.
 
-        :param ns_info:             NsInfo structure holding information about the NS instance.
-        :return:                    True if the resources have been released, False otherwise.
+        :param ns_info: NsInfo structure holding information about the NS instance.
+        :return:        True if the resources have been released, False otherwise.
         """
         for vnf_info in ns_info.vnf_info:
             if not self.validate_vnf_released_vresources(vnf_info):
@@ -264,12 +270,10 @@ class Mano(object):
         """
         This functions validates that the resources allocated to a VNF instance have been released.
 
-        :param vnf_info_initial:            VnfInfo structure holding information about the initial state of the VNF
-                                            instance.
-        :param vnf_info_final:              VnfInfo structure holding information about the final state of the VNF
-                                            instance
-        :return:                            True if the resources allocated to the initial VNF and not allocated to the
-                                            final VNF have been released, False otherwise.
+        :param vnf_info_initial:    VnfInfo structure holding information about the initial state of the VNF instance.
+        :param vnf_info_final:      VnfInfo structure holding information about the final state of the VNF instance
+        :return:                    True if the resources allocated to the initial VNF and not allocated to the final
+                                    VNF have been released, False otherwise.
         """
 
         vnfc_resource_id_list_final = []
@@ -282,7 +286,8 @@ class Mano(object):
                 vim = self.get_vim_helper(vim_id)
                 resource_id = vnfc_resource_info.compute_resource.resource_id
                 try:
-                    virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    LOG.debug('Resource ID %s found in VIM, not as expected' % resource_id)
                     return False
                 except Exception:
                     LOG.debug('Resource ID %s not found in VIM, as expected' % resource_id)
@@ -319,7 +324,7 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
-    def get_allocated_vresources(self, vnf_instance_id, additional_param):
+    def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         """
         This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.
 
@@ -340,17 +345,21 @@ class Mano(object):
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
             resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
-            vresources[resource_string] = dict()
+            vresources[resource_string] = OrderedDict()
 
             num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
             virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
             size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
             num_vnics = len(virtual_compute.virtual_network_interface)
+            vc_image_id = virtual_compute.vc_image_id
+            software_image_information = vim.query_image(vc_image_id)
+            vc_image_name = software_image_information.name
 
             vresources[resource_string]['vCPU'] = num_virtual_cpu
             vresources[resource_string]['vMemory'] = str(virtual_memory) + ' MB'
             vresources[resource_string]['vStorage'] = str(size_of_storage) + ' GB'
             vresources[resource_string]['vNIC'] = str(num_vnics)
+            vresources[resource_string]['Image name'] = str(vc_image_name)
 
         return vresources
 
@@ -416,7 +425,7 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-        :return:                                            NS instantiation operation status.
+        :return:                                            Identifier of the NS instance.
         """
         ns_instance_id = self.ns_create_id(nsd_id, ns_name, ns_description)
         LOG.debug('NS instance ID: %s' % ns_instance_id)
@@ -886,7 +895,7 @@ class Mano(object):
         :param localization_language:       Localization language of the VNF to be instantiated.
         :param additional_param:            Additional parameters passed as input to the instantiation process, specific
                                             to the VNF being instantiated.
-        :return:                            VNF instantiation operation status.
+        :return:                            Identifier of the VNF instance.
         """
         vnf_instance_id = self.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
         LOG.debug('VNF instance ID: %s' % vnf_instance_id)
@@ -895,7 +904,7 @@ class Mano(object):
                                                      additional_param)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            return None
+            raise ManoGenericError('VNF instantiation operation failed')
         return vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -1038,14 +1047,14 @@ class Mano(object):
         return self.mano_adapter.vnf_query(filter, attribute_selector)
 
     @log_entry_exit(LOG)
-    def vnf_scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+    def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         """
         This function scales a VNF horizontally (out/in).
 
         This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
         :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.
-        :param type:                Defines the type of the scale operation requested (scale out, scale in).
+        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).
         :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the
                                     VNFD.
         :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.
@@ -1055,7 +1064,7 @@ class Mano(object):
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
 
-        return self.mano_adapter.vnf_scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
+        return self.mano_adapter.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)
     def vnf_scale_to_level(self, vnf_instance_id, instantiation_level_id=None, scale_info=None, additional_param=None):
@@ -1097,12 +1106,9 @@ class Mano(object):
         lifecycle_operation_occurrence_id = self.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps,
                                                            additional_param)
 
-        scale_timeouts = {'out': self.VNF_SCALE_OUT_TIMEOUT,
-                          'in': self.VNF_SCALE_IN_TIMEOUT}
-
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=scale_timeouts[scale_type],
+                                                              max_wait_time=self.VNF_SCALE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
@@ -1129,7 +1135,7 @@ class Mano(object):
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=self.VNF_SCALE_OUT_TIMEOUT,
+                                                              max_wait_time=self.VNF_SCALE_TIMEOUT,
                                                               poll_interval=self.POLL_INTERVAL)
 
         return operation_status
@@ -1277,10 +1283,10 @@ class Mano(object):
         requires the VNF to be in a particular state.
 
         :param vnf_instance_id: Identifier of the VNF instance.
-        :return:                True if the VNF reached one of the final states, False otherwise.
+        :return:                None.
         """
-        return self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
-                                                           poll_interval=self.POLL_INTERVAL)
+        self.mano_adapter.wait_for_vnf_stable_state(vnf_instance_id, max_wait_time=self.VNF_STABLE_STATE_TIMEOUT,
+                                                    poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id):
@@ -1289,13 +1295,13 @@ class Mano(object):
         requires the NS to be in a particular state.
 
         :param ns_instance_id:  Identifier of the NS instance.
-        :return:                True if the NS reached one of the final states, False otherwise.
+        :return:                None.
         """
-        return self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
-                                                          poll_interval=self.POLL_INTERVAL)
+        self.mano_adapter.wait_for_ns_stable_state(ns_instance_id, max_wait_time=self.NS_STABLE_STATE_TIMEOUT,
+                                                   poll_interval=self.POLL_INTERVAL)
 
     @log_entry_exit(LOG)
-    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param):
+    def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         """
         This function verifies that the VNF instance(s) that are part of the NS with the provided instance ID have been
         deployed according to the NSD.
@@ -1310,22 +1316,24 @@ class Mano(object):
     @log_entry_exit(LOG)
     def get_vnf_ingress_cp_addr_list(self, vnf_info, ingress_cp_list):
         """
-        This function goes through each VNF with the provided instance ID and retrieves the destination address(es) for
-        each connection point in the ingress_cp_list.
+        This function retrieves from the provided VnfInfo information element the destination address(es) for each
+        connection point in the ingress_cp_list.
 
         :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list needs
                                     to be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
-                                    Expected format: ['CP1', 'CP2', ...]
+                                    Expected format: ['CP1:ip', 'CP2:mac', ...]
         :return:                    String with space-separated addresses.
         """
-        dest_addr_list = ''
+        dest_addr_list = []
 
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id in ingress_cp_list:
-                dest_addr_list += ext_cp_info.address[0] + ' '
+            for addr_type, addr_value in ext_cp_info.address.items():
+                cp_details = '%s:%s' % (ext_cp_info.cpd_id, addr_type)
+                if cp_details in ingress_cp_list:
+                    dest_addr_list.append(' '.join(addr_value))
 
-        return dest_addr_list
+        return ' '.join(dest_addr_list)
 
     @log_entry_exit(LOG)
     def get_ns_ingress_cp_addr_list(self, ns_info, ingress_cp_list):
@@ -1336,28 +1344,29 @@ class Mano(object):
         :param ns_info:             NsInfo information element for the NS for which the ingress CP address list needs to
                                     be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
-                                    Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
+                                    Expected format: ['VNF1:CP1:ip', 'VNF1:CP2:mac', 'VNF2:CP2:ip' ...]
         :return:                    String containing space-separated addresses.
         """
         # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
         # values lists with CPs whose addresses need to be retrieved
         # Example:
-        # ingress_cp_list = ['VNF1:CP1', 'VNF2:CP2', 'VNF1:CP3']
-        # ns_ingress_cps = {'VNF1': ['CP1', 'CP3'],
-        #                   'VNF2': ['CP2']}
+        # ingress_cp_list = ['VNF1:CP1:ip', 'VNF2:CP2:mac', 'VNF1:CP3:ip']
+        # ns_ingress_cps = {'VNF1': ['CP1:ip', 'CP3:ip'],
+        #                   'VNF2': ['CP2:mac']}
         ns_ingress_cps = dict()
         for ingress_cp in ingress_cp_list:
-            vnf_name, cp_name = ingress_cp.split(':')
+            vnf_name, cp_details = ingress_cp.split(':', 1)
             if vnf_name not in ns_ingress_cps.keys():
                 ns_ingress_cps[vnf_name] = list()
-            ns_ingress_cps[vnf_name].append(cp_name)
+            ns_ingress_cps[vnf_name].append(cp_details)
 
         # Build the list with the destination addresses
-        dest_addr_list = ''
+        dest_addr_list = []
         for vnf_info in ns_info.vnf_info:
             if vnf_info.vnf_product_name in ns_ingress_cps.keys():
-                dest_addr_list += self.get_vnf_ingress_cp_addr_list(vnf_info, ns_ingress_cps[vnf_info.vnf_product_name])
-        return dest_addr_list
+                dest_addr_list.append(self.get_vnf_ingress_cp_addr_list(vnf_info,
+                                                                        ns_ingress_cps[vnf_info.vnf_product_name]))
+        return ' '.join(dest_addr_list)
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_instance_id, additional_param=None):
@@ -1532,3 +1541,93 @@ class Mano(object):
         """
         return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, new_flavour_id,
                                                                  instantiation_level_id, additional_param)
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        """
+        This function will create an NSD information object in the NFVO for the NSD to be uploaded.
+
+        This function was written in accordance with section 7.2.16 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param user_defined_data:   User defined data for the NSD to be uploaded.
+        :return:                    Identifier of the created NSD information object.
+        """
+
+        return self.mano_adapter.nsd_info_create(user_defined_data)
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        """
+        This function will enable the OSS/BSS to query the NFVO concerning details of one or more NSD information
+        objects.
+
+        This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param filter:              Filter defining the NSD information objects on which the query applies, based on
+                                    attributes of the NSD information objects. It can also be used to specify one or
+                                    more NSD information objects to be queried by providing their identifiers.
+        :param attribute_selector:  Provides a list of attribute names of the NSD information objects. If present, only
+                                    these attributes are returned for the NSD information objects matching the filter.
+                                    If absent, the complete NSD information objects are returned.
+        :return:                    Details of the NSD information objects matching the input filter.
+        """
+
+        return self.mano_adapter.nsd_info_query(filter, attribute_selector)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd):
+        """
+        This function will upload an NSD to the NFVO.
+
+        This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param nsd_info_id: Identifier of the NSD information object associated with the NSD to be uploaded.
+        :param nsd:         NSD to be uploaded.
+        :return:            None.
+        """
+
+        return self.mano_adapter.nsd_upload(nsd_info_id, nsd)
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        """
+        This function will fetch an NSD from the NFVO.
+
+        This function was written in accordance with section 7.2.17 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param nsd_info_id: Identifier of the NSD information object associated with the NSD to be fetched.
+        :return:            The fetched NSD.
+        """
+
+        return self.mano_adapter.nsd_fetch(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id):
+        """
+        This function will delete one or more NSD(s). The associated NSD information objects will be deleted as well.
+
+        This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param nsd_info_id: Identifier of the NSD information objects to be deleted.
+        :return:            Identifier of the deleted NSD information objects.
+        """
+
+        return self.mano_adapter.nsd_delete(nsd_info_id)
+
+    @recursive_map
+    def resolve_ns_cp_addr(self, ns_info, data):
+        """
+        This function will search for pattern like ${vnf_name:cp_name:addr_type} (e.g ${VNF1:east:ip}) recursively
+        inside 'data' and resolve them using information found in 'ns_info'
+
+        :param ns_info:     NsInfo information element.
+        :param data:        Data structure containing patterns that may need resolving
+        :return:            Data structure with resolved patterns
+        """
+
+        pattern = '\$\{(.*?)\}'
+
+        data = re.sub(pattern, lambda x: self.get_ns_ingress_cp_addr_list(ns_info, [x.group(1)]), data)
+        data = re.sub(pattern, '\\1', data)
+
+        return data

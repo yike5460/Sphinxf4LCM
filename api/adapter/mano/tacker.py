@@ -65,9 +65,8 @@ class TackerManoAdapter(object):
             self.password = password
 
         except Exception as e:
-            LOG.error('Unable to create %s instance' % self.__class__.__name__)
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -94,7 +93,7 @@ class TackerManoAdapter(object):
                 return constants.OPERATION_PENDING
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get status for VNF %s - %s' % (resource_id, e))
 
             return constants.OPERATION_STATUS['OPENSTACK_VNF_STATE'][tacker_vnf_status]
 
@@ -104,7 +103,7 @@ class TackerManoAdapter(object):
                 tacker_show_vnf = self.tacker_client.show_vnf(resource_id)['vnf']
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get details for stack %s - %s' % (resource_id, e))
 
             # Get VIM object
             vim_id = tacker_show_vnf['vim_id']
@@ -128,7 +127,7 @@ class TackerManoAdapter(object):
                 return constants.OPERATION_SUCCESS
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get status for NS %s - %s' % (resource_id, e))
 
             return constants.OPERATION_STATUS['OPENSTACK_NS_STATE'][tacker_ns_status]
 
@@ -191,8 +190,9 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus, limit_vmem,
-                                                      limit_vc_instances, scaling_policy_name):
+    def limit_compute_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, limit_vcpus=True,
+                                                      limit_vmem=True, limit_vc_instances=True,
+                                                      scaling_policy_name=None):
         vnfd = self.get_vnfd(vnfd_id)
 
         # Get the scaling policy properties, if present.
@@ -236,7 +236,7 @@ class TackerManoAdapter(object):
         return reservation_id
 
     @log_entry_exit(LOG)
-    def limit_storage_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name):
+    def limit_storage_resources_for_vnf_instantiation(self, vnfd_id, generic_vim_object, scaling_policy_name=None):
         vnfd = self.get_vnfd(vnfd_id)
         # Get the scaling policy properties, if present.
         if scaling_policy_name is not None:
@@ -297,7 +297,7 @@ class TackerManoAdapter(object):
             vim_details = self.tacker_client.show_vim(vim_id)['vim']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for VIM %s - %s' % (vim_id, e))
         vim_auth_cred = vim_details['auth_cred']
         vim_type = vim_details['type']
 
@@ -314,7 +314,7 @@ class TackerManoAdapter(object):
             tacker_show_vnfd = self.tacker_client.show_vnfd(vnfd)['vnfd']['attributes']['vnfd']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get VNFD %s - %s' % (vnfd, e))
         return yaml.load(tacker_show_vnfd)
 
     @log_entry_exit(LOG)
@@ -325,12 +325,11 @@ class TackerManoAdapter(object):
             tacker_show_nsd = self.tacker_client.show_nsd(nsd)['nsd']['attributes']['nsd']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get NSD %s - %s' % (nsd, e))
         return yaml.load(tacker_show_nsd)
 
     @log_entry_exit(LOG)
-    def validate_vnf_allocated_vresources(self, vnf_instance_id, additional_param=None):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
@@ -436,7 +435,7 @@ class TackerManoAdapter(object):
                 self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to update VNF %s - %s' % (vnf_instance_id, e))
 
         # Poll on the VNF status until it reaches one of the final states
         operation_pending = True
@@ -461,7 +460,7 @@ class TackerManoAdapter(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_create_id(self, vnfd_id, vnf_instance_name, vnf_instance_description):
+    def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
         vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
                             'name': vnf_instance_name}}
 
@@ -470,7 +469,7 @@ class TackerManoAdapter(object):
             LOG.debug('Response from VNFM:\n%s' % json.dumps(vnf_instance, indent=4, separators=(',', ': ')))
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to create VNF - %s' % e)
         return vnf_instance['vnf']['id']
 
     @log_entry_exit(LOG)
@@ -495,7 +494,7 @@ class TackerManoAdapter(object):
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for VNF %s - %s' % (vnf_instance_id, e))
 
         # Get VIM object
         vim_id = tacker_show_vnf['vim_id']
@@ -535,7 +534,7 @@ class TackerManoAdapter(object):
             return vnf_info
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for VNF %s - %s' % (vnf_instance_id, e))
         # Get the Heat stack ID
         stack_id = tacker_show_vnf['instance_id']
 
@@ -636,7 +635,13 @@ class TackerManoAdapter(object):
                         for port in port_list['ports']:
                             vnf_ext_cp_info = VnfExtCpInfo()
                             vnf_ext_cp_info.cp_instance_id = port['id'].encode()
-                            vnf_ext_cp_info.address = [port['mac_address'].encode()]
+                            vnf_ext_cp_info.address = {
+                                'mac': [port['mac_address'].encode()],
+                                'ip': []
+                            }
+
+                            for fixed_ip in port['fixed_ips']:
+                                vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
 
                             # Extract the CP ID from the port name
                             match = re.search('CP\d+', port['name'])
@@ -651,7 +656,7 @@ class TackerManoAdapter(object):
                 return vnf_info
             except Exception as e:
                 LOG.exception(e)
-                raise TackerManoAdapterError(e.message)
+                raise TackerManoAdapterError('Unable to get allocated resources for VNF %s - %s' % (vnf_instance_id, e))
 
         return vnf_info
 
@@ -665,13 +670,13 @@ class TackerManoAdapter(object):
             body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
             self.tacker_client.scale_vnf(vnf_instance_id, body)
         except tackerclient.common.exceptions.NotFound as e:
-            LOG.debug('Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s"' %
-                      (vnf_instance_id, additional_param['scaling_policy_name']))
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError(
+                'Either VNF with instance ID %s does not exist or it does not have a scaling policy "%s" - %s'
+                    % (vnf_instance_id, additional_param['scaling_policy_name'], e))
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to scale VNF %s - %s' % (vnf_instance_id, e))
 
         return 'vnf', vnf_instance_id
 
@@ -685,7 +690,8 @@ class TackerManoAdapter(object):
             # of the cleanup procedure)
             LOG.debug('VNF with instance ID %s could not be found' % vnf_instance_id)
         except Exception as e:
-            raise TackerManoAdapterError(e.message)
+            LOG.exception(e)
+            raise TackerManoAdapterError('Unable to delete VNF %s - %s' % (vnf_instance_id, e))
         return 'vnf', vnf_instance_id
 
     @log_entry_exit(LOG)
@@ -693,7 +699,7 @@ class TackerManoAdapter(object):
         raise NotImplementedError
 
     @log_entry_exit(LOG)
-    def vnf_lifecycle_change_notification_subscribe(self, notification_filter):
+    def vnf_lifecycle_change_notification_subscribe(self, notification_filter=None):
         # TODO: implement notification filter
         last_vnf_event_id = list(self._get_vnf_events())[-1]['id']
         LOG.debug('Got last event id: %d' % last_vnf_event_id)
@@ -769,7 +775,8 @@ class TackerManoAdapter(object):
         try:
             vnf_events = self.tacker_client.list_vnf_events(**params)['vnf_events']
         except Exception as e:
-            raise TackerManoAdapterError(e.message)
+            LOG.exception(e)
+            raise TackerManoAdapterError('Unable to get VNF events - %s' % e)
         if starting_from is not None:
             vnf_events = (vnf_event for vnf_event in vnf_events if vnf_event['id'] > starting_from)
 
@@ -792,12 +799,14 @@ class TackerManoAdapter(object):
                 # the NotFound exception
                 vnf_status = 'NOTFOUND'
             except tackerclient.common.exceptions.TackerClientException:
-                return constants.OPERATION_PENDING
+                LOG.debug('Communication error between Tacker client and server')
+                vnf_status = 'UNKNOWN'
             except Exception as e:
-                raise TackerManoAdapterError(e.message)
+                LOG.exception(e)
+                raise TackerManoAdapterError('Unable to get status for VNF %s - %s' % (vnf_instance_id, e))
             LOG.debug('Got VNF status %s for VNF with ID %s' % (vnf_status, vnf_instance_id))
             if vnf_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected VNF status to be one of %s, got %s' % (stable_states, vnf_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -805,8 +814,8 @@ class TackerManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('VNF with ID %s did not reach a stable state after %s' % (vnf_instance_id, max_wait_time))
-        return False
+        raise TackerManoAdapterError('VNF with ID %s did not reach a stable state after %s'
+                                     % (vnf_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
@@ -818,7 +827,7 @@ class TackerManoAdapter(object):
             LOG.debug('Response from NFVO:\n%s' % json.dumps(ns_instance, indent=4, separators=(',', ': ')))
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to create NS - %s' % e)
         return ns_instance['ns']['id']
 
     @log_entry_exit(LOG)
@@ -839,7 +848,8 @@ class TackerManoAdapter(object):
             # of the cleanup procedure)
             LOG.debug('NS with instance ID %s could not be found' % ns_instance_id)
         except Exception as e:
-            raise TackerManoAdapterError(e.message)
+            LOG.exception(e)
+            raise TackerManoAdapterError('Unable to delete NS %s - %s' % (ns_instance_id, e))
         return 'ns', ns_instance_id
 
     @log_entry_exit(LOG)
@@ -861,10 +871,11 @@ class TackerManoAdapter(object):
             except tackerclient.common.exceptions.TackerClientException:
                 ns_status = 'NOTFOUND'
             except Exception as e:
-                raise TackerManoAdapterError(e.message)
+                LOG.exception(e)
+                raise TackerManoAdapterError('Unable to get status for NS %s - %s' % (ns_instance_id, e))
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_status, ns_instance_id))
             if ns_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -872,8 +883,8 @@ class TackerManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise TackerManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                     % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
@@ -921,7 +932,7 @@ class TackerManoAdapter(object):
             return ns_info
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get details for NS %s - %s' % (ns_instance_id, e))
 
         ns_info.ns_name = tacker_show_ns['name'].encode()
         ns_info.description = tacker_show_ns['description'].encode()
@@ -940,81 +951,6 @@ class TackerManoAdapter(object):
             ns_info.vnf_info.append(vnf_info)
 
         return ns_info
-
-    @log_entry_exit(LOG)
-    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
-        for vnf_info in ns_info.vnf_info:
-            # TODO: validate_vnf_allocated_vresources should be called, but avoid building the VnfInfo twice
-
-            vnfd_id = vnf_info.vnfd_id
-            vnfd = self.get_vnfd(vnfd_id)
-
-            for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-                vim_id = vnfc_resource_info.compute_resource.vim_id
-                vim = self.get_vim_helper(vim_id)
-
-                resource_id = vnfc_resource_info.compute_resource.resource_id
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-
-                # Get expected values
-                expected_num_vcpus = \
-                    vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                        'nfv_compute']['properties']['num_cpus']
-                expected_vmemory_size = \
-                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                            'nfv_compute']['properties']['mem_size'].split(' ')[0])
-                expected_vstorage_size = \
-                    int(vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id]['capabilities'][
-                            'nfv_compute']['properties']['disk_size'].split(' ')[0])
-                expected_num_vnics = 0
-                expected_vnic_types = dict()
-                for node in vnfd['topology_template']['node_templates'].keys():
-                    if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
-                        for req in vnfd['topology_template']['node_templates'][node]['requirements']:
-                            if req.get('virtualBinding', '')['node'] == vnfc_resource_info.vdu_id:
-                                expected_num_vnics += 1
-                                expected_vnic_types[node] = vnfd['topology_template']['node_templates'][node][
-                                    'properties'].get('type', 'normal')
-
-                # Get actual values
-                actual_num_vcpus = virtual_compute.virtual_cpu.num_virtual_cpu
-                actual_vmemory_size = virtual_compute.virtual_memory.virtual_mem_size
-                actual_vstorage_size = virtual_compute.virtual_disks[0].size_of_storage
-                actual_num_vnics = len(virtual_compute.virtual_network_interface)
-
-                # Compare actual values with expected values for number of vCPUs, vMemory vStorage and number of vNICs
-                if actual_num_vcpus != expected_num_vcpus or \
-                                actual_vmemory_size != expected_vmemory_size or \
-                                actual_vstorage_size != expected_vstorage_size or \
-                                actual_num_vnics != expected_num_vnics:
-                    LOG.debug('For VNFC with id %s expected resources do not match the actual ones' % resource_id)
-                    LOG.debug(
-                        'Expected %s vCPU(s), actual number of vCPU(s): %s' % (expected_num_vcpus, actual_num_vcpus))
-                    LOG.debug('Expected %s vMemory, actual vMemory: %s' % (expected_vmemory_size, actual_vmemory_size))
-                    LOG.debug(
-                        'Expected %s vStorage, actual vStorage: %s' % (expected_vstorage_size, actual_vstorage_size))
-                    LOG.debug('Expected %s vNICs, actual number of vNICs: %s' % (expected_num_vnics, actual_num_vnics))
-                    return False
-
-                # Compare expected vNIC types with actual vNIC types
-                for vnic in virtual_compute.virtual_network_interface:
-                    actual_vnic_type = vnic.type_virtual_nic
-
-                    # Find the name of the CP that has a cp_instance_id that matches the resource_id of this vNIC
-                    for ext_cp in vnf_info.instantiated_vnf_info.ext_cp_info:
-                        if ext_cp.cp_instance_id == vnic.resource_id:
-                            cp_name = ext_cp.cpd_id
-                            break
-
-                    expected_vnic_type = expected_vnic_types.get(cp_name, '')
-                    if expected_vnic_type != actual_vnic_type:
-                        LOG.debug('For VNFC with id %s actual vNIC types do not match the expected ones' % resource_id)
-                        LOG.debug('Expected "%s" type for the vNIC corresponding to CP %s, actual type: %s' %
-                                  (expected_vnic_type, cp_name, actual_vnic_type))
-                        return False
-
-        return True
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
@@ -1083,7 +1019,7 @@ class TackerManoAdapter(object):
             vnf_mgmt_url_dict = json.loads(vnf_mgmt_url)
         except Exception as e:
             LOG.exception(e)
-            raise TackerManoAdapterError(e.message)
+            raise TackerManoAdapterError('Unable to get management URL for VNF %s - %s' % (vnf_instance_id, e))
 
         mgmt_addr_list = list()
         for vnf_mgmt_url_elem in vnf_mgmt_url_dict.values():

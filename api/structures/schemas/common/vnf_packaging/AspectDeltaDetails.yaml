@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 7.1.10.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
+AspectDeltaDetails:
+  description: The AspectDeltaDetails information element defines the increments in terms of number of instances of VNFCs and virtual link flavours that correspond to the scaling steps of a scaling aspect
+  attributes:
+    uniform_delta:
+      description: Scaling delta to be applied for every scaling step of this aspect. This attribute allows to model uniform scaling steps.
+      type: ScalingDelta
+      required: False
+
+    deltas:
+      description: Scaling deltas to be applied for the different subsequent scaling steps of this aspect. The first entry in the array shall correspond to the first scaling step (between scale levels 0 to 1) and the last entry of the array shall correspond to the last scaling step (between maxScaleLevel-1 and maxScaleLevel.
+      type: List
+      required: False
+      constraints:
+        entry_type: ScalingDelta
+

@@ -10,6 +10,7 @@
 #
 
 
+import json
 import logging
 import random
 import time
@@ -23,7 +24,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, VnfExtCpInfo
+from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, \
+    VnfExtCpInfo, NsdInfo
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -53,6 +55,7 @@ class RiftManoAdapter(object):
         self.session.verify = False
 
         self.nsr_metadata = {}
+        self.nsd_info_ids = dict()
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -137,6 +140,37 @@ class RiftManoAdapter(object):
             else:
                 return constants.OPERATION_FAILED
 
+        if operation_type == 'scaling_group_terminate':
+            ns_instance_id, scaling_group_record_id = resource_id
+            resource = '/api/operational/project/%s/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
+                       (self.project, ns_instance_id, scaling_group_record_id)
+            try:
+                response = self.session.get(url=self.url + resource)
+                assert response.status_code == 200
+                json_content = response.json()
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
+                                           (scaling_group_record_id, ns_instance_id))
+            scaling_group_record = json_content.get('nsr:scaling-group-record')
+            if scaling_group_record == None:
+                return constants.OPERATION_SUCCESS
+            elif 'instance' in scaling_group_record:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_FAILED
+
+        if operation_type == 'multiple_operations':
+            operation_list = resource_id
+            operation_status_list = map(self.get_operation_status, operation_list)
+
+            if constants.OPERATION_FAILED in operation_status_list:
+                return constants.OPERATION_FAILED
+            elif constants.OPERATION_PENDING in operation_status_list:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_SUCCESS
+
         raise RiftManoAdapterError('Unknown operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
@@ -167,7 +201,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get NSD %s' % nsd_id)
 
         nsd = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd'][0]
-        nsd.pop('rw-project-nsd:meta')
+        nsd.pop('rw-project-nsd:meta', None)
 
         return nsd
 
@@ -184,7 +218,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to get VNFD %s' % vnfd_id)
 
         vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
-        vnfd.pop('rw-project-vnfd:meta')
+        vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
 
@@ -194,7 +228,7 @@ class RiftManoAdapter(object):
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
 
-        resource = '/api/config/project/Spirent/ns-instance-config/nsr'
+        resource = '/api/config/project/%s/ns-instance-config/nsr' % self.project
 
         nsr_metadata = self.nsr_metadata[ns_instance_id]
         nsr_metadata['datacenter'] = additional_param_for_ns['datacenter']
@@ -262,7 +296,10 @@ class RiftManoAdapter(object):
         for connection_point in vnfr['connection-point']:
             vnf_ext_cp_info = VnfExtCpInfo()
             vnf_ext_cp_info.cp_instance_id = str(connection_point['connection-point-id'])
-            vnf_ext_cp_info.address = [str(connection_point['mac-address'])]
+            vnf_ext_cp_info.address = {
+                'mac': [str(connection_point['mac-address'])],
+                'ip': [str(connection_point['ip-address'])]
+            }
             vnf_ext_cp_info.cpd_id = str(connection_point['name'])
             vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)
 
@@ -308,7 +345,7 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_terminate(self, ns_instance_id, terminate_time=None, additional_param=None):
-        resource = '/api/config/project/Spirent/ns-instance-config/nsr/%s' % ns_instance_id
+        resource = '/api/config/project/%s/ns-instance-config/nsr/%s' % (self.project, ns_instance_id)
 
         try:
             response = self.session.delete(url=self.url + resource)
@@ -384,51 +421,62 @@ class RiftManoAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def validate_ns_allocated_vresources(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
-        for vnf_info in ns_info.vnf_info:
-            if not self.validate_vnf_allocated_vresources(vnf_info):
-                return False
-        return True
-
-    @log_entry_exit(LOG)
-    def validate_vnf_allocated_vresources(self, vnf_info):
+    def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
         validation_result = True
 
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_resources = {}
+        expected_vdu_flavor = dict()
+        expected_vdu_resources = dict()
         for vdu in vnfd['vdu']:
+            expected_vdu_flavor[vdu['id']] = {
+                'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
+            }
             expected_vdu_resources[vdu['id']] = {
-                'vcpu-count': vdu['vm-flavor']['vcpu-count'],
-                'memory-mb': vdu['vm-flavor']['memory-mb'],
-                'storage-gb': vdu['vm-flavor']['storage-gb'],
+                'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
+                'memory-mb': vdu['vm-flavor'].get('memory-mb'),
+                'storage-gb': vdu['vm-flavor'].get('storage-gb'),
                 'nic-count': len(vdu['interface'])
             }
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vdu_id = vnfc_resource_info.vdu_id
-
             # Get VIM adapter object
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
-            actual_vdu_resources = {
-                'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
-                'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
-                'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
-                'nic-count': len(virtual_compute.virtual_network_interface)
-            }
+            # Get the flavor name from the VNFD
+            flavor_name_vnfd = expected_vdu_flavor[vdu_id]['vm-flavor-name']
+            if flavor_name_vnfd is not None:
 
-            for resource_name, actual_value in actual_vdu_resources.items():
-                expected_value = expected_vdu_resources[vdu_id][resource_name]
-                if actual_value != expected_value:
-                    LOG.debug('Unexpected value for %s: %s. Expected: %s'
-                              % (resource_name, actual_value, expected_value))
+                # Get the flavor name from the VIM
+                server_details = vim.server_get(resource_id)
+                server_flavor_id = server_details['flavor_id']
+                flavor_details = vim.flavor_get(server_flavor_id)
+                flavor_name_nova = str(flavor_details['name'])
+
+                # Compare the flavor name in the VNFD to the flavor name of the VM
+                if flavor_name_nova != flavor_name_vnfd:
+                    LOG.debug('Unexpected value for flavor: %s. Expected: %s' % (flavor_name_vnfd, flavor_name_nova))
                     validation_result = False
+            else:
+                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+
+                actual_vdu_resources = {
+                    'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
+                    'memory-mb': virtual_compute.virtual_memory.virtual_mem_size,
+                    'storage-gb': virtual_compute.virtual_disks[0].size_of_storage,
+                    'nic-count': len(virtual_compute.virtual_network_interface)
+                }
+
+                for resource_name, actual_value in actual_vdu_resources.items():
+                    expected_value = expected_vdu_resources[vdu_id][resource_name]
+                    if actual_value != expected_value:
+                        LOG.debug('Unexpected value for %s: %s. Expected: %s'
+                                  % (resource_name, actual_value, expected_value))
+                        validation_result = False
 
         return validation_result
 
@@ -469,7 +517,7 @@ class RiftManoAdapter(object):
         return validation_result
 
     @log_entry_exit(LOG)
-    def get_vnf_mgmt_addr_list(self, vnf_instance_id):
+    def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         vnf_mgmt_addr_list = list()
 
         resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_instance_id
@@ -553,7 +601,9 @@ class RiftManoAdapter(object):
                     LOG.exception(e)
                     raise RiftManoAdapterError('Unable to scale in NS %s' % ns_instance_id)
 
-                return 'ns_scale_in', ns_instance_id
+                ns_scale_in_op = 'ns_scale_in', ns_instance_id
+                scaling_group_terminate_op = 'scaling_group_terminate', (ns_instance_id, removed_scaling_groups_id)
+                return 'multiple_operations', [ns_scale_in_op, scaling_group_terminate_op]
 
             else:
                 raise RiftManoAdapterError('Invalid scaling direction: %s'
@@ -577,7 +627,7 @@ class RiftManoAdapter(object):
             ns_op_status = json_content['rw-project:project']['nsr:ns-instance-opdata']['nsr'][0]['operational-status']
             LOG.debug('Got NS status %s for NS with ID %s' % (ns_op_status, ns_instance_id))
             if ns_op_status in stable_states:
-                return True
+                return
             else:
                 LOG.debug('Expected NS status to be one of %s, got %s' % (stable_states, ns_op_status))
                 LOG.debug('Sleeping %s seconds' % poll_interval)
@@ -585,11 +635,11 @@ class RiftManoAdapter(object):
                 elapsed_time += poll_interval
                 LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
 
-        LOG.debug('NS with ID %s did not reach a stable state after %s' % (ns_instance_id, max_wait_time))
-        return False
+        raise RiftManoAdapterError('NS with ID %s did not reach a stable state after %s'
+                                   % (ns_instance_id, max_wait_time))
 
     @log_entry_exit(LOG)
-    def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps, additional_param):
+    def verify_ns_vnf_instance_count(self, ns_instance_id, aspect_id, number_of_steps=1, additional_param=None):
         validation_result = True
 
         # Get the NSR
@@ -642,3 +692,107 @@ class RiftManoAdapter(object):
                 validation_result = False
 
         return validation_result
+
+    @log_entry_exit(LOG)
+    def nsd_info_create(self, user_defined_data=None):
+        # Generating a UUID
+        nsd_info_id = str(uuid.uuid4())
+
+        # Populate the NsdInfo object
+        nsd_info = NsdInfo()
+        nsd_info.nsd_info_id = nsd_info_id
+        nsd_info.user_defined_data = user_defined_data
+
+        # Store the mapping between the NsdInfo object and its UUID
+        self.nsd_info_ids[nsd_info_id] = nsd_info
+
+        return nsd_info_id
+
+    @log_entry_exit(LOG)
+    def nsd_info_query(self, filter, attribute_selector=None):
+        nsd_info_id = filter['nsd_info_id']
+        return self.nsd_info_ids.get(nsd_info_id)
+
+    @log_entry_exit(LOG)
+    def nsd_upload(self, nsd_info_id, nsd):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Uploading the NSD
+        if nsd is not None:
+            raise NotImplementedError('Rift does not support ETSI NSD format')
+
+        vendor_nsd = nsd_info.user_defined_data.get('vendor_nsd')
+        if vendor_nsd is None:
+            raise RiftManoAdapterError('Vendor NSD not present in user_defined_data')
+
+        try:
+            vendor_nsd = json.loads(vendor_nsd)
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to parse vendor NSD')
+
+        resource = '/api/config/project/%s/nsd-catalog' % self.project
+        request_body = {'nsd': [vendor_nsd]}
+        try:
+            response = self.session.post(url=self.url + resource, json=request_body)
+            assert response.status_code == 201
+            assert 'ok' in response.json().get('rpc-reply', {})
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to upload the NSD')
+
+        # Retrieving details about the on-boarded NSD
+        nsd_id = str(vendor_nsd['id'])
+
+        # Updating the corresponding NsdInfo object with the details of the on-boarded NSD
+        nsd_info.nsd_id = nsd_id
+
+    @log_entry_exit(LOG)
+    def nsd_fetch(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # Get the NSD corresponding to the provided nsd_info_id
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is None:
+            raise RiftManoAdapterError('NsdInfo object with ID %s does not have the NsdId attribute set' % nsd_info_id)
+        nsd = self.get_nsd(nsd_id)
+
+        return nsd
+
+    @log_entry_exit(LOG)
+    def nsd_delete(self, nsd_info_id):
+        # Get the NsdInfo object corresponding to the provided nsd_info_id
+        nsd_info = self.nsd_info_ids.get(nsd_info_id)
+        if nsd_info is None:
+            raise RiftManoAdapterError('No NsdInfo object with ID %s' % nsd_info_id)
+
+        # If the NsdInfo object holds information about an NSD, delete it
+        nsd_id = nsd_info.nsd_id
+        if nsd_id is not None:
+            resource = '/api/config/project/%s/nsd-catalog/nsd/%s' % (self.project, nsd_id)
+            try:
+                response = self.session.delete(url=self.url + resource)
+                assert response.status_code == 201
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to delete NSD %s' % nsd_id)
+
+            # Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking
+            # that the NSD has been deleted.
+            try:
+                self.get_nsd(nsd_id)
+            except RiftManoAdapterError:
+                LOG.debug('NSD %s has been deleted' % nsd_id)
+            else:
+                raise RiftManoAdapterError('NSD %s has not been deleted' % nsd_id)
+
+        # Delete the NsdInfo object
+        self.nsd_info_ids.pop(nsd_info_id)
+
+        return nsd_info_id

@@ -43,11 +43,13 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
         resources have been freed up
     13. Determine the service disruption during the resizing
     14. Validate traffic flows through without issues
+    15. Terminate the NS
+    16. Validate that the NS is terminated and that all resources have been released by the VIM
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name')
-    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption', 'scale_in_ns')
+    TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption', 'scale_in_ns', 'terminate_ns')
 
     def run(self):
         LOG.info('Starting %s' % self.tc_name)
@@ -75,9 +77,6 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
                ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
                additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
-        if self.ns_instance_id is None:
-            raise TestRunError('NS instantiation operation failed')
-
         self.time_record.END('instantiate_ns')
 
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
@@ -86,6 +85,8 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'),
                                   additional_param=self.tc_input['mano'].get('termination_params'))
+        self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
+                                  ns_instance_id=self.ns_instance_id)
 
         # --------------------------------------------------------------------------------------------------------------
         # 2. Validate NS state is INSTANTIATED
@@ -129,7 +130,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
         self.traffic.configure(traffic_load='LOW_TRAFFIC_LOAD',
                                traffic_config=self.tc_input['traffic']['traffic_config'])
 
-        self.register_for_cleanup(index=20, function_reference=self.traffic.destroy)
+        self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_vnf_ingress_cp_addr_list(
@@ -139,13 +140,13 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
 
         self.traffic.start(return_when_emission_starts=True)
 
-        self.register_for_cleanup(index=30, function_reference=self.traffic.stop)
+        self.register_for_cleanup(index=40, function_reference=self.traffic.stop)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Validate traffic flows through without issues
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating traffic flows through without issues')
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -235,7 +236,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
         # Start the max traffic load.
         self.traffic.start(return_when_emission_starts=True)
 
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Max traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
@@ -348,12 +349,58 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VNF_IND(TestCase):
         self.traffic.start(return_when_emission_starts=True)
 
         # Checking the traffic flow.
-        if not self.traffic.does_traffic_flow(delay_time=5):
+        if not self.traffic.does_traffic_flow(delay_time=constants.TRAFFIC_DELAY_TIME):
             raise TestRunError('Traffic is not flowing', err_details='Low traffic did not flow')
 
         if self.traffic.any_traffic_loss(tolerance=constants.TRAFFIC_TOLERANCE):
             raise TestRunError('Traffic is flowing with packet loss', err_details='Low traffic flew with packet loss')
 
         self.tc_result['scaling_in']['traffic_after'] = 'LOW_TRAFFIC_LOAD'
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 15. Terminate the NS
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Terminating the NS')
+        self.time_record.START('terminate_ns')
+        if self.mano.ns_terminate_sync(ns_instance_id=self.ns_instance_id,
+                                       terminate_time=self.tc_input.get('terminate_time'),
+                                       additional_param=self.tc_input['mano'].get('termination_params')) != \
+                constants.OPERATION_SUCCESS:
+            raise TestRunError('Unexpected status for NS termination operation',
+                               err_details='NS termination operation failed')
+
+        self.time_record.END('terminate_ns')
+
+        self.tc_result['events']['terminate_ns']['duration'] = self.time_record.duration('terminate_ns')
+
+        self.unregister_from_cleanup(index=20)
+        self.unregister_from_cleanup(index=10)
+
+        self.register_for_cleanup(index=10, function_reference=self.mano.ns_delete_id,
+                                  ns_instance_id=self.ns_instance_id)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 16. Validate that the NS is terminated and that all resources have been released by the VIM
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Validating that the NS is terminated')
+        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+        if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
+            raise TestRunError('Unexpected NS instantiation state',
+                               err_details='NS instantiation state was not "%s" after the NS was terminated'
+                                           % constants.NS_NOT_INSTANTIATED)
+
+        LOG.info('Verifying that all the VNF instance(s) have been terminated')
+        for vnf_info in ns_info.vnf_info:
+            vnf_instance_id = vnf_info.vnf_instance_id
+            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
+                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
+                raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
+                                   % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
+
+        LOG.info('Validating that all resources have been released by the VIM')
+        if not self.mano.validate_ns_released_vresources(ns_info):
+            raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

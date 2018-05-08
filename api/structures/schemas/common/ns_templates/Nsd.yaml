@@ -1,0 +1,117 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.2.2 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+Nsd:
+  description: The NSD information element is a deployment template whose instances are used by the NFVO for the lifecycle management of NSs.
+  attributes:
+    nsd_identifier:
+      description: dentifier of this NSD information element. It Globally uniquely identifies an instance of the NSD.
+      type: Identifier
+      required: true
+
+    designer:
+      description: Identifies the designer of the NSD.
+      type: String
+      required: true
+
+    version:
+      description: Identifies the version of the NSD.
+      type: Version
+      required: true
+
+    nsd_name:
+      description: Provides the human readable name of the NSD.
+      type: String
+      required: true
+
+    nsd_invariant_id:
+      description: Identifies an NSD in a version independent manner. This attribute is invariant across versions of NSD.
+      type: Identifier
+      required: true
+
+    nested_nsd_id:
+      description: Human readable name for the VNF Product. Can change during the VNF Product lifetime.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    vnfd_id:
+      description: References the VNFD of a constituent VNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    pnfd_id:
+      description: References the PNFD of a constituent PNF.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    sapd:
+      description: Provides the descriptor of a service access point of the network service.
+      type: List
+      required: false
+      constraints:
+        entry_type: Sapd
+
+    virtual_link_desc:
+      description: Provides the constituent VLDs.
+      type: List
+      required: false
+      constraints:
+        entry_type: NsVirtualLinkDesc
+
+    vnffgd:
+      description: Provides the descriptors of the applicable forwarding graphs.
+      type: List
+      required: false
+      constraints:
+        entry_type: Vnffgd
+
+    monitored_info:
+      description: Identifies either a virtualised resource-related performance metric or a VNF Indicator.
+      type: List
+      required: false
+      constraints:
+        entry_type: MonitoredData
+
+    auto_scaling_rule:
+      description: Specifies a rule to trigger a scaling action on a NS instantiated according to the NSD.
+      type: List
+      required: false
+      constraints:
+        entry_type: Rule
+
+    life_cycle_management_script:
+      description: Provides a life cycle management script written in a Domain Specific Language (DSL).
+      type: List
+      required: false
+      constraints:
+        entry_type: NsLifeCycleManagementScript
+
+    nsdf:
+      description: Identifies a DF within the scope of an NSD.
+      type: List
+      required: True
+      constraints:
+        entry_type: NsDf
+
+    security:
+      description: Provides a signature to prevent tampering.
+      type: SecurityParameters
+      required: True
+

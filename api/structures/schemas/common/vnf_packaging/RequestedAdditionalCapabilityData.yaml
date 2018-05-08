@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.9.5 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.9.5 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 RequestedAdditionalCapabilityData:
   description: This information element describes requested additional capability for a particular VDU. Such a capability may be for acceleration or specific tasks.

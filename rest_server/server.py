@@ -15,7 +15,7 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 from threading import Lock
 
 from bottle import route, request, response, run
@@ -25,6 +25,8 @@ from utils import reporting, logging_module
 from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
 
 execution_queues = dict()
+message_queues = dict()
+step_triggers = dict()
 execution_processes = dict()
 tc_results = dict()
 tc_inputs = dict()
@@ -86,7 +88,7 @@ def _delete_config(key):
         json.dump(config, config_file, sort_keys=True, indent=2)
 
 
-def execute_test(tc_exec_request, tc_input, queue):
+def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger):
     """
     This function is used as a process target and it starts the execution of a test case.
     """
@@ -101,14 +103,18 @@ def execute_test(tc_exec_request, tc_input, queue):
     logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name)
 
     tc_start_time = datetime.utcnow()
-    tc_result = tc_class(tc_input).execute()
+    tc_instance = tc_class(tc_input)
+    tc_instance.message_queue = message_queue
+    tc_instance.step_trigger = step_trigger
+    tc_result = tc_instance.execute()
     tc_end_time = datetime.utcnow()
 
     tc_result['tc_start_time'] = tc_start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_end_time'] = tc_end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_duration'] = str(tc_end_time - tc_start_time)
 
-    queue.put(tc_result)
+    execution_queue.put(tc_result)
+    message_queue.put(None)
 
     kibana_srv = _read_config('kibana-srv')
     if kibana_srv is not None:
@@ -131,10 +137,16 @@ def do_exec():
     Request mapped function that starts the execution of a test case in a new process.
     """
     tc_exec_request = request.json
-    timeout_timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_OUT_TIMEOUT', 'VNF_SCALE_IN_TIMEOUT', 'VNF_STOP_TIMEOUT',
-                      'VNF_START_TIMEOUT', 'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT',
-                      'NS_INSTANTIATE_TIMEOUT', 'NS_SCALE_TIMEOUT', 'NS_UPDATE_TIMEOUT', 'NS_TERMINATE_TIMEOUT',
-                      'NS_STABLE_STATE_TIMEOUT', 'POLL_INTERVAL']
+    timeout_timers = ['VNF_INSTANTIATE_TIMEOUT', 'VNF_SCALE_TIMEOUT', 'VNF_STOP_TIMEOUT', 'VNF_START_TIMEOUT',
+                      'VNF_TERMINATE_TIMEOUT', 'VNF_STABLE_STATE_TIMEOUT', 'NS_INSTANTIATE_TIMEOUT', 'NS_SCALE_TIMEOUT',
+                      'NS_UPDATE_TIMEOUT', 'NS_TERMINATE_TIMEOUT', 'NS_STABLE_STATE_TIMEOUT', 'POLL_INTERVAL']
+
+    tc_name = tc_exec_request.get('tc_name')
+    try:
+        get_tc_constructor_class(tc_name)
+    except KeyError:
+        response.status = 404
+        return {'error': 'Test case %s not found' % tc_name}
 
     tc_input = tc_exec_request.get('tc_input')
     if tc_input is None:
@@ -148,14 +160,19 @@ def do_exec():
             resource_params = _read_resource(resource_type, resource_name)
             tc_input[resource_type] = dict()
             tc_input[resource_type]['type'] = resource_params['type']
+            tc_input[resource_type]['name'] = resource_name
             tc_input[resource_type]['adapter_config'] = resource_params['client_config']
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
             if resource_type == 'mano':
                 tc_input['mano']['instantiation_params'] = resource_params.get('instantiation_params', {})
+                tc_input['mano']['instantiation_params_for_ns'] = resource_params.get('instantiation_params_for_ns', {})
+                tc_input['mano']['instantiation_params_for_vnf'] = resource_params.get('instantiation_params_for_vnf',
+                                                                                       {})
                 tc_input['mano']['query_params'] = resource_params.get('query_params', {})
                 tc_input['mano']['termination_params'] = resource_params.get('termination_params', {})
                 tc_input['mano']['operate_params'] = resource_params.get('operate_params', {})
+                tc_input['mano']['scale_params'] = resource_params.get('scale_params', {})
                 tc_input['vnfd_id'] = resource_params.get('vnfd_id')
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
@@ -175,14 +192,22 @@ def do_exec():
             tc_input['vnf'] = dict()
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
     execution_id = str(uuid.uuid4())
-    queue = Queue()
-    execution_process = Process(target=execute_test, args=(tc_exec_request, tc_input, queue))
+    execution_queue = Queue()
+    message_queue = Queue()
+    if _read_config('debug') is True:
+        step_trigger = Event()
+    else:
+        step_trigger = None
+    execution_process = Process(target=execute_test,
+                                args=(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger))
     execution_process.start()
 
     tc_inputs[execution_id] = tc_input
 
     execution_processes[execution_id] = execution_process
-    execution_queues[execution_id] = queue
+    execution_queues[execution_id] = execution_queue
+    message_queues[execution_id] = message_queue
+    step_triggers[execution_id] = step_trigger
 
     return {'execution_id': execution_id}
 
@@ -386,7 +411,7 @@ def validate(resource):
             construct_adapter(request.json['type'], resource, **request.json['client_config'])
         except Exception as e:
             response.status = 504
-            return {'warning': e.message}
+            return {'warning': '%s' % e}
         response.status = 200
         return {'message': "Object validated."}
 
@@ -405,6 +430,45 @@ def wait_for_exec(execution_id):
 
     execution_process.join()
     return {'status': 'DONE'}
+
+
+@route('/v1.0/step/<execution_id>')
+def wait_for_step(execution_id):
+    try:
+        message_queue = message_queues[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'error': 'NOT_FOUND'}
+
+    if message_queue is None:
+        msg = None
+    else:
+        msg = message_queue.get()
+
+    if msg is None:
+        message_queues[execution_id] = None
+        response.status = 204
+        return {'status': 'DONE'}
+    else:
+        response.status = 200
+        return msg
+
+
+@route('/v1.0/step/<execution_id>', method='POST')
+def trigger_step(execution_id):
+    try:
+        step_trigger = step_triggers[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'error': 'NOT_FOUND'}
+
+    if step_trigger is None:
+        response.status = 204
+        return {'error': 'Not running in debug mode'}
+    else:
+        step_trigger.set()
+        response.status = 200
+        return {}
 
 
 run(host='0.0.0.0', port=8080, server='paste')

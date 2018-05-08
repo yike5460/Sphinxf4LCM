@@ -1,0 +1,60 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 6.5.2 of ETSI GS NFV-IFA 014 - v2.4.1 (2018-02).
+
+NsVirtualLinkDesc:
+  description: The NsVirtualLinkDesc information element provides general information enabling the instantiation of virtual links.
+  attributes:
+    virtual_link_desc_id:
+      description: Identifier of the NsVirtualLinkDesc information element. It uniquely identifies a VLD.
+      type: Identifier
+      required: true
+
+    virtual_link_desc_provider:
+      description: Defines the organization generating the VLD.
+      type: String
+      required: false
+
+    virtual_link_desc_version:
+      description: Specifies the version of the VLD.
+      type: Version
+      required: true
+
+    connectivity_type:
+      description: The ConnectivityType information element specifies the protocol exposed by a VL and the flow pattern supported by the VL.
+      type: ConnectivityType
+      required: true
+
+    virtual_link_df:
+      description: The VirtualLinkDf information element specifies properties for instantiating a VL according to a specific flavour.
+      type: List
+      required: true
+      constraints:
+        entry_type: VirtualLinkDf
+
+    test_access:
+      description: Specifies test access facilities expected on the VL (e.g. none, passive monitoring, or active (intrusive) loopbacks at endpoints).
+      type: List
+      required: false
+      constraints:
+        entry_type: String
+
+    description:
+      description: Provides human-readable information on the purpose of the virtual link (e.g. VL for control plane traffic).
+      type: String
+      required: false
+
+    security:
+      description: Provides a signature to prevent tampering.
+      type: SecurityParameters
+      required: false

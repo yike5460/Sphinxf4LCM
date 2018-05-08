@@ -94,13 +94,10 @@ class StaticTypeAttribute(Attribute):
 
 
 class CoercedList(MutableSequence):
-    def __init__(self, entry_type, data):
+    def __init__(self, entry_type_validator, data):
         super(CoercedList, self).__init__()
-        self._entry_type_validator = TypeValidator(entry_type)
-        if data is None:
-            self._list = list()
-        else:
-            self._list = list(data)
+        self._entry_type_validator = entry_type_validator
+        self._list = list(data)
 
     def __delitem__(self, key):
         self._list.__delitem__(key)
@@ -149,7 +146,7 @@ class List(StaticTypeAttribute):
         super(List, self).__init__()
 
     def _coerce(self, value):
-        return CoercedList(self.entry_type, value)
+        return CoercedList(self._entry_type_validator, value)
 
     def _validate(self, value):
         super(List, self)._validate(value)
@@ -307,6 +304,10 @@ class InformationElement(object):
 
 class InformationElementWithExternalSchema(InformationElement):
     __metaclass__ = SchemaLoader
+
+
+class LogicalNodeData(InformationElementWithExternalSchema):
+    pass
 
 
 class VnfExtCpInfo(InformationElementWithExternalSchema):
@@ -585,15 +586,15 @@ class VnfLifecycleChangeNotification(InformationElementWithExternalSchema):
     pass
 
 
-class ScalingAspect(InformationElementWithExternalSchema):
-    pass
-
-
 class L3AddressData(InformationElementWithExternalSchema):
     pass
 
 
 class AddressData(InformationElementWithExternalSchema):
+    pass
+
+
+class CpProtocolData(InformationElementWithExternalSchema):
     pass
 
 
@@ -617,15 +618,31 @@ class LinkBitrateRequirements(InformationElementWithExternalSchema):
     pass
 
 
-class QoS(InformationElementWithExternalSchema):
+class VnfQoS(InformationElementWithExternalSchema):
     pass
 
 
-class LocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
+class VnfLocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
     pass
 
 
 class VduLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkBitrateLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingDelta(InformationElementWithExternalSchema):
+    pass
+
+
+class AspectDeltaDetails(InformationElementWithExternalSchema):
+    pass
+
+
+class ScalingAspect(InformationElementWithExternalSchema):
     pass
 
 
@@ -657,7 +674,7 @@ class SwImageDesc(InformationElementWithExternalSchema):
     pass
 
 
-class MonitoringParameter(InformationElementWithExternalSchema):
+class VnfMonitoringParameter(InformationElementWithExternalSchema):
     pass
 
 
@@ -689,7 +706,7 @@ class VduProfile(InformationElementWithExternalSchema):
     pass
 
 
-class VirtualLinkProfile(InformationElementWithExternalSchema):
+class VnfVirtualLinkProfile(InformationElementWithExternalSchema):
     pass
 
 
@@ -697,11 +714,19 @@ class InstantiationLevel(InformationElementWithExternalSchema):
     pass
 
 
+class ChangeVnfFlavourOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class ChangeExtVnfConnectivityOpConfig(InformationElementWithExternalSchema):
+    pass
+
+
 class VnfLcmOperationsConfiguration(InformationElementWithExternalSchema):
     pass
 
 
-class AffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
+class VnfAffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
     pass
 
 
@@ -737,7 +762,7 @@ class VnfInfoModifiableAttributes(InformationElementWithExternalSchema):
     pass
 
 
-class LifeCycleManagementScript(InformationElementWithExternalSchema):
+class VnfLifeCycleManagementScript(InformationElementWithExternalSchema):
     pass
 
 
@@ -758,6 +783,122 @@ class SoftwareImageInformation(InformationElementWithExternalSchema):
 
 
 class OperateVnfData(InformationElementWithExternalSchema):
+    pass
+
+
+class NsToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class Dependencies(InformationElementWithExternalSchema):
+    pass
+
+
+class NsQoS(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkConnectivity(InformationElementWithExternalSchema):
+    pass
+
+
+class NsProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfToLevelMapping(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLevel(InformationElementWithExternalSchema):
+    pass
+
+
+class NsScalingAspect(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLocalAffinityOrAntiAffinityRule(InformationElementWithExternalSchema):
+    pass
+
+
+class NsAffinityOrAntiAffinityGroup(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class PnfProfile(InformationElementWithExternalSchema):
+    pass
+
+
+class SecurityParameters(InformationElementWithExternalSchema):
+    pass
+
+
+class NsDf(InformationElementWithExternalSchema):
+    pass
+
+
+class OperateVnfData(InformationElementWithExternalSchema):
+    pass
+
+
+class NsMonitoringParameter(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfIndicatorData(InformationElementWithExternalSchema):
+    pass
+
+
+class MonitoredData(InformationElementWithExternalSchema):
+    pass
+
+
+class Nfpd(InformationElementWithExternalSchema):
+    pass
+
+
+class Vnffgd(InformationElementWithExternalSchema):
+    pass
+
+
+class VirtualLinkDf(InformationElementWithExternalSchema):
+    pass
+
+
+class NsVirtualLinkDesc(InformationElementWithExternalSchema):
+    pass
+
+
+class Sapd(InformationElementWithExternalSchema):
+    pass
+
+
+class NsLifeCycleManagementScript(InformationElementWithExternalSchema):
+    pass
+
+
+class Nsd(InformationElementWithExternalSchema):
+    pass
+
+
+class NsdInfo(InformationElementWithExternalSchema):
     pass
 
 

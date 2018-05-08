@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.6.2 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.6.2 of ETSI GS NFV-IFA 011 - v2.4.1 (2017-02).
 
 Vdu:
   description: The Virtualisation Deployment Unit (VDU) is a construct supporting the description of the deployment and operational behaviour of a VNFC.
@@ -71,7 +71,7 @@ Vdu:
       type: List
       required: false
       constraints:
-        entry_type: MonitoringParameter
+        entry_type: VnfMonitoringParameter
 
     configurable_properties:
       description: Describes the configurable properties of all VNFC instances based on this VDU.

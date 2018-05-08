@@ -10,7 +10,7 @@
 #
 
 
-# This structure was written in accordance with section 7.1.8.3 of ETSI GS NFV-IFA 011 - v2.1.1 (2016-10).
+# This structure was written in accordance with section 7.1.8.3 of ETSI GS NFV-IFA 011 - v2.4.1 (2018-02).
 
 VduProfile:
   description: The VduProfile describes additional instantiation data for a given VDU used in a DF.
@@ -30,13 +30,12 @@ VduProfile:
       type: Integer
       required: true
 
-
     local_affinity_or_anti_affinity_rule:
       description: Specifies affinity or anti-affinity rules applicable between the virtualisation containers (e.g. virtual machines) to be created based on this VDU. When the cardinality is greater than 1, both affinity rule(s) and anti-affinity rule(s) with different scopes (e.g. "Affinity with the scope resource zone and anti-affinity with the scope NFVI node") are applicable to the virtualisation containers (e.g. virtual machines) to be created based on this VDU.
       type: List
       required: false
       constraints:
-        entry_type: LocalAffinityOrAntiAffinityRule
+        entry_type: VnfLocalAffinityOrAntiAffinityRule
 
     affinity_or_anti_affinity_group_id:
       description: Identifier(s) of the affinity or anti-affinity group(s) the VDU belongs to.
