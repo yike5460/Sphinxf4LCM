@@ -270,7 +270,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
 
     @Step(name='Verify VNF configuration',
           description='Verify that the VNF configuration has been updated to exclude the removed VNFC instances '
-                      'according to the descriptors by querying the VNFM')
+                      'according to the descriptors by querying the VNFM',
+          runnable=False)
     def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the VNF configuration has been updated to exclude the removed VNFC instances according to the
@@ -282,7 +283,8 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
 
     @Step(name='Verify VNFC instance(s) connection(s)',
           description='Verify that the remaining VNFC instance(s) and VL(s) are still connected according to the '
-                      'descriptors')
+                      'descriptors',
+          runnable=False)
     def step10(self):
         # --------------------------------------------------------------------------------------------------------------
         # 10. Verify that the remaining VNFC instance(s) and VL(s) are still connected according to the descriptors

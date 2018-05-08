@@ -57,7 +57,8 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
 
     @Step(name='Verify VLDs and VNFFGDs have been successfully on-boarded',
           description='Verify that all VLDs and VNFFGDs referenced in the NSD have been successfully on-boarded in '
-                      'MANO')
+                      'MANO',
+          runnable=False)
     def step3(self):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Verify that all VLDs and VNFFGDs referenced in the NSD have been successfully on-boarded in MANO

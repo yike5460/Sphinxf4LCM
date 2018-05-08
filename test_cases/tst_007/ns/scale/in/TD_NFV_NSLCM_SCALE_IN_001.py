@@ -206,7 +206,8 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
 
     @Step(name='Verify VNF instance(s) connection(s)',
           description='Verify that the remaining VNF instance(s), VL(s) and VNFFG(s) are still connected according to '
-                      'the descriptors')
+                      'the descriptors',
+          runnable=False)
     def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the remaining VNF instance(s), VL(s) and VNFFG(s) are still connected according to the
