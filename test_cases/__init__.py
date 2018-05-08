@@ -12,6 +12,7 @@
 
 import collections
 import importlib
+import time
 
 from api import ApiError
 from api.generic import constants, construct_generic
@@ -139,6 +140,8 @@ class TestCase(object):
         self.vnf = None
         self.vnfm = None
         self.cleanup_registrations = dict()
+        self.message_queue = None
+        self.step_trigger = None
 
     # @classmethod
     # def initialize(cls):
@@ -188,8 +191,25 @@ class TestCase(object):
 
     def run(self):
         for step in self.steps:
+            step_dict = {
+                'name': step.name,
+                'description': step.description,
+                'index': step.index
+            }
+
+            if self.step_trigger is not None:
+                step_dict['status'] = 'PAUSED'
+                self.message_queue.put(step_dict)
+                self.step_trigger.wait()
+                self.step_trigger.clear()
+
             self._LOG.info('Entering step %s' % step.name)
+            if self.message_queue is not None:
+                step_dict['status'] = 'RUNNING'
+                self.message_queue.put(step_dict)
+
             try:
+                step_start_time = time.time()
                 if step.runnable is True:
                     step.run_func(self)
                     step_status = 'PASS'
@@ -202,7 +222,13 @@ class TestCase(object):
                 step_status = 'ERROR'
                 raise e
             finally:
+                step_end_time = time.time()
+                step_duration = step_end_time - step_start_time
+                if self.message_queue is not None:
+                    step_dict['status'] = step_status
+                    self.message_queue.put(step_dict)
                 self.tc_result['steps'][step.index]['status'] = step_status
+                self.tc_result['steps'][step.index]['duration'] = step_duration
                 self._LOG.info('Exiting step %s' % step.name)
 
     def register_for_cleanup(self, index, function_reference, *args, **kwargs):

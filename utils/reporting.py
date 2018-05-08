@@ -43,10 +43,12 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write steps summary
         report_file.write('* Steps summary:\n')
-        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Status'], hrules=prettytable.ALL)
+        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Duration (sec)', 'Status'],
+                                    hrules=prettytable.ALL)
         t.max_width = 32
         for step_index, step_details in tc_result.get('steps', {}).items():
-            t.add_row([step_index, step_details['name'], step_details['description'], step_details['status']])
+            t.add_row([step_index, step_details['name'], step_details['description'],
+                       '%.3f' % step_details.get('duration', 0), step_details['status']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
@@ -116,8 +118,8 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         # Write VNF resources
         report_file.write('* VNF resources:\n')
         t_outside = prettytable.PrettyTable(
-                                         ['VNF', 'VNFC', 'Resource type', 'Expected', 'Actual', 'Validation'],
-                                         hrules=prettytable.ALL)
+            ['VNF', 'VNFC', 'Resource type', 'Expected', 'Actual', 'Validation'],
+            hrules=prettytable.ALL)
         t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
@@ -174,7 +176,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
                              tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
     durations['start'] = tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
-                        tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
+                         tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
     durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
                         tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration')
     durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \

@@ -140,6 +140,37 @@ class RiftManoAdapter(object):
             else:
                 return constants.OPERATION_FAILED
 
+        if operation_type == 'scaling_group_terminate':
+            ns_instance_id, scaling_group_record_id = resource_id
+            resource = '/api/operational/project/%s/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
+                       (self.project, ns_instance_id, scaling_group_record_id)
+            try:
+                response = self.session.get(url=self.url + resource)
+                assert response.status_code == 200
+                json_content = response.json()
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
+                                           (scaling_group_record_id, ns_instance_id))
+            scaling_group_record = json_content.get('nsr:scaling-group-record')
+            if scaling_group_record == None:
+                return constants.OPERATION_SUCCESS
+            elif 'instance' in scaling_group_record:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_FAILED
+
+        if operation_type == 'multiple_operations':
+            operation_list = resource_id
+            operation_status_list = map(self.get_operation_status, operation_list)
+
+            if constants.OPERATION_FAILED in operation_status_list:
+                return constants.OPERATION_FAILED
+            elif constants.OPERATION_PENDING in operation_status_list:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_SUCCESS
+
         raise RiftManoAdapterError('Unknown operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
@@ -570,7 +601,9 @@ class RiftManoAdapter(object):
                     LOG.exception(e)
                     raise RiftManoAdapterError('Unable to scale in NS %s' % ns_instance_id)
 
-                return 'ns_scale_in', ns_instance_id
+                ns_scale_in_op = 'ns_scale_in', ns_instance_id
+                scaling_group_terminate_op = 'scaling_group_terminate', (ns_instance_id, removed_scaling_groups_id)
+                return 'multiple_operations', [ns_scale_in_op, scaling_group_terminate_op]
 
             else:
                 raise RiftManoAdapterError('Invalid scaling direction: %s'

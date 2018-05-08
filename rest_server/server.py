@@ -15,7 +15,7 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 from threading import Lock
 
 from bottle import route, request, response, run
@@ -25,6 +25,8 @@ from utils import reporting, logging_module
 from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
 
 execution_queues = dict()
+message_queues = dict()
+step_triggers = dict()
 execution_processes = dict()
 tc_results = dict()
 tc_inputs = dict()
@@ -86,7 +88,7 @@ def _delete_config(key):
         json.dump(config, config_file, sort_keys=True, indent=2)
 
 
-def execute_test(tc_exec_request, tc_input, queue):
+def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger):
     """
     This function is used as a process target and it starts the execution of a test case.
     """
@@ -101,14 +103,18 @@ def execute_test(tc_exec_request, tc_input, queue):
     logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name)
 
     tc_start_time = datetime.utcnow()
-    tc_result = tc_class(tc_input).execute()
+    tc_instance = tc_class(tc_input)
+    tc_instance.message_queue = message_queue
+    tc_instance.step_trigger = step_trigger
+    tc_result = tc_instance.execute()
     tc_end_time = datetime.utcnow()
 
     tc_result['tc_start_time'] = tc_start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_end_time'] = tc_end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_duration'] = str(tc_end_time - tc_start_time)
 
-    queue.put(tc_result)
+    execution_queue.put(tc_result)
+    message_queue.put(None)
 
     kibana_srv = _read_config('kibana-srv')
     if kibana_srv is not None:
@@ -186,14 +192,22 @@ def do_exec():
             tc_input['vnf'] = dict()
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
     execution_id = str(uuid.uuid4())
-    queue = Queue()
-    execution_process = Process(target=execute_test, args=(tc_exec_request, tc_input, queue))
+    execution_queue = Queue()
+    message_queue = Queue()
+    if _read_config('debug') is True:
+        step_trigger = Event()
+    else:
+        step_trigger = None
+    execution_process = Process(target=execute_test,
+                                args=(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger))
     execution_process.start()
 
     tc_inputs[execution_id] = tc_input
 
     execution_processes[execution_id] = execution_process
-    execution_queues[execution_id] = queue
+    execution_queues[execution_id] = execution_queue
+    message_queues[execution_id] = message_queue
+    step_triggers[execution_id] = step_trigger
 
     return {'execution_id': execution_id}
 
@@ -416,6 +430,45 @@ def wait_for_exec(execution_id):
 
     execution_process.join()
     return {'status': 'DONE'}
+
+
+@route('/v1.0/step/<execution_id>')
+def wait_for_step(execution_id):
+    try:
+        message_queue = message_queues[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'error': 'NOT_FOUND'}
+
+    if message_queue is None:
+        msg = None
+    else:
+        msg = message_queue.get()
+
+    if msg is None:
+        message_queues[execution_id] = None
+        response.status = 204
+        return {'status': 'DONE'}
+    else:
+        response.status = 200
+        return msg
+
+
+@route('/v1.0/step/<execution_id>', method='POST')
+def trigger_step(execution_id):
+    try:
+        step_trigger = step_triggers[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'error': 'NOT_FOUND'}
+
+    if step_trigger is None:
+        response.status = 204
+        return {'error': 'Not running in debug mode'}
+    else:
+        step_trigger.set()
+        response.status = 200
+        return {}
 
 
 run(host='0.0.0.0', port=8080, server='paste')
