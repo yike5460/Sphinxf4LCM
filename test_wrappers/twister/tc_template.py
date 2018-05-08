@@ -11,6 +11,7 @@
 
 
 import requests
+from datetime import datetime
 
 
 def twister_run():
@@ -44,9 +45,42 @@ def twister_run():
         _RESULT = 'FAIL'
         return
 
+    # Iterate throught step by step execution and print status
+    current_step_index = 0
+    while True:
+        response = requests.get(url='http://%s:8080/v1.0/step/%s' % (vnf_lcv_srv, execution_id))
+        if response.status_code == 204:
+            print '-' * 32 + '[ %s ]' % datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '-' * 32
+            print '=== Test case steps completed ==='
+            break
+        else:
+            step_details = response.json()
+            step_index = step_details['index']
+            if step_index != current_step_index:
+                step_name = step_details['name']
+                step_description = step_details['description']
+                print '-' * 32 + '[ %s ]' % datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '-' * 32
+                print '%s. %s' % (step_index, step_name)
+                print 'Description: %s' % step_description
+                print 'Status:'
+            step_status = step_details['status']
+            print '- %s' % step_status
+            if step_status == 'PAUSED':
+                # Popup mechanism in Twister is currently not working:
+                # interact('msg', 'Test case execution PAUSED. Click OK to resume', 1)
+                # requests.post(url='http://%s:8080/v1.0/step/%s' % (vnf_lcv_srv, execution_id))
+
+                # Instead, we print a message, instructing the user how to continue
+                print '   *** TC execution paused. Send the following request to resume:'
+                print '       curl -XPOST http://<IP ADDRESS>:8080/v1.0/step/%s' % execution_id
+            current_step_index = step_index
+
     # Wait for the test case execution to finish
-    print 'Test case execution pending'
+    print '=== Waiting for test case execution to fully finish ==='
     requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/wait/' + execution_id)
+
+    print '=== Test case execution completed ==='
+    print '-' * 32 + '[ %s ]' % datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '-' * 32
 
     # Get the results for this execution
     server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec/' + execution_id)
