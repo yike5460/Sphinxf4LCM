@@ -66,8 +66,11 @@ def twister_run():
             step_status = step_details['status']
             print '- %s' % step_status
             if step_status == 'PAUSED':
+                # Popup mechanism in Twister is currently not working:
                 # interact('msg', 'Test case execution PAUSED. Click OK to resume', 1)
                 # requests.post(url='http://%s:8080/v1.0/step/%s' % (vnf_lcv_srv, execution_id))
+
+                # Instead, we print a message, instructing the user how to continue
                 print '   *** TC execution paused. Send the following request to resume:'
                 print '       curl -XPOST http://<IP ADDRESS>:8080/v1.0/step/%s' % execution_id
             current_step_index = step_index
