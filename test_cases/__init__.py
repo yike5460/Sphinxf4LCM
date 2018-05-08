@@ -68,10 +68,11 @@ class Step(object):
         cls.global_index += 1
         return cls.global_index
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, runnable=True):
         self.index = self.generate_index()
         self.name = name
         self.description = description
+        self.runnable = runnable
 
     def __call__(self, run_func):
         self.run_func = run_func
@@ -189,8 +190,11 @@ class TestCase(object):
         for step in self.steps:
             self._LOG.info('Entering step %s' % step.name)
             try:
-                step.run_func(self)
-                step_status = 'PASS'
+                if step.runnable is True:
+                    step.run_func(self)
+                    step_status = 'PASS'
+                else:
+                    step_status = 'NOT RUNNABLE'
             except TestRunError as e:
                 step_status = 'FAIL'
                 raise e
