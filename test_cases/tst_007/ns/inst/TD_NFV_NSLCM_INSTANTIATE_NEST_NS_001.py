@@ -219,7 +219,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
 
     @Step(name='Verify nesting NS VNF instance(s) configuration',
           description='Verify that the VNF instance(s) in the nesting NS have been configured according to the VNFD(s)'
-                      ' by querying the VNFM')
+                      ' by querying the VNFM',
+          runnable=False)
     def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the VNF instance(s) in the nesting NS have been configured according to the VNFD(s) by
@@ -231,7 +232,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
 
     @Step(name='Verify nesting NS VNF instance(s) connection(s)',
           description='Verify that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected '
-                      'according to the descriptors')
+                      'according to the descriptors',
+          runnable=False)
     def step10(self):
         # --------------------------------------------------------------------------------------------------------------
         # 10. Verify that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected according to the

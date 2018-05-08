@@ -195,7 +195,8 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
 
     @Step(name='Verify VNF configuration',
           description='Verify that the VNF configuration has been updated according to the descriptors by querying the '
-                      'VNFM')
+                      'VNFM',
+          runnable=False)
     def step7(self):
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the VNF configuration has been updated according to the descriptors by querying the VNFM
@@ -205,7 +206,8 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
         # TODO
 
     @Step(name='Verify VNFC instance(s) connection(s)',
-          description='Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors')
+          description='Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors',
+          runnable=False)
     def step8(self):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors
