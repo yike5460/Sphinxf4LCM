@@ -96,6 +96,11 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
+        for vnf_info in ns_info_after_instantiation.vnf_info:
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
     @Step(name='Scale out the NS',
           description='Trigger NS scale out by adding VNF instances to the NS in NFVO with an operator action')
     def step3(self):
@@ -136,6 +141,15 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
                                                       additional_param=self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNF instances after NS scale out')
 
+        ns_info_before_scale_in = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                             'additional_param': self.tc_input['mano'].get(
+                                                                 'query_params')})
+
+        for vnf_info in ns_info_before_scale_in.vnf_info:
+            self.tc_result['resources']['%s (Before scale in)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (Before scale in)' % vnf_info.vnf_product_name].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
     @Step(name='Scale in the NS',
           description='Trigger NS scale in by removing VNF instances from the NS in NFVO with an operator action')
     def step5(self):
@@ -174,6 +188,15 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
                                                       additional_param=self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNF instances after NS scale in')
 
+        self.ns_info_after_scale_in = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                 'additional_param': self.tc_input['mano'].get(
+                                                                     'query_params')})
+
+        for vnf_info in self.ns_info_after_scale_in.vnf_info:
+            self.tc_result['resources']['%s (After scale in)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After scale in)' % vnf_info.vnf_product_name].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
     @Step(name='Verify impacted VNF related resources have been released',
           description='Verify that the impacted VNF related resources have been released by the VIM')
     def step7(self):
@@ -194,9 +217,6 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the remaining VNF instance(s) are still running and reachable via their management '
                  'network')
-        self.ns_info_after_scale_in = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                 'additional_param': self.tc_input['mano'].get(
-                                                                     'query_params')})
         for vnf_info in self.ns_info_after_scale_in.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
             for mgmt_addr in mgmt_addr_list:

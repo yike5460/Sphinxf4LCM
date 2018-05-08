@@ -96,8 +96,8 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in self.ns_info_before_stop.vnf_info:
-            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Stop the target VNF',
