@@ -47,8 +47,8 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
                                     hrules=prettytable.ALL)
         t.max_width = 32
         for step_index, step_details in tc_result.get('steps', {}).items():
-            t.add_row([step_index, step_details['name'], step_details['description'], '%.3f' % step_details['duration'],
-                       step_details['status']])
+            t.add_row([step_index, step_details['name'], step_details['description'],
+                       '%.3f' % step_details.get('duration', 0), step_details['status']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
