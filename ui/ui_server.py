@@ -328,18 +328,9 @@ def mano_validate():
         nsd_id = request.forms.get('nsd_id')
         datacenter = request.forms.get('datacenter')
         scaling_group_name = request.forms.get('scaling_group_name')
-        if not request.forms.get('ns_instantiate_timeout'):
-            ns_instantiate_timeout = 1200
-        else:
-            ns_instantiate_timeout = int(request.forms.get('ns_instantiate_timeout'))
-        if not request.forms.get('ns_terminate_timeout'):
-            ns_terminate_timeout = 600
-        else:
-            ns_terminate_timeout = int(request.forms.get('ns_terminate_timeout'))
         (name, new_mano) = struct_mano(type=type, name=name, url=url, username=username, password=password,
-                                       project=project, ns_instantiate_timeout=ns_instantiate_timeout,
-                                       ns_terminate_timeout=ns_terminate_timeout, nsd_id=nsd_id,
-                                       datacenter=datacenter, scaling_group_name=scaling_group_name)
+                                       project=project, nsd_id=nsd_id, datacenter=datacenter,
+                                       scaling_group_name=scaling_group_name)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
@@ -474,8 +465,6 @@ def mano_delete():
             mano_info['username'] = mano_json[mano_name]['client_config']['username']
             mano_info['password'] = mano_json[mano_name]['client_config']['password']
             mano_info['project'] = mano_json[mano_name]['client_config']['project']
-            mano_info['ns_instantiate_timeout'] = mano_json[mano_name]['generic_config']['NS_INSTANTIATE_TIMEOUT']
-            mano_info['ns_terminate_timeout'] = mano_json[mano_name]['generic_config']['NS_TERMINATE_TIMEOUT']
             mano_info['datacenter'] = mano_json[mano_name]['instantiation_params_for_ns']['datacenter']
             mano_info['scaling_group_name'] = mano_json[mano_name]['scale_params']['scaling_group_name']
             mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
@@ -1285,10 +1274,6 @@ def struct_mano(type, name, **kwargs):
                 'username': kwargs['username'],
                 'password': kwargs['password'],
                 'project': kwargs['project']
-            },
-            'generic_config': {
-                'NS_INSTANTIATE_TIMEOUT': kwargs['ns_instantiate_timeout'],
-                'NS_TERMINATE_TIMEOUT': kwargs['ns_terminate_timeout']
             },
             'instantiation_params_for_ns': {'datacenter': kwargs['datacenter']},
             'scale_params': {'scaling_group_name': kwargs['scaling_group_name']},
