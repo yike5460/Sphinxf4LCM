@@ -100,6 +100,11 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
+        for vnf_info in self.ns_info_after_instantiation.vnf_info:
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
     @Step(name='Scale out the NS',
           description='Trigger NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator '
                       'action')
@@ -169,11 +174,6 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             if vnf_name in self.expected_vnfc_count.keys():
                 if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != self.expected_vnfc_count[vnf_name]:
                     raise TestRunError('VNFCs not added after VNF scaled out')
-
-        for vnf_info in self.ns_info_before_scale_in.vnf_info:
-            self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name].update(
-                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
         # TODO Add self.tc_result['scaling_out']['level']. We should do this only for the VNF(s) that we scaled
 
