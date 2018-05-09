@@ -168,8 +168,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
             filter={'ns_instance_id': self.ns_instance_id_nesting,
                     'additional_param': self.tc_input['mano'].get('query_params')})
         for vnf_info in self.ns_info_nesting_after_instantiation.vnf_info:
-            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Verify nesting NS VNF instance(s) have been deployed according to the nesting NSD',
@@ -219,7 +219,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
 
     @Step(name='Verify nesting NS VNF instance(s) configuration',
           description='Verify that the VNF instance(s) in the nesting NS have been configured according to the VNFD(s)'
-                      ' by querying the VNFM')
+                      ' by querying the VNFM',
+          runnable=False)
     def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the VNF instance(s) in the nesting NS have been configured according to the VNFD(s) by
@@ -231,7 +232,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
 
     @Step(name='Verify nesting NS VNF instance(s) connection(s)',
           description='Verify that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected '
-                      'according to the descriptors')
+                      'according to the descriptors',
+          runnable=False)
     def step10(self):
         # --------------------------------------------------------------------------------------------------------------
         # 10. Verify that the VNF instance(s), VL(s) and VNFFG(s) in the nesting NS have been connected according to the

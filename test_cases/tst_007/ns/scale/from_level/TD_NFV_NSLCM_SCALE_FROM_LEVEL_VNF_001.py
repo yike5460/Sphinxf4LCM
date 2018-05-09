@@ -104,8 +104,8 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in ns_info_after_instantiation.vnf_info:
-            self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Scale the NS to a new level',
@@ -266,7 +266,8 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
     @Step(name='Verify VNF configuration',
           description='Verify that the VNF configuration has been updated according to the descriptors by querying the '
-                      'VNFM')
+                      'VNFM',
+          runnable=False)
     def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the VNF configuration has been updated according to the descriptors by querying the VNFM
@@ -276,7 +277,8 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # TODO
 
     @Step(name='Verify VNFC instance(s) connection(s)',
-          description='Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors')
+          description='Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors',
+          runnable=False)
     def step10(self):
         # --------------------------------------------------------------------------------------------------------------
         # 10. Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors

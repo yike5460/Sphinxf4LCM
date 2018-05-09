@@ -108,8 +108,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                                                                       'additional_param': self.tc_input['mano'].get(
                                                                           'query_params')})
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
-            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Initial)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Verify VNF instance(s) have been deployed according to the NSD',
@@ -139,7 +139,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
 
     @Step(name='Verify VNF instance(s) configuration',
           description='Verify that the VNF instance(s) have been configured according to the VNFD(s) by querying the '
-                      'VNFM')
+                      'VNFM',
+          runnable=False)
     def step6(self):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the VNF instance(s) have been configured according to the VNFD(s) by querying the VNFM
@@ -150,7 +151,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
 
     @Step(name='Verify VNF instance(s) connection(s)',
           description='Verify that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the '
-                      'descriptors')
+                      'descriptors',
+          runnable=False)
     def step7(self):
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the VNF instance(s), VL(s) and VNFFG(s) have been connected according to the descriptors

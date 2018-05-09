@@ -204,7 +204,8 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
 
     @Step(name='Verify VNF configuration',
           description='Verify that the VNF configuration has been updated to include the additional VNFC instances '
-                      'according to the descriptors by querying the VNFM')
+                      'according to the descriptors by querying the VNFM',
+          runnable=False)
     def step7(self):
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the VNF configuration has been updated to include the additional VNFC instances according to
@@ -216,7 +217,8 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
 
     @Step(name='Verify VNFC instance(s) connection(s)',
           description='Verify that the additional VNFC instance(s) are connected to the VL(s) according to the '
-                      'descriptors')
+                      'descriptors',
+          runnable=False)
     def step8(self):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the additional VNFC instance(s) are connected to the VL(s) according to the descriptors

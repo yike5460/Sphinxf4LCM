@@ -143,6 +143,14 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                                       additional_param=self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNF instances after NS scale out')
 
+        self.ns_info_after_scale_out = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                  'additional_param': self.tc_input['mano'].get(
+                                                                      'query_params')})
+        for vnf_info in self.ns_info_after_scale_out.vnf_info:
+            self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
     @Step(name='Verify additional resources have been allocated',
           description='Verify that the additional resources have been allocated by the VIM according to the '
                       'descriptors')
@@ -163,9 +171,6 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         # 6. Verify that the additional VNF instance(s) are running and reachable via their management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the additional VNF instance(s) are running and reachable via their management network')
-        self.ns_info_after_scale_out = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                  'additional_param': self.tc_input['mano'].get(
-                                                                      'query_params')})
         for vnf_info in self.ns_info_after_scale_out.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
             for mgmt_addr in mgmt_addr_list:
@@ -175,7 +180,8 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
 
     @Step(name='Verify VNF instance(s) configuration',
           description='Verify that the additional VNF instance(s) have been configured according to the descriptors by '
-                      'querying the VNFM')
+                      'querying the VNFM',
+          runnable=False)
     def step7(self):
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the additional VNF instance(s) have been configured according to the descriptors by querying
@@ -187,7 +193,8 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
 
     @Step(name='Verify VNF instance(s) connection(s)',
           description='Verify that the additional VNF instance(s), VL(s) and VNFFG(s) are connected according to the '
-                      'descriptors')
+                      'descriptors',
+          runnable=False)
     def step8(self):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the additional VNF instance(s), VL(s) and VNFFG(s) are connected according to the descriptors
