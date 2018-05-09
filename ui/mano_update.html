@@ -122,6 +122,28 @@
                     <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{mano['client_config']['password']}}></td></tr>
                     <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"  value={{mano['nsd_id']}}></td></tr>
                   <% end %>
+                  <% if mano['type'] == 'rift': %>
+                    <tr><td>URL:</td><td><input type="text" name="url" style="width: 200px" value={{mano['client_config']['url']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"  value={{mano['client_config']['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{mano['client_config']['password']}}></td></tr>
+                    <tr><td>Project:</td><td><input type="text" name="project" style="width: 200px"  value={{mano['client_config']['project']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"  value={{mano['nsd_id']}}></td></tr>
+                    <tr><td>Datacenter:</td><td><input type="text" name="datacenter" style="width: 200px"  value={{mano['instantiation_params_for_ns']['datacenter']}}></td></tr>
+                    <tr><td>Scaling Group Name:</td><td><input type="text" name="scaling_group_name" style="width: 200px"  value={{mano['scale_params']['scaling_group_name']}}></td></tr>
+                  <% end %>
+                  <% if mano['type'] == 'openbaton': %>
+                    <tr><td>URL:</td><td><input type="text" name="url" style="width: 200px" value={{mano['client_config']['url']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px"  value={{mano['client_config']['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" value={{mano['client_config']['password']}}></td></tr>
+                    <tr><td>Project:</td><td><input type="text" name="project" style="width: 200px"  value={{mano['client_config']['project']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" style="width: 200px"  value={{mano['nsd_id']}}></td></tr>
+                    <tr><td>VIM Info:</td><td><select name="vim_info" style="width: 200px">
+                      <% for element in additional_params['vim_list']: %>
+                        <option value={{element}}>{{element}}</option>
+                      <% end %>
+                    </select></td></tr>
+
+                  <% end %>
 
 
           </table>

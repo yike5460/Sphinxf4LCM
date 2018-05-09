@@ -16,7 +16,7 @@ from collections import OrderedDict
 import requests
 from bottle import route, run, request, template, static_file, redirect
 
-MANO_TYPES = ['tacker', 'cisco', 'sdl']
+MANO_TYPES = ['tacker', 'cisco', 'sdl', 'rift', 'openbaton']
 VIM_TYPES = ['openstack']
 EM_TYPES = ['tacker']
 TRAFFIC_TYPES = ['stc']
@@ -196,7 +196,7 @@ def mano():
 
 
 @route('/mano/add/<mano_type>/')
-def mano_add(mano_type, warning=None, message=None, mano=None, name=None):
+def mano_add(mano_type, warning=None, message=None, mano=None, name=None, additional_params=None):
     """
     This function displays the required form to add a new MANO platform.
     :param mano_type: Type of MANO platform to be added
@@ -206,7 +206,11 @@ def mano_add(mano_type, warning=None, message=None, mano=None, name=None):
     :param name: Name of MANO element
     """
 
-    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano, name=name)
+    if additional_params == None:
+        additional_params = dict()
+        additional_params['vim_list'] = prepare_option_list(option_type="vim")
+    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano, name=name,
+                    additional_params=additional_params)
 
 
 @route('/mano/validate/', method='POST')
@@ -315,11 +319,78 @@ def mano_validate():
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+    if type == 'rift':
+        name = request.forms.get('name')
+        url = request.forms.get('url')
+        username = request.forms.get('username')
+        password = request.forms.get('password')
+        project = request.forms.get('project')
+        nsd_id = request.forms.get('nsd_id')
+        datacenter = request.forms.get('datacenter')
+        scaling_group_name = request.forms.get('scaling_group_name')
+        (name, new_mano) = struct_mano(type=type, name=name, url=url, username=username, password=password,
+                                       project=project, nsd_id=nsd_id, datacenter=datacenter,
+                                       scaling_group_name=scaling_group_name)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+        elif request.forms.get('add'):
+            if not name:
+                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
+                                mano=new_mano, name=name)
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+    if type == 'openbaton':
+        name = request.forms.get('name')
+        url = request.forms.get('url')
+        username = request.forms.get('username')
+        password = request.forms.get('password')
+        project = request.forms.get('project')
+        nsd_id = request.forms.get('nsd_id')
+        vim_name = request.forms.get('vim_info')
+        if vim_name:
+            vim_info = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name).json()
+        else:
+            vim_info = None
+        (name, new_mano) = struct_mano(type=type, name=name, url=url, username=username, password=password,
+                                       project=project, nsd_id=nsd_id, vim_info=vim_info)
+        if request.forms.get('validate') and request.forms.get('action') == 'Add':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            additional_params = dict()
+            additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=vim_name)
+            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name,
+                            additional_params=additional_params)
+        elif request.forms.get('validate') and request.forms.get('action') == 'Update':
+            validation = validate('mano', new_mano)
+            warning = validation['warning']
+            message = validation['message']
+            additional_params = dict()
+            additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=vim_name)
+            return mano_update(warning=warning, message=message, mano=new_mano, name=name,
+                               additional_params=additional_params)
+        elif request.forms.get('add'):
+            if not name:
+                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
+                                mano=new_mano, name=name)
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+        elif request.forms.get('update'):
+            requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
+
     return mano()
 
 
 @route('/mano/update/', method='POST')
-def mano_update(warning=None, message=None, mano=None, name=None):
+def mano_update(warning=None, message=None, mano=None, name=None, additional_params=None):
     """
     This function displays the required form to update an existing MANO platform.
     :param warning: Warning information from the REST server at the validation operation.
@@ -332,9 +403,18 @@ def mano_update(warning=None, message=None, mano=None, name=None):
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
-        return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name)
+        if additional_params == None:
+            additional_params = dict()
+            if mano_json['client_config'].get('vim_info', {}):
+                selected_vim = mano_json['client_config']['vim_info'].keys()[0]
+            else:
+                selected_vim = None
+            additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=selected_vim)
+        return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name,
+                        additional_params=additional_params)
     else:
-        return template('mano_update.html', warning=warning, message=message, mano=mano, name=name)
+        return template('mano_update.html', warning=warning, message=message, mano=mano, name=name,
+                        additional_params=additional_params)
 
 
 @route('/mano/delete/', method='POST')
@@ -380,6 +460,21 @@ def mano_delete():
             mano_info['username'] = mano_json[mano_name]['client_config']['username']
             mano_info['password'] = mano_json[mano_name]['client_config']['password']
             mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
+        elif mano_json[mano_name]['type'] == 'rift':
+            mano_info['url'] = mano_json[mano_name]['client_config']['url']
+            mano_info['username'] = mano_json[mano_name]['client_config']['username']
+            mano_info['password'] = mano_json[mano_name]['client_config']['password']
+            mano_info['project'] = mano_json[mano_name]['client_config']['project']
+            mano_info['datacenter'] = mano_json[mano_name]['instantiation_params_for_ns']['datacenter']
+            mano_info['scaling_group_name'] = mano_json[mano_name]['scale_params']['scaling_group_name']
+            mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
+        elif mano_json[mano_name]['type'] == 'openbaton':
+            mano_info['url'] = mano_json[mano_name]['client_config']['url']
+            mano_info['username'] = mano_json[mano_name]['client_config']['username']
+            mano_info['password'] = mano_json[mano_name]['client_config']['password']
+            mano_info['project'] = mano_json[mano_name]['client_config']['project']
+            mano_info['nsd_id'] = mano_json[mano_name]['nsd_id']
+            mano_info['vim_info'] = mano_json[mano_name]['client_config']['vim_info'].keys()[0]
         return template('mano_delete.html', mano=mano_info)
     else:
         mano_name = request.forms.get('name')
@@ -1171,6 +1266,32 @@ def struct_mano(type, name, **kwargs):
             },
             'nsd_id': kwargs['nsd_id']
         }
+    elif type == 'rift':
+        mano = {
+            'type': type,
+            'client_config': {
+                'url': kwargs['url'],
+                'username': kwargs['username'],
+                'password': kwargs['password'],
+                'project': kwargs['project']
+            },
+            'instantiation_params_for_ns': {'datacenter': kwargs['datacenter']},
+            'scale_params': {'scaling_group_name': kwargs['scaling_group_name']},
+            'nsd_id': kwargs['nsd_id']
+        }
+    elif type == 'openbaton':
+        mano = {
+            'type': type,
+            'client_config': {
+                'url': kwargs['url'],
+                'username': kwargs['username'],
+                'password': kwargs['password'],
+                'project': kwargs['project'],
+                'vim_info': kwargs['vim_info']
+            },
+            'nsd_id': kwargs['nsd_id']
+        }
+
     return (name, mano)
 
 
@@ -1279,6 +1400,16 @@ def get_str_by_unicode(raw_input):
         result_list.append(item.encode())
     result_string = ', '.join(result_list)
     return result_string
+
+
+def prepare_option_list(option_type, selected=None):
+    if option_type == "vim":
+        option_list = requests.get(url='http://localhost:8080/v1.0/vim').json().keys()
+        if selected and selected in option_list:
+            option_list.remove(selected)
+            option_list.insert(0, selected)
+
+    return option_list
 
 
 run(host='0.0.0.0', port=8081, debug=False)
