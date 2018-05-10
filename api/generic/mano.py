@@ -1531,7 +1531,7 @@ class Mano(object):
     def validate_vnf_deployment_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id,
                                         additional_param=None):
         """
-        This function will return True if the VNF deployment flavour was updated successfully, and False otherwise.
+        This function validates that the VNF with the given instance ID uses the correct deployment flavor.
 
         :param vnf_instance_id:         VNF instance ID fo which the deployment flavour was changed
         :param new_flavour_id:          The new deployment flavour that was applied to the VNF instance
