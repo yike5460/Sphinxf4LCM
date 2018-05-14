@@ -64,7 +64,7 @@
   "ScaleNsByStepsData":                       "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleNsByStepsData.yaml",
   "VnfInstanceData":                          "schemas/Os-Ma-Nfvo/lifecycle/management/VnfInstanceData.yaml",
   "ScaleNsData":                              "schemas/Os-Ma-Nfvo/lifecycle/management/ScaleNsData.yaml",
-  "NsdInfo":                                  "schemas/Os-Ma-Nfvo/management/NsdInfo.yaml",
+  "NsdInfo":                                  "schemas/Os-Ma-Nfvo/nsd/NsdInfo.yaml",
   "VnfLifecycleChangeNotification":           "schemas/Or-Vnfm/lifecycle/changes/VnfLifecycleChangeNotification.yaml",
   "AffectedVnfc":                             "schemas/Or-Vnfm/lifecycle/changes/AffectedVnfc.yaml",
   "AffectedVirtualStorage":                   "schemas/Or-Vnfm/lifecycle/changes/AffectedVirtualStorage.yaml",
