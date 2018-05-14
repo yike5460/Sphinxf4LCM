@@ -169,6 +169,15 @@ class OpenstackVimAdapter(object):
         return virtual_compute
 
     @log_entry_exit(LOG)
+    def terminate_virtualised_compute_resources(self, identifier):
+        try:
+            self.nova_client.servers.force_delete(identifier)
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (identifier, e))
+        return identifier
+
+    @log_entry_exit(LOG)
     def port_list(self, **query_filter):
         """
         This function gets the list of ports.
