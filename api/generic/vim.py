@@ -251,6 +251,19 @@ class Vim(object):
         return self.vim_adapter.query_virtualised_compute_resource(query_compute_filter)
 
     @log_entry_exit(LOG)
+    def terminate_virtualised_compute_resources(self, identifier):
+        """
+        This function allows de-allocating and terminating one or more instantiated virtualised compute resource(s).
+
+        This function was written in accordance with section 7.3.1.5 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).
+
+        :param identifier:  Identifier(s) of the virtualised compute resource(s) to be terminated.
+        :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.
+        """
+
+        return self.vim_adapter.terminate_virtualised_compute_resources(identifier)
+
+    @log_entry_exit(LOG)
     def query_virtualised_network_resource(self, query_network_filter):
         """
         This function allows querying information about instantiated virtualised network resources.
