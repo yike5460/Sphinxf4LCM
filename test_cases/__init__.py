@@ -217,9 +217,11 @@ class TestCase(object):
                     step_status = 'NOT RUNNABLE'
             except TestRunError as e:
                 step_status = 'FAIL'
+                self._LOG.exception(e)
                 raise e
             except Exception as e:
                 step_status = 'ERROR'
+                self._LOG.exception(e)
                 raise e
             finally:
                 step_end_time = time.time()
