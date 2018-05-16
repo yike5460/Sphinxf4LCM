@@ -14,6 +14,7 @@ import logging
 
 import os_client_config
 
+from api.generic import constants
 from api.adapter.vim import VimAdapterError
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
     VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, SoftwareImageInformation
@@ -89,6 +90,23 @@ class OpenstackVimAdapter(object):
         except Exception as e:
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
+
+    @log_entry_exit(LOG)
+    def get_operation_status(self, lifecycle_operation_occurrence_id):
+        if lifecycle_operation_occurrence_id is None:
+            raise OpenstackVimAdapterError('Lifecycle Operation Occurrence ID is absent')
+        else:
+            operation_type, resource_id = lifecycle_operation_occurrence_id
+
+        if operation_type == 'server_terminate':
+            try:
+                self.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            except Exception:
+                LOG.debug('Resource ID %s no longer present in VIM, as expected' % resource_id)
+                return constants.OPERATION_SUCCESS
+            else:
+                LOG.debug('Resource ID %s still present in VIM, not as expected' % resource_id)
+                return constants.OPERATION_PENDING
 
     @log_entry_exit(LOG)
     def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
@@ -169,13 +187,13 @@ class OpenstackVimAdapter(object):
         return virtual_compute
 
     @log_entry_exit(LOG)
-    def terminate_virtualised_compute_resources(self, identifier):
+    def trigger_compute_resource_termination(self, identifier):
         try:
             self.nova_client.servers.force_delete(identifier)
         except Exception as e:
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (identifier, e))
-        return identifier
+        return 'server_terminate', identifier
 
     @log_entry_exit(LOG)
     def port_list(self, **query_filter):
