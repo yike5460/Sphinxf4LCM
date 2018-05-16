@@ -43,36 +43,33 @@ class Vim(object):
         self.vim_adapter = construct_adapter(vendor, module_type='vim', **adapter_config)
 
     @log_entry_exit(LOG)
-    def get_operation_status(self, lifecycle_operation_occurrence_id):
+    def get_operation_status(self, operation_id):
         """
-        This function provides the status of a lifecycle management operation.
+        This function provides the status of an operation.
 
-        :param lifecycle_operation_occurrence_id:   ID of the lifecycle operation occurrence.
-        :return:                                    The status of the operation ex. 'Processing', 'Failed'.
+        :param operation_id:    ID of the operation.
+        :return:                The status of the operation ex. 'Processing', 'Failed'.
         """
 
-        return self.vim_adapter.get_operation_status(lifecycle_operation_occurrence_id)
+        return self.vim_adapter.get_operation_status(operation_id)
 
     @log_entry_exit(LOG)
-    def poll_for_operation_completion(self, lifecycle_operation_occurrence_id, final_states, max_wait_time,
-                                      poll_interval):
+    def poll_for_operation_completion(self, operation_id, final_states, max_wait_time, poll_interval):
         """
         This function polls the status of an operation until it reaches a final state or time is up.
 
-        :param lifecycle_operation_occurrence_id:   ID of the lifecycle operation occurrence.
-        :param final_states:                        List of states of the operation that when reached, the polling
-                                                    stops.
-        :param max_wait_time:                       Maximum interval of time in seconds to wait for the operation to
-                                                    reach a final state.
-        :param poll_interval:                       Interval of time in seconds between consecutive polls.
-        :return:                                    Operation status.
+        :param operation_id:    ID of the operation.
+        :param final_states:    List of states of the operation that when reached, the polling stops.
+        :param max_wait_time:   Maximum interval of time in seconds to wait for the operation to reach a final state.
+        :param poll_interval:   Interval of time in seconds between consecutive polls.
+        :return:                Operation status.
         """
         operation_pending = True
         elapsed_time = 0
 
         while operation_pending and elapsed_time < max_wait_time:
-            operation_status = self.get_operation_status(lifecycle_operation_occurrence_id)
-            LOG.debug('Got status %s for operation with ID %s' % (operation_status, lifecycle_operation_occurrence_id))
+            operation_status = self.get_operation_status(operation_id)
+            LOG.debug('Got status %s for operation with ID %s' % (operation_status, operation_id))
             if operation_status in final_states:
                 operation_pending = False
             else:
@@ -299,7 +296,7 @@ class Vim(object):
         This function triggers the termination of one or more instantiated virtualised compute resource(s).
 
         :param identifier:  Identifier(s) of the virtualised compute resource(s) to be terminated.
-        :return:            Identifier of the lifecycle operation occurrence.
+        :return:            Identifier of operation.
         """
 
         return self.vim_adapter.trigger_compute_resource_termination(identifier)
@@ -315,9 +312,9 @@ class Vim(object):
         :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.
         """
 
-        lifecycle_operation_occurrence_id = self.trigger_compute_resource_termination(identifier)
+        operation_id = self.trigger_compute_resource_termination(identifier)
 
-        operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
+        operation_status = self.poll_for_operation_completion(operation_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
                                                               max_wait_time=constants.COMPUTE_TERMINATION_TIMEOUT,
                                                               poll_interval=constants.POLL_INTERVAL)

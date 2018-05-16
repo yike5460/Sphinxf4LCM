@@ -116,10 +116,10 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
         # TODO
 
         # Verify that no fault alarms have been created on the NFVO
-        self.nfvo_filter = self.tc_input['mano'].get('alarm_list_params', {})
-        self.nfvo_filter.update({'ns_instance_id': self.ns_instance_id})
-        alarm_list = self.mano.ns_get_alarm_list(self.nfvo_filter)
-        if len(alarm_list) != 0:
+        self.nfvo_alarm_filter = self.tc_input['mano'].get('alarm_list_params', {})
+        self.nfvo_alarm_filter.update({'ns_instance_id': self.ns_instance_id})
+        nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
+        if len(nfvo_alarm_list) != 0:
             raise TestRunError('Fault alarms have been created on the NFVO before triggering failure')
 
     @Step(name='Trigger a failure on a virtualized resource',
@@ -172,7 +172,7 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
         LOG.info('Verifying that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms')
         elapsed_time = 0
         while elapsed_time < constants.ALARM_TIMEOUT:
-            alarm_list = self.mano.ns_get_alarm_list(self.nfvo_filter)
+            alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
             if len(alarm_list) != 0:
                 break
             else:
