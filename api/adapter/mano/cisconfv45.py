@@ -2130,11 +2130,28 @@ class CiscoNFVManoAdapter(object):
     def vnf_change_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                            ext_managed_virtual_link=None, vim_connection_info=None, additional_param=None):
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
-        tenant = additional_param.get('tenant')
-        esc = additional_param.get('esc')
+        tenant_name = additional_param.get('tenant')
+
+        # Get the deployment XML
+        try:
+            deployment_xml = self.nso.get(('xpath',
+                                           '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
+                                           % (tenant_name, deployment_name))).data_xml
+            deployment_xml = etree.fromstring(deployment_xml)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError('Unable to communicate with the NSO Netconf server - %s' % e)
+
+        # Get the name of the ESC this deployment belongs to
+        try:
+            esc_name = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-deployment/'
+                                           '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}esc').text
+        except AttributeError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError('ESC name not available in ESC')
 
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                          'additional_param': {'tenant': tenant}})
+                                          'additional_param': {'tenant': tenant_name}})
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
         vnfd_xml = etree.fromstring(vnfd)
@@ -2152,7 +2169,7 @@ class CiscoNFVManoAdapter(object):
             vdu_num_instances = vdu.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}number-of-instances').text
             vm_group_map[vm_group_name] = vdu_num_instances
 
-        xml_config = self.build_vnf_change_flavour(tenant, deployment_name, esc, vnf_name, new_flavour_id)
+        xml_config = self.build_vnf_change_flavour(tenant_name, deployment_name, esc_name, vnf_name, new_flavour_id)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=xml_config)
         except NCClientError as e:
@@ -2167,7 +2184,7 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operations_occurrence_id = uuid.uuid4()
         lifecycle_operations_occurrence_dict = {
             'operation_type': 'vnf_change_df',
-            'tenant_name': tenant,
+            'tenant_name': tenant_name,
             'deployment_name': deployment_name,
             'vnfd_flavour': new_flavour_id,
             'vm_group_map': vm_group_map

@@ -41,7 +41,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
     """
 
     REQUIRED_APIS = ('mano', 'traffic')
-    REQUIRED_ELEMENTS = ('nsd_id', 'change_vnf_deployment_flavour')
+    REQUIRED_ELEMENTS = ('nsd_id', 'change_vnf_df_list')
     TESTCASE_EVENTS = ('instantiate_ns', 'ns_update_vnf_df', 'terminate_ns')
 
     @Step(name='Instantiate the NS', description='Trigger NS instantiation on the NFVO')
@@ -115,16 +115,15 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                  'instance on NFVO')
         self.change_vnf_flavour_data_list = list()
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
-            if vnf_info.vnf_product_name in self.tc_input.get('change_vnf_deployment_flavour').get('vnfs').keys():
-                change_vnf_flavour_data = ChangeVnfFlavourData()
-                change_vnf_flavour_data.vnf_instance_id = vnf_info.vnf_instance_id
-                change_vnf_flavour_data.new_flavour_id = str(self.tc_input.get('change_vnf_deployment_flavour').\
-                    get('vnfs').get(vnf_info.vnf_product_name).get('new_flavour_id'))
-                change_vnf_flavour_data.instantiation_level_id = str(self.tc_input.get('change_vnf_deployment_flavour').\
-                    get('vnfs').get(vnf_info.vnf_product_name).get('instantiation_level_id'))
-                change_vnf_flavour_data.additional_param = self.tc_input.get('change_vnf_deployment_flavour').get(
-                    'additional_param')
-                self.change_vnf_flavour_data_list.append(change_vnf_flavour_data)
+            for target_vnf in self.tc_input['change_vnf_df_list']:
+                if vnf_info.vnf_product_name == target_vnf['target_vnf_name']:
+                    change_vnf_flavour_data = ChangeVnfFlavourData()
+                    change_vnf_flavour_data.vnf_instance_id = vnf_info.vnf_instance_id
+                    change_vnf_flavour_data.new_flavour_id = str(target_vnf['target_flavour_id'])
+                    change_vnf_flavour_data.instantiation_level_id = str(target_vnf['target_instantiation_level_id'])
+                    change_vnf_flavour_data.additional_param = self.tc_input['mano'].get('change_df_params')
+                    self.change_vnf_flavour_data_list.append(change_vnf_flavour_data)
+                    break
 
         self.time_record.START('ns_update_vnf_df')
 
@@ -164,13 +163,15 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                                                'additional_param': self.tc_input['mano'].get(
                                                                    'query_params')})
         for vnf_info in self.ns_info_after_update.vnf_info:
-            if vnf_info.vnf_product_name in self.tc_input.get('change_vnf_deployment_flavour').get('vnfs').keys():
-                mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
-                                                                  self.tc_input['mano'].get('query_params'))
-                for mgmt_addr in mgmt_addr_list:
-                    if not ping(mgmt_addr):
-                        raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
-                                           % (mgmt_addr, vnf_info.vnf_product_name))
+            for target_vnf in self.tc_input['change_vnf_df_list']:
+                if vnf_info.vnf_product_name == target_vnf['target_vnf_name']:
+                    mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                                      self.tc_input['mano'].get('query_params'))
+                    for mgmt_addr in mgmt_addr_list:
+                        if not ping(mgmt_addr):
+                            raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
+                                               % (mgmt_addr, vnf_info.vnf_product_name))
+                break
 
     @Step(name='Verify VNF DF update was successful',
           description='Verify that the NFVO indicates the VNF DF update operation as successful')
