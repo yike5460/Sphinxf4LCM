@@ -11,11 +11,12 @@
 
 
 import logging
+from novaclient.exceptions import NotFound
 
 import os_client_config
 
-from api.generic import constants
 from api.adapter.vim import VimAdapterError
+from api.generic import constants
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
     VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, SoftwareImageInformation
 from utils.logging_module import log_entry_exit
@@ -92,18 +93,21 @@ class OpenstackVimAdapter(object):
             raise OpenstackVimAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
     @log_entry_exit(LOG)
-    def get_operation_status(self, lifecycle_operation_occurrence_id):
-        if lifecycle_operation_occurrence_id is None:
-            raise OpenstackVimAdapterError('Lifecycle Operation Occurrence ID is absent')
+    def get_operation_status(self, operation_id):
+        if operation_id is None:
+            raise OpenstackVimAdapterError('Operation ID is absent')
         else:
-            operation_type, resource_id = lifecycle_operation_occurrence_id
+            operation_type, resource_id = operation_id
 
         if operation_type == 'server_terminate':
             try:
-                self.query_virtualised_compute_resource(filter={'compute_id': resource_id})
-            except Exception:
+                self.nova_client.servers.get(resource_id)
+            except NotFound:
                 LOG.debug('Resource ID %s no longer present in VIM, as expected' % resource_id)
                 return constants.OPERATION_SUCCESS
+            except Exception as e:
+                LOG.exception(e)
+                return constants.OPERATION_PENDING
             else:
                 LOG.debug('Resource ID %s still present in VIM, not as expected' % resource_id)
                 return constants.OPERATION_PENDING
