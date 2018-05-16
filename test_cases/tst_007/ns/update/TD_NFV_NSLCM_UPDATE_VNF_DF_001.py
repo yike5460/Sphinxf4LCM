@@ -114,14 +114,15 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
         LOG.info('Triggering a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS '
                  'instance on NFVO')
         self.change_vnf_flavour_data_list = list()
+        print 'pas -1'
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
             if vnf_info.vnf_product_name in self.tc_input.get('change_vnf_deployment_flavour').get('vnfs').keys():
                 change_vnf_flavour_data = ChangeVnfFlavourData()
                 change_vnf_flavour_data.vnf_instance_id = vnf_info.vnf_instance_id
-                change_vnf_flavour_data.new_flavour_id = self.tc_input.get('change_vnf_deployment_flavour').\
-                    get('vnfs').get(vnf_info.vnf_product_name).get('new_flavour_id')
-                change_vnf_flavour_data.instantiation_level_id = self.tc_input.get('change_vnf_deployment_flavour').\
-                    get('vnfs').get(vnf_info.vnf_product_name).get('instantiation_level_id')
+                change_vnf_flavour_data.new_flavour_id = str(self.tc_input.get('change_vnf_deployment_flavour').\
+                    get('vnfs').get(vnf_info.vnf_product_name).get('new_flavour_id'))
+                change_vnf_flavour_data.instantiation_level_id = str(self.tc_input.get('change_vnf_deployment_flavour').\
+                    get('vnfs').get(vnf_info.vnf_product_name).get('instantiation_level_id'))
                 change_vnf_flavour_data.additional_param = self.tc_input.get('change_vnf_deployment_flavour').get(
                     'additional_param')
                 self.change_vnf_flavour_data_list.append(change_vnf_flavour_data)
