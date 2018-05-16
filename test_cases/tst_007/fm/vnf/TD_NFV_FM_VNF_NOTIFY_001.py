@@ -29,18 +29,19 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
     Sequence:
     1. Trigger NS instantiation on the NFVO
     2. Verify that the NFVO indicates NS instantiation operation result as successful
-    3. Trigger a failure on a virtualized resource allocated to the relevant VNF instance (e.g. terminate the
+    3. Verify that no fault alarms have been created on the VIM, VNFM and NFVO
+    4. Trigger a failure on a virtualized resource allocated to the relevant VNF instance (e.g. terminate the
        virtualized resource directly on the VIM)
-    4. Verify that a virtualized resource fault alarm has been created on the VIM by querying the list of virtualized
+    5. Verify that a virtualized resource fault alarm has been created on the VIM by querying the list of virtualized
        resource fault alarms
-    5. Verify that a VNF fault alarm has been created for the affected VNF instance on the VNFM by querying the list of
+    6. Verify that a VNF fault alarm has been created for the affected VNF instance on the VNFM by querying the list of
        VNF fault alarms
-    6. Verify that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms
-    7. Trigger the termination of the NS instance on the NFVO
-    8. Verify that the NS is terminated and that all resources have been released by the VIM
+    7. Verify that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms
+    8. Trigger the termination of the NS instance on the NFVO
+    9. Verify that the NS is terminated and that all resources have been released by the VIM
     """
 
-    REQUIRED_APIS = ('mano', )
+    REQUIRED_APIS = ('mano', 'vim')
     REQUIRED_ELEMENTS = ('nsd_id',)
     TESTCASE_EVENTS = ('instantiate_ns', 'terminate_ns')
 
@@ -101,19 +102,37 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id,
                                                    self.tc_input['mano'].get('query_params')))
 
-    @Step(name='Trigger a failure on a virtualized resource',
-          description='Trigger a failure on a virtualized resource allocated to the relevant VNF instance')
+    @Step(name='Verify that no fault alarms have been created on the VIM, VNFM and NFVO',
+          description='Verify that no fault alarms have been created on the VIM, VNFM and NFVO')
     def step3(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Trigger a failure on a virtualized resource allocated to the relevant VNF instance
+        # 3. Verify that no fault alarms have been created on the VIM, VNFM and NFVO
+        # --------------------------------------------------------------------------------------------------------------
+        LOG.info('Verifying that no fault alarms have been created on the VIM, VNFM and NFVO')
+        # Verify that no fault alarms have been created on the VIM
+        # TODO
+
+        # Verify that no fault alarms have been created on the VNFM
+        # TODO
+
+        # Verify that no fault alarms have been created on the NFVO
+        self.nfvo_filter = self.tc_input['mano'].get('alarm_list_params', {})
+        self.nfvo_filter.update({'ns_instance_id': self.ns_instance_id})
+        alarm_list = self.mano.ns_get_alarm_list(self.nfvo_filter)
+        if len(alarm_list) != 0:
+            raise TestRunError('Fault alarms have been created on the NFVO before triggering failure')
+
+    @Step(name='Trigger a failure on a virtualized resource',
+          description='Trigger a failure on a virtualized resource allocated to the relevant VNF instance')
+    def step4(self):
+        # --------------------------------------------------------------------------------------------------------------
+        # 4. Trigger a failure on a virtualized resource allocated to the relevant VNF instance
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering a failure on a virtualized resource allocated to the relevant VNF instance')
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
             for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
-                vim_id = vnfc_resource_info.compute_resource.vim_id
-                vim = self.mano.get_vim_helper(vim_id)
                 self.resource_id = vnfc_resource_info.compute_resource.resource_id
-                vim.terminate_virtualised_compute_resources(self.resource_id)
+                self.vim.terminate_virtualised_compute_resources(self.resource_id)
                 break
             break
 
@@ -121,9 +140,9 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
           description='Verify that a virtualized resource fault alarm has been created on the VIM by querying the list '
                       'of virtualized resource fault alarms',
           runnable=False)
-    def step4(self):
+    def step5(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 4. Verify that a virtualized resource fault alarm has been created on the VIM by querying the list of
+        # 5. Verify that a virtualized resource fault alarm has been created on the VIM by querying the list of
         #    virtualized resource fault alarms
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that a virtualized resource fault alarm has been created on the VIM by querying the list of'
@@ -134,9 +153,9 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
           description='Verify that a VNF fault alarm has been created for the affected VNF instance on the VNFM by '
                       'querying the list of VNF fault alarms',
           runnable=False)
-    def step5(self):
+    def step6(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Verify that a VNF fault alarm has been created for the affected VNF instance on the VNFM by querying the
+        # 6. Verify that a VNF fault alarm has been created for the affected VNF instance on the VNFM by querying the
         #    list of VNF fault alarms
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that a VNF fault alarm has been created for the affected VNF instance on the VNFM by '
@@ -146,39 +165,38 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
     @Step(name='Verify that a NS fault alarm has been created on the NFVO',
           description='Verify that a NS fault alarm has been created on the NFVO by querying the list of NS fault '
                       'alarms')
-    def step6(self):
+    def step7(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 6. Verify that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms
+        # 7. Verify that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms')
         elapsed_time = 0
-        filter = self.tc_input['mano'].get('alarm_list_params', {})
-        filter.update({'ns_instance_id': self.ns_instance_id})
         while elapsed_time < constants.ALARM_TIMEOUT:
-            alarm_list = self.mano.ns_get_alarm_list(filter)
+            alarm_list = self.mano.ns_get_alarm_list(self.nfvo_filter)
             if len(alarm_list) != 0:
                 break
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
             if elapsed_time == constants.ALARM_TIMEOUT:
-                raise TestRunError('No fault alarm received after %s seconds' % elapsed_time)
+                raise TestRunError('No fault alarm created on the NFVO after %s seconds' % elapsed_time)
 
+        notification_matched = False
         for alarm in alarm_list:
             resource_type = alarm.root_cause_faulty_resource.faulty_resource_type
-            if resource_type != 'COMPUTE':
-                raise TestRunError('Expected alarm faulty resource type to be "COMPUTE";'
-                                   'received alarm faulty resource type is %s' % resource_type)
-
             resource_id = alarm.root_cause_faulty_resource.faulty_resource.resource_id
-            if resource_id != self.resource_id:
-                raise TestRunError('Expected alarm for VM %s; received alarm is for VM %s'
-                                   % (self.resource_id, resource_id))
+
+            if resource_type == 'COMPUTE' and resource_id == self.resource_id:
+                notification_matched = True
+                break
+
+        if not notification_matched:
+            raise TestRunError('No fault alarm created on the NFVO for compute resource %s' % self.resource_id)
 
     @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
-    def step7(self):
+    def step8(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Trigger the termination of the NS instance on the NFVO
+        # 8. Trigger the termination of the NS instance on the NFVO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering the termination of the NS instance on the NFVO')
         self.time_record.START('terminate_ns')
@@ -202,9 +220,9 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
 
     @Step(name='Verify NS is terminated',
           description='Verify that the NS is terminated and that all resources have been released by the VIM')
-    def step8(self):
+    def step9(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 8. Verify that the NS is terminated and that all resources have been released by the VIM
+        # 9. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
         ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
