@@ -11,10 +11,12 @@
 
 
 import logging
+from novaclient.exceptions import NotFound
 
 import os_client_config
 
 from api.adapter.vim import VimAdapterError
+from api.generic import constants
 from api.structures.objects import VirtualCompute, VirtualCpu, VirtualMemory, VirtualStorage, VirtualNetworkInterface, \
     VirtualComputeQuota, VirtualNetworkQuota, VirtualStorageQuota, SoftwareImageInformation
 from utils.logging_module import log_entry_exit
@@ -89,6 +91,26 @@ class OpenstackVimAdapter(object):
         except Exception as e:
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
+
+    @log_entry_exit(LOG)
+    def get_operation_status(self, operation_id):
+        if operation_id is None:
+            raise OpenstackVimAdapterError('Operation ID is absent')
+        else:
+            operation_type, resource_id = operation_id
+
+        if operation_type == 'server_terminate':
+            try:
+                self.nova_client.servers.get(resource_id)
+            except NotFound:
+                LOG.debug('Resource ID %s no longer present in VIM, as expected' % resource_id)
+                return constants.OPERATION_SUCCESS
+            except Exception as e:
+                LOG.exception(e)
+                return constants.OPERATION_PENDING
+            else:
+                LOG.debug('Resource ID %s still present in VIM, not as expected' % resource_id)
+                return constants.OPERATION_PENDING
 
     @log_entry_exit(LOG)
     def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
@@ -167,6 +189,15 @@ class OpenstackVimAdapter(object):
         virtual_compute.vc_image_id = server_details['image_id']
         # TODO: What should the function return when the specified resources are not found?
         return virtual_compute
+
+    @log_entry_exit(LOG)
+    def trigger_compute_resource_termination(self, identifier):
+        try:
+            self.nova_client.servers.force_delete(identifier)
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (identifier, e))
+        return 'server_terminate', identifier
 
     @log_entry_exit(LOG)
     def port_list(self, **query_filter):

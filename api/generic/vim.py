@@ -11,9 +11,10 @@
 
 
 import logging
+import time
 
 from api.adapter import construct_adapter
-from api.generic import ApiGenericError
+from api.generic import ApiGenericError, constants
 from api.structures.objects import ComputePoolReservation, StoragePoolReservation
 from utils.logging_module import log_entry_exit
 
@@ -40,6 +41,45 @@ class Vim(object):
         """
         self.vendor = vendor
         self.vim_adapter = construct_adapter(vendor, module_type='vim', **adapter_config)
+
+    @log_entry_exit(LOG)
+    def get_operation_status(self, operation_id):
+        """
+        This function provides the status of an operation.
+
+        :param operation_id:    ID of the operation.
+        :return:                The status of the operation ex. 'Processing', 'Failed'.
+        """
+
+        return self.vim_adapter.get_operation_status(operation_id)
+
+    @log_entry_exit(LOG)
+    def poll_for_operation_completion(self, operation_id, final_states, max_wait_time, poll_interval):
+        """
+        This function polls the status of an operation until it reaches a final state or time is up.
+
+        :param operation_id:    ID of the operation.
+        :param final_states:    List of states of the operation that when reached, the polling stops.
+        :param max_wait_time:   Maximum interval of time in seconds to wait for the operation to reach a final state.
+        :param poll_interval:   Interval of time in seconds between consecutive polls.
+        :return:                Operation status.
+        """
+        operation_pending = True
+        elapsed_time = 0
+
+        while operation_pending and elapsed_time < max_wait_time:
+            operation_status = self.get_operation_status(operation_id)
+            LOG.debug('Got status %s for operation with ID %s' % (operation_status, operation_id))
+            if operation_status in final_states:
+                operation_pending = False
+            else:
+                LOG.debug('Expected state to be one of %s, got %s' % (final_states, operation_status))
+                LOG.debug('Sleeping %s seconds' % poll_interval)
+                time.sleep(poll_interval)
+                elapsed_time += poll_interval
+                LOG.debug('Elapsed time %s seconds out of %s' % (elapsed_time, max_wait_time))
+
+        return operation_status
 
     @log_entry_exit(LOG)
     def get_resource_group_id(self):
@@ -249,6 +289,39 @@ class Vim(object):
         """
 
         return self.vim_adapter.query_virtualised_compute_resource(query_compute_filter)
+
+    @log_entry_exit(LOG)
+    def trigger_compute_resource_termination(self, identifier):
+        """
+        This function triggers the termination of one or more instantiated virtualised compute resource(s).
+
+        :param identifier:  Identifier(s) of the virtualised compute resource(s) to be terminated.
+        :return:            Identifier of operation.
+        """
+
+        return self.vim_adapter.trigger_compute_resource_termination(identifier)
+
+    @log_entry_exit(LOG)
+    def terminate_virtualised_compute_resources(self, identifier):
+        """
+        This function allows de-allocating and terminating one or more instantiated virtualised compute resource(s).
+
+        This function was written in accordance with section 7.3.1.5 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).
+
+        :param identifier:  Identifier(s) of the virtualised compute resource(s) to be terminated.
+        :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.
+        """
+
+        operation_id = self.trigger_compute_resource_termination(identifier)
+
+        operation_status = self.poll_for_operation_completion(operation_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=constants.COMPUTE_TERMINATION_TIMEOUT,
+                                                              poll_interval=constants.POLL_INTERVAL)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            raise VimGenericError('Virtualised compute resource termination failed')
+        return identifier
 
     @log_entry_exit(LOG)
     def query_virtualised_network_resource(self, query_network_filter):

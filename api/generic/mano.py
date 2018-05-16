@@ -482,7 +482,6 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-
         :return:                                            Identifier of the NS lifecycle operation occurrence.
 
         """
@@ -1577,8 +1576,8 @@ class Mano(object):
         inside 'data' and resolve them using information found in 'ns_info'
 
         :param ns_info:     NsInfo information element.
-        :param data:        Data structure containing patterns that may need resolving
-        :return:            Data structure with resolved patterns
+        :param data:        Data structure containing patterns that may need resolving.
+        :return:            Data structure with resolved patterns.
         """
 
         pattern = '\$\{(.*?)\}'
@@ -1587,3 +1586,18 @@ class Mano(object):
         data = re.sub(pattern, '\\1', data)
 
         return data
+
+    @log_entry_exit(LOG)
+    def ns_get_alarm_list(self, filter):
+        """
+        This function  enables the OSS/BSSs to query the active alarms from the NFVO.
+
+        This function was written in accordance with section 7.6.4 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param filter:  Input filter for selecting alarms. This can contain the list of the NS identifiers, severity and
+                        cause.
+        :return:        Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The cardinality
+                        can be "0" to indicate that no Alarm could be retrieved based on the input filter information.
+        """
+
+        return self.mano_adapter.ns_get_alarm_list(filter)

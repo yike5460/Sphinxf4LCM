@@ -1,0 +1,29 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.5.7 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+
+FaultyResourceInfo:
+  description: The FaultyResourceInfo information element encapsulates information about faulty resource that has a negative impact on a VNF or an NS virtual link, which is the constituent component of the impacted NS.
+  attributes:
+    faulty_resource:
+      description: Information that identifies the faulty resource instance and its managing entity.
+      type: ResourceHandle
+      required: true
+
+    faulty_resource_type:
+      description: Type of the faulty resource.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ COMPUTE, STORAGE, NETWORK ]
