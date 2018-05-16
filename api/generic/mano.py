@@ -482,7 +482,6 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-
         :return:                                            Identifier of the NS lifecycle operation occurrence.
 
         """

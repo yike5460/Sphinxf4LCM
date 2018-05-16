@@ -270,7 +270,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
-        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
+        This function does not have a direct mapping in Cisco NFV 4.5 client so it will just return the status of the
         VNF with given ID.
 
         :param lifecycle_operation_occurrence_id:   UUID used to retrieve the operation details from the class attribute
