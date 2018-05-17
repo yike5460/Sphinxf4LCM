@@ -149,7 +149,7 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
                  ' virtualized resource fault alarms')
         # TODO
 
-    @Step(name='Verify that a VNF fault alarm has been created on the VNFM ',
+    @Step(name='Verify that a VNF fault alarm has been created on the VNFM',
           description='Verify that a VNF fault alarm has been created for the affected VNF instance on the VNFM by '
                       'querying the list of VNF fault alarms',
           runnable=False)
