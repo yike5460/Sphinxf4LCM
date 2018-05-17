@@ -10,6 +10,7 @@
 #
 
 
+import json
 import logging
 import os
 
@@ -195,3 +196,15 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     except Exception as e:
         LOG.debug('Unable to communicate to ElasticSearch server: %s' % kibana_srv)
         LOG.exception(e)
+
+
+def dump_raw_json(json_file_name, tc_exec_request, tc_input, tc_result):
+    json_file_path = os.path.join(REPORT_DIR, json_file_name)
+    with open(json_file_path, 'w') as json_file:
+        raw_json = {
+            'tc_exec_request': tc_exec_request,
+            'tc_input': tc_input,
+            'tc_result': tc_result
+        }
+
+        json.dump(raw_json, json_file, indent=2)
