@@ -103,7 +103,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id,
                                                    self.tc_input['mano'].get('query_params')))
 
-    @Step(name='Trigger a failure on a virtualized resource',
+    @Step(name='Stop a virtualized resource directly on the VIM',
           description='Trigger a failure on a virtualized resource allocated to the relevant VNF instance')
     def step3(self):
         # --------------------------------------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
             for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
                 self.resource_id = vnfc_resource_info.compute_resource.resource_id
-                self.vim.terminate_virtualised_compute_resources(self.resource_id)
+                self.vim.operate_virtualised_compute_resource(compute_id=self.resource_id, compute_operation='STOP')
                 break
             break
 
@@ -134,15 +134,14 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         # Verify that no fault alarms have been cleared on the NFVO
         # TODO
 
-    @Step(name='Resolve the failure of the virtualized resource',
-          description='Resolve the failure of the virtualized resource allocated to the relevant VNF',
-          runnable=False)
+    @Step(name='Start the virtualized resource that was previously stopped',
+          description='Resolve the failure of the virtualized resource allocated to the relevant VNF')
     def step5(self):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Resolve the failure of the virtualized resource allocated to the relevant VNF
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Resolving the failure of the virtualized resource allocated to the relevant VNF')
-        # TODO
+        self.vim.operate_virtualised_compute_resource(compute_id=self.resource_id, compute_operation='START')
 
     @Step(name='Verify that the relevant virtualized resource fault alarm has been cleared on the VIM',
           description='Verify that the relevant virtualized resource fault alarm has been cleared on the VIM by '

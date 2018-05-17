@@ -122,7 +122,7 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
         if len(nfvo_alarm_list) != 0:
             raise TestRunError('Fault alarms have been created on the NFVO before triggering failure')
 
-    @Step(name='Trigger a failure on a virtualized resource',
+    @Step(name='Terminate a virtualized resource directly on the VIM',
           description='Trigger a failure on a virtualized resource allocated to the relevant VNF instance')
     def step4(self):
         # --------------------------------------------------------------------------------------------------------------
