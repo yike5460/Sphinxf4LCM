@@ -99,7 +99,7 @@ class OpenstackVimAdapter(object):
         else:
             operation_type, resource_id = operation_id
 
-        if operation_type == 'server_terminate':
+        if operation_type == 'compute_terminate':
             try:
                 self.nova_client.servers.get(resource_id)
             except NotFound:
@@ -111,6 +111,30 @@ class OpenstackVimAdapter(object):
             else:
                 LOG.debug('Resource ID %s still present in VIM, not as expected' % resource_id)
                 return constants.OPERATION_PENDING
+
+        if operation_type == 'compute_stop':
+            try:
+                virtual_compute = self.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            except Exception as e:
+                LOG.exception(e)
+                return constants.OPERATION_FAILED
+            if virtual_compute.operational_state == 'DISABLED':
+                return constants.OPERATION_SUCCESS
+            else:
+                return constants.OPERATION_PENDING
+
+        if operation_type == 'compute_start':
+            try:
+                virtual_compute = self.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            except Exception as e:
+                LOG.exception(e)
+                return constants.OPERATION_FAILED
+            if virtual_compute.operational_state == 'ENABLED':
+                return constants.OPERATION_SUCCESS
+            else:
+                return constants.OPERATION_PENDING
+
+        raise OpenstackVimAdapterError('Cannot get operation status for operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
     def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
@@ -191,13 +215,37 @@ class OpenstackVimAdapter(object):
         return virtual_compute
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_termination(self, identifier):
+    def trigger_compute_resource_termination(self, compute_id):
         try:
-            self.nova_client.servers.force_delete(identifier)
+            self.nova_client.servers.force_delete(compute_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (identifier, e))
-        return 'server_terminate', identifier
+            raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (compute_id, e))
+        return 'compute_terminate', compute_id
+
+    @log_entry_exit(LOG)
+    def trigger_compute_resource_operation(self, compute_id, compute_operation, compute_operation_input_data=None):
+        if compute_operation == 'STOP':
+            try:
+                self.nova_client.servers.stop(compute_id)
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenstackVimAdapterError('Unable to stop server %s - %s' % (compute_id, e))
+            return 'compute_stop', compute_id
+
+        if compute_operation == 'START':
+            try:
+                self.nova_client.servers.start(compute_id)
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenstackVimAdapterError('Unable to start server %s - %s' % (compute_id, e))
+            return 'compute_start', compute_id
+
+        raise NotImplementedError('Cannot perform operation "%s"' % compute_operation)
+
+    @log_entry_exit(LOG)
+    def operate_virtualised_compute_resource(self, compute_id, compute_operation, compute_operation_input_data):
+        pass
 
     @log_entry_exit(LOG)
     def port_list(self, **query_filter):
