@@ -57,6 +57,8 @@ class RiftManoAdapter(object):
         self.nsr_metadata = {}
         self.nsd_info_ids = dict()
 
+        self.vim_helpers = {}
+
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         # TODO: the get logic inside ifs should be moved into functions
@@ -362,6 +364,10 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
+        vim_helper = self.vim_helpers.get(vim_id)
+        if vim_helper is not None:
+            return vim_helper
+
         resource = '/api/config/project/cloud/account/%s' % vim_id
 
         try:
@@ -390,7 +396,10 @@ class RiftManoAdapter(object):
         else:
             raise RiftManoAdapterError('Unsupported VIM type: %s' % vim_type)
 
-        return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+        vim_helper = construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+        self.vim_helpers[vim_id] = vim_helper
+
+        return vim_helper
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info, additional_param=None):
