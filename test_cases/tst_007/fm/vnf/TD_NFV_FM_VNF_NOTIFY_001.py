@@ -120,7 +120,7 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
         self.nfvo_alarm_filter.update({'ns_instance_id': self.ns_instance_id})
         nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
         if len(nfvo_alarm_list) != 0:
-            raise TestRunError('Fault alarms have been created on the NFVO before triggering failure')
+            raise TestRunError('Fault alarms have been created on the NFVO before triggering the failure')
 
     @Step(name='Terminate a virtualized resource directly on the VIM',
           description='Trigger a failure on a virtualized resource allocated to the relevant VNF instance')
@@ -171,14 +171,14 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that a NS fault alarm has been created on the NFVO by querying the list of NS fault alarms')
         elapsed_time = 0
-        while elapsed_time < constants.ALARM_TIMEOUT:
+        while elapsed_time < constants.ALARM_CREATE_TIMEOUT:
             alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
             if len(alarm_list) != 0:
                 break
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.ALARM_TIMEOUT:
+            if elapsed_time == constants.ALARM_CREATE_TIMEOUT:
                 raise TestRunError('No fault alarm created on the NFVO after %s seconds' % elapsed_time)
 
         notification_matched = False
