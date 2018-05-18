@@ -274,7 +274,7 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
                                err_details='Normal traffic flew with packet loss')
 
         self.traffic.stop()
-        self.unregister_from_cleanup(index=40)
+        self.unregister_from_cleanup(index=50)
 
     @Step(name='Terminate the nested NS', description='Trigger nested NS instance termination on the NFVO')
     def step11(self):
