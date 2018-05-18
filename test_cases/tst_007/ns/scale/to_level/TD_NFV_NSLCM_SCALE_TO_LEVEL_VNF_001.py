@@ -264,6 +264,9 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
 
         self.tc_result['scaling_to_level']['traffic_after'] = 'NORMAL_TRAFFIC_LOAD'
 
+        self.traffic.stop()
+        self.unregister_from_cleanup(index=40)
+
     @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
     def step11(self):
         # --------------------------------------------------------------------------------------------------------------
