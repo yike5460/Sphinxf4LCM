@@ -118,8 +118,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
             break
 
     @Step(name='Verify that no fault alarms have been cleared on the VIM, VNFM and NFVO',
-          description='Verify that no fault alarms have been cleared on the VIM, VNFM and NFVO',
-          runnable=False)
+          description='Verify that no fault alarms have been cleared on the VIM, VNFM and NFVO')
     def step4(self):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that no fault alarms have been cleared on the VIM, VNFM and NFVO
@@ -132,7 +131,22 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         # TODO
 
         # Verify that no fault alarms have been cleared on the NFVO
-        # TODO
+        self.nfvo_alarm_filter = self.tc_input['mano'].get('alarm_list_params', {})
+        self.nfvo_alarm_filter.update({'ns_instance_id': self.ns_instance_id})
+        elapsed_time = 0
+        while elapsed_time < constants.ALARM_CREATE_TIMEOUT:
+            nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
+            if len(nfvo_alarm_list) != 0:
+                for alarm in nfvo_alarm_list:
+                    resource_type = alarm.root_cause_faulty_resource.faulty_resource_type
+                    resource_id = alarm.root_cause_faulty_resource.faulty_resource.resource_id
+
+                    if resource_type == 'COMPUTE' and resource_id == self.resource_id:
+                        raise TestRunError('Fault alarm for compute resource %s cleared on the NFVO before resolving '
+                                           'the failure' % self.resource_id)
+            else:
+                sleep(constants.POLL_INTERVAL)
+                elapsed_time += constants.POLL_INTERVAL
 
     @Step(name='Start the virtualized resource that was previously stopped',
           description='Resolve the failure of the virtualized resource allocated to the relevant VNF')
@@ -179,17 +193,15 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the relevant NS fault alarm has been cleared on the NFVO by querying the list of NS '
                  'fault alarms')
-        alarm_filter = self.tc_input['mano'].get('alarm_list_params', {})
-        alarm_filter.update({'ns_instance_id': self.ns_instance_id})
         elapsed_time = 0
-        while elapsed_time < constants.ALARM_TIMEOUT:
-            alarm_list = self.mano.ns_get_alarm_list(alarm_filter)
+        while elapsed_time < constants.ALARM_CLEAR_TIMEOUT:
+            alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
             if len(alarm_list) != 0:
                 break
             else:
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
-            if elapsed_time == constants.ALARM_TIMEOUT:
+            if elapsed_time == constants.ALARM_CLEAR_TIMEOUT:
                 raise TestRunError('No fault alarm cleared on the NFVO after %s seconds' % elapsed_time)
 
         notification_matched = False
