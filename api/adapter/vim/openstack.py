@@ -114,22 +114,24 @@ class OpenstackVimAdapter(object):
 
         if operation_type == 'compute_stop':
             try:
-                virtual_compute = self.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                server_details = self.server_get(resource_id)
+                server_status = server_details['status']
             except Exception as e:
                 LOG.exception(e)
-                return constants.OPERATION_FAILED
-            if virtual_compute.operational_state == 'DISABLED':
+                return constants.OPERATION_PENDING
+            if server_status == 'SHUTOFF':
                 return constants.OPERATION_SUCCESS
             else:
                 return constants.OPERATION_PENDING
 
         if operation_type == 'compute_start':
             try:
-                virtual_compute = self.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                server_details = self.server_get(resource_id)
+                server_status = server_details['status']
             except Exception as e:
                 LOG.exception(e)
-                return constants.OPERATION_FAILED
-            if virtual_compute.operational_state == 'ENABLED':
+                return constants.OPERATION_PENDING
+            if server_status == 'ACTIVE':
                 return constants.OPERATION_SUCCESS
             else:
                 return constants.OPERATION_PENDING
@@ -215,7 +217,7 @@ class OpenstackVimAdapter(object):
         return virtual_compute
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_termination(self, compute_id):
+    def trigger_compute_resource_terminate(self, compute_id):
         try:
             self.nova_client.servers.force_delete(compute_id)
         except Exception as e:
@@ -224,7 +226,7 @@ class OpenstackVimAdapter(object):
         return 'compute_terminate', compute_id
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_operation(self, compute_id, compute_operation, compute_operation_input_data=None):
+    def trigger_compute_resource_operate(self, compute_id, compute_operation, compute_operation_input_data=None):
         if compute_operation == 'STOP':
             try:
                 self.nova_client.servers.stop(compute_id)
@@ -242,10 +244,6 @@ class OpenstackVimAdapter(object):
             return 'compute_start', compute_id
 
         raise NotImplementedError('Cannot perform operation "%s"' % compute_operation)
-
-    @log_entry_exit(LOG)
-    def operate_virtualised_compute_resource(self, compute_id, compute_operation, compute_operation_input_data):
-        pass
 
     @log_entry_exit(LOG)
     def port_list(self, **query_filter):
