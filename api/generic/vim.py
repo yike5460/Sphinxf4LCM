@@ -291,15 +291,16 @@ class Vim(object):
         return self.vim_adapter.query_virtualised_compute_resource(query_compute_filter)
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_termination(self, compute_id):
+    def trigger_compute_resource_terminate(self, compute_id):
         """
-        This function triggers the termination of one or more instantiated virtualised compute resource(s).
+        This function triggers the execution of the "terminate" command one one or more instantiated virtualised compute
+        resource(s).
 
         :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.
         :return:            Identifier of operation.
         """
 
-        return self.vim_adapter.trigger_compute_resource_termination(compute_id)
+        return self.vim_adapter.trigger_compute_resource_terminate(compute_id)
 
     @log_entry_exit(LOG)
     def terminate_virtualised_compute_resources(self, compute_id):
@@ -312,11 +313,11 @@ class Vim(object):
         :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.
         """
 
-        operation_id = self.trigger_compute_resource_termination(compute_id)
+        operation_id = self.trigger_compute_resource_terminate(compute_id)
 
         operation_status = self.poll_for_operation_completion(operation_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=constants.COMPUTE_TERMINATION_TIMEOUT,
+                                                              max_wait_time=constants.COMPUTE_TERMINATE_TIMEOUT,
                                                               poll_interval=constants.POLL_INTERVAL)
 
         if operation_status != constants.OPERATION_SUCCESS:
@@ -324,9 +325,10 @@ class Vim(object):
         return compute_id
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_operation(self, compute_id, compute_operation, compute_operation_input_data=None):
+    def trigger_compute_resource_operate(self, compute_id, compute_operation, compute_operation_input_data=None):
         """
-        This function triggers the operation of one or more instantiated virtualised compute resource(s).
+        This function triggers the execution of the "operate" command on one or more instantiated virtualised compute
+        resource(s).
 
         :param compute_id:                      Identifier of the virtualised compute resource to operate.
         :param compute_operation:               Type of operation to perform on the virtualised compute resource.
@@ -335,10 +337,10 @@ class Vim(object):
         :param compute_operation_input_data:    Additional parameters associated to the operation to perform. For
                                                 example, if the operation is "delete snapshot", information about what
                                                 snapshot identifier to delete is provided.
-        :return:                                Identifier of the operation
+        :return:                                Identifier of the operation.
         """
-        return self.vim_adapter.trigger_compute_resource_operation(compute_id, compute_operation,
-                                                                   compute_operation_input_data)
+        return self.vim_adapter.trigger_compute_resource_operate(compute_id, compute_operation,
+                                                                 compute_operation_input_data)
 
     @log_entry_exit(LOG)
     def operate_virtualised_compute_resource(self, compute_id, compute_operation, compute_operation_input_data=None):
@@ -360,12 +362,12 @@ class Vim(object):
                                                 instance, when a snapshot operation is requested, this field provides
                                                 information about the identifier of the snapshot and its location.
         """
-        operation_id = self.trigger_compute_resource_operation(compute_id, compute_operation,
-                                                               compute_operation_input_data)
+        operation_id = self.trigger_compute_resource_operate(compute_id, compute_operation,
+                                                             compute_operation_input_data)
 
         operation_status = self.poll_for_operation_completion(operation_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=constants.COMPUTE_OPERATION_TIMEOUT,
+                                                              max_wait_time=constants.COMPUTE_OPERATE_TIMEOUT,
                                                               poll_interval=constants.POLL_INTERVAL)
 
         if operation_status != constants.OPERATION_SUCCESS:
