@@ -152,10 +152,23 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
 def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result):
     report_file_path = os.path.join(REPORT_DIR, html_report_file_name)
+
+    # Open html template
     with open("report_template.html", 'r') as template_file:
         template = template_file.read()
 
-    # Substitutes fields in the html report string
+    # Open files for copying into .html
+    with open("bootstrap.min.css", 'r') as f:
+        bootstrap_css = f.read()
+    with open("logo_Spirent.PNG", 'rb') as image_file:
+        logo_base64 = base64.b64encode(image_file.read())
+    with open("jquery.min.js", 'r') as f:
+        jquery_js_data = f.read()
+    with open("bootstrap.min.js", 'r') as f:
+        bootstrap_js_data = f.read()
+
+
+    # Substitute fields in the html report string
     # Select color and result values based on status
     if tc_result['overall_status'] in ['PASSED']:
         color, result = "green", "Pass"
@@ -164,17 +177,11 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
     else:
         color, result = "#8B0000", "Error"
 
-    # Open files for copying into .html
-    with open("bootstrap.min.css", 'r') as f:
-        bootstrap_css = f.read()
-    with open("logo_Spirent.PNG", 'rb') as image_file:
-        logo_base64 = str(base64.b64encode(image_file.read()))[2:-1]
-
     # Format time
     start_time = (str(tc_result['tc_start_time']).split('T')[0] + " " +
                   str(tc_result['tc_start_time']).split('T')[1][0:8])
 
-    # Populating Steps Summary table
+    # Populate Steps Summary table
     d_steps = {}
     for step_index in tc_result.get('steps', {}):
         d_steps[int(step_index)] = tc_result.get('steps', {})[step_index]
@@ -330,11 +337,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                              "event_details": str(event_details)}
         events = events + (events_part % substitutes_local)
 
-    with open("jquery.min.js", 'r') as f:
-        jquery_js_data = f.read()
-    with open("bootstrap.min.js", 'r') as f:
-        bootstrap_js_data = f.read()
-
+    # Write the main substitution dictionary
     substitutes = {
         'tc_name': str(tc_exec_request['tc_name']), 'start_time': start_time, "bootstrap_css_file": bootstrap_css,
         'logo': logo_base64, 'color': color, 'result': result, "run_id": str(tc_exec_request['run_id']),
