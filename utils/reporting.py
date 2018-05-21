@@ -19,7 +19,7 @@ import webbrowser
 from api.generic import constants
 import base64
 
-REPORT_DIR = ''
+REPORT_DIR = '/var/log/vnflcv'
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
