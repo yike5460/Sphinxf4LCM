@@ -15,7 +15,6 @@ import os
 
 import prettytable
 import requests
-import webbrowser
 from api.generic import constants
 import base64
 
