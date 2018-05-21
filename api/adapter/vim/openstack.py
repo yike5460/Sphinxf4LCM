@@ -38,7 +38,7 @@ class OpenstackVimAdapter(object):
     """
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
-                 project_domain_name=None, user_domain_name=None, **kwargs):
+                 project_domain_name=None, user_domain_name=None, verify=False, **kwargs):
         """
         Create the Heat, Neutron and Nova clients.
         """
@@ -50,7 +50,8 @@ class OpenstackVimAdapter(object):
                                                             identity_api_version=identity_api_version,
                                                             project_name=project_name,
                                                             project_domain_name=project_domain_name,
-                                                            user_domain_name=user_domain_name)
+                                                            user_domain_name=user_domain_name,
+                                                            verify=verify)
 
             self.neutron_client = os_client_config.make_client('network',
                                                                auth_url=auth_url,
@@ -59,7 +60,8 @@ class OpenstackVimAdapter(object):
                                                                identity_api_version=identity_api_version,
                                                                project_name=project_name,
                                                                project_domain_name=project_domain_name,
-                                                               user_domain_name=user_domain_name)
+                                                               user_domain_name=user_domain_name,
+                                                               verify=verify)
 
             self.nova_client = os_client_config.make_client('compute',
                                                             auth_url=auth_url,
@@ -68,7 +70,8 @@ class OpenstackVimAdapter(object):
                                                             identity_api_version=identity_api_version,
                                                             project_name=project_name,
                                                             project_domain_name=project_domain_name,
-                                                            user_domain_name=user_domain_name)
+                                                            user_domain_name=user_domain_name,
+                                                            verify=verify)
 
             self.cinder_client = os_client_config.make_client('volume',
                                                               auth_url=auth_url,
@@ -77,7 +80,8 @@ class OpenstackVimAdapter(object):
                                                               identity_api_version=identity_api_version,
                                                               project_name=project_name,
                                                               project_domain_name=project_domain_name,
-                                                              user_domain_name=user_domain_name)
+                                                              user_domain_name=user_domain_name,
+                                                              verify=verify)
 
             self.glance_client = os_client_config.make_client('image',
                                                               auth_url=auth_url,
@@ -86,7 +90,8 @@ class OpenstackVimAdapter(object):
                                                               identity_api_version=identity_api_version,
                                                               project_name=project_name,
                                                               project_domain_name=project_domain_name,
-                                                              user_domain_name=user_domain_name)
+                                                              user_domain_name=user_domain_name,
+                                                              verify=verify)
 
         except Exception as e:
             LOG.exception(e)
