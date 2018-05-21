@@ -352,9 +352,10 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
         "vnf_resources": vnf_resources, "scaling_info": scaling_info, "time_stamps": time_stamps, "events": events,
         "jquery_js_data": jquery_js_data, "bootstrap_js_data":bootstrap_js_data}
 
+    # Write the html report file
     with open(report_file_path, 'w') as report_file:
         report_file.write(template % substitutes)
-    webbrowser.open_new_tab(report_file_path)
+
 
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
