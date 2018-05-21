@@ -189,8 +189,10 @@ class RiftManoAdapter(object):
 
         nsd = json_content['rw-project:project']['project-nsd:nsd-catalog']['nsd'][0]
 
+        # Generate Empty Nsd object
         nsd_generic = Nsd()
 
+        # Top level (not nested) mapping
         nsd_generic.nsd_identifier = str(nsd['id'])
         nsd_generic.nsd_name = str(nsd['name'])
         nsd_generic.version = str(nsd['version'])
@@ -200,17 +202,15 @@ class RiftManoAdapter(object):
         generic_vnfd_id_list = []
         generic_vnf_profile_id_list = []
         generic_vnf_profile_list = []
-
-        for index, entry in enumerate(nsd['constituent-vnfd']):
+        for entry in nsd['constituent-vnfd']:
             generic_vnfd_id_list = generic_vnfd_id_list + [str(entry['vnfd-id-ref'])]
             generic_vnf_profile_id_list = generic_vnf_profile_id_list + [str(entry['member-vnf-index'])]
-            generic_vnf_profile_list = generic_vnf_profile_list + [VnfProfile()]
-            generic_vnf_profile_list[index].vnf_profile_id = str(entry['member-vnf-index'])
-            generic_vnf_profile_list[index].vnfd_id = str(entry['vnfd-id-ref'])
+            vnf_profile = VnfProfile()
+            vnf_profile.vnf_profile_id = str(entry['member-vnf-index'])
+            vnf_profile.vnfd_id = str(entry['vnfd-id-ref'])
+            generic_vnf_profile_list.append(vnf_profile)
 
         nsd_generic.vnfd_id = list(set(generic_vnfd_id_list))
-        nsdf_list = [NsDf()]
-        nsd_generic.nsdf = nsdf_list
 
         # Initialize empty ns_vlc data structure
         ns_vlc = {}
@@ -218,16 +218,18 @@ class RiftManoAdapter(object):
             ns_vlc[id] = {}
             ns_vlc[id]['cpd_list'] = []
             ns_vlc[id]['vl_list'] = []
+
         # VLD data
         if 'vld' in nsd.keys():
             generic_vld_list = []
-            for index, entry in enumerate(nsd['vld']):
-                generic_vld_list = generic_vld_list + [NsVirtualLinkDesc()]
-                generic_vld_list[index].virtual_link_desc_id = str(entry["id"])
-                generic_vld_list[index].virtual_link_desc_version = str(entry.get("version"))
-                generic_vld_list[index].description = str(entry.get("description"))
+            for entry in nsd['vld']:
+                ns_virtual_link_desc = NsVirtualLinkDesc()
+                ns_virtual_link_desc.virtual_link_desc_id = str(entry["id"])
+                ns_virtual_link_desc.virtual_link_desc_version = str(entry.get("version"))
+                ns_virtual_link_desc.description = str(entry.get("description"))
+                generic_vld_list.append(ns_virtual_link_desc)
 
-                for ind, en in enumerate(entry['vnfd-connection-point-ref']):
+                for en in entry['vnfd-connection-point-ref']:
                     ns_vlc[str(en["member-vnf-index-ref"])]['cpd_list'].append(str(en['vnfd-connection-point-ref']))
                     ns_vlc[str(en["member-vnf-index-ref"])]['vl_list'].append(str(entry["id"]))
             nsd_generic.virtual_link_desc = generic_vld_list
@@ -235,19 +237,19 @@ class RiftManoAdapter(object):
         # Populate vnf profiles with NsVirtualLinkConnectivity information elements
         for id in ns_vlc:
             ns_virtual_link_connectivity_list = []
-
-            for index, vlc in enumerate(ns_vlc[id]['vl_list']):
-                ns_virtual_link_connectivity_list = ns_virtual_link_connectivity_list + [NsVirtualLinkConnectivity()]
-                ns_virtual_link_connectivity_list[index].virtual_link_profile_id = vlc
-                ns_virtual_link_connectivity_list[index].cpd_id = [ns_vlc[id]['cpd_list'][index]]
-
+            for vlc in ns_vlc[id]['vl_list']:
+                count = len(ns_virtual_link_connectivity_list)
+                ns_virtual_link_connectivity = NsVirtualLinkConnectivity()
+                ns_virtual_link_connectivity.virtual_link_profile_id = vlc
+                ns_virtual_link_connectivity.cpd_id = [ns_vlc[id]['cpd_list'][count]]
+                ns_virtual_link_connectivity_list.append(ns_virtual_link_connectivity)
             generic_vnf_profile_list[int(id) - 1].ns_virtual_link_connectivity = ns_virtual_link_connectivity_list
             del ns_virtual_link_connectivity_list
 
-        #Add nsdf information element
-        nsdf_list[0].vnf_profile = generic_vnf_profile_list
-        nsdf_list[0].ns_df_id = str(nsd['name'])
-        nsd_generic.nsdf = nsdf_list
+        nsdf = [NsDf()]
+        nsdf[0].vnf_profile = generic_vnf_profile_list
+        nsdf[0].ns_df_id = str(nsd['name'])
+        nsd_generic.nsdf = nsdf
 
         return nsd_generic
 
@@ -283,12 +285,10 @@ class RiftManoAdapter(object):
         vnfd = json_content['rw-project:project']['project-vnfd:vnfd-catalog']['vnfd'][0]
         vnfd.pop('rw-project-vnfd:meta')
 
-        ###Build empty generic Vnfd object
+        # Build empty generic Vnfd object
         vnfd_generic = Vnfd()
 
-        ###Data mapping
-
-        ##Nested level 0
+        # Top level (not nested) mapping
         vnfd_generic.vnf_product_name = str(vnfd['name'])
         vnfd_generic.vnf_product_info_name = str(vnfd.get('name'))
         vnfd_generic.vnf_product_info_description = str(vnfd.get('description'))
@@ -296,52 +296,48 @@ class RiftManoAdapter(object):
         vnfd_generic.vnf_provider = str(vnfd['vendor'])
         vnfd_generic.vnfd_version = str(vnfd['version'])
 
-        ##Nested levels 1+
-
         # VDU data
-
         generic_vdus = []
         generic_virtual_compute_descs = []
         generic_virtual_storage_descs = []
 
-        for index, vdu in enumerate(vnfd["vdu"]):
-            generic_vdus = generic_vdus + [Vdu()]
-            generic_virtual_compute_descs = generic_virtual_compute_descs + [VirtualComputeDesc()]
-            generic_virtual_storage_descs = generic_virtual_storage_descs + [VirtualStorageDesc()]
+        for vdu in vnfd["vdu"]:
+            generic_vdu = Vdu()
+            generic_virtual_compute_desc = VirtualComputeDesc()
+            generic_virtual_storage_desc = VirtualStorageDesc()
 
-            generic_vdus[index].name = str(vdu['name'])
-            generic_vdus[index].vdu_id = str(vdu['id'])
+            generic_vdu.name = str(vdu['name'])
+            generic_vdu.vdu_id = str(vdu['id'])
+            generic_vdu.sw_image_desc = SwImageDesc()
+            generic_vdu.sw_image_desc.name = str(vdu.get('image'))
 
-            generic_vdus[index].sw_image_desc = SwImageDesc()
-            generic_vdus[index].sw_image_desc.name = str(vdu.get('image'))
-
-            cpu_pinning_policy_exists = False
             if ("guest-epa" in vdu.keys()):
-                generic_virtual_compute_descs[index].virtual_cpu = VirtualCpuData()
-                generic_virtual_compute_descs[index].virtual_cpu.virtual_cpu_pinning = VirtualCpuPinningData()
-                cpu_pinning_policy_exists = True
+                generic_virtual_compute_desc.virtual_cpu = VirtualCpuData()
+                generic_virtual_compute_desc.virtual_cpu.virtual_cpu_pinning = VirtualCpuPinningData()
                 if vdu["guest-epa"]["cpu-pinning-policy"] == "SHARED":
-                    generic_virtual_compute_descs[
-                        index].virtual_cpu.virtual_cpu_pinning.virtual_cpu_pinning_policy = "dynamic"
+                    generic_virtual_compute_desc.virtual_cpu.virtual_cpu_pinning.virtual_cpu_pinning_policy = "dynamic"
                 else:
-                    generic_virtual_compute_descs[index].virtual_cpu.num_virtual_cpu = vdu["vm-flavor"]["vcpu-count"]
-                generic_virtual_compute_descs[index].virtual_compute_desc_id = str(vdu["id"])
+                    generic_virtual_compute_desc.virtual_cpu.num_virtual_cpu = vdu["vm-flavor"]["vcpu-count"]
+                generic_virtual_compute_desc.virtual_compute_desc_id = str(vdu["id"])
 
-            generic_virtual_compute_descs[index].virtual_memory = VirtualMemoryData()
-            generic_virtual_compute_descs[index].virtual_memory.virtual_mem_size = int(vdu["vm-flavor"]["memory-mb"])
+            generic_virtual_compute_desc.virtual_memory = VirtualMemoryData()
+            generic_virtual_compute_desc.virtual_memory.virtual_mem_size = int(vdu["vm-flavor"]["memory-mb"])
 
-            generic_virtual_storage_descs[index].size_of_storage = int(vdu["vm-flavor"].get("storage-gb"))
-            generic_virtual_storage_descs[index].id = str(vdu.get("id"))
+            generic_virtual_storage_desc.size_of_storage = int(vdu["vm-flavor"].get("storage-gb"))
+            generic_virtual_storage_desc.id = str(vdu.get("id"))
+
+            generic_vdus.append(generic_vdu)
+            generic_virtual_compute_descs.append(generic_virtual_compute_desc)
+            generic_virtual_storage_descs.append(generic_virtual_storage_desc)
 
         # VNFD's external connection points
-
         generic_vnf_ext_cpds = []
         for index, connection in enumerate(vnfd["connection-point"]):
-            generic_vnf_ext_cpds = generic_vnf_ext_cpds + [VnfExtCpd()]
-            generic_vnf_ext_cpds[index].cpd_id = str(vnfd["connection-point"][index]["name"])
+            generic_vnf_ext_cpd = VnfExtCpd()
+            generic_vnf_ext_cpd.cpd_id = str(vnfd["connection-point"][index]["name"])
+            generic_vnf_ext_cpds.append(generic_vnf_ext_cpd)
 
-        ###Populate nested levels of the generic Vnfd object
-
+        # Populate nested levels of the generic Vnfd object
         vnfd_generic.vdu = generic_vdus
         vnfd_generic.virtual_compute_desc = generic_virtual_compute_descs
         vnfd_generic.virtual_storage_desc = generic_virtual_storage_descs
