@@ -15,10 +15,11 @@ import os
 
 import prettytable
 import requests
-
+import webbrowser
 from api.generic import constants
+import base64
 
-REPORT_DIR = '/var/log/vnflcv'
+REPORT_DIR = ''
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -115,8 +116,8 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         # Write VNF resources
         report_file.write('* VNF resources:\n')
         t_outside = prettytable.PrettyTable(
-                                         ['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
-                                         hrules=prettytable.ALL)
+            ['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
+            hrules=prettytable.ALL)
         t_outside.max_width = 16
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
@@ -151,332 +152,207 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
 def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result):
     report_file_path = os.path.join(REPORT_DIR, html_report_file_name)
+    with open("report_template.html", 'r') as template_file:
+        template = template_file.read()
+
+    # Substitutes fields in the html report string
+    # Select color and result values based on status
+    if tc_result['overall_status'] in ['PASSED']:
+        color, result = "green", "Pass"
+    elif tc_result['overall_status'] in ['ERROR', 'FAILED']:
+        color, result = "red", "Fail"
+    else:
+        color, result = "#8B0000", "Error"
+
+    # Open files for copying into .html
+    with open("bootstrap.min.css", 'r') as f:
+        bootstrap_css = f.read()
+    with open("logo_Spirent.PNG", 'rb') as image_file:
+        logo_base64 = str(base64.b64encode(image_file.read()))[2:-1]
+
+    # Format time
+    start_time = (str(tc_result['tc_start_time']).split('T')[0] + " " +
+                  str(tc_result['tc_start_time']).split('T')[1][0:8])
+
+    # Populating Steps Summary table
+    d_steps = {}
+    for step_index in tc_result.get('steps', {}):
+        d_steps[int(step_index)] = tc_result.get('steps', {})[step_index]
+    steps_summary_body = ''
+    for step_index, step_details in sorted(d_steps.items()):
+        steps_summary_some_part = '''
+                                        <tr>
+                                            <td> %(step_index)s </td>
+                                            <td> %(step_name)s </td>
+                                            <td> %(step_description)s </td>
+                                            <td> %(step_duration)s </td>
+                                            <td> %(step_status)s </td>
+                                        </tr>
+         '''
+        substitutes_local = {'step_index': str(step_index), 'step_name': str(step_details['name']),
+                             'step_description': str(step_details['description']),
+                             'step_duration': ('%.3f' % step_details.get('duration', 0)),
+                             'step_status': str(step_details['status'])}
+        steps_summary_body = steps_summary_body + (steps_summary_some_part % substitutes_local)
+        del substitutes_local
+    del d_steps
+
+    # Write VNF resources
+    vnf_resources = ''
+    for key in tc_result.get('resources', {}).keys():
+        for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
+            count = 0
+            for resource_type, resource_size in vnfc_resources.items():
+                size = len(vnfc_resources.items())
+                if count % size == 0:
+                    vnf_resources_some_part = '''
+                                                             <tr>
+                                                                 <td rowspan="%(size)s"> %(vnfc)s   </td>
+                                                                 <td rowspan="%(size)s"> %(vnfcd)s   </td>
+                                                                 <td> %(resource_type)s   </td>
+                                                                 <td> %(resource_size)s   </td>
+                                                                 <td> %(resource_size)s   </td>
+                                                                 <td> %(status)s   </td>
+                                                             </tr>
+                                 '''
+                    substitutes_local = {'size': size, 'vnfc': str(key), 'vnfcd': str(vnfc_id),
+                                         'resource_type': str(resource_type), 'resource_size': str(resource_size),
+                                         'status': "OK"}
+                    vnf_resources = vnf_resources + (vnf_resources_some_part % substitutes_local)
+                else:
+                    vnf_resources_some_part = '''
+                                                             <tr>
+                                                                 <td> %(resource_type)s   </td>
+                                                                 <td> %(resource_size)s   </td>
+                                                                 <td> %(resource_size)s   </td>
+                                                                 <td> %(status)s   </td>
+                                                             </tr>
+                                 '''
+                    substitutes_local = {'resource_type': str(resource_type), 'resource_size': str(resource_size),
+                                         'status': "OK"}
+                    vnf_resources = vnf_resources + (vnf_resources_some_part % substitutes_local)
+                count += 1
+
+    # Check for scaling info
+    scaling_info = ''
+    written_header = False
+    for direction in ['out', 'in', 'up', 'down']:
+        scale_type = 'scaling_' + direction
+        if bool(tc_result[scale_type]):
+
+            if not written_header:
+                scaling_header = '''
+                        <div class="col-xs-12">
+
+                            <h4><a href="#scaling_results" data-toggle="collapse">&#65516; Scaling results &#65516;</a></h4>
+
+                            <div id="scaling_results" class = "collapse">
+                                <table class = "table table-bordered table-striped table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>Scaling type</th>
+                                            <th>Status</th>
+                                            <th>Scaling level</th>
+                                            <th>Traffic before scaling</th>
+                                            <th>Traffic after scaling</th>
+                                        </tr>
+                '''
+                scaling_info = scaling_info + scaling_header
+
+                written_header = True
+
+            # Build the scale table row
+            status = tc_result[scale_type].get('status', 'N/A')
+            scale_level = tc_result[scale_type].get('level', 'N/A')
+
+            load_before_scaling = tc_result[scale_type].get('traffic_before')
+            load_after_scaling = tc_result[scale_type].get('traffic_after')
+
+            percent_before_scaling = constants.traffic_load_percent_mapping.get(load_before_scaling, 'N/A')
+            percent_after_scaling = constants.traffic_load_percent_mapping.get(load_after_scaling, 'N/A')
+
+            traffic_before_scaling = str(percent_before_scaling) + ' %'
+            traffic_after_scaling = str(percent_after_scaling) + ' %'
+
+            scaling_results_some_part = '''
+                                    <tr>
+                                        <td> %(scale_type)s </td>
+                                        <td> %(status)s </td>
+                                        <td> %(scale_level)s </td>
+                                        <td> %(traffic_before_scaling)s </td>
+                                        <td> %(traffic_after_scaling)s </td>
+                                    </tr>
+            '''
+
+            substitutes_local = {"scale_type": scale_type, "status": status, "scale_level": scale_level,
+                                 "traffic_before_scaling": traffic_before_scaling,
+                                 "traffic_after_scaling": traffic_after_scaling}
+            scaling_info = scaling_info + (scaling_results_some_part % substitutes_local)
+
+    if written_header:
+        scaling_results_last_part = '''
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    '''
+        scaling_info = scaling_info + scaling_results_last_part
+
+    # Write timestamps
+    time_stamps = ''
+    for event_name, timestamp in tc_result.get('timestamps', {}).items():
+        time_stamps_part = '''
+                                    <tr>
+                                        <td> %(event_name)s </td>
+                                        <td> %(time_stamp)s </td>
+                                    </tr>
+        '''
+        substitutes_local = {"event_name" : str(event_name), "time_stamp": str(timestamp)}
+        time_stamps = time_stamps + (time_stamps_part % substitutes_local)
+
+    # Write test case events
+    events = ''
+    for event_name in tc_result.get('events', {}).keys():
+        try:
+            event_duration = round(tc_result['events'][event_name].get('duration'), 1)
+        except TypeError:
+            event_duration = 'N/A'
+        event_details = tc_result['events'][event_name].get('details', '')
+
+        events_part = '''
+                                    <tr>
+                                        <td> %(event_name)s </td>
+                                        <td> %(event_duration)s </td>
+                                        <td> %(event_details)s </td>
+                                    </tr>
+        '''
+        substitutes_local = {"event_name": str(event_name), "event_duration": str(event_duration),
+                             "event_details": str(event_details)}
+        events = events + (events_part % substitutes_local)
+
+    with open("jquery.min.js", 'r') as f:
+        jquery_js_data = f.read()
+    with open("bootstrap.min.js", 'r') as f:
+        bootstrap_js_data = f.read()
+
+    substitutes = {
+        'tc_name': str(tc_exec_request['tc_name']), 'start_time': start_time, "bootstrap_css_file": bootstrap_css,
+        'logo': logo_base64, 'color': color, 'result': result, "run_id": str(tc_exec_request['run_id']),
+        "suite_name": str(tc_exec_request['suite_name']), "tc_start_time": str(tc_result['tc_start_time']),
+        "tc_end_time": str(tc_result['tc_end_time']), "tc_duration": str(tc_result['tc_duration']),
+        "error_info": str(tc_result['error_info']), "mano_type": str(tc_input.get('mano', {}).get('type')),
+        "mano_name": str(tc_input.get('mano', {}).get('name', 'N/A')),
+        "vim_type": str(tc_input.get('vim', {}).get('type')),
+        "vim_vim": str(tc_input.get('vim', {}).get('vim', 'N/A')),
+        "traffic_type": str(tc_input.get('traffic', {}).get('type')),
+        "traffic_vim": str(tc_input.get('traffic', {}).get('vim', 'N/A')), "steps_summary_body": steps_summary_body,
+        "vnf_resources": vnf_resources, "scaling_info": scaling_info, "time_stamps": time_stamps, "events": events,
+        "jquery_js_data": jquery_js_data, "bootstrap_js_data":bootstrap_js_data}
+
     with open(report_file_path, 'w') as report_file:
+        report_file.write(template % substitutes)
+    webbrowser.open_new_tab(report_file_path)
 
-        # Write HTML header
-        report_file.write('<!DOCTYPE html> \n')
-        report_file.write('<html> \n ')
-        report_file.write('<head> \n ')
-        report_file.write('<title> VNF/NS TEST REPORT </title> \n ')
-
-        ## Table style section
-        report_file.write('<style> \n')
-        report_file.write("table {")
-        report_file.write("    font-family: arial, sans-serif; \n")
-        report_file.write("    border-collapse: collapse; \n")
-        report_file.write("    width: 25% \n")
-        report_file.write("} \n")
-
-        report_file.write("td { \n")
-        report_file.write("    border: 1px solid black; \n")
-        report_file.write("    text-align: center; \n")
-        report_file.write("    padding: 8px; \n")
-        report_file.write("} \n")
-
-        report_file.write("th { \n")
-        report_file.write("    border: 2px solid black; \n")
-        report_file.write("    text-align: center; \n")
-        report_file.write("    padding: 8px; \n")
-        report_file.write("    background-color: white")
-        report_file.write("} \n")
-
-        report_file.write("tr:nth-child(even) { \n")
-        report_file.write("    background-color: #dddddd \n")
-        report_file.write("} \n")
-
-        report_file.write("img { \n")
-        report_file.write("width:100%; \n")
-        report_file.write("} \n")
-        report_file.write('</style>')
-
-        report_file.write('</head> \n ')
-
-        report_file.write('<body>')
-
-        report_file.write('<h1> VNF/NS TEST REPORT </h1> \n ')
-
-        report_file.write('<img src="/var/log/vnflcv/logo_Spirent.PNG" alt="Spirent logo" style="width:100px;height:100px;">')
-
-        # Write run details
-        report_file.write('<h2> RUN DETAILS </h2> \n ')
-        report_file.write("<table> \n")
-
-        ## Write table header
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>Aspect</th> \n")
-        report_file.write("        <th>Value</th> \n")
-        report_file.write("    </tr> \n")
-
-        ## Write table body
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>Run ID</td> \n")
-        report_file.write("        <td>" + tc_exec_request['run_id'] + "</td> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>Suite name</td> \n")
-        report_file.write("        <td>" + tc_exec_request['suite_name'] + "</td> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>TC name</td> \n")
-        report_file.write("        <td>" + tc_exec_request['tc_name'] + "</td> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>TC start time</td> \n")
-        report_file.write("        <td>" + tc_result['tc_start_time'] + "</td> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>TC end time</td> \n")
-        report_file.write("        <td>"+ tc_result['tc_end_time'] + "</td> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>TC duration</td> \n")
-        report_file.write("        <td>"+ tc_result['tc_duration'] + "</td> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("</table \n")
-
-        # Write steps summary
-        report_file.write('<h2> Steps Summary </h2> \n ')
-
-        report_file.write("<table> \n")
-
-        ## Write table header
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>Step #</th> \n")
-        report_file.write("        <th>Name</th> \n")
-        report_file.write("        <th>Description</th> \n")
-        report_file.write("        <th>Status</th> \n")
-        report_file.write("    </tr> \n")
-
-        ## Write table body
-        for step_index, step_details in tc_result.get('steps', {}).items():
-            report_file.write("    <tr> \n")
-            report_file.write("        <td>"+ step_index +"</td> \n")
-            report_file.write("        <td>" + step_details['name'] + "</td> \n")
-            report_file.write("        <td>" + step_details['description'] + "</td> \n")
-            report_file.write("        <td>" + step_details['status'] + "</td> \n")
-            report_file.write("    </tr> \n")
-
-        report_file.write("</table> \n")
-
-
-
-        # Write test case environment
-
-        report_file.write('<h2> Test Case Environment  </h2> \n ')
-        report_file.write("<table> \n")
-
-        ## Write table header
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>Module</th> \n")
-        report_file.write("        <th>Type</th> \n")
-        report_file.write("    </tr> \n")
-
-        ## Write table body
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>MANO</th> \n")
-        report_file.write("        <td>"+ tc_input.get('mano', {}).get('type') +"</th> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>VIM</th> \n")
-        report_file.write("        <td>OpenStack</th> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>VNF</th> \n")
-        report_file.write("        <td>vCPE</th> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>Traffic</th> \n")
-        report_file.write("        <td>"+str(tc_input.get('traffic', {}).get('type'))+"</th> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("</table> \n")
-
-        # Check for scaling info
-        print_scaling_results = False
-        wrote_header = False
-        for direction in ['out', 'in', 'up', 'down']:
-            scale_type = 'scaling_' + direction
-            if bool(tc_result[scale_type]):
-                # Set flag so the scaling results table will be printed
-                print_scaling_results = True
-
-
-                if not wrote_header:
-                    report_file.write('<h2> Scaling results (traffic values are expressed as percent of line rate) </h2> \n ')
-                    report_file.write("<table> \n")
-
-                    ## Write table header
-                    report_file.write("    <tr> \n")
-                    report_file.write("        <th>'Scaling type'</th> \n")
-                    report_file.write("        <th>'Status'> \n")
-                    report_file.write("        <th>'Scaling level'> \n")
-                    report_file.write("        <th>'Traffic before scaling'> \n")
-                    report_file.write("        <th>'Traffic after scaling'> \n")
-                    report_file.write("    </tr> \n")
-                    wrote_header = True
-
-                # Build the scale table row
-                status = tc_result[scale_type].get('status', 'N/A')
-                scale_level = tc_result[scale_type].get('level', 'N/A')
-
-                load_before_scaling = tc_result[scale_type].get('traffic_before')
-                load_after_scaling = tc_result[scale_type].get('traffic_after')
-
-                percent_before_scaling = constants.traffic_load_percent_mapping.get(load_before_scaling, 'N/A')
-                percent_after_scaling = constants.traffic_load_percent_mapping.get(load_after_scaling, 'N/A')
-
-                traffic_before_scaling = str(percent_before_scaling) + ' %'
-                traffic_after_scaling = str(percent_after_scaling) + ' %'
-
-                # Add the row to the table
-                report_file.write("    <tr> \n")
-                report_file.write("        <td>" + scale_type + "</th> \n")
-                report_file.write("        <td>" + status + "</th> \n")
-                report_file.write("        <td>" + scale_level + "</th> \n")
-                report_file.write("        <td>" + traffic_before_scaling + "</th> \n")
-                report_file.write("        <td>" + traffic_after_scaling + "</th> \n")
-                report_file.write("    </tr> \n")
-
-
-        # Write test case events
-
-        report_file.write('<h2> Events  </h2> \n ')
-        report_file.write("<table> \n")
-
-        ## Write table header
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>Event</th> \n")
-        report_file.write("        <th>Duration (sec) </th> \n")
-        report_file.write("        <th>Details</th> \n")
-        report_file.write("    </tr> \n")
-
-        for event_name in tc_result.get('events', {}).keys():
-            try:
-                event_duration = round(tc_result['events'][event_name].get('duration'), 1)
-            except TypeError:
-                event_duration = 'N/A'
-            event_details = tc_result['events'][event_name].get('details', '')
-
-            ## Write table body
-            report_file.write("    <tr> \n")
-            report_file.write("        <td>" + event_name + "</th> \n")
-            report_file.write("        <td>" + event_duration + "</th> \n")
-            report_file.write("        <td>" + event_details + "</th> \n")
-            report_file.write("    </tr> \n")
-
-        report_file.write("</table> \n")
-
-        # Write timestamps
-        report_file.write('<h2> Timestamps  </h2> \n ')
-        report_file.write("<table> \n")
-
-        ## Write table header
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>Event</th> \n")
-        report_file.write("        <th>Timestamp (epoch time) </th> \n")
-        report_file.write("    </tr> \n")
-
-        for event_name, timestamp in tc_result.get('timestamps', {}).items():
-            report_file.write("    <tr> \n")
-            report_file.write("        <td>" + event_name + "</th> \n")
-            report_file.write("        <td>" + timestamp + "</th> \n")
-            report_file.write("    </tr> \n")
-
-        report_file.write("</table> \n")
-
-        # Write VNF resources
-        report_file.write('<h2> VNF resources  </h2> \n ')
-        report_file.write("<table> \n")
-
-        ## Write table header
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>VNF</th> \n")
-        report_file.write("        <th>VNFC</th> \n")
-        report_file.write("        <th>Resource type </th> \n")
-        report_file.write("        <th>Expected size </th> \n")
-        report_file.write("        <th>Actual size </th> \n")
-        report_file.write("        <th>Validation</th> \n")
-        report_file.write("    </tr> \n")
-
-        # for key in tc_result.get('resources', {}).keys():
-        #     for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
-        #         for resource_type, resource_size in vnfc_resources.items():
-
-        report_file.write("</table> \n")
-
-        #Write test case results
-
-        report_file.write(" Test case results ")
-        report_file.write("<table> \n")
-
-        ## Write table header
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <th>Overall status</th> \n")
-        report_file.write("        <th>Error info</th> \n")
-        report_file.write("    </tr> \n")
-
-        ## Write table body
-
-        report_file.write("    <tr> \n")
-        report_file.write("        <td>" + tc_result['overall_status'] + "</th> \n")
-        report_file.write("        <td>" + tc_result['error_info'] + "</th> \n")
-        report_file.write("    </tr> \n")
-
-        report_file.write("</table> \n")
-
-        # # Write VNF resources
-        # report_file.write('* VNF resources:\n')
-        # t_outside = prettytable.PrettyTable(
-        #                                  ['VNF', 'VNFC', 'Resource type', 'Expected size', 'Actual size', 'Validation'],
-        #                                  hrules=prettytable.ALL)
-        # t_outside.max_width = 16
-        # for key in tc_result.get('resources', {}).keys():
-        #     for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
-        #         row = [key, vnfc_id]
-        #         # t_inside = [prettytable.PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
-        #         t_inside = dict()
-        #         t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-        #         t_inside['Expected size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-        #         t_inside['Actual size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-        #         t_inside['Validation'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-        #         for resource_type, resource_size in vnfc_resources.items():
-        #             t_inside['Resource type'].add_row([resource_type])
-        #             t_inside['Expected size'].add_row([resource_size])
-        #             t_inside['Actual size'].add_row([resource_size])
-        #             t_inside['Validation'].add_row(['OK'])
-        #         row.append(t_inside['Resource type'])
-        #         row.append(t_inside['Expected size'])
-        #         row.append(t_inside['Actual size'])
-        #         row.append(t_inside['Validation'])
-        #         t_outside.add_row(row)
-        # report_file.write(t_outside.get_string())
-        # report_file.write('\n\n')
-        #
-        # # Write test case results
-        # report_file.write('*** Test case results ***')
-        # report_file.write('\n\n')
-        # t = prettytable.PrettyTable(['Overall status', 'Error info'])
-        # t.add_row([tc_result['overall_status'], tc_result['error_info']])
-        # report_file.write(t.get_string())
-        # report_file.write('\n\n')
-
-
-
-        report_file.write('</body>')
-        report_file.write('</html>')
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict = dict()
@@ -502,7 +378,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
                              tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
     durations['start'] = tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
-                        tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
+                         tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
     durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
                         tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration')
     durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \
