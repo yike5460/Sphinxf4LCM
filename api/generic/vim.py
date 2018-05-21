@@ -291,37 +291,89 @@ class Vim(object):
         return self.vim_adapter.query_virtualised_compute_resource(query_compute_filter)
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_termination(self, identifier):
+    def trigger_compute_resource_terminate(self, compute_id):
         """
-        This function triggers the termination of one or more instantiated virtualised compute resource(s).
+        This function triggers the execution of the "terminate" command one one or more instantiated virtualised compute
+        resource(s).
 
-        :param identifier:  Identifier(s) of the virtualised compute resource(s) to be terminated.
+        :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.
         :return:            Identifier of operation.
         """
 
-        return self.vim_adapter.trigger_compute_resource_termination(identifier)
+        return self.vim_adapter.trigger_compute_resource_terminate(compute_id)
 
     @log_entry_exit(LOG)
-    def terminate_virtualised_compute_resources(self, identifier):
+    def terminate_virtualised_compute_resources(self, compute_id):
         """
         This function allows de-allocating and terminating one or more instantiated virtualised compute resource(s).
 
         This function was written in accordance with section 7.3.1.5 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).
 
-        :param identifier:  Identifier(s) of the virtualised compute resource(s) to be terminated.
+        :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.
         :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.
         """
 
-        operation_id = self.trigger_compute_resource_termination(identifier)
+        operation_id = self.trigger_compute_resource_terminate(compute_id)
 
         operation_status = self.poll_for_operation_completion(operation_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
-                                                              max_wait_time=constants.COMPUTE_TERMINATION_TIMEOUT,
+                                                              max_wait_time=constants.COMPUTE_TERMINATE_TIMEOUT,
                                                               poll_interval=constants.POLL_INTERVAL)
 
         if operation_status != constants.OPERATION_SUCCESS:
             raise VimGenericError('Virtualised compute resource termination failed')
-        return identifier
+        return compute_id
+
+    @log_entry_exit(LOG)
+    def trigger_compute_resource_operate(self, compute_id, compute_operation, compute_operation_input_data=None):
+        """
+        This function triggers the execution of the "operate" command on one or more instantiated virtualised compute
+        resource(s).
+
+        :param compute_id:                      Identifier of the virtualised compute resource to operate.
+        :param compute_operation:               Type of operation to perform on the virtualised compute resource.
+                                                Possible values are: "START", "STOP", "PAUSE", "SUSPEND", "REBOOT",
+                                                "CREATE_SNAPSHOT", and "DELETE_SNAPSHOT".
+        :param compute_operation_input_data:    Additional parameters associated to the operation to perform. For
+                                                example, if the operation is "delete snapshot", information about what
+                                                snapshot identifier to delete is provided.
+        :return:                                Identifier of the operation.
+        """
+        return self.vim_adapter.trigger_compute_resource_operate(compute_id, compute_operation,
+                                                                 compute_operation_input_data)
+
+    @log_entry_exit(LOG)
+    def operate_virtualised_compute_resource(self, compute_id, compute_operation, compute_operation_input_data=None):
+        """
+        This function allows executing specific operation command on instantiated virtualised compute resources.
+
+        This function was written in accordance with section 7.3.1.6 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).
+
+        :param compute_id:                      Identifier of the virtualised compute resource to operate.
+        :param compute_operation:               Type of operation to perform on the virtualised compute resource.
+                                                Possible values are: "START", "STOP", "PAUSE", "SUSPEND", "REBOOT",
+                                                "CREATE_SNAPSHOT", and "DELETE_SNAPSHOT".
+        :param compute_operation_input_data:    Additional parameters associated to the operation to perform. For
+                                                example, if the operation is "delete snapshot", information about what
+                                                snapshot identifier to delete is provided.
+        :return compute_data:                   Element containing information on the new status of the operated
+                                                virtualised compute resource.
+        :return compute_operation_output_data:  Optional. Set of output values depending on the type of operation. For
+                                                instance, when a snapshot operation is requested, this field provides
+                                                information about the identifier of the snapshot and its location.
+        """
+        operation_id = self.trigger_compute_resource_operate(compute_id, compute_operation,
+                                                             compute_operation_input_data)
+
+        operation_status = self.poll_for_operation_completion(operation_id,
+                                                              final_states=constants.OPERATION_FINAL_STATES,
+                                                              max_wait_time=constants.COMPUTE_OPERATE_TIMEOUT,
+                                                              poll_interval=constants.POLL_INTERVAL)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            raise VimGenericError('Virtualised compute resource operation failed')
+
+        return self.query_virtualised_compute_resource(query_compute_filter={'compute_id': compute_id})
 
     @log_entry_exit(LOG)
     def query_virtualised_network_resource(self, query_network_filter):
