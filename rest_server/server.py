@@ -176,6 +176,7 @@ def do_exec():
                 tc_input['mano']['operate_params'] = resource_params.get('operate_params', {})
                 tc_input['mano']['scale_params'] = resource_params.get('scale_params', {})
                 tc_input['mano']['sap_data'] = resource_params.get('sap_data', {})
+                tc_input['mano']['alarm_list_params'] = resource_params.get('alarm_list_params', {})
                 tc_input['vnfd_id'] = resource_params.get('vnfd_id')
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
