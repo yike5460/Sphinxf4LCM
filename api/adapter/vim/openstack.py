@@ -38,7 +38,7 @@ class OpenstackVimAdapter(object):
     """
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
-                 project_domain_name=None, user_domain_name=None, **kwargs):
+                 project_domain_name=None, user_domain_name=None, verify=False, **kwargs):
         """
         Create the Heat, Neutron and Nova clients.
         """
@@ -50,7 +50,8 @@ class OpenstackVimAdapter(object):
                                                             identity_api_version=identity_api_version,
                                                             project_name=project_name,
                                                             project_domain_name=project_domain_name,
-                                                            user_domain_name=user_domain_name)
+                                                            user_domain_name=user_domain_name,
+                                                            verify=verify)
 
             self.neutron_client = os_client_config.make_client('network',
                                                                auth_url=auth_url,
@@ -59,7 +60,8 @@ class OpenstackVimAdapter(object):
                                                                identity_api_version=identity_api_version,
                                                                project_name=project_name,
                                                                project_domain_name=project_domain_name,
-                                                               user_domain_name=user_domain_name)
+                                                               user_domain_name=user_domain_name,
+                                                               verify=verify)
 
             self.nova_client = os_client_config.make_client('compute',
                                                             auth_url=auth_url,
@@ -68,7 +70,8 @@ class OpenstackVimAdapter(object):
                                                             identity_api_version=identity_api_version,
                                                             project_name=project_name,
                                                             project_domain_name=project_domain_name,
-                                                            user_domain_name=user_domain_name)
+                                                            user_domain_name=user_domain_name,
+                                                            verify=verify)
 
             self.cinder_client = os_client_config.make_client('volume',
                                                               auth_url=auth_url,
@@ -77,7 +80,8 @@ class OpenstackVimAdapter(object):
                                                               identity_api_version=identity_api_version,
                                                               project_name=project_name,
                                                               project_domain_name=project_domain_name,
-                                                              user_domain_name=user_domain_name)
+                                                              user_domain_name=user_domain_name,
+                                                              verify=verify)
 
             self.glance_client = os_client_config.make_client('image',
                                                               auth_url=auth_url,
@@ -86,7 +90,8 @@ class OpenstackVimAdapter(object):
                                                               identity_api_version=identity_api_version,
                                                               project_name=project_name,
                                                               project_domain_name=project_domain_name,
-                                                              user_domain_name=user_domain_name)
+                                                              user_domain_name=user_domain_name,
+                                                              verify=verify)
 
         except Exception as e:
             LOG.exception(e)
@@ -99,7 +104,7 @@ class OpenstackVimAdapter(object):
         else:
             operation_type, resource_id = operation_id
 
-        if operation_type == 'server_terminate':
+        if operation_type == 'compute_terminate':
             try:
                 self.nova_client.servers.get(resource_id)
             except NotFound:
@@ -111,6 +116,32 @@ class OpenstackVimAdapter(object):
             else:
                 LOG.debug('Resource ID %s still present in VIM, not as expected' % resource_id)
                 return constants.OPERATION_PENDING
+
+        if operation_type == 'compute_stop':
+            try:
+                server_details = self.server_get(resource_id)
+                server_status = server_details['status']
+            except Exception as e:
+                LOG.exception(e)
+                return constants.OPERATION_PENDING
+            if server_status == 'SHUTOFF':
+                return constants.OPERATION_SUCCESS
+            else:
+                return constants.OPERATION_PENDING
+
+        if operation_type == 'compute_start':
+            try:
+                server_details = self.server_get(resource_id)
+                server_status = server_details['status']
+            except Exception as e:
+                LOG.exception(e)
+                return constants.OPERATION_PENDING
+            if server_status == 'ACTIVE':
+                return constants.OPERATION_SUCCESS
+            else:
+                return constants.OPERATION_PENDING
+
+        raise OpenstackVimAdapterError('Cannot get operation status for operation type "%s"' % operation_type)
 
     @log_entry_exit(LOG)
     def create_compute_resource_reservation(self, resource_group_id, compute_pool_reservation=None,
@@ -191,13 +222,33 @@ class OpenstackVimAdapter(object):
         return virtual_compute
 
     @log_entry_exit(LOG)
-    def trigger_compute_resource_termination(self, identifier):
+    def trigger_compute_resource_terminate(self, compute_id):
         try:
-            self.nova_client.servers.force_delete(identifier)
+            self.nova_client.servers.force_delete(compute_id)
         except Exception as e:
             LOG.exception(e)
-            raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (identifier, e))
-        return 'server_terminate', identifier
+            raise OpenstackVimAdapterError('Unable to delete server %s - %s' % (compute_id, e))
+        return 'compute_terminate', compute_id
+
+    @log_entry_exit(LOG)
+    def trigger_compute_resource_operate(self, compute_id, compute_operation, compute_operation_input_data=None):
+        if compute_operation == 'STOP':
+            try:
+                self.nova_client.servers.stop(compute_id)
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenstackVimAdapterError('Unable to stop server %s - %s' % (compute_id, e))
+            return 'compute_stop', compute_id
+
+        if compute_operation == 'START':
+            try:
+                self.nova_client.servers.start(compute_id)
+            except Exception as e:
+                LOG.exception(e)
+                raise OpenstackVimAdapterError('Unable to start server %s - %s' % (compute_id, e))
+            return 'compute_start', compute_id
+
+        raise NotImplementedError('Cannot perform operation "%s"' % compute_operation)
 
     @log_entry_exit(LOG)
     def port_list(self, **query_filter):
