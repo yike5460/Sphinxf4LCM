@@ -188,9 +188,14 @@ def do_exec():
                 tc_input['operate_vnf_data'] = resource_params.get('operate_vnf_data')
                 tc_input['nsd'] = resource_params.get('nsd')
                 tc_input['nsd_params'] = resource_params.get('nsd_params', {})
-                if tc_input['nsd_params'].get('vendor_nsd'):
-                    with open(tc_input['nsd_params']['vendor_nsd'], 'r') as nsd_file:
-                        tc_input['nsd_params']['vendor_nsd'] = nsd_file.read()
+                if tc_input['nsd_params'].get('vendor_nsd_file'):
+                    try:
+                        with open(tc_input['nsd_params']['vendor_nsd_file'], 'r') as nsd_file:
+                            tc_input['nsd_params']['vendor_nsd'] = nsd_file.read()
+                            tc_input['nsd_params'].pop('vendor_nsd_file')
+                    except Exception as e:
+                        response.status = 504
+                        return {'Error': '%s' % e}
                 tc_input[resource_type]['generic_config'] = dict()
                 for timeout_timer in timeout_timers:
                     timeout = _read_config(timeout_timer)
