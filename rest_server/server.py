@@ -116,6 +116,7 @@ def execute_test(tc_exec_request, tc_input, queue):
         reporting.kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result)
 
     reporting.report_test_case(report_file_name, tc_exec_request, tc_input, tc_result)
+
     reporting.html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result)
 
 @route('/version')
