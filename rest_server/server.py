@@ -185,6 +185,11 @@ def do_exec():
                 tc_input['scale_to_level_list'] = resource_params.get('scale_to_level_list')
                 tc_input['scale_from_level_list'] = resource_params.get('scale_from_level_list')
                 tc_input['operate_vnf_data'] = resource_params.get('operate_vnf_data')
+                tc_input['nsd'] = resource_params.get('nsd')
+                tc_input['nsd_params'] = resource_params.get('nsd_params', {})
+                if tc_input['nsd_params'].get('vendor_nsd'):
+                    with open(tc_input['nsd_params']['vendor_nsd'], 'r') as nsd_file:
+                        tc_input['nsd_params']['vendor_nsd'] = nsd_file.read()
                 tc_input[resource_type]['generic_config'] = dict()
                 for timeout_timer in timeout_timers:
                     timeout = _read_config(timeout_timer)
