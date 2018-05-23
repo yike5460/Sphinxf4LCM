@@ -48,7 +48,7 @@
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="/">Lab Environment</a></li>
-            <li class="dropdown active">
+            <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Lab Elements<span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="/mano/">Management & Orchestration</a></li>
@@ -61,7 +61,7 @@
             <li><a href="/additional/">Additional Parameters</a></li>
             <li><a href="/twister/" target="_blank">Test Execution</a></li>
             <li><a href="/kibana/" target="_blank">Analytics</a></li>
-            <li><a href="/reports/">Reports</a></li>
+            <li class="active"><a href="/reports/">Reports</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -72,32 +72,26 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-          <h2>Delete VIM {{ vim['name'] }}?</h2>
+          <h2>Available Reports</h2>
           <table class="table table-striped">
-                <form action="/vim/delete/" method="post">
-                  <% if vim['type'] == 'openstack': %>
-                    <tr><td>User Domain Name:</td><td><input type="text" name="user_domain_name" style="width: 200px" readonly value={{vim['user_domain_name']}}></td></tr>
-                    <tr><td>Username:</td><td><input type="text" name="username" style="width: 200px" readonly value={{vim['username']}}></td></tr>
-                    <tr><td>Password:</td><td><input type="password" name="password" style="width: 200px" readonly value={{vim['password']}}></td></tr>
-                    <tr><td>Project Domain Name:</td><td><input type="text" name="project_domain_name" style="width: 200px" readonly value={{vim['project_domain_name']}}></td></tr>
-                    <tr><td>Project Name:</td><td><input type="text" name="project_name" style="width: 200px" readonly value={{vim['project_name']}}></td></tr>
-                    <tr><td>Auth URL:</td><td><input type="text" name="auth_url" style="width: 200px" readonly value={{vim['auth_url']}}></td></tr>
-                    <tr><td>Identity API Version:</td><td><input type="number" name="identity_api_version" style="width: 200px" readonly value={{vim['identity_api_version']}}></td></tr>
-                  <% end %>
-                  <input type="hidden" name="confirmed" value="yes">
-                  <input type="hidden" name="name" value={{vim['name']}}>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+              </tr>
+            </thead>
+          <!--div class="table-responsive" -->
+              <% for i in range(0, len(reports_list)): %>
+                <tr>
+                  <td>
+                    {{ i+1 }}
+                  </td>
+                  <td>
+                    <a href="/reports/{{ reports_list[i] }}">{{ reports_list[i] }}</a>
+                  </td>
+                </tr>
+              <% end %>
           </table>
-            <div class="btn-group">
-                  <input value="Delete" type="submit" class="btn btn-default">
-                  </input>
-                </form>
-            </div>
-            <div class="btn-group">
-              <form action="/vim/">
-                <input type="submit" value="Cancel" class="btn btn-default">
-                </input>
-              </form>
-            </div>
       </div>
 
     </div> <!-- /container -->
