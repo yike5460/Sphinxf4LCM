@@ -499,9 +499,8 @@ def list_reports():
 
     def get_basename(absolute_path):
         return os.path.splitext(os.path.basename(absolute_path))[0]
+
     report_names = map(get_basename, report_files_list)
-
-
     report_names.sort()
 
     return {'reports': report_names}
