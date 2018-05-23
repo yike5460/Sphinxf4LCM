@@ -26,7 +26,7 @@ SELF_DIR = os.path.dirname(os.path.realpath(__file__))
 # Names of file used to build the HTML report
 REPORT_TEMPLATE_NAME = 'report_template.html'
 BOOTSTRAP_CSS_NAME = 'bootstrap.min.css'
-LOGO_FILE_NAME = 'logo_Spirent.PNG'
+LOGO_FILE_NAME = 'logo_spirent.png'
 JQUERY_JS_NAME = 'jquery.min.js'
 BOOTSTRAP_JS_NAME = 'bootstrap.min.js'
 
@@ -212,8 +212,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                             <td>%(step_description)s</td>
                                             <td>%(step_duration)s</td>
                                             <td>%(step_status)s</td>
-                                        </tr>
-         '''
+                                        </tr>'''
         substitutes_local = {'step_index': str(step_index),
                              'step_name': str(step_details['name']),
                              'step_description': str(step_details['description']),
@@ -237,8 +236,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                                                  <td>%(resource_size)s</td>
                                                                  <td>%(resource_size)s</td>
                                                                  <td>%(status)s</td>
-                                                             </tr>
-                                 '''
+                                                             </tr>'''
                     substitutes_local = {'size': size,
                                          'vnfc': str(key),
                                          'vnfcd': str(vnfc_id),
@@ -253,8 +251,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                                                  <td>%(resource_size)s</td>
                                                                  <td>%(resource_size)s</td>
                                                                  <td>%(status)s</td>
-                                                             </tr>
-                                 '''
+                                                             </tr>'''
                     substitutes_local = {'resource_type': str(resource_type),
                                          'resource_size': str(resource_size),
                                          'status': 'OK'}
@@ -283,8 +280,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                             <th>Scaling level</th>
                                             <th>Traffic before scaling</th>
                                             <th>Traffic after scaling</th>
-                                        </tr>
-                '''
+                                        </tr>'''
                 scaling_info = scaling_info + scaling_header
 
                 written_header = True
@@ -309,8 +305,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                         <td>%(scale_level)s</td>
                                         <td>%(traffic_before_scaling)s</td>
                                         <td>%(traffic_after_scaling)s</td>
-                                    </tr>
-            '''
+                                    </tr>'''
 
             substitutes_local = {'scale_type': scale_type,
                                  'status': status,
@@ -324,8 +319,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                    '''
+                    </div>'''
         scaling_info = scaling_info + scaling_results_last_part
 
     # Write timestamps
@@ -335,8 +329,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                     <tr>
                                         <td>%(event_name)s</td>
                                         <td>%(time_stamp)s</td>
-                                    </tr>
-        '''
+                                    </tr>'''
         substitutes_local = {'event_name': str(event_name), 'time_stamp': str(timestamp)}
         time_stamps = time_stamps + (time_stamps_part % substitutes_local)
 
@@ -354,8 +347,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                         <td>%(event_name)s</td>
                                         <td>%(event_duration)s</td>
                                         <td>%(event_details)s</td>
-                                    </tr>
-        '''
+                                    </tr>'''
         substitutes_local = {'event_name': str(event_name),
                              'event_duration': str(event_duration),
                              'event_details': str(event_details)}
