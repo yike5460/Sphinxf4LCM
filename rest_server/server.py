@@ -15,10 +15,11 @@ import logging
 import os
 import uuid
 from datetime import datetime
+from glob import glob
 from multiprocessing import Process, Queue, Event
 from threading import Lock
 
-from bottle import route, request, response, run
+from bottle import route, request, response, run, static_file
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
@@ -33,6 +34,7 @@ tc_inputs = dict()
 
 json_file_path = '/etc/vnflcv'
 config_file_name = 'config.json'
+reports_dir = '/var/log/vnflcv'
 
 lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
 lock = dict()
@@ -490,6 +492,26 @@ def trigger_step(execution_id):
         step_trigger.set()
         response.status = 200
         return {}
+
+
+@route('/v1.0/reports')
+def list_reports():
+    extension = request.query.type or 'html'
+    report_files_list = glob('%s/*.%s' % (reports_dir, extension))
+
+    def get_basename(absolute_path):
+        return os.path.splitext(os.path.basename(absolute_path))[0]
+
+    report_names = map(get_basename, report_files_list)
+    report_names.sort()
+
+    return {'reports': report_names}
+
+
+@route('/v1.0/reports/<name>')
+def get_report(name):
+    extension = request.query.type or 'html'
+    return static_file('%s.%s' % (name, extension), root=os.path.abspath(reports_dir))
 
 
 run(host='0.0.0.0', port=8080, server='paste')
