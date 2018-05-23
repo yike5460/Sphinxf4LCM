@@ -11,6 +11,7 @@
 
 
 import base64
+import json
 import logging
 import os
 
@@ -44,20 +45,23 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
 
         # Write steps summary
         report_file.write('* Steps summary:\n')
-        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Status'])
+        t = prettytable.PrettyTable(['Step #', 'Name', 'Description', 'Duration (sec)', 'Status'],
+                                    hrules=prettytable.ALL)
+        t.max_width = 32
         for step_index, step_details in tc_result.get('steps', {}).items():
-            t.add_row([step_index, step_details['name'], step_details['description'], step_details['status']])
+            t.add_row([step_index, step_details['name'], step_details['description'],
+                       '%.3f' % step_details.get('duration', 0), step_details['status']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
         # Write test case environment
         report_file.write('*** Test case environment ***')
         report_file.write('\n\n')
-        t = prettytable.PrettyTable(['Module', 'Type'])
-        t.add_row(['MANO', tc_input.get('mano', {}).get('type')])
-        t.add_row(['VIM', 'openstack'])
-        t.add_row(['VNF', 'vcpe'])
-        t.add_row(['Traffic', tc_input.get('traffic', {}).get('type')])
+        t = prettytable.PrettyTable(['Module', 'Type', 'Name'])
+        t.add_row(['MANO', tc_input.get('mano', {}).get('type'), tc_input.get('mano', {}).get('name', 'N/A')])
+        t.add_row(['VIM', tc_input.get('vim', {}).get('type'), tc_input.get('vim', {}).get('name', 'N/A')])
+        # t.add_row(['VNF', 'vcpe', tc_input.get('vnf', {}).get('name', 'N/A')])
+        t.add_row(['Traffic', tc_input.get('traffic', {}).get('type'), tc_input.get('traffic', {}).get('name', 'N/A')])
         report_file.write(t.get_string())
         report_file.write('\n\n')
 
@@ -121,20 +125,19 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
                 row = [key, vnfc_id]
-                # t_inside = [prettytable.PrettyTable(['resource'], border=False, header=False) for i in range(0, 4)]
                 t_inside = dict()
                 t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Expected size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Actual size'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Expected'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside['Actual'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 t_inside['Validation'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 for resource_type, resource_size in vnfc_resources.items():
                     t_inside['Resource type'].add_row([resource_type])
-                    t_inside['Expected size'].add_row([resource_size])
-                    t_inside['Actual size'].add_row([resource_size])
+                    t_inside['Expected'].add_row([resource_size])
+                    t_inside['Actual'].add_row([resource_size])
                     t_inside['Validation'].add_row(['OK'])
                 row.append(t_inside['Resource type'])
-                row.append(t_inside['Expected size'])
-                row.append(t_inside['Actual size'])
+                row.append(t_inside['Expected'])
+                row.append(t_inside['Actual'])
                 row.append(t_inside['Validation'])
                 t_outside.add_row(row)
         report_file.write(t_outside.get_string())
@@ -144,6 +147,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         report_file.write('*** Test case results ***')
         report_file.write('\n\n')
         t = prettytable.PrettyTable(['Overall status', 'Error info'])
+        t.max_width = 32
         t.add_row([tc_result['overall_status'], tc_result['error_info']])
         report_file.write(t.get_string())
         report_file.write('\n\n')
@@ -417,3 +421,15 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     except Exception as e:
         LOG.debug('Unable to communicate to ElasticSearch server: %s' % kibana_srv)
         LOG.exception(e)
+
+
+def dump_raw_json(json_file_name, tc_exec_request, tc_input, tc_result):
+    json_file_path = os.path.join(REPORT_DIR, json_file_name)
+    with open(json_file_path, 'w') as json_file:
+        raw_json = {
+            'tc_exec_request': tc_exec_request,
+            'tc_input': tc_input,
+            'tc_result': tc_result
+        }
+
+        json.dump(raw_json, json_file, indent=2)

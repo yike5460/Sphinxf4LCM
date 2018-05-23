@@ -15,7 +15,7 @@ from time import sleep
 
 from api.generic import constants
 from api.structures.objects import ScaleVnfData, ScaleToLevelData
-from test_cases import TestCase, TestRunError
+from test_cases import TestCase, TestRunError, Step
 from utils.misc import generate_name
 from utils.net import ping
 
@@ -52,7 +52,8 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
     REQUIRED_ELEMENTS = ('nsd_id', 'scale_to_level_list', 'scale_from_level_list')
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_to_level_ns', 'scale_from_level_ns', 'terminate_ns')
 
-    def run(self):
+    @Step(name='Instantiate the NS', description='Trigger NS instantiation on the NFVO')
+    def step1(self):
         LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -87,6 +88,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
+    @Step(name='Verify NS instantiation was successful',
+          description='Verify that the NFVO indicates NS instantiation operation result as successful')
+    def step2(self):
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
@@ -100,10 +104,14 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in ns_info_after_instantiation.vnf_info:
-            self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
+    @Step(name='Scale the NS to a new level',
+          description='Trigger NS scale by scaling to another existing instantiation level a VNF in the NS in NFVO with'
+                      ' an operator action')
+    def step3(self):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Trigger NS scale by scaling to another existing instantiation level a VNF in the NS in NFVO with an
         #    operator action
@@ -138,6 +146,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
+    @Step(name='Verify NS has scaled',
+          description='Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
+    def step4(self):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
@@ -159,6 +170,10 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
         self.tc_result['scaling_to_level']['status'] = 'Success'
 
+    @Step(name='Scale the NS to the initial level',
+          description='Trigger NS scale by scaling to the initial instantiation level a VNF in the NS in NFVO with an '
+                      'operator action')
+    def step5(self):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Trigger NS scale by scaling to the initial instantiation level a VNF in the NS in NFVO with an operator
         #    action
@@ -199,19 +214,22 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
         sleep(constants.INSTANCE_BOOT_TIME)
 
+    @Step(name='Verify NS has scaled',
+          description='Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
+    def step6(self):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
-        ns_info_after_scale_from_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                    'additional_param': self.tc_input['mano'].get(
-                                                                        'query_params')})
-        if not self.mano.validate_ns_instantiation_level(ns_info_after_scale_from_level,
+        self.ns_info_after_scale_from_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                         'additional_param': self.tc_input['mano'].get(
+                                                                             'query_params')})
+        if not self.mano.validate_ns_instantiation_level(self.ns_info_after_scale_from_level,
                                                          self.tc_input['scale_from_level_list'],
                                                          self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNFCs')
 
-        for vnf_info in ns_info_after_scale_from_level.vnf_info:
+        for vnf_info in self.ns_info_after_scale_from_level.vnf_info:
             self.tc_result['resources']['%s (After scale from level)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (After scale from level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -220,6 +238,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
         self.tc_result['scaling_from_level']['status'] = 'Success'
 
+    @Step(name='Verify allocated resources',
+          description='Verify that the resources allocated by the VIM have changed according to the descriptors')
+    def step7(self):
         # --------------------------------------------------------------------------------------------------------------
         # 7. Verify that the resources allocated by the VIM have changed according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
@@ -228,11 +249,14 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                                           self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
+    @Step(name='Verify all VNFC instance(s) are reachable via the management network',
+          description='Verify that all VNFC instance(s) are running and reachable via the management network')
+    def step8(self):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that all VNFC instance(s) are running and reachable via the management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that all VNFC instance(s) are running and reachable via the management network')
-        for vnf_info in ns_info_after_scale_from_level.vnf_info:
+        for vnf_info in self.ns_info_after_scale_from_level.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
                                                               self.tc_input['mano'].get('query_params'))
             for mgmt_addr in mgmt_addr_list:
@@ -240,31 +264,48 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                     raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
                                        % (mgmt_addr, vnf_info.vnf_product_name))
 
+    @Step(name='Verify VNF configuration',
+          description='Verify that the VNF configuration has been updated according to the descriptors by querying the '
+                      'VNFM',
+          runnable=False)
+    def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the VNF configuration has been updated according to the descriptors by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that the VNF configuration has been updated according to the descriptors by querying the VNFM')
+        LOG.info('Verifying that the VNF configuration has been updated according to the descriptors by querying the '
+                 'VNFM')
         # TODO
 
+    @Step(name='Verify VNFC instance(s) connection(s)',
+          description='Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors',
+          runnable=False)
+    def step10(self):
         # --------------------------------------------------------------------------------------------------------------
         # 10. Verify that all VNFC instance(s) are connected to the VL(s) according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that all VNFC instance(s) are connected to the VL(s) according to the descriptors')
         # TODO
 
+    @Step(name='Verify NS scale from level was successful',
+          description='Verify that the NFVO indicates the scaling operation result as successful')
+    def step11(self):
         # --------------------------------------------------------------------------------------------------------------
         # 11. Verify that the NFVO indicates the scaling operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates the scaling operation result as successful')
-        LOG.debug('This has implicitly been checked at step 3')
+        LOG.debug('This has implicitly been checked at step 5')
 
+    @Step(name='Verify traffic flows',
+          description='Verify that NS has been scaled by running the end-to-end functional test in relevance to the VNF'
+                      ' scale and capacity')
+    def step12(self):
         # --------------------------------------------------------------------------------------------------------------
         # 12. Verify that NS has been scaled by running the end-to-end functional test in relevance to the VNF scale and
         #     capacity
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verify that NS has been scaled by running the end-to-end functional test in relevance to the VNF '
+        LOG.info('Verifying that NS has been scaled by running the end-to-end functional test in relevance to the VNF '
                  'scale and capacity')
-        resolved_traffic_config = self.mano.resolve_ns_cp_addr(ns_info_after_scale_from_level,
+        resolved_traffic_config = self.mano.resolve_ns_cp_addr(self.ns_info_after_scale_from_level,
                                                                data=self.tc_input['traffic']['traffic_config'])
         self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD', traffic_config=resolved_traffic_config)
 
@@ -272,7 +313,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info_after_scale_from_level,
+                                                          self.ns_info_after_scale_from_level,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
@@ -294,6 +335,11 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
 
         self.tc_result['scaling_to_level']['traffic_after'] = 'NORMAL_TRAFFIC_LOAD'
 
+        self.traffic.stop()
+        self.unregister_from_cleanup(index=40)
+
+    @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
+    def step13(self):
         # --------------------------------------------------------------------------------------------------------------
         # 13. Trigger the termination of the NS instance on the NFVO
         # --------------------------------------------------------------------------------------------------------------
@@ -317,6 +363,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_delete_id,
                                   ns_instance_id=self.ns_instance_id)
 
+    @Step(name='Verify NS is terminated',
+          description='Verify that the NS is terminated and that all resources have been released by the VIM')
+    def step14(self):
         # --------------------------------------------------------------------------------------------------------------
         # 14. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
@@ -330,7 +379,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info_after_scale_from_level.vnf_info:
+        for vnf_info in self.ns_info_after_scale_from_level.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
@@ -339,7 +388,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info_after_scale_from_level):
+        if not self.mano.validate_ns_released_vresources(self.ns_info_after_scale_from_level):
             raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

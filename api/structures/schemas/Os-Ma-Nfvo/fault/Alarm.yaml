@@ -1,0 +1,109 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.5.4 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+
+Alarm:
+  description: The Alarm information element encapsulates information about an alarm.
+  attributes:
+    alarm_id:
+      description: Identifier of this Alarm information element.
+      type: Identifier
+      required: true
+
+    managed_object_id:
+      description: Identifier of the affected managed object. The Managed Objects for the current specification will be network services.
+      type: Identifier
+      required: true
+
+    root_cause_faulty_component:
+      description: The NS components (e.g. nested NS, NS virtual link and VNF) that are causing the NS fault.
+      type: FaultyComponentInfo
+      required: true
+
+    root_cause_faulty_resource:
+      description: The virtualised resources that are causing the faulty component. It shall be present when the faulty component is "NS Virtual Link" or "VNF"
+      type: FaultyResourceInfo
+      required: false
+
+    alarm_raised_time:
+      description: Timestamp indicating when the alarm was raised by the network service.
+      type: TimeStamp
+      required: true
+
+    alarm_changed_time:
+      description: Timestamp indicating when the alarm was last changed.
+      type: TimeStamp
+      required: false
+
+    alarm_cleared_time:
+      description: Timestamp indicating when the alarm was cleared.
+      type: TimeStamp
+      required: false
+
+    ack_state:
+      description: State of the alarm.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ ACKNOWLEDGED, UNACKNOWLEDGED ]
+
+    perceived_severity:
+      description: Perceived severity of the managed object failure.
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ CRITICAL, MAJOR, MINOR, WARNING, INDETERMINATE, CLEARED ]
+
+    event_time:
+      description: Timestamp indicating when the fault was observed.
+      type: TimeStamp
+      required: true
+
+    event_type:
+      description: Type of the event. The allowed values for the eventType attribute use the event type defined in Recommendation ITU-T X. 733
+      type: Enum
+      required: true
+      constraints:
+        entry_type: String
+        valid_values: [ COMMUNICATION_ALARM, PROCESSING_ALARM, ENVIRONMENT_ALARM, QOS_ALARM, EQUIPMENT_ALARM ]
+
+    fault_type:
+      description: Additional information related to the type of the fault.
+      type: String
+      required: true
+
+    probable_cause:
+      description: Information about the probable cause of the fault.
+      type: String
+      required: true
+
+    is_root_cause:
+      description: Parameter indicating if this fault is the root for other correlated alarms. If TRUE, then the alarms listed in the parameter correlatedAlarmId are caused by this fault.
+      type: Boolean
+      required: true
+
+    correlated_alarm_id:
+      description: List of identifiers of other alarms correlated to this fault.
+      type: List
+      required: false
+      constraints:
+        entry_type: Identifier
+
+    fault_details:
+      description: Provides additional information about the fault.
+      type: List
+      required: false
+      constraints:
+        entry_type: NotSpecified

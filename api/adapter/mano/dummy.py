@@ -44,8 +44,7 @@ class DummyManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
-        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
-        VNF with given ID.
+        This function does not have a direct mapping so it will just return the status of the VNF with given ID.
         """
         LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in OpenStack Tacker client!')
         LOG.debug('Will return the state of the resource with given Id')

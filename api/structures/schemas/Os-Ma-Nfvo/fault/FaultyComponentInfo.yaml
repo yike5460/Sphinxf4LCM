@@ -1,0 +1,31 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.5.6 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+
+FaultyComponentInfo:
+  description: The FaultyComponentInfo information element encapsulates information about faulty component that has a negative impact on an NS.
+  attributes:
+    faulty_nested_ns_instance_id:
+      description: Identifier of the faulty nested NS instance.
+      type: Identifier
+      required: false
+
+    faulty_ns_virtual_link_instance_id:
+      description: Identifier of the faulty NS virtual link instance.
+      type: Identifier
+      required: false
+
+    faulty_vnf_instance_id:
+      description: Identifier of the faulty VNF instance.
+      type: Identifier
+      required: false

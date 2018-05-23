@@ -18,22 +18,23 @@ node {
 	}
 
 	stage('Connect') {
-		sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no -o ConnectionAttempts=600 ubuntu@$ipaddr true"
+		sh "ssh-keygen -f ~/.ssh/known_hosts -R $ipaddr"
+		sh "ssh -o StrictHostKeyChecking=no -o ConnectionAttempts=600 ubuntu@$ipaddr true"
 	}
 
 	stage('Upload') {
-		sh "scp -o StrictHostKeyChecking=no -o UpdateHostKeys=no /tmp/vnflcv/vnflcv.tar.gz ubuntu@$ipaddr:~"
-		sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr tar -xvf vnflcv.tar.gz"
+		sh "scp /tmp/vnflcv/vnflcv.tar.gz ubuntu@$ipaddr:~"
+		sh "ssh ubuntu@$ipaddr tar -xvf vnflcv.tar.gz"
 	}
 
 	stage('Deploy') {
 		try {
 			timeout(time: 60, unit: 'MINUTES') {
-				sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr vnflcv/deploy.sh --headless"
+				sh "ssh ubuntu@$ipaddr vnflcv/deploy.sh --headless"
 			}
 		} finally {
-			sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr cat .cache/conjure-up/conjure-up.log"
-			sh "ssh -o StrictHostKeyChecking=no -o UpdateHostKeys=no ubuntu@$ipaddr /snap/bin/juju status"
+			sh "ssh ubuntu@$ipaddr cat .cache/conjure-up/conjure-up.log"
+			sh "ssh ubuntu@$ipaddr /snap/bin/juju status"
 		}
 	}
 
@@ -49,6 +50,9 @@ node {
 		executionid = sh(script: "curl -XPOST http://$ipaddr:8080/v1.0/exec -H 'Content-Type: Application/json' -d @/tmp/vnflcv/tc_exec.json | jq -r '.execution_id' | tr -d '\n'", returnStdout: true)
 		sh "curl http://$ipaddr:8080/v1.0/wait/$executionid"
 		sh "curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | python -mjson.tool"
+		sh "ssh ubuntu@$ipaddr /snap/bin/juju ssh vnflcv/0 cat /var/log/vnflcv/\\\'*.log\\\'"
+		sh "ssh ubuntu@$ipaddr /snap/bin/juju ssh vnflcv/0 cat /var/log/vnflcv/\\\'*.txt\\\'"
+		sh "ssh ubuntu@$ipaddr /snap/bin/juju ssh vnflcv/0 journalctl -u vnflcv-rest"
 		sh "test \$(curl http://$ipaddr:8080/v1.0/exec/$executionid -H 'Content-Type: Application/json' | jq -r '.tc_result|.overall_status') = PASSED"
 		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/mano/tacker1"
 		sh "curl -f -XDELETE http://$ipaddr:8080/v1.0/traffic/stc1"

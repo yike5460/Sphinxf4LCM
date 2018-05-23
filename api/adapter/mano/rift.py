@@ -57,6 +57,8 @@ class RiftManoAdapter(object):
         self.nsr_metadata = {}
         self.nsd_info_ids = dict()
 
+        self.vim_helpers = {}
+
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         # TODO: the get logic inside ifs should be moved into functions
@@ -139,6 +141,37 @@ class RiftManoAdapter(object):
                 return constants.OPERATION_PENDING
             else:
                 return constants.OPERATION_FAILED
+
+        if operation_type == 'scaling_group_terminate':
+            ns_instance_id, scaling_group_record_id = resource_id
+            resource = '/api/operational/project/%s/ns-instance-opdata/nsr/%s/scaling-group-record/instance/%s' % \
+                       (self.project, ns_instance_id, scaling_group_record_id)
+            try:
+                response = self.session.get(url=self.url + resource)
+                assert response.status_code == 200
+                json_content = response.json()
+            except Exception as e:
+                LOG.exception(e)
+                raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
+                                           (scaling_group_record_id, ns_instance_id))
+            scaling_group_record = json_content.get('nsr:scaling-group-record')
+            if scaling_group_record == None:
+                return constants.OPERATION_SUCCESS
+            elif 'instance' in scaling_group_record:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_FAILED
+
+        if operation_type == 'multiple_operations':
+            operation_list = resource_id
+            operation_status_list = map(self.get_operation_status, operation_list)
+
+            if constants.OPERATION_FAILED in operation_status_list:
+                return constants.OPERATION_FAILED
+            elif constants.OPERATION_PENDING in operation_status_list:
+                return constants.OPERATION_PENDING
+            else:
+                return constants.OPERATION_SUCCESS
 
         raise RiftManoAdapterError('Unknown operation type "%s"' % operation_type)
 
@@ -331,6 +364,10 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vim_helper(self, vim_id):
+        vim_helper = self.vim_helpers.get(vim_id)
+        if vim_helper is not None:
+            return vim_helper
+
         resource = '/api/config/project/cloud/account/%s' % vim_id
 
         try:
@@ -359,7 +396,10 @@ class RiftManoAdapter(object):
         else:
             raise RiftManoAdapterError('Unsupported VIM type: %s' % vim_type)
 
-        return construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+        vim_helper = construct_adapter(vendor=vim_vendor, module_type='vim', **vim_params)
+        self.vim_helpers[vim_id] = vim_helper
+
+        return vim_helper
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info, additional_param=None):
@@ -570,7 +610,9 @@ class RiftManoAdapter(object):
                     LOG.exception(e)
                     raise RiftManoAdapterError('Unable to scale in NS %s' % ns_instance_id)
 
-                return 'ns_scale_in', ns_instance_id
+                ns_scale_in_op = 'ns_scale_in', ns_instance_id
+                scaling_group_terminate_op = 'scaling_group_terminate', (ns_instance_id, removed_scaling_groups_id)
+                return 'multiple_operations', [ns_scale_in_op, scaling_group_terminate_op]
 
             else:
                 raise RiftManoAdapterError('Invalid scaling direction: %s'
