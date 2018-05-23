@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width = device-width, initial-scale = 1">
+        <title>%(tc_name)s Report | Test Started at %(start_time)s</title>
+        <style type="text/css">
+        %(bootstrap_css_data)s
+        </style>
+    </head>
+
+    <body>
+        <div class="logo">
+            <img src="data:image/png;base64,%(logo)s" alt="Spirent logo" style="width:100px;height:100px;">
+        </div>
+
+        <div class="page-header">
+            <h2 class="text-center">Test Report</h2>
+            <h4 class="text-center"> <font color='gray'>%(tc_name)s</font> </h4>
+        </div>
+
+        <div class="container">
+            <h3 class="text-left">Summary:</h3>
+        </div>
+
+        <div class="container">
+            <div class="column">
+                <div class="col-xs-12">
+                    <h4><a href="#Information" data-toggle="collapse">&#65516; Time and Test Case ID Information &#65516;</a></h4>
+                    <div id="Information" class = "collapse in">
+                        <table class = "table table-bordered table-striped table-hover">
+                            <tbody>
+                                <tr>
+                                    <td>Test case name</td>
+                                    <td> <font color='gray'>%(tc_name)s</font></td>
+                                </tr>
+                                <tr>
+                                    <td>Test Result</td>
+                                    <td> <font color=%(color)s>%(result)s</font></td>
+                                </tr>
+                                <tr>
+                                    <td>Run ID</td>
+                                    <td>%(run_id)s</td>
+                                </tr>
+                                <tr>
+                                    <td>Suite name</td>
+                                    <td>%(suite_name)s</td>
+                                </tr>
+                                <tr>
+                                    <td>TC start time</td>
+                                    <td>%(tc_start_time)s</td>
+                                </tr>
+                                <tr>
+                                    <td>TC end time</td>
+                                    <td>%(tc_end_time)s</td>
+                                </tr>
+                                <tr>
+                                    <td>TC duration</td>
+                                    <td>%(tc_duration)s</td>
+                                </tr>
+                                <tr>
+                                    <td>Error Information </td>
+                                    <td> <font color=%(color)s>%(error_info)s</font> </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <h3 class="text-left">Details:</h3>
+        </div>
+
+        <div class="container">
+            <div class="column">
+                <div class="col-xs-12">
+                    <h4><a href="#test_case_environment" data-toggle="collapse">&#65516; Test Case Environment &#65516; </a></h4>
+                    <div id="test_case_environment" class = "collapse">
+                        <table class = "table table-bordered table-striped table-hover">
+                            <tbody>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                </tr>
+                                <tr>
+                                    <td>MANO</td>
+                                    <td>%(mano_type)s</td>
+                                    <td>%(mano_name)s</td>
+                                </tr>
+                                <tr>
+                                    <td>VIM</td>
+                                    <td>%(vim_type)s</td>
+                                    <td>%(vim_name)s</td>
+                                </tr>
+                                <tr>
+                                    <td>Traffic</td>
+                                    <td>%(traffic_type)s</td>
+                                    <td>%(traffic_name)s</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-xs-12">
+                    <h4><a href="#steps_summary" data-toggle="collapse">&#65516; Steps Summary &#65516;</a></h4>
+                    <div id="steps_summary" class = "collapse">
+                        <table class = "table table-bordered table-striped table-hover">
+                            <tbody>
+                                <tr>
+                                    <th>Step Number </th>
+                                    <th>Name </th>
+                                    <th>Description </th>
+                                    <th>Duration (sec) </th>
+                                    <th>Status </th>
+                                </tr>
+                                %(steps_summary_body)s
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-xs-12">
+                    <h4><a href="#vnf_resources" data-toggle="collapse">&#65516; VNF Resources &#65516;</a></h4>
+                    <div id="vnf_resources" class = "collapse">
+                            <table class = "table table-bordered table-striped table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>VNF</th>
+                                        <th>VNFC</th>
+                                        <th>Resource type</th>
+                                        <th>Expected value</th>
+                                        <th>Actual value</th>
+                                        <th>Validation</th>
+                                    </tr>
+                                    %(vnf_resources)s
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+
+                %(scaling_info)s
+
+                <div class="col-xs-12">
+                    <h4><a href="#timestamps" data-toggle="collapse">&#65516; Timestamps &#65516;</a></h4>
+                    <div id="timestamps" class = "collapse">
+                    <table class = "table table-bordered table-striped table-hover">
+                        <tbody>
+                            <tr>
+                                <th>Event</th>
+                                <th>Timestamps (epoch time)</th>
+                            </tr>
+                            %(time_stamps)s
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <div class="col-xs-12">
+                    <h4><a href="#events" data-toggle="collapse">&#65516; Events &#65516;</a></h4>
+                    <div id="events" class = "collapse">
+                        <table class = "table table-bordered table-striped table-hover">
+                            <tbody>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Duration (sec)</th>
+                                    <th>Details</th>
+                                </tr>
+                                %(events)s
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+        %(jquery_js_data)s
+        </script>
+
+        <script type="text/javascript">
+        %(bootstrap_js_data)s
+        </script>
+    </body>
+ </html>
