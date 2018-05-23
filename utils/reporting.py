@@ -21,6 +21,14 @@ import requests
 from api.generic import constants
 
 REPORT_DIR = '/var/log/vnflcv'
+SELF_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# Names of file used to build the HTML report
+REPORT_TEMPLATE_NAME = 'report_template.html'
+BOOTSTRAP_CSS_NAME = 'bootstrap.min.css'
+LOGO_FILE_NAME = 'logo_Spirent.PNG'
+JQUERY_JS_NAME = 'jquery.min.js'
+BOOTSTRAP_JS_NAME = 'bootstrap.min.js'
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -157,17 +165,25 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
     report_file_path = os.path.join(REPORT_DIR, html_report_file_name)
 
     # Open html template
-    with open('report_template.html', 'r') as template_file:
+    report_template_path = os.path.join(SELF_DIR, REPORT_TEMPLATE_NAME)
+    with open(report_template_path, 'r') as template_file:
         template = template_file.read()
 
     # Open files for copying into .html
-    with open('bootstrap.min.css', 'r') as f:
-        bootstrap_css = f.read()
-    with open('logo_Spirent.PNG', 'rb') as image_file:
+    bootstrap_css_path = os.path.join(SELF_DIR, BOOTSTRAP_CSS_NAME)
+    with open(bootstrap_css_path, 'r') as f:
+        bootstrap_css_data = f.read()
+
+    logo_file_path = os.path.join(SELF_DIR, LOGO_FILE_NAME)
+    with open(logo_file_path, 'rb') as image_file:
         logo_base64 = base64.b64encode(image_file.read())
-    with open('jquery.min.js', 'r') as f:
+
+    jquery_js_path = os.path.join(SELF_DIR, JQUERY_JS_NAME)
+    with open(jquery_js_path, 'r') as f:
         jquery_js_data = f.read()
-    with open('bootstrap.min.js', 'r') as f:
+
+    bootstrap_js_path = os.path.join(SELF_DIR, BOOTSTRAP_JS_NAME)
+    with open(bootstrap_js_path, 'r') as f:
         bootstrap_js_data = f.read()
 
     # Substitute fields in the html report string
@@ -349,7 +365,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
     substitutes = {
         'tc_name': str(tc_exec_request['tc_name']),
         'start_time': start_time,
-        'bootstrap_css_file': bootstrap_css,
+        'bootstrap_css_data': bootstrap_css_data,
         'logo': logo_base64,
         'color': color,
         'result': result,

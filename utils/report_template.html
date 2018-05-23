@@ -6,27 +6,28 @@
         <meta name="viewport" content="width = device-width, initial-scale = 1">
         <title>%(tc_name)s Report | Test Started at %(start_time)s</title>
         <style type="text/css">
-        %(bootstrap_css_file)s
+        %(bootstrap_css_data)s
         </style>
     </head>
+
     <body>
         <div class="logo">
             <img src="data:image/png;base64,%(logo)s" alt="Spirent logo" style="width:100px;height:100px;">
         </div>
+
         <div class="page-header">
             <h2 class="text-center">Test Report</h2>
             <h4 class="text-center"> <font color='gray'>%(tc_name)s</font> </h4>
         </div>
+
         <div class="container">
             <h3 class="text-left">Summary:</h3>
         </div>
+
         <div class="container">
             <div class="column">
                 <div class="col-xs-12">
-
-                    <h4><a href="#Information" data-toggle="collapse">&#65516; Time and Test Case ID Information
-                     &#65516;</a></h4>
-
+                    <h4><a href="#Information" data-toggle="collapse">&#65516; Time and Test Case ID Information &#65516;</a></h4>
                     <div id="Information" class = "collapse in">
                         <table class = "table table-bordered table-striped table-hover">
                             <tbody>
@@ -68,18 +69,16 @@
                 </div>
             </div>
         </div>
+
         <div class="container">
             <h3 class="text-left">Details:</h3>
         </div>
 
         <div class="container">
             <div class="column">
-
-        <div class="col-xs-12">
-
-        <h4><a href="#test_case_environment" data-toggle="collapse">&#65516; Test Case Environment &#65516; </a></h4>
-
-        <div id="test_case_environment" class = "collapse">
+                <div class="col-xs-12">
+                    <h4><a href="#test_case_environment" data-toggle="collapse">&#65516; Test Case Environment &#65516; </a></h4>
+                    <div id="test_case_environment" class = "collapse">
                         <table class = "table table-bordered table-striped table-hover">
                             <tbody>
                                 <tr>
@@ -104,11 +103,11 @@
                                 </tr>
                             </tbody>
                         </table>
-        </div>
-        </div>
-        <div class="col-xs-12">
-                    <h4><a href="#steps_summary" data-toggle="collapse">&#65516; Steps Summary &#65516;</a></h4>
+                    </div>
+                </div>
 
+                <div class="col-xs-12">
+                    <h4><a href="#steps_summary" data-toggle="collapse">&#65516; Steps Summary &#65516;</a></h4>
                     <div id="steps_summary" class = "collapse">
                         <table class = "table table-bordered table-striped table-hover">
                             <tbody>
@@ -124,9 +123,9 @@
                         </table>
                     </div>
                 </div>
-        <div class="col-xs-12">
-                    <h4><a href="#vnf_resources" data-toggle="collapse">&#65516; VNF Resources &#65516;</a></h4>
 
+                <div class="col-xs-12">
+                    <h4><a href="#vnf_resources" data-toggle="collapse">&#65516; VNF Resources &#65516;</a></h4>
                     <div id="vnf_resources" class = "collapse">
                             <table class = "table table-bordered table-striped table-hover">
                                 <tbody>
@@ -143,55 +142,48 @@
                             </table>
                     </div>
                 </div>
-        %(scaling_info)s
-        <div class="col-xs-12">
 
-            <h4><a href="#timestamps" data-toggle="collapse">&#65516; Timestamps &#65516;</a></h4>
+                %(scaling_info)s
 
-            <div id="timestamps" class = "collapse">
+                <div class="col-xs-12">
+                    <h4><a href="#timestamps" data-toggle="collapse">&#65516; Timestamps &#65516;</a></h4>
+                    <div id="timestamps" class = "collapse">
                     <table class = "table table-bordered table-striped table-hover">
                         <tbody>
                             <tr>
                                 <th>Event</th>
                                 <th>Timestamps (epoch time)</th>
                             </tr>
-                        %(time_stamps)s
+                            %(time_stamps)s
                         </tbody>
                     </table>
-            </div>
-        </div>
+                    </div>
+                </div>
 
-        <div class="col-xs-12">
-
-            <h4><a href="#events" data-toggle="collapse">&#65516; Events &#65516;</a></h4>
-
-            <div id="events" class = "collapse">
-                    <table class = "table table-bordered table-striped table-hover">
-                        <tbody>
-                            <tr>
-                                <th>Event</th>
-                                <th>Duration (sec)</th>
-                                <th>Details</th>
-                            </tr>
-                            %(events)s
-                        </tbody>
-                    </table>
+                <div class="col-xs-12">
+                    <h4><a href="#events" data-toggle="collapse">&#65516; Events &#65516;</a></h4>
+                    <div id="events" class = "collapse">
+                        <table class = "table table-bordered table-striped table-hover">
+                            <tbody>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Duration (sec)</th>
+                                    <th>Details</th>
+                                </tr>
+                                %(events)s
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
- <script type="text/javascript">
+        <script type="text/javascript">
+        %(jquery_js_data)s
+        </script>
 
- %(jquery_js_data)s
-
- </script>
-
- <script type="text/javascript">
-
- %(bootstrap_js_data)s
-
- </script>
-
- </body>
+        <script type="text/javascript">
+        %(bootstrap_js_data)s
+        </script>
+    </body>
  </html>
