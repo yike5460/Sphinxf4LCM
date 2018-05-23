@@ -17,7 +17,7 @@ import uuid
 from datetime import datetime
 from glob import glob
 from multiprocessing import Process, Queue, Event
-from threading import Lock
+from threading import Lock, Thread
 
 from bottle import route, request, response, run, static_file
 
@@ -118,7 +118,6 @@ def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step
     tc_result['tc_duration'] = str(tc_end_time - tc_start_time)
 
     execution_queue.put(tc_result)
-    message_queue.put(None)
 
     kibana_srv = _read_config('kibana-srv')
     if kibana_srv is not None:
@@ -127,6 +126,16 @@ def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step
     reporting.report_test_case(report_file_name, tc_exec_request, tc_input, tc_result)
     reporting.html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result)
     reporting.dump_raw_json(json_file_name, tc_exec_request, tc_input, tc_result)
+
+
+def process_reaper(execution_id):
+    execution_process = execution_processes.get(execution_id)
+    if execution_process is None:
+        return
+
+    execution_process.join()
+    message_queue = message_queues[execution_id]
+    message_queue.put(None)
 
 
 @route('/version')
@@ -231,6 +240,9 @@ def do_exec():
     execution_queues[execution_id] = execution_queue
     message_queues[execution_id] = message_queue
     step_triggers[execution_id] = step_trigger
+
+    process_reaper_thread = Thread(target=process_reaper, args=(execution_id,))
+    process_reaper_thread.start()
 
     return {'execution_id': execution_id}
 
