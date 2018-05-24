@@ -14,8 +14,8 @@
 
 import requests
 
-# TODO: Get VNF Lifecycle Verification server IP address
-vnf_lcv_srv = '10.2.34.39'
+# Get VNF Lifecycle Verification server IP address
+vnf_lcv_srv = 'vnflcv'
 
 # Get the list with the test cases under execution
 server_response = requests.get(url='http://' + vnf_lcv_srv + ':8080/v1.0/exec')
