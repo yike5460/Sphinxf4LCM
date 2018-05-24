@@ -299,6 +299,9 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
+        self.traffic.stop()
+        self.unregister_from_cleanup(index=40)
+
     @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
     def step13(self):
         # --------------------------------------------------------------------------------------------------------------

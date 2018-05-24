@@ -1137,6 +1137,18 @@ def kibana():
     redirect(kibana_url)
 
 
+@route('/reports/')
+def get_reports_list():
+    reports = requests.get(url='http://localhost:8080/v1.0/reports?type=html')
+    reports_list = reports.json()['reports']
+    return template('reports.html', reports_list=reports_list)
+
+
+@route('/reports/<report_name>')
+def get_report(report_name):
+    return requests.get(url='http://localhost:8080/v1.0/reports/%s' % report_name)
+
+
 @route('/static/<filename:re:.*\.css|.*\.css\.map>')
 def all_css(filename):
     """

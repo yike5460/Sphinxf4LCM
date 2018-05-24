@@ -135,8 +135,8 @@ class OpenbatonManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
-        This function does not have a direct mapping in Openbaton so it will just return the status of the
-        specified resource type with given ID.
+        This function does not have a direct mapping in Openbaton so it will just return the status of the specified
+        resource type with given ID.
         """
         LOG.debug('"Lifecycle Operation Occurrence Id" is not implemented in Openbaton!')
         LOG.debug('Will return the state of the resource with given Id')

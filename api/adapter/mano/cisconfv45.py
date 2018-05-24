@@ -22,7 +22,7 @@ from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import InstantiatedVnfInfo, VnfExtCpInfo, VnfInfo, VnfcResourceInfo, ResourceHandle, \
-    NsInfo, NsdInfo
+    NsInfo, NsdInfo, Alarm, FaultyResourceInfo
 from utils.logging_module import log_entry_exit
 
 # Instantiate logger
@@ -289,7 +289,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
-        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
+        This function does not have a direct mapping in Cisco NFV 4.5 client so it will just return the status of the
         VNF with given ID.
 
         :param lifecycle_operation_occurrence_id:   UUID used to retrieve the operation details from the class attribute
@@ -2394,3 +2394,65 @@ class CiscoNFVManoAdapter(object):
         self.nsd_info_ids.pop(nsd_info_id)
 
         return nsd_info_id
+
+    @log_entry_exit(LOG)
+    def ns_get_alarm_list(self, filter):
+        tenant_name = filter['tenant']
+        deployment_name = filter['ns_instance_id']
+        event_type = filter['event']
+
+        # Get the deployment XML
+        try:
+            deployment_xml = self.nso.get(('xpath',
+                                           '/nfvo/vnf-info/esc/vnf-deployment[tenant="%s"][deployment-name="%s"]'
+                                           % (tenant_name, deployment_name))).data_xml
+            deployment_xml = etree.fromstring(deployment_xml)
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError('Unable to communicate with the NSO Netconf server - %s' % e)
+
+        # Get the name of the ESC this deployment belongs to
+        try:
+            esc_name = deployment_xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-deployment/'
+                                           '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}esc').text
+        except AttributeError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError('ESC name not available in ESC')
+
+        # Get the Netconf notification(s) for the specified event type
+        try:
+            notifications = self.nso.get(('xpath',
+                                         '/devices/device[name="%s"]/netconf-notifications/received-notifications/'
+                                         'notification/data/escEvent[depname="%s"][tenant="%s"][event/type="%s"]'
+                                         % (esc_name, deployment_name, tenant_name, event_type))).data_xml
+            notifications = etree.fromstring(notifications)
+            netconf_notifications = notifications.findall('.//{http://tail-f.com/ns/ncs}notification')
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError('Unable to communicate with the NSO Netconf server - %s' % e)
+
+        # Build the alarm list
+        alarm_list = list()
+        for netconf_notification in netconf_notifications:
+            # Get notification details
+            try:
+                vim_id = netconf_notification.find('.//{http://www.cisco.com/esc/esc}vm_source/'
+                                                   '{http://www.cisco.com/esc/esc}vim_id').text
+                vm_id = netconf_notification.find('.//{http://www.cisco.com/esc/esc}vm_source/'
+                                                  '{http://www.cisco.com/esc/esc}vmid').text
+            except AttributeError as e:
+                LOG.exception(e)
+                raise CiscoNFVManoAdapterError('Unable to parse notification XML - %s' % e)
+
+            # Build alarm information element
+            alarm = Alarm()
+            alarm.root_cause_faulty_resource = FaultyResourceInfo()
+            alarm.root_cause_faulty_resource.faulty_resource_type = 'COMPUTE'
+            alarm.root_cause_faulty_resource.faulty_resource = ResourceHandle()
+            alarm.root_cause_faulty_resource.faulty_resource.vim_id = vim_id
+            alarm.root_cause_faulty_resource.faulty_resource.resource_id = vm_id
+
+            # Append the alarm in the alarm list
+            alarm_list.append(alarm)
+
+        return alarm_list

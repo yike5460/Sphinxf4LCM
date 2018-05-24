@@ -782,10 +782,6 @@ class SoftwareImageInformation(InformationElementWithExternalSchema):
     pass
 
 
-class OperateVnfData(InformationElementWithExternalSchema):
-    pass
-
-
 class NsToLevelMapping(InformationElementWithExternalSchema):
     pass
 
@@ -811,10 +807,6 @@ class NsVirtualLinkConnectivity(InformationElementWithExternalSchema):
 
 
 class NsProfile(InformationElementWithExternalSchema):
-    pass
-
-
-class VnfToLevelMapping(InformationElementWithExternalSchema):
     pass
 
 
@@ -923,4 +915,16 @@ class ExtManagedVirtualLinkData(InformationElementWithExternalSchema):
 
 
 class ChangeVnfFlavourData(InformationElementWithExternalSchema):
+    pass
+
+
+class FaultyComponentInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class FaultyResourceInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class Alarm(InformationElementWithExternalSchema):
     pass

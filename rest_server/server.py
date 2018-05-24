@@ -15,10 +15,11 @@ import logging
 import os
 import uuid
 from datetime import datetime
+from glob import glob
 from multiprocessing import Process, Queue, Event
 from threading import Lock
 
-from bottle import route, request, response, run
+from bottle import route, request, response, run, static_file
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
@@ -33,6 +34,7 @@ tc_inputs = dict()
 
 json_file_path = '/etc/vnflcv'
 config_file_name = 'config.json'
+reports_dir = '/var/log/vnflcv'
 
 lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
 lock = dict()
@@ -98,6 +100,8 @@ def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step
     timestamp = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now())
     log_file_name = '%s_%s.log' % (timestamp, str(tc_name))
     report_file_name = '%s_%s.txt' % (timestamp, str(tc_name))
+    html_report_file_name = '%s_%s.html' % (timestamp, str(tc_name))
+    json_file_name = '%s_%s.json' % (timestamp, str(tc_name))
 
     root_logger = logging.getLogger()
     logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name)
@@ -121,6 +125,8 @@ def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step
         reporting.kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result)
 
     reporting.report_test_case(report_file_name, tc_exec_request, tc_input, tc_result)
+    reporting.html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result)
+    reporting.dump_raw_json(json_file_name, tc_exec_request, tc_input, tc_result)
 
 
 @route('/version')
@@ -174,11 +180,28 @@ def do_exec():
                 tc_input['mano']['operate_params'] = resource_params.get('operate_params', {})
                 tc_input['mano']['scale_params'] = resource_params.get('scale_params', {})
                 tc_input['mano']['change_df_params'] = resource_params.get('change_df_params')
+                tc_input['mano']['sap_data'] = resource_params.get('sap_data', {})
+                tc_input['mano']['alarm_list_params'] = resource_params.get('alarm_list_params', {})
                 tc_input['vnfd_id'] = resource_params.get('vnfd_id')
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
                 tc_input['nsd_id'] = resource_params.get('nsd_id')
                 tc_input['change_vnf_df_list'] = resource_params.get('change_vnf_df_list')
+                tc_input['nested_ns_instance_data'] = resource_params.get('nested_ns_instance_data')
+                tc_input['ns_instantiation_level_id'] = resource_params.get('ns_instantiation_level_id')
+                tc_input['scale_to_level_list'] = resource_params.get('scale_to_level_list')
+                tc_input['scale_from_level_list'] = resource_params.get('scale_from_level_list')
+                tc_input['operate_vnf_data'] = resource_params.get('operate_vnf_data')
+                tc_input['nsd'] = resource_params.get('nsd')
+                tc_input['nsd_params'] = resource_params.get('nsd_params', {})
+                if tc_input['nsd_params'].get('vendor_nsd_file'):
+                    try:
+                        with open(tc_input['nsd_params']['vendor_nsd_file'], 'r') as nsd_file:
+                            tc_input['nsd_params']['vendor_nsd'] = nsd_file.read()
+                            tc_input['nsd_params'].pop('vendor_nsd_file')
+                    except Exception as e:
+                        response.status = 504
+                        return {'Error': '%s' % e}
                 tc_input[resource_type]['generic_config'] = dict()
                 for timeout_timer in timeout_timers:
                     timeout = _read_config(timeout_timer)
@@ -471,6 +494,26 @@ def trigger_step(execution_id):
         step_trigger.set()
         response.status = 200
         return {}
+
+
+@route('/v1.0/reports')
+def list_reports():
+    extension = request.query.type or 'html'
+    report_files_list = glob('%s/*.%s' % (reports_dir, extension))
+
+    def get_basename(absolute_path):
+        return os.path.splitext(os.path.basename(absolute_path))[0]
+
+    report_names = map(get_basename, report_files_list)
+    report_names.sort()
+
+    return {'reports': report_names}
+
+
+@route('/v1.0/reports/<name>')
+def get_report(name):
+    extension = request.query.type or 'html'
+    return static_file('%s.%s' % (name, extension), root=os.path.abspath(reports_dir))
 
 
 run(host='0.0.0.0', port=8080, server='paste')
