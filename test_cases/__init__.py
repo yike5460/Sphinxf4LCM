@@ -320,12 +320,33 @@ class TestCase(object):
             self.tc_result['overall_status'] = constants.TEST_ERROR
             self.tc_result['error_info'] = '%s: %s' % (type(e).__name__, e)
         finally:
+            cleanup_dict = {
+                'name': 'Cleanup',
+                'description': 'Cleanup procedure for reverting the SUT to the initial state',
+                'index': '-'
+            }
+
+            if self.step_trigger is not None:
+                cleanup_dict['status'] = 'PAUSED'
+                self.message_queue.put(dict(cleanup_dict))
+                self.step_trigger.wait()
+                self.step_trigger.clear()
+
+            if self.message_queue is not None:
+                cleanup_dict['status'] = 'RUNNING'
+                self.message_queue.put(dict(cleanup_dict))
+
             try:
                 self.cleanup()
+                cleanup_status = 'PASS'
             except TestCleanupError as e:
                 self._LOG.error('%s cleanup failed' % self.tc_name)
                 self._LOG.exception(e)
+                cleanup_status = 'FAIL'
             finally:
+                if self.message_queue is not None:
+                    cleanup_dict['status'] = cleanup_status
+                    self.message_queue.put(dict(cleanup_dict))
                 self.collect_timestamps()
                 self._LOG.info('RESULT: %s' % self.tc_result['overall_status'])
                 return self.tc_result
