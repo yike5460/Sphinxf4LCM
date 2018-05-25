@@ -198,6 +198,7 @@ def do_exec():
                 tc_input['ns_instantiation_level_id'] = resource_params.get('ns_instantiation_level_id')
                 tc_input['scale_to_level_list'] = resource_params.get('scale_to_level_list')
                 tc_input['scale_from_level_list'] = resource_params.get('scale_from_level_list')
+                tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')
                 tc_input['operate_vnf_data'] = resource_params.get('operate_vnf_data')
                 tc_input['nsd'] = resource_params.get('nsd')
                 tc_input['nsd_params'] = resource_params.get('nsd_params', {})
@@ -217,6 +218,8 @@ def do_exec():
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
         tc_input['scaling_policy_list'] = _read_config('scaling_policy_list')
+        if tc_input['operate_vnf_data'] is None:
+            tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')
 
         # TODO: remove
         if 'vnf' not in tc_input.keys():
