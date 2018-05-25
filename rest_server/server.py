@@ -199,6 +199,7 @@ def do_exec():
                 tc_input['scale_to_level_list'] = resource_params.get('scale_to_level_list')
                 tc_input['scale_from_level_list'] = resource_params.get('scale_from_level_list')
                 tc_input['operate_vnf_data'] = resource_params.get('operate_vnf_data')
+                tc_input['nested_ns_params'] = resource_params.get('nested_ns_params', {})
                 tc_input['nsd'] = resource_params.get('nsd')
                 tc_input['nsd_params'] = resource_params.get('nsd_params', {})
                 if tc_input['nsd_params'].get('vendor_nsd_file'):
