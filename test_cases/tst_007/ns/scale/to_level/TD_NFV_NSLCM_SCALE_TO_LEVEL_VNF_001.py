@@ -121,10 +121,10 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
             instantiation_level_id = scale_to_level['target_instantiation_level_id']
             # Build the ScaleVnfData information element
             scale_vnf_data = ScaleVnfData()
-            scale_vnf_data.vnf_instance_id = vnf_name
+            scale_vnf_data.vnf_instance_id = str(vnf_name)
             scale_vnf_data.type = 'to_instantiation_level'
             scale_vnf_data.scale_to_level_data = ScaleToLevelData()
-            scale_vnf_data.scale_to_level_data.instantiation_level_id = instantiation_level_id
+            scale_vnf_data.scale_to_level_data.instantiation_level_id = str(instantiation_level_id)
             scale_vnf_data.scale_to_level_data.additional_param = self.tc_input['mano'].get('scale_params')
 
             scale_vnf_data_list.append(scale_vnf_data)
