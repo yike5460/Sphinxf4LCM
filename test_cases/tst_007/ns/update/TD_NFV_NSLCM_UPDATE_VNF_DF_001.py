@@ -104,26 +104,24 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Change VNF deployment flavour',
-          description='Trigger a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS'
-                      ' instance on NFVO')
+          description='Trigger a NS update changing the deployment flavour of one or more VNF instances in a NS '
+                      'instance on NFVO')
     def step3(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 3. Trigger a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS instance on
-        #    NFVO
+        # 3. Trigger a NS update changing the deployment flavour of one or more VNF instances in a NS instance on NFVO
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Triggering a NS update changing the deployment flavour (DF) of one or more VNF instances in a NS '
-                 'instance on NFVO')
+        LOG.info('Triggering a NS update changing the deployment flavour of one or more VNF instances in a NS instance '
+                 'on NFVO')
         self.change_vnf_flavour_data_list = list()
-        for vnf_info in self.ns_info_after_instantiation.vnf_info:
-            for target_vnf in self.tc_input['change_vnf_df_list']:
-                if vnf_info.vnf_product_name == target_vnf['target_vnf_name']:
-                    change_vnf_flavour_data = ChangeVnfFlavourData()
-                    change_vnf_flavour_data.vnf_instance_id = vnf_info.vnf_instance_id
-                    change_vnf_flavour_data.new_flavour_id = str(target_vnf['target_flavour_id'])
-                    change_vnf_flavour_data.instantiation_level_id = str(target_vnf['target_instantiation_level_id'])
-                    change_vnf_flavour_data.additional_param = self.tc_input['mano'].get('change_df_params')
-                    self.change_vnf_flavour_data_list.append(change_vnf_flavour_data)
-                    break
+        for target_vnf in self.tc_input['change_vnf_df_list']:
+                change_vnf_flavour_data = ChangeVnfFlavourData()
+                change_vnf_flavour_data.vnf_instance_id = self.mano.get_vnf_instance_id_from_ns_vnf_name(
+                    self.ns_info_after_instantiation, target_vnf['target_vnf_name'])
+                change_vnf_flavour_data.new_flavour_id = str(target_vnf['target_vnf_name'])
+                change_vnf_flavour_data.instantiation_level_id = \
+                    str(target_vnf.get('target_instantiation_level_id', ''))
+                change_vnf_flavour_data.additional_param = self.tc_input['mano'].get('change_df_params')
+                self.change_vnf_flavour_data_list.append(change_vnf_flavour_data)
 
         self.time_record.START('ns_update_vnf_df')
 
@@ -163,15 +161,12 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                                                'additional_param': self.tc_input['mano'].get(
                                                                    'query_params')})
         for vnf_info in self.ns_info_after_update.vnf_info:
-            for target_vnf in self.tc_input['change_vnf_df_list']:
-                if vnf_info.vnf_product_name == target_vnf['target_vnf_name']:
-                    mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
-                                                                      self.tc_input['mano'].get('query_params'))
-                    for mgmt_addr in mgmt_addr_list:
-                        if not ping(mgmt_addr):
-                            raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
-                                               % (mgmt_addr, vnf_info.vnf_product_name))
-                break
+            mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id,
+                                                              self.tc_input['mano'].get('query_params'))
+            for mgmt_addr in mgmt_addr_list:
+                if not ping(mgmt_addr):
+                    raise TestRunError('Unable to PING IP address %s belonging to VNF %s'
+                                       % (mgmt_addr, vnf_info.vnf_product_name))
 
     @Step(name='Verify VNF DF update was successful',
           description='Verify that the NFVO indicates the VNF DF update operation as successful')
@@ -225,7 +220,8 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
             raise TestRunError('Traffic is flowing with packet loss',
                                err_details='Normal traffic flew with packet loss')
 
-        LOG.info('%s execution completed successfully' % self.tc_name)
+        self.traffic.stop()
+        self.unregister_from_cleanup(index=40)
 
     @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
     def step8(self):

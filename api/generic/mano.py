@@ -1522,24 +1522,29 @@ class Mano(object):
                                             process, specific to the VNF being modified as declared in the VNFD.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
+
         return self.mano_adapter.vnf_change_flavour(vnf_instance_id, new_flavour_id, instantiation_level_id,
                                                     ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
                                                     additional_param)
 
     @log_entry_exit(LOG)
-    def validate_vnf_deployment_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id,
-                                        additional_param=None):
+    def validate_vnf_deployment_flavour(self, vnf_instance_id, expected_flavour_id,
+                                        expected_instantiation_level_id=None, additional_param=None):
         """
-        This function validates that the VNF with the given instance ID uses the correct deployment flavor.
+        This function validates that the VNF with the given instance ID uses the correct deployment flavor and
+        instantiation level ID.
 
-        :param vnf_instance_id:         VNF instance ID fo which the deployment flavour was changed
-        :param new_flavour_id:          The new deployment flavour that was applied to the VNF instance
-        :param instantiation_level_id:  The instantiation level id that was applied to the VNF instance
-        :param additional_param:        Additional parameters
-        :return:                        True if the new deployment flavour was applied successfully, False otherwise
+        :param vnf_instance_id:                 Identifier of the VNF instance whose deployment flavor and instantiation
+                                                level ID should be validated.
+        :param expected_flavour_id:             Expected deployment flavour of the VNF instance.
+        :param expected_instantiation_level_id: Expected instantiation level ID of the VNF instance.
+        :param additional_param:                Additional parameters used for filtering.
+        :return:                                True if the VNF instance uses the correct deployment flavor and
+                                                instantiation level ID, False otherwise.
         """
-        return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, new_flavour_id,
-                                                                 instantiation_level_id, additional_param)
+
+        return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, expected_flavour_id,
+                                                                 expected_instantiation_level_id, additional_param)
 
     @log_entry_exit(LOG)
     def nsd_info_create(self, user_defined_data=None):
