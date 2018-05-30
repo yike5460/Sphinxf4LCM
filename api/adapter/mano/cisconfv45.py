@@ -1730,11 +1730,9 @@ class CiscoNFVManoAdapter(object):
             operation_list = []
             for scale_data in scale_vnf_data:
                 if scale_data.type == 'to_instantiation_level':
-                    vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id,
-                                                                    vnf_name=scale_data.vnf_instance_id)
                     instantiation_level_id = scale_data.scale_to_level_data.instantiation_level_id
                     lifecycle_operation_occurrence_id = self.vnf_scale_to_level(
-                                                       vnf_instance_id=vnf_instance_id,
+                                                       vnf_instance_id=scale_data.vnf_instance_id,
                                                        instantiation_level_id=instantiation_level_id,
                                                        additional_param=scale_data.scale_to_level_data.additional_param)
                     operation_list.append(lifecycle_operation_occurrence_id)
