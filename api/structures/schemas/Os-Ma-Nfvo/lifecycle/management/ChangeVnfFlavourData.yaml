@@ -1,0 +1,49 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.3.4.15 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+ChangeVnfFlavourData:
+  description: The ChangeVnfFlavourData information element specifies existing VNF instance for which the DF needs to be changed. This specifies the new DF, the instantiationLevel of the new DF that may be used and the additional parameters as input for the flavour change
+  attributes:
+    vnf_instance_id:
+      description: Identifier of the VNF instance to be modified
+      type: Identifier
+      required: true
+
+    new_flavour_id:
+      description: Identifier of the new VNF DF to apply to this VNF instance.
+      type: Identifier
+      required: true
+
+    instantiation_level_id:
+      description: Identifier of the instantiation level of the DF to be used. If not present, the default instantiation level as declared in the VNFD shall be used.
+      type: Identifier
+      required: false
+
+    ext_virtual_link:
+      description: Information about external VLs to connect the VNF to.
+      type: List
+      required: false
+      constraints:
+        entry_type: ExtVirtualLinkData
+
+    ext_managed_virtual_link:
+      description: Information about internal VLs that are managed by other entities than the VNFM.
+      type: List
+      required: false
+      constraints:
+        entry_type: ExtManagedVirtualLinkData
+
+    additional_param:
+      description: Additional parameters passed by the OSS/BSS as input to the flavour change process, specific to the VNF being modified, as declared in the VNFD.
+      type: Mapping
+      required: false
