@@ -1024,6 +1024,12 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def validate_vnf_allocated_vresources(self, vnf_info, additional_param=None):
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
+
         vnf_instance_id = vnf_info.vnf_instance_id
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
@@ -1840,6 +1846,12 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_info, additional_param=None):
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
+
         tenant_name = additional_param['tenant']
         vnf_instance_id = vnf_info.vnf_instance_id
         deployment_name, _ = self.vnf_instance_id_metadata[vnf_instance_id]
@@ -2034,6 +2046,12 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def validate_vnf_instantiation_level(self, vnf_info, instantiation_level_id, additional_param=None):
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
+
         tenant_name = additional_param['tenant']
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_info.vnf_instance_id]
 
