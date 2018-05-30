@@ -834,15 +834,6 @@ class CiscoNFVManoAdapter(object):
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id
 
-        # Get the VM group list corresponding to the provided VNF instance ID
-        vm_group_list = self.get_vm_groups_for_vnf(vnf_instance_id, additional_param)
-
-        # Get the VNF instantiation state
-        vnf_deployment_state = self.get_vm_groups_aggregated_deployment_state(vm_group_list, deployment_name)
-        vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'][vnf_deployment_state]
-        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
-            return vnf_info
-
         # Get the VNFD ID from the NSO
         xml = self.nso.get(('xpath',
                             '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info[name="%s"]/vnfd'
@@ -851,14 +842,19 @@ class CiscoNFVManoAdapter(object):
         vnfd_id = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd').text
 
-        # Get the VNFD XML from the NSO
-        vnfd_xml = self.nso.get(('xpath', '/nfvo/vnfd[id="%s"]' % vnfd_id)).data_xml
-        vnfd_xml = etree.fromstring(vnfd_xml)
-
         # Build the vnf_info data structure
         vnf_info.vnf_instance_name = vnf_instance_id
         # vnf_info.vnf_instance_description =
         vnf_info.vnfd_id = vnfd_id
+
+        # Get the VM group list corresponding to the provided VNF instance ID
+        vm_group_list = self.get_vm_groups_for_vnf(vnf_instance_id, additional_param)
+
+        # Get the VNF instantiation state
+        vnf_deployment_state = self.get_vm_groups_aggregated_deployment_state(vm_group_list, deployment_name)
+        vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['NSO_DEPLOYMENT_STATE'][vnf_deployment_state]
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            return vnf_info
 
         # Build the InstantiatedVnfInfo information element only if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
@@ -886,6 +882,10 @@ class CiscoNFVManoAdapter(object):
                                            '/esc_datamodel/tenants/tenant[name="%s"]/deployments/deployment[name="%s"]'
                                             % (tenant_name, deployment_name))).data_xml
             deployment_xml = etree.fromstring(deployment_xml)
+
+            # Get the VNFD XML from the NSO
+            vnfd_xml = self.nso.get(('xpath', '/nfvo/vnfd[id="%s"]' % vnfd_id)).data_xml
+            vnfd_xml = etree.fromstring(vnfd_xml)
 
             for vm_group in vm_group_list:
                 # Get the VDU ID corresponding to this VM group
