@@ -92,15 +92,15 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        ns_info_before_scale_to_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                   'additional_param': self.tc_input['mano'].get(
-                                                                       'query_params')})
-        if ns_info_before_scale_to_level.ns_state != constants.NS_INSTANTIATED:
+        self.ns_info_before_scale_to_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                        'additional_param': self.tc_input['mano'].get(
+                                                                            'query_params')})
+        if self.ns_info_before_scale_to_level.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        for vnf_info in ns_info_before_scale_to_level.vnf_info:
+        for vnf_info in self.ns_info_before_scale_to_level.vnf_info:
             self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -121,7 +121,8 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
             instantiation_level_id = scale_to_level['target_instantiation_level_id']
             # Build the ScaleVnfData information element
             scale_vnf_data = ScaleVnfData()
-            scale_vnf_data.vnf_instance_id = str(vnf_name)
+            scale_vnf_data.vnf_instance_id = self.mano.get_vnf_instance_id_from_ns_vnf_name(
+                self.ns_info_before_scale_to_level, vnf_name)
             scale_vnf_data.type = 'to_instantiation_level'
             scale_vnf_data.scale_to_level_data = ScaleToLevelData()
             scale_vnf_data.scale_to_level_data.instantiation_level_id = str(instantiation_level_id)
