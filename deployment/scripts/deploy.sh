@@ -19,48 +19,43 @@ else
         fi
 fi
 
-# Prepare log file
-sudo /bin/mkdir /var/log/vnflcv
-sudo /usr/bin/touch /var/log/vnflcv/vnflcv-deployment.log
-sudo chmod 646 /var/log/vnflcv/vnflcv-deployment.log
-
 # Update the list of available packages and their versions
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/bin/date >> /var/log/vnflcv/vnflcv-deployment.log
-echo "1. Running apt-get update" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-sudo /usr/bin/apt-get -y update >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/bin/date
+echo "1. Running apt-get update"
+echo "================================================"
+sudo /usr/bin/apt-get -y update
 
 # Upgrade the packages to the latest versions
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
 /bin/date >> /var/log/vnflcv/vnflcv-deployment.log
-echo "2. Running apt-get upgrade" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-sudo /usr/bin/apt-get -y upgrade &>> /var/log/vnflcv/vnflcv-deployment.log
+echo "2. Running apt-get upgrade"
+echo "================================================"
+sudo /usr/bin/apt-get -y upgrade
 
-sudo apt-get -y install zfsutils-linux &>> /var/log/vnflcv/vnflcv-deployment.log
+sudo apt-get -y install zfsutils-linux
 
 # Remove the existing LXD packages
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/bin/date >> /var/log/vnflcv/vnflcv-deployment.log
-echo "3. Removing lxd and lxd-client" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-sudo /usr/bin/apt-get -y remove --purge lxd lxd-client >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/bin/date
+echo "3. Removing lxd and lxd-client"
+echo "================================================"
+sudo /usr/bin/apt-get -y remove --purge lxd lxd-client
 
 # Install the snap version of LXD
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/bin/date >> /var/log/vnflcv/vnflcv-deployment.log
-echo "4. Installing lxd" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-sudo /usr/bin/snap install lxd >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/bin/date
+echo "4. Installing lxd"
+echo "================================================"
+sudo /usr/bin/snap install lxd
 /bin/sleep 20
 
 # Initialize the LXD configuration
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/bin/date >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/bin/date
 echo "5. Initializing lxd" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/snap/bin/lxd init --auto --storage-backend zfs >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/snap/bin/lxd init --auto --storage-backend zfs
 OIF=$(ip route get 8.8.8.8 | grep dev | cut -f 5 -d ' ')
 OIF_MTU=$(cat /sys/class/net/${OIF}/mtu)
 /snap/bin/lxc network set lxdbr0 bridge.mtu ${OIF_MTU}
@@ -70,17 +65,17 @@ OIF_MTU=$(cat /sys/class/net/${OIF}/mtu)
 /snap/bin/lxc network set lxdbr0 ipv6.nat false
 
 # Install conjure-up
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/bin/date >> /var/log/vnflcv/vnflcv-deployment.log
-echo "6. Installing conjure-up" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-sudo /usr/bin/snap install conjure-up --classic >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/bin/date
+echo "6. Installing conjure-up"
+echo "================================================"
+sudo /usr/bin/snap install conjure-up --classic
 
 # Run conjure-up
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
-/bin/date >> /var/log/vnflcv/vnflcv-deployment.log
-echo "6. Running conjure-up" >> /var/log/vnflcv/vnflcv-deployment.log
-echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
+echo "================================================"
+/bin/date
+echo "6. Running conjure-up"
+echo "================================================"
 if [ "$1" == "--headless" ]
 then
     /snap/bin/conjure-up $(dirname $0) localhost
