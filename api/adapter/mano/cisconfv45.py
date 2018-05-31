@@ -831,21 +831,27 @@ class CiscoNFVManoAdapter(object):
         additional_param = filter['additional_param']
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         tenant_name = additional_param['tenant']
+
+        # Build the VnfInfo data structure
         vnf_info = VnfInfo()
+        vnf_info.vnf_instance_name = vnf_instance_id
+        # vnf_info.vnf_instance_description =
         vnf_info.vnf_instance_id = vnf_instance_id
 
         # Get the VNFD ID from the NSO
-        xml = self.nso.get(('xpath',
-                            '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info[name="%s"]/vnfd'
-                                % (deployment_name, vnf_name))).data_xml
-        xml = etree.fromstring(xml)
-        vnfd_id = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
-                           '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd').text
-
-        # Build the vnf_info data structure
-        vnf_info.vnf_instance_name = vnf_instance_id
-        # vnf_info.vnf_instance_description =
-        vnf_info.vnfd_id = vnfd_id
+        try:
+            xml = self.nso.get(('xpath',
+                                '/nfvo/vnf-info/esc/vnf-deployment[deployment-name="%s"]/vnf-info[name="%s"]/vnfd'
+                                    % (deployment_name, vnf_name))).data_xml
+            xml = etree.fromstring(xml)
+            vnfd_id = xml.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
+                               '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnfd').text
+            vnf_info.vnfd_id = vnfd_id
+        except NCClientError as e:
+            LOG.exception(e)
+            raise CiscoNFVManoAdapterError('Unable to communicate with the NSO Netconf server - %s' % e)
+        except AttributeError:
+            LOG.debug('VNFD ID not available in deployment %s; the deployment may have been deleted' % deployment_name)
 
         # Get the VM group list corresponding to the provided VNF instance ID
         vm_group_list = self.get_vm_groups_for_vnf(vnf_instance_id, additional_param)
