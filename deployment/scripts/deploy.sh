@@ -63,7 +63,11 @@ echo "================================================" >> /var/log/vnflcv/vnflc
 /snap/bin/lxd init --auto --storage-backend zfs >> /var/log/vnflcv/vnflcv-deployment.log
 OIF=$(ip route get 8.8.8.8 | grep dev | cut -f 5 -d ' ')
 OIF_MTU=$(cat /sys/class/net/${OIF}/mtu)
-/snap/bin/lxc network create lxdbr0 bridge.mtu=${OIF_MTU} ipv4.address=auto ipv4.nat=true ipv6.address=none ipv6.nat=false >> /var/log/vnflcv/vnflcv-deployment.log
+/snap/bin/lxc network set lxdbr0 bridge.mtu ${OIF_MTU}
+/snap/bin/lxc network set lxdbr0 ipv4.address auto
+/snap/bin/lxc network set lxdbr0 ipv4.nat true
+/snap/bin/lxc network set lxdbr0 ipv6.address none
+/snap/bin/lxc network set lxdbr0 ipv6.nat false
 
 # Install conjure-up
 echo "================================================" >> /var/log/vnflcv/vnflcv-deployment.log
