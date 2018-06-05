@@ -62,6 +62,7 @@ VDU_TEMPLATE = '''
                             <flavor-name>%(flavor_name)s</flavor-name>
                             %(day0_config)s
                             %(vdu_cp_list)s
+                            %(device_template)s
                         </vdu>'''
 
 DAY0_TEMPLATE = '''
@@ -69,6 +70,10 @@ DAY0_TEMPLATE = '''
                                 <destination>%(day0_dest)s</destination>
                                 <url>%(day0_url)s</url>
                             </day0>'''
+
+DEVICE_TEMPLATE = '''       <esc-device-template>
+                                <name>%(device_template_name)s</name>
+                            </esc-device-template>'''
 
 VDU_CP_TEMPLATE = '''
                         <connection-point-address>
@@ -1121,7 +1126,8 @@ class CiscoNFVManoAdapter(object):
                 'day0_config': self.build_day0_config(vdu_param['day0']),
                 'bootup_time': vdu_param['bootup_time'],
                 'recovery_wait_time': vdu_param['recovery_wait_time'],
-                'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp'])
+                'vdu_cp_list': self.build_vdu_cp_list(vdu_param['cp']),
+                'device_template': self.build_vdu_device_template(vdu_param['device_template'])
             }
 
             vdu_xml = VDU_TEMPLATE % vdu_template_values
@@ -1143,6 +1149,17 @@ class CiscoNFVManoAdapter(object):
             vdu_cp_list_xml += vdu_cp_xml
 
         return vdu_cp_list_xml
+
+    @log_entry_exit(LOG)
+    def build_vdu_device_template(self, device_template_params):
+        device_template_xml = ''
+        if 'name' in device_template_params:
+            device_template_values = {
+                'device_template_name': device_template_params['name'],
+            }
+            device_template_xml = DEVICE_TEMPLATE % device_template_values
+
+        return device_template_xml
 
     @log_entry_exit(LOG)
     def build_vnfd_cp_list(self, ext_cp_vlr):
