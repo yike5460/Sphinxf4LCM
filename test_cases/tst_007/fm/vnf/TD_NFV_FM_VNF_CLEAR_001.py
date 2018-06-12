@@ -134,7 +134,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         self.nfvo_alarm_filter = self.tc_input['mano'].get('alarm_list_params', {})
         self.nfvo_alarm_filter.update({'ns_instance_id': self.ns_instance_id})
         elapsed_time = 0
-        while elapsed_time < constants.ALARM_CREATE_TIMEOUT:
+        while elapsed_time < constants.ALARM_CLEAR_TIMEOUT:
             nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
             if len(nfvo_alarm_list) != 0:
                 for alarm in nfvo_alarm_list:
