@@ -24,6 +24,7 @@ from bottle import route, request, response, run, static_file
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
 from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
+from utils.misc import generate_timestamp
 
 execution_queues = dict()
 message_queues = dict()
@@ -97,7 +98,7 @@ def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step
     tc_name = tc_exec_request['tc_name']
     tc_class = get_tc_constructor_class(tc_name)
 
-    timestamp = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now())
+    timestamp = generate_timestamp()
     log_file_name = '%s_%s.log' % (timestamp, str(tc_name))
     report_file_name = '%s_%s.txt' % (timestamp, str(tc_name))
     html_report_file_name = '%s_%s.html' % (timestamp, str(tc_name))
