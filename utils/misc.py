@@ -27,7 +27,7 @@ def generate_timestamp():
 
 def generate_name(name):
     """
-    This function generates an unique name by adding a timestamp at the end of the provided name.
+    This function generates a unique name by adding a timestamp at the end of the provided name.
     """
 
     return '%s_%s' % (name, generate_timestamp())
