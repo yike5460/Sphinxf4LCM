@@ -74,7 +74,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_BOOT_TIME)
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
@@ -135,6 +135,8 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
 
         self.tc_result['events']['ns_update_vnf_df']['duration'] = self.time_record.duration('ns_update_vnf_df')
         self.tc_result['events']['ns_update_vnf_df']['details'] = 'Success'
+
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify virtualized resources have been updated by VIM',
           description='Verify that the virtualized resources have been updated by the VIM according to the new'

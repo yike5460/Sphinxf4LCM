@@ -87,7 +87,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
-    @Step(name='Verify NS instantiation wa successful',
+    @Step(name='Verify NS instantiation was successful',
           description='Verify that the NFVO indicates NS instantiation operation result as successful')
     def step2(self):
         # --------------------------------------------------------------------------------------------------------------
