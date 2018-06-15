@@ -133,6 +133,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         # Verify that no fault alarms have been cleared on the NFVO
         self.nfvo_alarm_filter = self.tc_input['mano'].get('alarm_list_params', {})
         self.nfvo_alarm_filter.update({'ns_instance_id': self.ns_instance_id})
+        self.nfvo_alarm_filter.update({'alarm_type': 'alarm_clear'})
         elapsed_time = 0
         while elapsed_time < constants.ALARM_CLEAR_TIMEOUT:
             nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
