@@ -54,6 +54,14 @@ class RiftManoAdapter(object):
         self.session.auth = HTTPBasicAuth(username=self.username, password=self.password)
         self.session.verify = False
 
+        resource = '/api/operational/project/%s/project-config' % self.project
+        try:
+            response = self.session.get(url=self.url + resource)
+            assert response.status_code == 200
+        except Exception as e:
+            LOG.exception(e)
+            raise RiftManoAdapterError('Unable to connect to REST server: %s' % self.url)
+
         self.nsr_metadata = {}
         self.nsd_info_ids = dict()
 
