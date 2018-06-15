@@ -275,7 +275,14 @@ class Mano(object):
         :return:                    True if the resources allocated to the initial VNF and not allocated to the final
                                     VNF have been released, False otherwise.
         """
+        # Check if the VNF instantiation state is INSTANTIATED
+        for vnf_info in [vnf_info_initial, vnf_info_final]:
+            if vnf_info is not None and vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+                LOG.debug('Cannot perform validation because %s reports the VNF instantiation state as %s'
+                          % (vnf_info, constants.VNF_NOT_INSTANTIATED))
+                return False
 
+        # Validate released resources
         vnfc_resource_id_list_final = []
         if vnf_info_final is not None:
             for vnfc_resource_info in vnf_info_final.instantiated_vnf_info.vnfc_resource_info:
@@ -308,6 +315,14 @@ class Mano(object):
                                     constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                           'additional_param': additional_param})
+
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
+
+        # Validate the state of the VNF and its resources
         vnf_state = vnf_info.instantiated_vnf_info.vnf_state
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
@@ -334,9 +349,15 @@ class Mano(object):
         """
 
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-
         vresources = dict()
 
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot get allocated resources because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return vresources
+
+        # Retrieve the allocated resources
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
@@ -1324,8 +1345,14 @@ class Mano(object):
                                     Expected format: ['CP1:ip', 'CP2:mac', ...]
         :return:                    String with space-separated addresses.
         """
-        dest_addr_list = []
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot get destination address list because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return ''
 
+        # Retrieve the destination address list
+        dest_addr_list = []
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
             for addr_type, addr_value in ext_cp_info.address.items():
                 cp_details = '%s:%s' % (ext_cp_info.cpd_id, addr_type)
