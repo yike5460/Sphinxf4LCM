@@ -119,7 +119,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
                 vnf_data = OperateVnfData()
                 vnf_data.vnf_instance_id = vnf_info.vnf_instance_id
                 vnf_data.change_state_to = 'stop'
-                vnf_data.additional_param = self.tc_input['mano'].get('operate_params')
+                vnf_data.additional_param = self.tc_input['mano'].get('operate_params', {})
                 self.operate_vnf_data_list.append(vnf_data)
 
         self.time_record.START('ns_update_stop_vnf')
