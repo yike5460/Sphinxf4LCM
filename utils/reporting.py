@@ -188,12 +188,12 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
 
     # Substitute fields in the html report string
     # Select color and result values based on status
-    if tc_result['overall_status'] in ['PASSED']:
-        color, result = 'green', 'Pass'
-    elif tc_result['overall_status'] in ['ERROR', 'FAILED']:
-        color, result = 'red', 'Fail'
+    if tc_result['overall_status'] == 'PASSED':
+        color, result = 'green', 'PASSED'
+    elif tc_result['overall_status'] == 'FAILED':
+        color, result = 'red', 'FAILED'
     else:
-        color, result = '#8B0000', 'Error'
+        color, result = '#8B0000', 'ERROR'
 
     # Format time
     start_time = (str(tc_result['tc_start_time']).split('T')[0] + ' ' +
