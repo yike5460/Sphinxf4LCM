@@ -2464,12 +2464,12 @@ class CiscoNFVManoAdapter(object):
     def ns_get_alarm_list(self, filter):
         tenant_name = filter['tenant']
         deployment_name = filter['ns_instance_id']
-        alarm_type = filter['alarm_type']
+        alarm_state = filter['alarm_state']
 
         try:
-            event_type = filter['event_type'][alarm_type]
+            event_type = filter['alarm_state_mapping'][alarm_state]
         except KeyError:
-            raise CiscoNFVManoAdapterError('No event type defined in the alarm filter for alarm type %s' % alarm_type)
+            raise CiscoNFVManoAdapterError('No mapping defined in the alarm filter for alarm state %s' % alarm_state)
 
         # Get the deployment XML
         try:
