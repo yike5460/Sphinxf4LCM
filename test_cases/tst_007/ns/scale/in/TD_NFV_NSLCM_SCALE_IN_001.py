@@ -97,8 +97,10 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in ns_info_after_instantiation.vnf_info:
-            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources'][
+                '%s / %s (After instantiation)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+            self.tc_result['resources'][
+                '%s / %s (After instantiation)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Scale out the NS',
@@ -146,8 +148,10 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
                                                                  'query_params')})
 
         for vnf_info in ns_info_before_scale_in.vnf_info:
-            self.tc_result['resources']['%s (Before scale in)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Before scale in)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources'][
+                '%s / %s (Before scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+            self.tc_result['resources'][
+                '%s / %s (Before scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Scale in the NS',
@@ -193,8 +197,10 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
                                                                      'query_params')})
 
         for vnf_info in self.ns_info_after_scale_in.vnf_info:
-            self.tc_result['resources']['%s (After scale in)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (After scale in)' % vnf_info.vnf_product_name].update(
+            self.tc_result['resources'][
+                '%s /%s (After scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+            self.tc_result['resources'][
+                '%s / %s (After scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
     @Step(name='Verify impacted VNF related resources have been released',
