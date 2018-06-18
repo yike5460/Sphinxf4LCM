@@ -1668,7 +1668,7 @@ class Mano(object):
     @log_entry_exit(LOG)
     def ns_get_alarm_list(self, filter):
         """
-        This function  enables the OSS/BSSs to query the active alarms from the NFVO.
+        This function enables the OSS/BSSs to query the active alarms from the NFVO.
 
         This function was written in accordance with section 7.6.4 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
 
