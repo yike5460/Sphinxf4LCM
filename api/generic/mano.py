@@ -275,18 +275,20 @@ class Mano(object):
         :return:                    True if the resources allocated to the initial VNF and not allocated to the final
                                     VNF have been released, False otherwise.
         """
-        # Check if the VNF instantiation state is INSTANTIATED
-        for vnf_info in [vnf_info_initial, vnf_info_final]:
-            if vnf_info is not None and vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
-                LOG.debug('Cannot perform validation because %s reports the VNF instantiation state as %s'
-                          % (vnf_info, constants.VNF_NOT_INSTANTIATED))
-                return False
 
-        # Validate released resources
         vnfc_resource_id_list_final = []
         if vnf_info_final is not None:
+            if vnf_info_final.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+                LOG.debug('Cannot perform validation because vnf_info_final reports the VNF instantiation state as %s'
+                          % constants.VNF_NOT_INSTANTIATED)
+                return False
             for vnfc_resource_info in vnf_info_final.instantiated_vnf_info.vnfc_resource_info:
                 vnfc_resource_id_list_final.append(vnfc_resource_info.compute_resource.resource_id)
+
+        if vnf_info_initial.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because vnf_info_initial reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
         for vnfc_resource_info in vnf_info_initial.instantiated_vnf_info.vnfc_resource_info:
             if vnfc_resource_info.compute_resource.resource_id not in vnfc_resource_id_list_final:
                 vim_id = vnfc_resource_info.compute_resource.vim_id
