@@ -76,8 +76,6 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
-
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'),
@@ -147,7 +145,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
         self.tc_result['events']['scale_out_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_BOOT_TIME)
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify additional VNFC instance(s) have been deployed',
           description='Verify that the additional VNFC instance(s) have been deployed for the VNF by querying the VNFM')

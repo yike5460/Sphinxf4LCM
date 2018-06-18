@@ -142,7 +142,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
         self.tc_result['events']['scale_to_level_ns']['duration'] = self.time_record.duration('scale_to_level_ns')
         self.tc_result['events']['scale_to_level_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_BOOT_TIME)
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS has scaled',
           description='Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
