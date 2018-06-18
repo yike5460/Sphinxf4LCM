@@ -118,7 +118,7 @@ class TD_NFV_FM_VNF_NOTIFY_001(TestCase):
         # Verify that no fault alarms have been created on the NFVO
         self.nfvo_alarm_filter = self.tc_input['mano'].get('alarm_list_params', {})
         self.nfvo_alarm_filter.update({'ns_instance_id': self.ns_instance_id})
-        self.nfvo_alarm_filter.update({'alarm_type': 'alarm_create'})
+        self.nfvo_alarm_filter.update({'alarm_state': 'ALARM_TRIGGERED'})
         nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
         if len(nfvo_alarm_list) != 0:
             raise TestRunError('Fault alarms have been created on the NFVO before triggering the failure')
