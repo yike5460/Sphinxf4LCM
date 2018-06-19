@@ -198,7 +198,7 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
 
         for vnf_info in self.ns_info_after_scale_in.vnf_info:
             self.tc_result['resources'][
-                '%s /%s (After scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+                '%s / %s (After scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
             self.tc_result['resources'][
                 '%s / %s (After scale in)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
