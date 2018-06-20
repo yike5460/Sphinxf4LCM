@@ -13,13 +13,14 @@
 import logging
 import re
 import time
+from collections import OrderedDict
 from threading import Thread, Event, Lock
 
 from api.adapter import construct_adapter
 from api.generic import ApiGenericError
 from api.generic import constants
 from utils.logging_module import log_entry_exit
-from utils.misc import tee
+from utils.misc import recursive_map, tee
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -277,8 +278,17 @@ class Mano(object):
 
         vnfc_resource_id_list_final = []
         if vnf_info_final is not None:
+            if vnf_info_final.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+                LOG.debug('Cannot perform validation because vnf_info_final reports the VNF instantiation state as %s'
+                          % constants.VNF_NOT_INSTANTIATED)
+                return False
             for vnfc_resource_info in vnf_info_final.instantiated_vnf_info.vnfc_resource_info:
                 vnfc_resource_id_list_final.append(vnfc_resource_info.compute_resource.resource_id)
+
+        if vnf_info_initial.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because vnf_info_initial reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
         for vnfc_resource_info in vnf_info_initial.instantiated_vnf_info.vnfc_resource_info:
             if vnfc_resource_info.compute_resource.resource_id not in vnfc_resource_id_list_final:
                 vim_id = vnfc_resource_info.compute_resource.vim_id
@@ -307,6 +317,14 @@ class Mano(object):
                                     constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                           'additional_param': additional_param})
+
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot perform validation because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return False
+
+        # Validate the state of the VNF and its resources
         vnf_state = vnf_info.instantiated_vnf_info.vnf_state
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
@@ -333,9 +351,15 @@ class Mano(object):
         """
 
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-
         vresources = dict()
 
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot get allocated resources because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return vresources
+
+        # Retrieve the allocated resources
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
@@ -344,17 +368,21 @@ class Mano(object):
             virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
 
             resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
-            vresources[resource_string] = dict()
+            vresources[resource_string] = OrderedDict()
 
             num_virtual_cpu = virtual_compute.virtual_cpu.num_virtual_cpu
             virtual_memory = virtual_compute.virtual_memory.virtual_mem_size
             size_of_storage = virtual_compute.virtual_disks[0].size_of_storage
             num_vnics = len(virtual_compute.virtual_network_interface)
+            vc_image_id = virtual_compute.vc_image_id
+            software_image_information = vim.query_image(vc_image_id)
+            vc_image_name = software_image_information.name
 
             vresources[resource_string]['vCPU'] = num_virtual_cpu
             vresources[resource_string]['vMemory'] = str(virtual_memory) + ' MB'
             vresources[resource_string]['vStorage'] = str(size_of_storage) + ' GB'
             vresources[resource_string]['vNIC'] = str(num_vnics)
+            vresources[resource_string]['Image name'] = str(vc_image_name)
 
         return vresources
 
@@ -477,7 +505,6 @@ class Mano(object):
         :param additional_affinity_or_anti_affinity_rule:   Specifies additional affinity or anti-affinity constraint
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
-
         :return:                                            Identifier of the NS lifecycle operation occurrence.
 
         """
@@ -1317,16 +1344,24 @@ class Mano(object):
         :param vnf_info:            VnfInfo information element for the VNF for which the ingress CP address list needs
                                     to be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
-                                    Expected format: ['CP1', 'CP2', ...]
+                                    Expected format: ['CP1:ip', 'CP2:mac', ...]
         :return:                    String with space-separated addresses.
         """
-        dest_addr_list = ''
+        # Check if the VNF instantiation state is INSTANTIATED
+        if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
+            LOG.debug('Cannot get destination address list because VnfInfo reports the VNF instantiation state as %s'
+                      % constants.VNF_NOT_INSTANTIATED)
+            return ''
 
+        # Retrieve the destination address list
+        dest_addr_list = []
         for ext_cp_info in vnf_info.instantiated_vnf_info.ext_cp_info:
-            if ext_cp_info.cpd_id in ingress_cp_list:
-                dest_addr_list += ext_cp_info.address[0] + ' '
+            for addr_type, addr_value in ext_cp_info.address.items():
+                cp_details = '%s:%s' % (ext_cp_info.cpd_id, addr_type)
+                if cp_details in ingress_cp_list:
+                    dest_addr_list.append(' '.join(addr_value))
 
-        return dest_addr_list
+        return ' '.join(dest_addr_list)
 
     @log_entry_exit(LOG)
     def get_ns_ingress_cp_addr_list(self, ns_info, ingress_cp_list):
@@ -1337,28 +1372,29 @@ class Mano(object):
         :param ns_info:             NsInfo information element for the NS for which the ingress CP address list needs to
                                     be retrieved.
         :param ingress_cp_list:     List of connection points for which to get the corresponding address(es).
-                                    Expected format: ['VNF1:CP1', 'VNF1:CP2', 'VNF2:CP2' ...]
+                                    Expected format: ['VNF1:CP1:ip', 'VNF1:CP2:mac', 'VNF2:CP2:ip' ...]
         :return:                    String containing space-separated addresses.
         """
         # Build a dict that has as keys the names of the VNFs for which ingress CP addresses need to be retrieved and as
         # values lists with CPs whose addresses need to be retrieved
         # Example:
-        # ingress_cp_list = ['VNF1:CP1', 'VNF2:CP2', 'VNF1:CP3']
-        # ns_ingress_cps = {'VNF1': ['CP1', 'CP3'],
-        #                   'VNF2': ['CP2']}
+        # ingress_cp_list = ['VNF1:CP1:ip', 'VNF2:CP2:mac', 'VNF1:CP3:ip']
+        # ns_ingress_cps = {'VNF1': ['CP1:ip', 'CP3:ip'],
+        #                   'VNF2': ['CP2:mac']}
         ns_ingress_cps = dict()
         for ingress_cp in ingress_cp_list:
-            vnf_name, cp_name = ingress_cp.split(':')
+            vnf_name, cp_details = ingress_cp.split(':', 1)
             if vnf_name not in ns_ingress_cps.keys():
                 ns_ingress_cps[vnf_name] = list()
-            ns_ingress_cps[vnf_name].append(cp_name)
+            ns_ingress_cps[vnf_name].append(cp_details)
 
         # Build the list with the destination addresses
-        dest_addr_list = ''
+        dest_addr_list = []
         for vnf_info in ns_info.vnf_info:
             if vnf_info.vnf_product_name in ns_ingress_cps.keys():
-                dest_addr_list += self.get_vnf_ingress_cp_addr_list(vnf_info, ns_ingress_cps[vnf_info.vnf_product_name])
-        return dest_addr_list
+                dest_addr_list.append(self.get_vnf_ingress_cp_addr_list(vnf_info,
+                                                                        ns_ingress_cps[vnf_info.vnf_product_name]))
+        return ' '.join(dest_addr_list)
 
     @log_entry_exit(LOG)
     def verify_vnf_sw_images(self, vnf_instance_id, additional_param=None):
@@ -1491,6 +1527,55 @@ class Mano(object):
         return True
 
     @log_entry_exit(LOG)
+    def vnf_change_flavour(self, vnf_instance_id, new_flavour_id, instantiation_level_id=None, ext_virtual_link=None,
+                           ext_managed_virtual_link=None, vim_connection_info=None, additional_param=None):
+        """
+        This function changes the deployment flavour of a VNF instance.
+
+        This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 007 v2.4.1 (2018-02).
+
+        :param vnf_instance_id:             Identifier of the VNF instance to be modified.
+        :param new_flavour_id:              Identifier of the new VNF DF to apply to this VNF instance.
+        :param instantiation_level_id:      Identifier of the instantiation level of the DF to be used. If not present,
+                                            the default instantiation level as declared in the VNFD shall be used.
+        :param ext_virtual_link:            Information about external VLs to connect the VNF to.
+        :param ext_managed_virtual_link:    Information about internal VLs that are managed by other entities than the
+                                            VNFM.
+        :param vim_connection_info:         Information about VIM connection(s) for managing resources for the VNF
+                                            instance, or external/externally-managed virtual links. This attribute shall
+                                            be supported and present if VNF-related resource management in direct mode
+                                            is applicable. In that case, this attribute shall be present if there is the
+                                            need to communicate VIM connection information for external or
+                                            externally-managed virtual links.
+        :param additional_param:            Additional parameters passed by the NFVO as input to the flavour change
+                                            process, specific to the VNF being modified as declared in the VNFD.
+        :return:                            Identifier of the VNF lifecycle operation occurrence.
+        """
+
+        return self.mano_adapter.vnf_change_flavour(vnf_instance_id, new_flavour_id, instantiation_level_id,
+                                                    ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
+                                                    additional_param)
+
+    @log_entry_exit(LOG)
+    def validate_vnf_deployment_flavour(self, vnf_instance_id, expected_flavour_id,
+                                        expected_instantiation_level_id=None, additional_param=None):
+        """
+        This function validates that the VNF with the given instance ID uses the correct deployment flavor and
+        instantiation level ID.
+
+        :param vnf_instance_id:                 Identifier of the VNF instance whose deployment flavor and instantiation
+                                                level ID should be validated.
+        :param expected_flavour_id:             Expected deployment flavour of the VNF instance.
+        :param expected_instantiation_level_id: Expected instantiation level ID of the VNF instance.
+        :param additional_param:                Additional parameters used for filtering.
+        :return:                                True if the VNF instance uses the correct deployment flavor and
+                                                instantiation level ID, False otherwise.
+        """
+
+        return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, expected_flavour_id,
+                                                                 expected_instantiation_level_id, additional_param)
+
+    @log_entry_exit(LOG)
     def nsd_info_create(self, user_defined_data=None):
         """
         This function will create an NSD information object in the NFVO for the NSD to be uploaded.
@@ -1561,3 +1646,36 @@ class Mano(object):
         """
 
         return self.mano_adapter.nsd_delete(nsd_info_id)
+
+    @recursive_map
+    def resolve_ns_cp_addr(self, ns_info, data):
+        """
+        This function will search for pattern like ${vnf_name:cp_name:addr_type} (e.g ${VNF1:east:ip}) recursively
+        inside 'data' and resolve them using information found in 'ns_info'
+
+        :param ns_info:     NsInfo information element.
+        :param data:        Data structure containing patterns that may need resolving.
+        :return:            Data structure with resolved patterns.
+        """
+
+        pattern = '\$\{(.*?)\}'
+
+        data = re.sub(pattern, lambda x: self.get_ns_ingress_cp_addr_list(ns_info, [x.group(1)]), data)
+        data = re.sub(pattern, '\\1', data)
+
+        return data
+
+    @log_entry_exit(LOG)
+    def ns_get_alarm_list(self, filter):
+        """
+        This function enables the OSS/BSSs to query the active alarms from the NFVO.
+
+        This function was written in accordance with section 7.6.4 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
+
+        :param filter:  Input filter for selecting alarms. This can contain the list of the NS identifiers, severity and
+                        cause.
+        :return:        Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The cardinality
+                        can be "0" to indicate that no Alarm could be retrieved based on the input filter information.
+        """
+
+        return self.mano_adapter.ns_get_alarm_list(filter)

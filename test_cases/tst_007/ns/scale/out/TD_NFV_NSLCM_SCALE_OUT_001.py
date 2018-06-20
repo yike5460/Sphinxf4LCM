@@ -15,7 +15,7 @@ from time import sleep
 
 from api.generic import constants
 from api.structures.objects import ScaleNsData, ScaleNsByStepsData
-from test_cases import TestCase, TestRunError
+from test_cases import TestCase, TestRunError, Step
 from utils.misc import generate_name
 from utils.net import ping
 
@@ -35,8 +35,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
     4. Verify that the additional VNF instance(s) have been deployed by querying the VNFM
     5. Verify that the additional resources have been allocated by the VIM according to the descriptors
     6. Verify that the additional VNF instance(s) are running and reachable via their management network
-    7. Verify that the additional VNF instances(s) have been configured according to the descriptors by querying the
-       VNFM
+    7. Verify that the additional VNF instance(s) have been configured according to the descriptors by querying the VNFM
     8. Verify that the additional VNF instance(s), VL(s) and VNFFG(s) are connected according to the descriptors
     9. Verify that the NFVO indicates the scaling operation result as successful
     10. Verify that NS has been scaled out by running the end-to-end functional test factoring the VNF scale and
@@ -49,7 +48,8 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
     REQUIRED_ELEMENTS = ('nsd_id', )
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'terminate_ns')
 
-    def run(self):
+    @Step(name='Instantiate the NS', description='Trigger NS instantiation on the NFVO')
+    def step1(self):
         LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -75,30 +75,37 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
-
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
 
+    @Step(name='Verify NS instantiation was successful',
+          description='Verify that the NFVO indicates NS instantiation operation result as successful')
+    def step2(self):
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                             'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info.ns_state != constants.NS_INSTANTIATED:
+        ns_info_before_scale_out = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                              'additional_param': self.tc_input['mano'].get(
+                                                                  'query_params')})
+        if ns_info_before_scale_out.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
                                            % constants.NS_INSTANTIATED)
 
-        for vnf_info in ns_info.vnf_info:
-            self.tc_result['resources']['%s (Before scale out)' % vnf_info.vnf_product_name] = dict()
-            self.tc_result['resources']['%s (Before scale out)' % vnf_info.vnf_product_name].update(
+        for vnf_info in ns_info_before_scale_out.vnf_info:
+            self.tc_result['resources'][
+                '%s / %s (Before scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+            self.tc_result['resources'][
+                '%s / %s (Before scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
+    @Step(name='Scale out the NS',
+          description='Trigger NS scale out by adding VNF instances to the NS in NFVO with an operator action')
+    def step3(self):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Trigger NS scale out by adding VNF instances to the NS in NFVO with an operator action
         # --------------------------------------------------------------------------------------------------------------
@@ -122,8 +129,11 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
         self.tc_result['events']['scale_out_ns']['details'] = 'Success'
 
-        sleep(constants.INSTANCE_BOOT_TIME)
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
+    @Step(name='Verify additional VNF instance(s) have been deployed',
+          description='Verify that the additional VNF instance(s) have been deployed by querying the VNFM')
+    def step4(self):
         # --------------------------------------------------------------------------------------------------------------
         # 4. Verify that the additional VNF instance(s) have been deployed by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
@@ -133,6 +143,20 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                                       additional_param=self.tc_input['mano'].get('scale_params')):
             raise TestRunError('Incorrect number of VNF instances after NS scale out')
 
+        self.ns_info_after_scale_out = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                                  'additional_param': self.tc_input['mano'].get(
+                                                                      'query_params')})
+        for vnf_info in self.ns_info_after_scale_out.vnf_info:
+            self.tc_result['resources'][
+                '%s / %s (After scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+            self.tc_result['resources'][
+                '%s / %s (After scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
+                self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
+
+    @Step(name='Verify additional resources have been allocated',
+          description='Verify that the additional resources have been allocated by the VIM according to the '
+                      'descriptors')
+    def step5(self):
         # --------------------------------------------------------------------------------------------------------------
         # 5. Verify that the additional resources have been allocated by the VIM according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
@@ -141,52 +165,74 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                                           self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
+    @Step(name='Verify VNF instance(s) are reachable via their management network',
+          description='Verify that the additional VNF instance(s) are running and reachable via their management '
+                      'network')
+    def step6(self):
         # --------------------------------------------------------------------------------------------------------------
         # 6. Verify that the additional VNF instance(s) are running and reachable via their management network
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the additional VNF instance(s) are running and reachable via their management network')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in self.ns_info_after_scale_out.vnf_info:
             mgmt_addr_list = self.mano.get_vnf_mgmt_addr_list(vnf_info.vnf_instance_id)
             for mgmt_addr in mgmt_addr_list:
                 if not ping(mgmt_addr):
                     raise TestRunError('Unable to PING IP address %s belonging to %s'
                                        % (mgmt_addr, vnf_info.vnf_product_name))
 
+    @Step(name='Verify VNF instance(s) configuration',
+          description='Verify that the additional VNF instance(s) have been configured according to the descriptors by '
+                      'querying the VNFM',
+          runnable=False)
+    def step7(self):
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Verify that the additional VNF instances(s) have been configured according to the descriptors by querying
+        # 7. Verify that the additional VNF instance(s) have been configured according to the descriptors by querying
         #    the VNFM
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the additional VNF instances(s) have been configured according to the descriptors by '
+        LOG.info('Verifying that the additional VNF instance(s) have been configured according to the descriptors by '
                  'querying the VNFM')
         # TODO
 
+    @Step(name='Verify VNF instance(s) connection(s)',
+          description='Verify that the additional VNF instance(s), VL(s) and VNFFG(s) are connected according to the '
+                      'descriptors',
+          runnable=False)
+    def step8(self):
         # --------------------------------------------------------------------------------------------------------------
         # 8. Verify that the additional VNF instance(s), VL(s) and VNFFG(s) are connected according to the descriptors
         # --------------------------------------------------------------------------------------------------------------
-        LOG.info('Verifying that the additional VNF instances(s), VL(s) and VNFFG(s) are connected according to the '
+        LOG.info('Verifying that the additional VNF instance(s), VL(s) and VNFFG(s) are connected according to the '
                  'descriptors')
         # TODO
 
+    @Step(name='Verify NS scale out was successful',
+          description='Verify that the NFVO indicates the scaling operation result as successful')
+    def step9(self):
         # --------------------------------------------------------------------------------------------------------------
         # 9. Verify that the NFVO indicates the scaling operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates the scaling operation result as successful')
         LOG.debug('This has implicitly been checked at step 3')
 
+    @Step(name='Verify traffic flows',
+          description='Verify that NS has been scaled out by running the end-to-end functional test factoring the VNF '
+                      'scale and capacity')
+    def step10(self):
         # --------------------------------------------------------------------------------------------------------------
         # 10. Verify that NS has been scaled out by running the end-to-end functional test factoring the VNF scale and
         #     capacity
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NS has been scaled out by running the end-to-end functional test factoring the VNF '
                  'scale and capacity')
-        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD',
-                               traffic_config=self.tc_input['traffic']['traffic_config'])
+        resolved_traffic_config = self.mano.resolve_ns_cp_addr(self.ns_info_after_scale_out,
+                                                               data=self.tc_input['traffic']['traffic_config'])
+        self.traffic.configure(traffic_load='NORMAL_TRAFFIC_LOAD', traffic_config=resolved_traffic_config)
 
         self.register_for_cleanup(index=30, function_reference=self.traffic.destroy)
 
         # Configure stream destination address(es)
         dest_addr_list = self.mano.get_ns_ingress_cp_addr_list(
-                                                          ns_info,
+                                                          self.ns_info_after_scale_out,
                                                           self.tc_input['traffic']['traffic_config']['ingress_cp_name'])
         self.traffic.reconfig_traffic_dest(dest_addr_list)
 
@@ -208,6 +254,11 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
 
         self.tc_result['scaling_out']['traffic_after'] = 'NORMAL_TRAFFIC_LOAD'
 
+        self.traffic.stop()
+        self.unregister_from_cleanup(index=40)
+
+    @Step(name='Terminate the NS', description='Trigger the termination of the NS instance on the NFVO')
+    def step11(self):
         # --------------------------------------------------------------------------------------------------------------
         # 11. Trigger the termination of the NS instance on the NFVO
         # --------------------------------------------------------------------------------------------------------------
@@ -231,29 +282,32 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_delete_id,
                                   ns_instance_id=self.ns_instance_id)
 
+    @Step(name='Verify NS is terminated',
+          description='Verify that the NS is terminated and that all resources have been released by the VIM')
+    def step12(self):
         # --------------------------------------------------------------------------------------------------------------
         # 12. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
-        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
-        if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
+        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
+                                                               'additional_param': self.tc_input['mano'].get(
+                                                                   'query_params')})
+        if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'
                                            % constants.NS_NOT_INSTANTIATED)
 
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
-        for vnf_info in ns_info.vnf_info:
+        for vnf_info in self.ns_info_after_scale_out.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
             vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
                                                    'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
-                raise TestRunError(
-                    'VNF instance was not terminated correctly. VNF instance ID %s expected state was %s but got %s'
-                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
+                raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
+                                   % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))
 
         LOG.info('Verifying that all resources have been released by the VIM')
-        if not self.mano.validate_ns_released_vresources(ns_info):
+        if not self.mano.validate_ns_released_vresources(self.ns_info_after_scale_out):
             raise TestRunError('Allocated resources have not been released by the VIM')
 
         LOG.info('%s execution completed successfully' % self.tc_name)

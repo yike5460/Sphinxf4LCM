@@ -15,22 +15,27 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from multiprocessing import Process, Queue
-from threading import Lock
+from glob import glob
+from multiprocessing import Process, Queue, Event
+from threading import Lock, Thread
 
-from bottle import route, request, response, run
+from bottle import route, request, response, run, static_file
 
 from api.adapter import construct_adapter
 from utils import reporting, logging_module
 from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
+from utils.misc import generate_timestamp
 
 execution_queues = dict()
+message_queues = dict()
+step_triggers = dict()
 execution_processes = dict()
 tc_results = dict()
 tc_inputs = dict()
 
 json_file_path = '/etc/vnflcv'
 config_file_name = 'config.json'
+reports_dir = '/var/log/vnflcv'
 
 lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
 lock = dict()
@@ -86,35 +91,52 @@ def _delete_config(key):
         json.dump(config, config_file, sort_keys=True, indent=2)
 
 
-def execute_test(tc_exec_request, tc_input, queue):
+def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger):
     """
     This function is used as a process target and it starts the execution of a test case.
     """
     tc_name = tc_exec_request['tc_name']
     tc_class = get_tc_constructor_class(tc_name)
 
-    timestamp = '{:%Y_%m_%d_%H_%M_%S}'.format(datetime.now())
+    timestamp = generate_timestamp()
     log_file_name = '%s_%s.log' % (timestamp, str(tc_name))
     report_file_name = '%s_%s.txt' % (timestamp, str(tc_name))
+    html_report_file_name = '%s_%s.html' % (timestamp, str(tc_name))
+    json_file_name = '%s_%s.json' % (timestamp, str(tc_name))
 
     root_logger = logging.getLogger()
     logging_module.configure_logger(root_logger, file_level='DEBUG', log_filename=log_file_name)
 
     tc_start_time = datetime.utcnow()
-    tc_result = tc_class(tc_input).execute()
+    tc_instance = tc_class(tc_input)
+    tc_instance.message_queue = message_queue
+    tc_instance.step_trigger = step_trigger
+    tc_result = tc_instance.execute()
     tc_end_time = datetime.utcnow()
 
     tc_result['tc_start_time'] = tc_start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_end_time'] = tc_end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_duration'] = str(tc_end_time - tc_start_time)
 
-    queue.put(tc_result)
+    execution_queue.put(tc_result)
 
     kibana_srv = _read_config('kibana-srv')
     if kibana_srv is not None:
         reporting.kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result)
 
     reporting.report_test_case(report_file_name, tc_exec_request, tc_input, tc_result)
+    reporting.html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_result)
+    reporting.dump_raw_json(json_file_name, tc_exec_request, tc_input, tc_result)
+
+
+def process_reaper(execution_id):
+    execution_process = execution_processes.get(execution_id)
+    if execution_process is None:
+        return
+
+    execution_process.join()
+    message_queue = message_queues[execution_id]
+    message_queue.put(None)
 
 
 @route('/version')
@@ -154,6 +176,7 @@ def do_exec():
             resource_params = _read_resource(resource_type, resource_name)
             tc_input[resource_type] = dict()
             tc_input[resource_type]['type'] = resource_params['type']
+            tc_input[resource_type]['name'] = resource_name
             tc_input[resource_type]['adapter_config'] = resource_params['client_config']
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
@@ -166,10 +189,30 @@ def do_exec():
                 tc_input['mano']['termination_params'] = resource_params.get('termination_params', {})
                 tc_input['mano']['operate_params'] = resource_params.get('operate_params', {})
                 tc_input['mano']['scale_params'] = resource_params.get('scale_params', {})
+                tc_input['mano']['change_df_params'] = resource_params.get('change_df_params')
+                tc_input['mano']['sap_data'] = resource_params.get('sap_data', {})
+                tc_input['mano']['alarm_list_params'] = resource_params.get('alarm_list_params', {})
                 tc_input['vnfd_id'] = resource_params.get('vnfd_id')
                 tc_input['flavour_id'] = resource_params.get('flavour_id')
                 tc_input['instantiation_level_id'] = resource_params.get('instantiation_level_id')
                 tc_input['nsd_id'] = resource_params.get('nsd_id')
+                tc_input['change_vnf_df_list'] = resource_params.get('change_vnf_df_list')
+                tc_input['nested_ns_instance_data'] = resource_params.get('nested_ns_instance_data')
+                tc_input['ns_instantiation_level_id'] = resource_params.get('ns_instantiation_level_id')
+                tc_input['scale_to_level_list'] = resource_params.get('scale_to_level_list')
+                tc_input['scale_from_level_list'] = resource_params.get('scale_from_level_list')
+                tc_input['operate_vnf_data'] = resource_params.get('operate_vnf_data')
+                tc_input['nested_ns_params'] = resource_params.get('nested_ns_params', {})
+                tc_input['nsd'] = resource_params.get('nsd')
+                tc_input['nsd_params'] = resource_params.get('nsd_params', {})
+                if tc_input['nsd_params'].get('vendor_nsd_file'):
+                    try:
+                        with open(tc_input['nsd_params']['vendor_nsd_file'], 'r') as nsd_file:
+                            tc_input['nsd_params']['vendor_nsd'] = nsd_file.read()
+                            tc_input['nsd_params'].pop('vendor_nsd_file')
+                    except Exception as e:
+                        response.status = 504
+                        return {'Error': '%s' % e}
                 tc_input[resource_type]['generic_config'] = dict()
                 for timeout_timer in timeout_timers:
                     timeout = _read_config(timeout_timer)
@@ -178,21 +221,33 @@ def do_exec():
 
         tc_input['scaling_policy_name'] = _read_config('scaling_policy_name')
         tc_input['scaling_policy_list'] = _read_config('scaling_policy_list')
-        tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')
+        if tc_input['operate_vnf_data'] is None:
+            tc_input['operate_vnf_data'] = _read_config('operate_vnf_data')
 
         # TODO: remove
         if 'vnf' not in tc_input.keys():
             tc_input['vnf'] = dict()
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
     execution_id = str(uuid.uuid4())
-    queue = Queue()
-    execution_process = Process(target=execute_test, args=(tc_exec_request, tc_input, queue))
+    execution_queue = Queue()
+    message_queue = Queue()
+    if _read_config('debug') is True:
+        step_trigger = Event()
+    else:
+        step_trigger = None
+    execution_process = Process(target=execute_test,
+                                args=(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger))
     execution_process.start()
 
     tc_inputs[execution_id] = tc_input
 
     execution_processes[execution_id] = execution_process
-    execution_queues[execution_id] = queue
+    execution_queues[execution_id] = execution_queue
+    message_queues[execution_id] = message_queue
+    step_triggers[execution_id] = step_trigger
+
+    process_reaper_thread = Thread(target=process_reaper, args=(execution_id,))
+    process_reaper_thread.start()
 
     return {'execution_id': execution_id}
 
@@ -415,6 +470,65 @@ def wait_for_exec(execution_id):
 
     execution_process.join()
     return {'status': 'DONE'}
+
+
+@route('/v1.0/step/<execution_id>')
+def wait_for_step(execution_id):
+    try:
+        message_queue = message_queues[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'error': 'NOT_FOUND'}
+
+    if message_queue is None:
+        msg = None
+    else:
+        msg = message_queue.get()
+
+    if msg is None:
+        message_queues[execution_id] = None
+        response.status = 204
+        return {'status': 'DONE'}
+    else:
+        response.status = 200
+        return msg
+
+
+@route('/v1.0/step/<execution_id>', method='POST')
+def trigger_step(execution_id):
+    try:
+        step_trigger = step_triggers[execution_id]
+    except KeyError:
+        response.status = 404
+        return {'error': 'NOT_FOUND'}
+
+    if step_trigger is None:
+        response.status = 204
+        return {'error': 'Not running in debug mode'}
+    else:
+        step_trigger.set()
+        response.status = 200
+        return {}
+
+
+@route('/v1.0/reports')
+def list_reports():
+    extension = request.query.type or 'html'
+    report_files_list = glob('%s/*.%s' % (reports_dir, extension))
+
+    def get_basename(absolute_path):
+        return os.path.splitext(os.path.basename(absolute_path))[0]
+
+    report_names = map(get_basename, report_files_list)
+    report_names.sort()
+
+    return {'reports': report_names}
+
+
+@route('/v1.0/reports/<name>')
+def get_report(name):
+    extension = request.query.type or 'html'
+    return static_file('%s.%s' % (name, extension), root=os.path.abspath(reports_dir))
 
 
 run(host='0.0.0.0', port=8080, server='paste')

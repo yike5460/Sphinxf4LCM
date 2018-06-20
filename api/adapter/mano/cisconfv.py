@@ -136,8 +136,8 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
-        This function does not have a direct mapping in OpenStack Tacker client so it will just return the status of the
-        VNF with given ID.
+        This function does not have a direct mapping in Cisco NFV client so it will just return the status of the VNF
+        with given ID.
 
         :param lifecycle_operation_occurrence_id:   UUID used to retrieve the operation details from the class
                                                      attribute self.lifecycle_operation_occurrence_ids
@@ -446,10 +446,25 @@ class CiscoNFVManoAdapter(object):
                                                              % (vm_group_text, vm_id_text, nic_id_text))
                         ip_address_text = ip_address.text
 
+                        # Get the MAC address
+                        mac_address = deployment_xml.find('.//{http://www.cisco.com/esc/esc}vm_group'
+                                                          '[{http://www.cisco.com/esc/esc}name="%s"]/'
+                                                          '{http://www.cisco.com/esc/esc}vm_instance'
+                                                          '[{http://www.cisco.com/esc/esc}vm_id="%s"]/'
+                                                          '{http://www.cisco.com/esc/esc}interfaces/'
+                                                          '{http://www.cisco.com/esc/esc}interface'
+                                                          '[{http://www.cisco.com/esc/esc}nicid="%s"]/'
+                                                          '{http://www.cisco.com/esc/esc}mac_address'
+                                                          % (vm_group_text, vm_id_text, nic_id_text))
+                        mac_address_text = mac_address.text
+
                         # Build the VnfExtCpInfo data structure
                         vnf_ext_cp_info = VnfExtCpInfo()
                         vnf_ext_cp_info.cp_instance_id = port_id_text
-                        vnf_ext_cp_info.address = [ip_address_text]
+                        vnf_ext_cp_info.address = {
+                            'ip': [ip_address_text],
+                            'mac': [mac_address_text]
+                        }
                         vnf_ext_cp_info.cpd_id = cpd_id_text
 
                         # Append the current VnfExtCpInfo element to the VnfExtCpInfo list

@@ -61,6 +61,7 @@
             <li><a href="/additional/">Additional Parameters</a></li>
             <li><a href="/twister/" target="_blank">Test Execution</a></li>
             <li><a href="/kibana/" target="_blank">Analytics</a></li>
+            <li><a href="/reports/">Reports</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -109,6 +110,23 @@
                     <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
                     <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
                     <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" readonly style="width: 200px" value={{mano['nsd_id']}}></td></tr>
+                  <% end %>
+                  <% if mano['type'] == 'rift': %>
+                    <tr><td>URL:</td><td><input type="text" name="url" readonly style="width: 200px" value={{mano['url']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
+                    <tr><td>Project:</td><td><input type="text" name="project" readonly style="width: 200px" value={{mano['project']}}></td></tr>
+                    <tr><td>Datacenter:</td><td><input type="text" name="datacenter" readonly style="width: 200px" value={{mano['datacenter']}}></td></tr>
+                    <tr><td>Scaling Group Name:</td><td><input type="text" name="scaling_group_name" readonly style="width: 200px" value={{mano['scaling_group_name']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" readonly style="width: 200px" value={{mano['nsd_id']}}></td></tr>
+                  <% end %>
+                  <% if mano['type'] == 'openbaton': %>
+                    <tr><td>URL:</td><td><input type="text" name="url" readonly style="width: 200px" value={{mano['url']}}></td></tr>
+                    <tr><td>Username:</td><td><input type="text" name="username" readonly style="width: 200px" value={{mano['username']}}></td></tr>
+                    <tr><td>Password:</td><td><input type="password" name="password" readonly style="width: 200px" value={{mano['password']}}></td></tr>
+                    <tr><td>Project:</td><td><input type="text" name="project" readonly style="width: 200px" value={{mano['project']}}></td></tr>
+                    <tr><td>NSD ID:</td><td><input type="text" name="nsd_id" readonly style="width: 200px" value={{mano['nsd_id']}}></td></tr>
+                    <tr><td>VIM Info:</td><td><input type="text" name="vim_info" readonly style="width: 200px" value={{mano['vim_info']}}></td></tr>
                   <% end %>
 
                   <input type="hidden" name="confirmed" value="yes">

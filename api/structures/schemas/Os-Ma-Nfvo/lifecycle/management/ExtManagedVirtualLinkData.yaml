@@ -1,0 +1,40 @@
+#
+# Copyright (c) 2018 by Spirent Communications Plc.
+# All Rights Reserved.
+#
+# This software is confidential and proprietary to Spirent Communications Inc.
+# No part of this software may be reproduced, transmitted, disclosed or used
+# in violation of the Software License Agreement without the expressed
+# written consent of Spirent Communications Inc.
+#
+#
+
+
+# This structure was written in accordance with section 8.3.4.28 of ETSI GS NFV-IFA 013 - v2.4.1 (2018-02).
+ExtManagedVirtualLinkData:
+  description: The ExtManagedVirtualLinkData information element provides the information of an externally-managed internal VL to be used as a parameter passed to multiple interfaces.
+  attributes:
+    ext_managed_virtual_link_id:
+      description: Identifier of this externally-managed internal VL instance. The identifier is assigned by the NFV-MANO entity that manages this VL instance.
+      type: Identifier
+      required: true
+
+    virtual_link_desc_id:
+      description: Identifier of the VLD in the VNFD for this VL.
+      type: Identifier
+      required: true
+
+    vim_id:
+      description: Identifier of the VIM that manages this resource. This attribute shall be supported and present if VNF-related resource management in direct mode is applicable.
+      type: Identifier
+      required: false
+
+    resource_provider_id:
+      description: Identifies the entity responsible for the management of the resource. This attribute shall be supported and present when VNF-related Resource Management in indirect mode is applicable.
+      type: Identifier
+      required: false
+
+    resource_id:
+      description: Identifier of the resource in the scope of the VIM or the resource provider.
+      type: Identifier
+      required: true

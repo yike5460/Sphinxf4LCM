@@ -12,7 +12,7 @@
 
 import logging
 
-from test_cases import TestCase
+from test_cases import TestCase, Step
 
 # Instantiate logger
 LOG = logging.getLogger(__name__)
@@ -31,26 +31,35 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
     REQUIRED_APIS = ('mano', )
     REQUIRED_ELEMENTS = ('nsd', )
 
-    def run(self):
+    @Step(name='On-board NSD', description='Trigger the on-boarding of the NSD on MANO')
+    def step1(self):
         LOG.info('Starting %s' % self.tc_name)
 
         # --------------------------------------------------------------------------------------------------------------
         # 1. Trigger the on-boarding of the NSD on MANO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Creating the NSD information object')
-        nsd_info_id = self.mano.nsd_info_create(self.tc_input.get('nsd_params', {}))
+        self.nsd_info_id = self.mano.nsd_info_create(self.tc_input.get('nsd_params', {}))
 
         LOG.info('Triggering the on-boarding of the NSD on MANO')
-        self.mano.nsd_upload(nsd_info_id, self.tc_input['nsd'])
+        self.mano.nsd_upload(self.nsd_info_id, self.tc_input['nsd'])
 
-        self.register_for_cleanup(index=10, function_reference=self.mano.nsd_delete, nsd_info_id=nsd_info_id)
+        self.register_for_cleanup(index=10, function_reference=self.mano.nsd_delete, nsd_info_id=self.nsd_info_id)
 
+    @Step(name='Verify NSD is successfully on-boarded',
+          description='Verify that NSD is successfully on-boarded in MANO')
+    def step2(self):
         # --------------------------------------------------------------------------------------------------------------
         # 2. Verify that NSD is successfully on-boarded in MANO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that NSD is successfully on-boarded in MANO')
-        self.tc_result['nsd'] = self.mano.nsd_fetch(nsd_info_id)
+        self.tc_result['nsd'] = self.mano.nsd_fetch(self.nsd_info_id)
 
+    @Step(name='Verify VLDs and VNFFGDs have been successfully on-boarded',
+          description='Verify that all VLDs and VNFFGDs referenced in the NSD have been successfully on-boarded in '
+                      'MANO',
+          runnable=False)
+    def step3(self):
         # --------------------------------------------------------------------------------------------------------------
         # 3. Verify that all VLDs and VNFFGDs referenced in the NSD have been successfully on-boarded in MANO
         # --------------------------------------------------------------------------------------------------------------

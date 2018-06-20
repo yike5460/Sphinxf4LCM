@@ -810,10 +810,6 @@ class NsProfile(InformationElementWithExternalSchema):
     pass
 
 
-class VnfToLevelMapping(InformationElementWithExternalSchema):
-    pass
-
-
 class NsLevel(InformationElementWithExternalSchema):
     pass
 
@@ -892,7 +888,43 @@ class NsLifeCycleManagementScript(InformationElementWithExternalSchema):
 
 class Nsd(InformationElementWithExternalSchema):
     pass
-  
-  
+
+
 class NsdInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfExtCpConfig(InformationElementWithExternalSchema):
+    pass
+
+
+class VnfExtCpData(InformationElementWithExternalSchema):
+    pass
+
+
+class ExtLinkPortData(InformationElementWithExternalSchema):
+    pass
+
+
+class ExtVirtualLinkData(InformationElementWithExternalSchema):
+    pass
+
+
+class ExtManagedVirtualLinkData(InformationElementWithExternalSchema):
+    pass
+
+
+class ChangeVnfFlavourData(InformationElementWithExternalSchema):
+    pass
+
+
+class FaultyComponentInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class FaultyResourceInfo(InformationElementWithExternalSchema):
+    pass
+
+
+class Alarm(InformationElementWithExternalSchema):
     pass

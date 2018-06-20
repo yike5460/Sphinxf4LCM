@@ -27,7 +27,5 @@ VnfExtCpInfo:
 
     address:
       description: List of network addresses that have been configured (statically or dynamically) on the CP
-      type: List
+      type: Mapping
       required: false
-      constraints:
-        entry_type: NotSpecified

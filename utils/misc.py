@@ -12,17 +12,25 @@
 
 import collections
 import datetime
+import functools
 
 from threading import Lock
 
 
-def generate_name(name):
+def generate_timestamp():
     """
-    This function generates an unique name by adding a timestamp at the end of the provided name
+    This function generates a timestamp.
     """
 
-    new_name = str(name) + '_{:%Y_%m_%d_%H_%M_%S}'.format(datetime.datetime.now())
-    return new_name
+    return '{:%Y%m%d_%H%M%S}'.format(datetime.datetime.now())
+
+
+def generate_name(name):
+    """
+    This function generates a unique name by adding a timestamp at the end of the provided name.
+    """
+
+    return '%s_%s' % (name, generate_timestamp())
 
 
 def tee(iterable, n=2):
@@ -30,7 +38,7 @@ def tee(iterable, n=2):
     This function is based on the Python implementation of itertools.tee:
     https://docs.python.org/2/library/itertools.html#itertools.tee
 
-    A lock was added for making it safe to use the teed iterators in separate threads
+    A lock was added for making it safe to use the teed iterators in separate threads.
     """
     it = iter(iterable)
     l = Lock()
@@ -46,3 +54,17 @@ def tee(iterable, n=2):
             yield mydeque.popleft()
 
     return tuple(gen(d) for d in deques)
+
+
+def recursive_map(func):
+    @functools.wraps(func)
+    def mapper(*args, **kwargs):
+        data = kwargs.pop('data')
+
+        if isinstance(data, dict):
+            return {k: mapper(data=v, *args, **kwargs) for k, v in data.iteritems()}
+        if isinstance(data, list):
+            return map(lambda e: mapper(data=e, *args, **kwargs), data)
+        return func(data=data, *args, **kwargs)
+
+    return mapper
