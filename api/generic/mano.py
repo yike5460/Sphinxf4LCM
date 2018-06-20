@@ -458,9 +458,7 @@ class Mano(object):
                                                     ns_instantiation_level_id,
                                                     additional_affinity_or_anti_affinity_rule)
 
-        if operation_status != constants.OPERATION_SUCCESS:
-            raise ManoGenericError('NS instantiation operation failed')
-        return ns_instance_id
+        return ns_instance_id, operation_status
 
     @log_entry_exit(LOG)
     def ns_delete_id(self, ns_instance_id):

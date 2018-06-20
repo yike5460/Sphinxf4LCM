@@ -55,7 +55,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS instantiation on the NFVO')
         self.time_record.START('instantiate_ns')
-        self.ns_instance_id = self.mano.ns_create_and_instantiate(
+        self.ns_instance_id, operation_status = self.mano.ns_create_and_instantiate(
                nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
                ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
                sap_data=self.tc_input['mano'].get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
@@ -68,19 +68,22 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
                ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
                additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
-        self.time_record.END('instantiate_ns')
-
-        self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
-        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
-
-        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
-
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id,
                                   terminate_time=self.tc_input.get('terminate_time'),
                                   additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            raise TestRunError('NS instantiation operation failed')
+
+        self.time_record.END('instantiate_ns')
+
+        self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
+
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS instantiation was successful',
           description='Verify that the NFVO indicates NS instantiation operation result as successful')
