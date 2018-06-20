@@ -57,7 +57,7 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         # 1. Trigger nested NS instantiation on the NFVO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering nested NS instantiation on the NFVO')
-        self.ns_instance_id_nested = self.mano.ns_create_and_instantiate(
+        self.ns_instance_id_nested, operation_status = self.mano.ns_create_and_instantiate(
             nsd_id=self.nested_ns_params['nsd_id'], ns_name=generate_name(self.tc_name),
             ns_description=self.nested_ns_params.get('ns_description'),
             flavour_id=self.nested_ns_params.get('flavour_id'), sap_data=self.nested_ns_params.get('sap_data'),
@@ -72,14 +72,17 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
             additional_affinity_or_anti_affinity_rule=self.nested_ns_params.get(
                 'additional_affinity_or_anti_affinity_rule'))
 
-        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
-
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id_nested,
                                   terminate_time=self.nested_ns_params.get('terminate_time'),
                                   additional_param=self.nested_ns_params.get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id_nested)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            raise TestRunError('NS instantiation operation failed')
+
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify nested NS instantiation was successful',
           description='Verify that the NFVO indicates nested NS instantiation operation result as successful')
@@ -103,7 +106,7 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering nesting NS instantiation on the NFVO')
         self.time_record.START('instantiate_ns')
-        self.ns_instance_id_nesting = self.mano.ns_create_and_instantiate(
+        self.ns_instance_id_nesting, operation_status = self.mano.ns_create_and_instantiate(
             nsd_id=self.tc_input['nsd_id'], ns_name=generate_name(self.tc_name),
             ns_description=self.tc_input.get('ns_description'), flavour_id=self.tc_input.get('flavour_id'),
             sap_data=self.tc_input['mano'].get('sap_data'), pnf_info=self.tc_input.get('pnf_info'),
@@ -116,19 +119,22 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
             ns_instantiation_level_id=self.tc_input.get('ns_instantiation_level_id'),
             additional_affinity_or_anti_affinity_rule=self.tc_input.get('additional_affinity_or_anti_affinity_rule'))
 
-        self.time_record.END('instantiate_ns')
-
-        self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
-        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
-
-        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
-
         self.register_for_cleanup(index=30, function_reference=self.mano.ns_terminate_and_delete,
                                   ns_instance_id=self.ns_instance_id_nesting,
                                   terminate_time=self.tc_input.get('terminate_time'),
                                   additional_param=self.tc_input['mano'].get('termination_params'))
         self.register_for_cleanup(index=40, function_reference=self.mano.wait_for_ns_stable_state,
                                   ns_instance_id=self.ns_instance_id_nesting)
+
+        if operation_status != constants.OPERATION_SUCCESS:
+            raise TestRunError('NS instantiation operation failed')
+
+        self.time_record.END('instantiate_ns')
+
+        self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
+        self.tc_result['events']['instantiate_ns']['details'] = 'Success'
+
+        sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify nesting NS instantiation was successful',
           description='Verify that the NFVO indicates nesting NS instantiation operation result as successful')
