@@ -26,6 +26,9 @@ from api.adapter.mano import ManoAdapterError
 from api.generic import constants
 from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, \
     VnfExtCpInfo, NsdInfo
+from api.structures.objects import Nsd, VnfProfile, NsDf, NsVirtualLinkDesc, NsVirtualLinkConnectivity, Vnfd, Vdu, \
+    VirtualComputeDesc, VirtualStorageDesc, SwImageDesc, VirtualCpuData, VirtualCpuPinningData, VirtualMemoryData, \
+    VnfExtCpd
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
@@ -216,6 +219,84 @@ class RiftManoAdapter(object):
         return nsd
 
     @log_entry_exit(LOG)
+    def get_nsd_generic(self, nsd_id):
+        nsd = self.get_nsd(nsd_id)
+
+        # Create empty generic Nsd object
+        nsd_generic = Nsd()
+
+        # Populate Nsd generic data
+        nsd_generic.nsd_identifier = str(nsd['id'])
+        nsd_generic.nsd_name = str(nsd['name'])
+        nsd_generic.version = str(nsd['version'])
+        nsd_generic.designer = str(nsd['vendor'])
+
+        # Populate VNFD IDs and build basic VnfProfile information elements
+        nsd_generic.vnfd_id = []
+        nsdf = NsDf()
+        nsdf.vnf_profile = []
+        ns_vlc = {}
+        for vnfd in nsd['constituent-vnfd']:
+            vnfd_id = str(vnfd['vnfd-id-ref'])
+            vnf_index = str(vnfd['member-vnf-index'])
+            ns_vlc[vnf_index] = {}
+
+            # Store the current VNFD
+            if vnfd_id not in nsd_generic.vnfd_id:
+                nsd_generic.vnfd_id.append(vnfd_id)
+
+            # Build the VnfProfile information element for the VNF with the current VNF index
+            vnf_profile = VnfProfile()
+            vnf_profile.vnf_profile_id = vnf_index
+            vnf_profile.vnfd_id = vnfd_id
+            nsdf.vnf_profile.append(vnf_profile)
+
+        # Populate NsVirtualLinkDesc information element
+        if 'vld' in nsd.keys():
+            nsd_generic.virtual_link_desc = []
+            for vld in nsd['vld']:
+                vld_id = str(vld['id'])
+                ns_virtual_link_desc = NsVirtualLinkDesc()
+                ns_virtual_link_desc.virtual_link_desc_id = vld_id
+                nsd_generic.virtual_link_desc.append(ns_virtual_link_desc)
+
+                # Build dict containing the list of CPs for each VL, for each member VNF index
+                # Example:
+                # {
+                #   '1': {
+                #     'link1': [
+                #       'mgmt'
+                #     ],
+                #     'link3': [
+                #       'east'
+                #     ],
+                #     'link2': [
+                #       'west'
+                #     ]
+                #   }
+                # }
+                for cp in vld['vnfd-connection-point-ref']:
+                    vnf_index = str(cp['member-vnf-index-ref'])
+                    if vld_id not in ns_vlc[vnf_index]:
+                        ns_vlc[vnf_index][vld_id] = []
+                    ns_vlc[vnf_index][vld_id].append(str(cp['vnfd-connection-point-ref']))
+
+        # Populate VNF profiles with NsVirtualLinkConnectivity information elements
+        for vnf_profile in nsdf.vnf_profile:
+            vnf_index = vnf_profile.vnf_profile_id
+            vnf_profile.ns_virtual_link_connectivity = []
+            for vl_id in ns_vlc[vnf_index]:
+                ns_virtual_link_connectivity = NsVirtualLinkConnectivity()
+                ns_virtual_link_connectivity.virtual_link_profile_id = vl_id
+                ns_virtual_link_connectivity.cpd_id = ns_vlc[vnf_index][vl_id]
+                vnf_profile.ns_virtual_link_connectivity.append(ns_virtual_link_connectivity)
+
+        nsdf.ns_df_id = str(nsd['name'])
+        nsd_generic.nsdf = [nsdf]
+
+        return nsd_generic
+
+    @log_entry_exit(LOG)
     def get_vnfd(self, vnfd_id):
         resource = '/api/config/project/vnfd-catalog/vnfd/%s' % vnfd_id
 
@@ -231,6 +312,63 @@ class RiftManoAdapter(object):
         vnfd.pop('rw-project-vnfd:meta', None)
 
         return vnfd
+
+    @log_entry_exit(LOG)
+    def get_vnfd_generic(self, vnfd_id):
+        vnfd = self.get_vnfd(vnfd_id)
+
+        # Create empty generic Vnfd object
+        vnfd_generic = Vnfd()
+
+        # Populate general VNFD data
+        vnfd_generic.vnf_product_name = str(vnfd['name'])
+        vnfd_generic.vnf_product_info_name = str(vnfd['name'])
+        vnfd_generic.vnf_product_info_description = str(vnfd.get('description'))
+        vnfd_generic.vnfd_id = str(vnfd['id'])
+        vnfd_generic.vnf_provider = str(vnfd['vendor'])
+        vnfd_generic.vnfd_version = str(vnfd['version'])
+
+        # Populate Vdu, VirtualComputeDesc and VirtualStorageDesc information elements
+        vnfd_generic.vdu = []
+        vnfd_generic.virtual_compute_desc = []
+        vnfd_generic.virtual_storage_desc = []
+        for vdu in vnfd['vdu']:
+            generic_vdu = Vdu()
+            generic_virtual_compute_desc = VirtualComputeDesc()
+            generic_virtual_storage_desc = VirtualStorageDesc()
+
+            generic_vdu.name = str(vdu['name'])
+            generic_vdu.vdu_id = str(vdu['id'])
+            generic_vdu.sw_image_desc = SwImageDesc()
+            generic_vdu.sw_image_desc.name = str(vdu.get('image'))
+
+            if 'guest-epa' in vdu.keys():
+                generic_virtual_compute_desc.virtual_cpu = VirtualCpuData()
+                generic_virtual_compute_desc.virtual_cpu.virtual_cpu_pinning = VirtualCpuPinningData()
+                if vdu['guest-epa']['cpu-pinning-policy'] == 'SHARED':
+                    generic_virtual_compute_desc.virtual_cpu.virtual_cpu_pinning.virtual_cpu_pinning_policy = 'dynamic'
+                else:
+                    generic_virtual_compute_desc.virtual_cpu.num_virtual_cpu = vdu['vm-flavor']['vcpu-count']
+                generic_virtual_compute_desc.virtual_compute_desc_id = str(vdu['id'])
+
+            generic_virtual_compute_desc.virtual_memory = VirtualMemoryData()
+            generic_virtual_compute_desc.virtual_memory.virtual_mem_size = int(vdu['vm-flavor']['memory-mb'])
+
+            generic_virtual_storage_desc.size_of_storage = int(vdu['vm-flavor'].get('storage-gb'))
+            generic_virtual_storage_desc.id = str(vdu.get('id'))
+
+            vnfd_generic.vdu.append(generic_vdu)
+            vnfd_generic.virtual_compute_desc.append(generic_virtual_compute_desc)
+            vnfd_generic.virtual_storage_desc.append(generic_virtual_storage_desc)
+
+        # Populate VnfExtCpd information element
+        vnfd_generic.vnf_ext_cpd = []
+        for connection_point in vnfd['connection-point']:
+            generic_vnf_ext_cpd = VnfExtCpd()
+            generic_vnf_ext_cpd.cpd_id = str(connection_point['name'])
+            vnfd_generic.vnf_ext_cpd.append(generic_vnf_ext_cpd)
+
+        return vnfd_generic
 
     @log_entry_exit(LOG)
     def ns_instantiate(self, ns_instance_id, flavour_id, sap_data=None, pnf_info=None, vnf_instance_data=None,
