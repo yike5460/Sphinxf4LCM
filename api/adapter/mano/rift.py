@@ -260,7 +260,7 @@ class RiftManoAdapter(object):
                 ns_virtual_link_desc.virtual_link_desc_id = vld_id
                 nsd_generic.virtual_link_desc.append(ns_virtual_link_desc)
 
-                # Build dict containing the list of CPs for each VL, for each VNF index
+                # Build dict containing the list of CPs for each VL, for each member VNF index
                 # Example:
                 # {
                 #   '1': {
