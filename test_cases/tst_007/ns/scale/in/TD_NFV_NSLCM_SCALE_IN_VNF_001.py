@@ -163,6 +163,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             if vnf_info.vnf_product_name in self.expected_vnfc_count.keys():
                 self.vnf_info_impacted_list.append(vnf_info)
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS has scaled out',

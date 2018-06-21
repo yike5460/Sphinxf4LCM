@@ -86,6 +86,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS instantiation was successful',
@@ -145,6 +146,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
         self.tc_result['events']['scale_to_level_ns']['duration'] = self.time_record.duration('scale_to_level_ns')
         self.tc_result['events']['scale_to_level_ns']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS has scaled',

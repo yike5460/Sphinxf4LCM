@@ -83,6 +83,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS instantiation was successful',
@@ -149,6 +150,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
                         raise TestRunError('Fault alarm for compute resource %s cleared on the NFVO before resolving '
                                            'the failure' % self.resource_id)
             else:
+                LOG.debug('Sleeping %s seconds before querying the MANO again for alarms' % constants.POLL_INTERVAL)
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
 
@@ -203,6 +205,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
             if len(alarm_list) != 0:
                 break
             else:
+                LOG.debug('Sleeping %s seconds before querying the MANO again for alarms' % constants.POLL_INTERVAL)
                 sleep(constants.POLL_INTERVAL)
                 elapsed_time += constants.POLL_INTERVAL
             if elapsed_time == constants.ALARM_CLEAR_TIMEOUT:

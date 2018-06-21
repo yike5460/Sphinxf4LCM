@@ -88,6 +88,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS instantiation was successful',
@@ -206,6 +207,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         self.tc_result['events']['ns_update_start_vnf']['duration'] = self.time_record.duration('ns_update_start_vnf')
         self.tc_result['events']['ns_update_start_vnf']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to boot' % constants.INSTANCE_BOOT_TIME)
         sleep(constants.INSTANCE_BOOT_TIME)
 
     @Step(name='Verify target VNF was started',

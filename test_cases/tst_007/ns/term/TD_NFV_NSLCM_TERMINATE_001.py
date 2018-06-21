@@ -75,6 +75,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         self.tc_result['events']['instantiate_ns']['duration'] = self.time_record.duration('instantiate_ns')
         self.tc_result['events']['instantiate_ns']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS instantiation was successful',
@@ -129,7 +130,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # 4. Verify that all the VNF instance(s) have been terminated by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         # TODO: add this timer in constants
-        LOG.info('Sleeping 60 seconds to allow MANO to finalize termination of resources')
+        LOG.debug('Sleeping 60 seconds to allow MANO to finalize termination of resources')
         sleep(60)
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_after_instantiation.vnf_info:

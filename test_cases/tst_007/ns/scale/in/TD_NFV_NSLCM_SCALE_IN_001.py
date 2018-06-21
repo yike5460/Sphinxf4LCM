@@ -132,6 +132,7 @@ class TD_NFV_NSLCM_SCALE_IN_001(TestCase):
         self.tc_result['events']['scale_out_ns']['duration'] = self.time_record.duration('scale_out_ns')
         self.tc_result['events']['scale_out_ns']['details'] = 'Success'
 
+        LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
 
     @Step(name='Verify NS has scaled out',

@@ -24,11 +24,9 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from api.adapter import construct_adapter
 from api.adapter.mano import ManoAdapterError
 from api.generic import constants
-from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, \
-    VnfExtCpInfo, NsdInfo
-from api.structures.objects import Nsd, VnfProfile, NsDf, NsVirtualLinkDesc, NsVirtualLinkConnectivity, Vnfd, Vdu, \
-    VirtualComputeDesc, VirtualStorageDesc, SwImageDesc, VirtualCpuData, VirtualCpuPinningData, VirtualMemoryData, \
-    VnfExtCpd
+from api.structures.objects import NsInfo, VnfInfo, InstantiatedVnfInfo, VnfcResourceInfo, ResourceHandle, NsdInfo, \
+    VnfExtCpInfo, Nsd, VnfProfile, NsDf, NsVirtualLinkDesc, NsVirtualLinkConnectivity, Vnfd, Vdu, VirtualComputeDesc, \
+    VirtualStorageDesc, SwImageDesc, VirtualCpuData, VirtualCpuPinningData, VirtualMemoryData, VnfExtCpd
 from utils.logging_module import log_entry_exit
 
 LOG = logging.getLogger(__name__)
