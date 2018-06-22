@@ -140,11 +140,12 @@ def process_reaper(execution_id):
     message_queue.put(None)
 
     execution_queue = execution_queues[execution_id]
-
     if not execution_queue.empty():
         tc_result = execution_queue.get_nowait()
         tc_results[execution_id] = tc_result
     execution_queues[execution_id] = None
+
+    step_triggers[execution_id] = None
 
 
 @route('/version')
