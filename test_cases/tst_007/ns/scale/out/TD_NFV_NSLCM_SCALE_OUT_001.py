@@ -77,6 +77,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                   ns_instance_id=self.ns_instance_id)
 
         if operation_status != constants.OPERATION_SUCCESS:
+            self.tc_result['events']['instantiate_ns']['details'] = 'Fail'
             raise TestRunError('NS instantiation operation failed')
 
         self.time_record.END('instantiate_ns')
@@ -125,6 +126,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                    scale_time=self.tc_input.get('scale_time')) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_out']['status'] = 'Fail'
+            self.tc_result['events']['scale_out_ns']['details'] = 'Fail'
             raise TestRunError('MANO could not scale out the NS')
 
         self.time_record.END('scale_out_ns')
@@ -272,6 +274,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                        terminate_time=self.tc_input.get('terminate_time'),
                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
+            self.tc_result['events']['terminate_ns']['details'] = 'Fail'
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='NS termination operation failed')
 

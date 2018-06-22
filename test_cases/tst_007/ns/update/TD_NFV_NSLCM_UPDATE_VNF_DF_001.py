@@ -74,6 +74,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                   ns_instance_id=self.ns_instance_id)
 
         if operation_status != constants.OPERATION_SUCCESS:
+            self.tc_result['events']['instantiate_ns']['details'] = 'Fail'
             raise TestRunError('NS instantiation operation failed')
 
         self.time_record.END('instantiate_ns')
@@ -129,6 +130,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
         if self.mano.ns_update_sync(ns_instance_id=self.ns_instance_id, update_type='ChangeVnfDf',
                                     change_vnf_flavour_data=self.change_vnf_flavour_data_list) != \
                 constants.OPERATION_SUCCESS:
+            self.tc_result['events']['ns_update_vnf_df']['details'] = 'Fail'
             raise TestRunError('Unexpected status for NS update operation',
                                err_details='NS update operation failed')
 
@@ -238,6 +240,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
                                        terminate_time=self.tc_input.get('terminate_time'),
                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
+            self.tc_result['events']['terminate_ns']['details'] = 'Fail'
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='NS termination operation failed')
 

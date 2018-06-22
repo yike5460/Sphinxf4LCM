@@ -135,6 +135,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                   ns_instance_id=self.ns_instance_id_nesting)
 
         if operation_status != constants.OPERATION_SUCCESS:
+            self.tc_result['events']['instantiate_ns']['details'] = 'Fail'
             raise TestRunError('NS instantiation operation failed')
 
         self.time_record.END('instantiate_ns')
@@ -316,6 +317,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
                                        terminate_time=self.tc_input.get('terminate_time'),
                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
+            self.tc_result['events']['terminate_ns']['details'] = 'Fail'
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='Nesting NS termination operation failed')
 

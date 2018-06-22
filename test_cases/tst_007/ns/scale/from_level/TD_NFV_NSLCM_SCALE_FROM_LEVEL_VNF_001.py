@@ -82,6 +82,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                   ns_instance_id=self.ns_instance_id)
 
         if operation_status != constants.OPERATION_SUCCESS:
+            self.tc_result['events']['instantiate_ns']['details'] = 'Fail'
             raise TestRunError('NS instantiation operation failed')
 
         self.time_record.END('instantiate_ns')
@@ -142,6 +143,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                    scale_time=self.tc_input.get('scale_time')) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_to_level']['status'] = 'Fail'
+            self.tc_result['events']['scale_to_level_ns']['details'] = 'Fail'
             raise TestRunError('MANO could not scale to level the NS')
 
         self.time_record.END('scale_to_level_ns')
@@ -212,6 +214,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                    scale_time=self.tc_input.get('scale_time')) \
                 != constants.OPERATION_SUCCESS:
             self.tc_result['scaling_from_level']['status'] = 'Fail'
+            self.tc_result['events']['scale_from_level_ns']['details'] = 'Fail'
             raise TestRunError('MANO could not scale from level the NS')
 
         self.time_record.END('scale_from_level_ns')
@@ -357,6 +360,7 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
                                        terminate_time=self.tc_input.get('terminate_time'),
                                        additional_param=self.tc_input['mano'].get('termination_params')) != \
                 constants.OPERATION_SUCCESS:
+            self.tc_result['events']['terminate_ns']['details'] = 'Fail'
             raise TestRunError('Unexpected status for NS termination operation',
                                err_details='NS termination operation failed')
 
