@@ -174,7 +174,7 @@ class OpenstackVimAdapter(object):
         except Exception as e:
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get project ID - %s' % e)
-        return project_id.encode()
+        return str(project_id)
 
     @log_entry_exit(LOG)
     def query_virtualised_compute_resource(self, filter):
@@ -209,11 +209,11 @@ class OpenstackVimAdapter(object):
         for port_list in port_dict:
             for port in port_list['ports']:
                 virtual_network_interface = VirtualNetworkInterface()
-                virtual_network_interface.resource_id = port['id'].encode()
-                virtual_network_interface.owner_id = port['device_id'].encode()
-                virtual_network_interface.network_id = port['network_id'].encode()
-                virtual_network_interface.type_virtual_nic = port['binding:vnic_type'].encode()
-                virtual_network_interface.mac_address = port['mac_address'].encode()
+                virtual_network_interface.resource_id = str(port['id'])
+                virtual_network_interface.owner_id = str(port['device_id'])
+                virtual_network_interface.network_id = str(port['network_id'])
+                virtual_network_interface.type_virtual_nic = str(port['binding:vnic_type'])
+                virtual_network_interface.mac_address = str(port['mac_address'])
                 virtual_network_interface.acceleration_capability = list()
                 virtual_compute.virtual_network_interface.append(virtual_network_interface)
 
@@ -296,12 +296,12 @@ class OpenstackVimAdapter(object):
             raise OpenstackVimAdapterError('Unable to get details for server %s - %s' % (server_id, e))
 
         server_details = dict()
-        server_details['flavor_id'] = server.flavor['id'].encode()
-        server_details['hostId'] = server.hostId.encode()
-        server_details['image_id'] = server.image['id'].encode()
-        server_details['name'] = server.name.encode()
-        server_details['status'] = server.status.encode()
-        server_details['user_id'] = server.user_id.encode()
+        server_details['flavor_id'] = str(server.flavor['id'])
+        server_details['hostId'] = str(server.hostId)
+        server_details['image_id'] = str(server.image['id'])
+        server_details['name'] = str(server.name)
+        server_details['status'] = str(server.status)
+        server_details['user_id'] = str(server.user_id)
 
         return server_details
 
@@ -418,7 +418,7 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get compute resource quota - %s' % e)
         virtual_compute_quota = VirtualComputeQuota()
-        virtual_compute_quota.resource_group_id = quotas._info['id'].encode()
+        virtual_compute_quota.resource_group_id = str(quotas._info['id'])
         resources = {'num_vcpus': quotas.cores, 'num_vc_instances': quotas.instances, 'virtual_mem_size': quotas.ram}
         for item, value in resources.items():
             if value != -1:
@@ -438,7 +438,7 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get network resource quota - %s' % e)
         virtual_network_quota = VirtualNetworkQuota()
-        virtual_network_quota.resource_group_id = project_id.encode()
+        virtual_network_quota.resource_group_id = str(project_id)
         resources = {'num_public_ips': quotas['quota']['floatingip'], 'num_ports': quotas['quota']['port'],
                      'num_subnets': quotas['quota']['subnet']}
         for item, value in resources.items():
@@ -459,7 +459,7 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get storage resource quota - %s' % e)
         virtual_storage_quota = VirtualStorageQuota()
-        virtual_storage_quota.resource_group_id = project_id.encode()
+        virtual_storage_quota.resource_group_id = str(project_id)
         resources = {'storage_size': quotas.gigabytes, 'num_snapshots': quotas.snapshots,
                      'num_volumes': quotas.volumes}
         for item, value in resources.items():
@@ -499,9 +499,9 @@ class OpenstackVimAdapter(object):
 
         software_image_information = SoftwareImageInformation()
         software_image_information.id = image_id
-        software_image_information.name = image.name.encode()
-        software_image_information.created_at = image.created_at.encode()
-        software_image_information.updated_at = image.updated_at.encode()
+        software_image_information.name = str(image.name)
+        software_image_information.created_at = str(image.created_at)
+        software_image_information.updated_at = str(image.updated_at)
         software_image_information.min_disk = image.min_disk
         software_image_information.min_ram = image.min_ram
 
