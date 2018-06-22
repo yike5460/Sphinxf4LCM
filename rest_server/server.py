@@ -135,8 +135,17 @@ def process_reaper(execution_id):
         return
 
     execution_process.join()
+    execution_processes[execution_id] = None
     message_queue = message_queues[execution_id]
     message_queue.put(None)
+
+    execution_queue = execution_queues[execution_id]
+    if not execution_queue.empty():
+        tc_result = execution_queue.get_nowait()
+        tc_results[execution_id] = tc_result
+    execution_queues[execution_id] = None
+
+    step_triggers[execution_id] = None
 
 
 @route('/version')
@@ -240,6 +249,7 @@ def do_exec():
     execution_process.start()
 
     tc_inputs[execution_id] = tc_input
+    tc_results[execution_id] = {}
 
     execution_processes[execution_id] = execution_process
     execution_queues[execution_id] = execution_queue
@@ -263,17 +273,10 @@ def get_status(execution_id):
         response.status = 404
         return {'status': 'NOT_FOUND'}
 
-    if execution_process.is_alive():
+    if execution_process is not None:
         return {'status': 'PENDING',
                 'tc_input': tc_inputs[execution_id]}
     else:
-        if tc_results.get(execution_id) is None:
-            queue = execution_queues[execution_id]
-            if queue.empty():
-                tc_result = {}
-            else:
-                tc_result = queue.get_nowait()
-            tc_results[execution_id] = tc_result
         return {'status': 'DONE',
                 'tc_result': tc_results[execution_id],
                 'tc_input': tc_inputs[execution_id]}
@@ -285,7 +288,8 @@ def do_stop_exec(execution_id):
     Request mapped function that stops the test execution with the specified ID.
     """
     execution_process = execution_processes[execution_id]
-    execution_process.terminate()
+    if execution_process is not None:
+        execution_process.terminate()
 
 
 @route('/v1.0/exec')
@@ -297,7 +301,7 @@ def all_status():
     for execution_id, execution_process in execution_processes.items():
         execution_status = dict()
         execution_status['execution_id'] = execution_id
-        if execution_process.is_alive():
+        if execution_process is not None:
             execution_status['status'] = 'PENDING'
         else:
             execution_status['status'] = 'DONE'
@@ -468,7 +472,8 @@ def wait_for_exec(execution_id):
         response.status = 404
         return {'status': 'NOT_FOUND'}
 
-    execution_process.join()
+    if execution_process is not None:
+        execution_process.join()
     return {'status': 'DONE'}
 
 
