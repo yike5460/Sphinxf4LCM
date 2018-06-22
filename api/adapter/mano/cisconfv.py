@@ -297,7 +297,7 @@ class CiscoNFVManoAdapter(object):
         vnf_instance_id = filter['vnf_instance_id']
         tenant_name = filter['additional_param']['tenant']
         vnf_info = VnfInfo()
-        vnf_info.vnf_instance_id = vnf_instance_id.encode()
+        vnf_info.vnf_instance_id = str(vnf_instance_id)
 
         # Try to retrieve the instantiation state for the VNF with the given deployment name. If the AttributeError
         # exception is raised, report the VNF instantiation state as NOT_INSTANTIATED.
@@ -505,7 +505,7 @@ class CiscoNFVManoAdapter(object):
             server_details = vim.server_get(server_id)
             server_flavor_id = server_details['flavor_id']
             flavor_details = vim.flavor_get(server_flavor_id)
-            flavor_name_nova = flavor_details['name'].encode()
+            flavor_name_nova = str(flavor_details['name'])
 
             # Get the name of the flavor associated to this VNFC from the VNFR
             vdu_id = vnfc_resource_info.vdu_id
