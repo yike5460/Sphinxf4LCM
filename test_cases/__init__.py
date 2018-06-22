@@ -177,6 +177,7 @@ class TestCase(object):
     def initialize_events(self):
         for event in self.TESTCASE_EVENTS:
             self.tc_result['events'][event] = dict()
+            self.tc_result['events'][event]['details'] = 'N/A'
 
     def initialize_steps(self):
         for step in self.steps:
