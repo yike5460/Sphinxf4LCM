@@ -80,7 +80,7 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
                                   ns_instance_id=self.ns_instance_id_nested)
 
         if operation_status != constants.OPERATION_SUCCESS:
-            raise TestRunError('NS instantiation operation failed')
+            raise TestRunError('Nested NS instantiation operation failed')
 
         LOG.debug('Sleeping %s seconds to allow the VDUs to complete first boot' % constants.INSTANCE_FIRST_BOOT_TIME)
         sleep(constants.INSTANCE_FIRST_BOOT_TIME)
@@ -129,7 +129,7 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
 
         if operation_status != constants.OPERATION_SUCCESS:
             self.tc_result['events']['instantiate_ns']['details'] = 'Fail'
-            raise TestRunError('NS instantiation operation failed')
+            raise TestRunError('Nesting NS instantiation operation failed')
 
         self.time_record.END('instantiate_ns')
 
