@@ -297,9 +297,8 @@ class CiscoNFVManoAdapter(object):
             self.nso.close_session()
             self.esc.close_session()
         except Exception as e:
-            LOG.debug('Trying to close the NETCONF session, but got the following exception: ')
+            LOG.debug('Trying to close the NETCONF session, but got the following exception:')
             LOG.exception(e)
-
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
