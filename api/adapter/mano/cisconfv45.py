@@ -292,6 +292,14 @@ class CiscoNFVManoAdapter(object):
         self.vnf_instance_id_metadata = dict()
         self.nsd_info_ids = dict()
 
+    def __del__(self):
+        try:
+            self.nso.close_session()
+            self.esc.close_session()
+        except Exception as e:
+            LOG.debug('Trying to close the NETCONF session, but got the following exception:')
+            LOG.exception(e)
+
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         """
