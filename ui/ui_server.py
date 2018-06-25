@@ -1209,12 +1209,12 @@ def set_default_additional():
                            'MAX_TRAFFIC_LOAD': 5}
     for item in timers.keys():
         config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
-        if config.json().encode() == 'None':
+        if str(config.json()) == 'None':
             default_value = timers[item]
             requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
     for item in traffic_load_values:
         config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
-        if config.json().encode() == 'None':
+        if str(config.json()) == 'None':
             default_value = traffic_load_values[item]
             requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
 
@@ -1409,7 +1409,7 @@ def get_str_by_unicode(raw_input):
         item = item.lstrip()
         item = item.lstrip('u')
         item = item.lstrip('\'').rstrip('\'')
-        result_list.append(item.encode())
+        result_list.append(str(item))
     result_string = ', '.join(result_list)
     return result_string
 

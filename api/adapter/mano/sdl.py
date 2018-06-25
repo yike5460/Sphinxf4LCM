@@ -222,7 +222,7 @@ class SdlManoAdapter(object):
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
         vnf_info = VnfInfo()
-        vnf_info.vnf_instance_id = vnf_instance_id.encode()
+        vnf_info.vnf_instance_id = str(vnf_instance_id)
 
         response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
         vnf_instance_dict = response.json()
@@ -270,12 +270,12 @@ class SdlManoAdapter(object):
                         vnf_ext_cp_info = VnfExtCpInfo()
                         vnf_ext_cp_info.cp_instance_id = str(port['id'])
                         vnf_ext_cp_info.address = {
-                            'mac': [port['mac_address'].encode()],
+                            'mac': [str(port['mac_address'])],
                             'ip': []
                         }
 
                         for fixed_ip in port['fixed_ips']:
-                            vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
+                            vnf_ext_cp_info.address['ip'].append(str(fixed_ip['ip_address']))
 
                         vnf_ext_cp_info.cpd_id = str(match.groups()[0])
                         vnf_info.instantiated_vnf_info.ext_cp_info.append(vnf_ext_cp_info)

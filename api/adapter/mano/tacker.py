@@ -377,7 +377,7 @@ class TackerManoAdapter(object):
                 server_details = vim.server_get(resource_id)
                 server_flavor_id = server_details['flavor_id']
                 flavor_details = vim.flavor_get(server_flavor_id)
-                vim_flavor_name = flavor_details['name'].encode()
+                vim_flavor_name = str(flavor_details['name'])
                 if vnfd_flavor_name != vim_flavor_name:
                     LOG.debug('Expected flavor name %s does not match the actual flavor %s',
                               (vnfd_flavor_name, vim_flavor_name))
@@ -525,7 +525,7 @@ class TackerManoAdapter(object):
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
         vnf_info = VnfInfo()
-        vnf_info.vnf_instance_id = vnf_instance_id.encode()
+        vnf_info.vnf_instance_id = str(vnf_instance_id)
 
         try:
             tacker_show_vnf = self.tacker_client.show_vnf(vnf_instance_id)['vnf']
@@ -544,13 +544,13 @@ class TackerManoAdapter(object):
         heat_stack = vim.stack_get(stack_id)
 
         # Build the vnf_info data structure
-        vnf_info.vnf_instance_name = tacker_show_vnf['name'].encode()
-        vnf_info.vnf_instance_description = tacker_show_vnf['description'].encode()
-        vnf_info.vnfd_id = tacker_show_vnf['vnfd_id'].encode()
+        vnf_info.vnf_instance_name = str(tacker_show_vnf['name'])
+        vnf_info.vnf_instance_description = str(tacker_show_vnf['description'])
+        vnf_info.vnfd_id = str(tacker_show_vnf['vnfd_id'])
         vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][
             tacker_show_vnf['status']]
         vnf_info.metadata = {'error_reason': str(tacker_show_vnf['error_reason']),
-                             'heat_stack_id': stack_id.encode()}
+                             'heat_stack_id': str(stack_id)}
 
         # Build the InstantiatedVnfInfo information element only if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
@@ -597,12 +597,12 @@ class TackerManoAdapter(object):
 
                             # Build the VnfcResourceInfo data structure
                             vnfc_resource_info = VnfcResourceInfo()
-                            vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
-                            vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+                            vnfc_resource_info.vnfc_instance_id = str(vnf_resource_id)
+                            vnfc_resource_info.vdu_id = str(vnf_resource_name)
 
                             vnfc_resource_info.compute_resource = ResourceHandle()
-                            vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
-                            vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+                            vnfc_resource_info.compute_resource.vim_id = str(vim_id)
+                            vnfc_resource_info.compute_resource.resource_id = str(vnf_resource_id)
 
                             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
                 else:
@@ -616,12 +616,12 @@ class TackerManoAdapter(object):
                         if vnf_resource_type == 'OS::Nova::Server':
                             # Build the VnfcResourceInfo data structure
                             vnfc_resource_info = VnfcResourceInfo()
-                            vnfc_resource_info.vnfc_instance_id = vnf_resource_id.encode()
-                            vnfc_resource_info.vdu_id = vnf_resource_name.encode()
+                            vnfc_resource_info.vnfc_instance_id = str(vnf_resource_id)
+                            vnfc_resource_info.vdu_id = str(vnf_resource_name)
 
                             vnfc_resource_info.compute_resource = ResourceHandle()
-                            vnfc_resource_info.compute_resource.vim_id = vim_id.encode()
-                            vnfc_resource_info.compute_resource.resource_id = vnf_resource_id.encode()
+                            vnfc_resource_info.compute_resource.vim_id = str(vim_id)
+                            vnfc_resource_info.compute_resource.resource_id = str(vnf_resource_id)
 
                             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
@@ -634,19 +634,19 @@ class TackerManoAdapter(object):
                     for port_list in port_dict:
                         for port in port_list['ports']:
                             vnf_ext_cp_info = VnfExtCpInfo()
-                            vnf_ext_cp_info.cp_instance_id = port['id'].encode()
+                            vnf_ext_cp_info.cp_instance_id = str(port['id'])
                             vnf_ext_cp_info.address = {
-                                'mac': [port['mac_address'].encode()],
+                                'mac': [str(port['mac_address'])],
                                 'ip': []
                             }
 
                             for fixed_ip in port['fixed_ips']:
-                                vnf_ext_cp_info.address['ip'].append(fixed_ip['ip_address'].encode())
+                                vnf_ext_cp_info.address['ip'].append(str(fixed_ip['ip_address']))
 
                             # Extract the CP ID from the port name
                             match = re.search('CP\d+', port['name'])
                             if match:
-                                vnf_ext_cp_info.cpd_id = match.group().encode()
+                                vnf_ext_cp_info.cpd_id = str(match.group())
                             else:
                                 raise TackerManoAdapterError('Cannot get the CP ID')
 
@@ -742,10 +742,10 @@ class TackerManoAdapter(object):
         }
 
         notification = VnfLifecycleChangeNotification()
-        notification.vnf_instance_id = str(vnf_event['id']).encode()  # TODO: Modify to show vnf instance id
+        notification.vnf_instance_id = str(vnf_event['id'])  # TODO: Modify to show vnf instance id
 
-        vnf_event_type = vnf_event['event_type'].encode()
-        vnf_resource_state = vnf_event['resource_state'].encode()
+        vnf_event_type = str(vnf_event['event_type'])
+        vnf_resource_state = str(vnf_event['resource_state'])
 
         notification_attributes = operations_mapping[(vnf_event_type, vnf_resource_state)]
         if isinstance(notification_attributes, tuple):
@@ -753,7 +753,7 @@ class TackerManoAdapter(object):
             notification_operation, notification_status = notification_attributes
         if isinstance(notification_attributes, dict):
             # ambiguity; must resolve based on event_details
-            vnf_event_details = vnf_event['event_details'].encode()
+            vnf_event_details = str(vnf_event['event_details'])
             notification_operation, notification_status = notification_attributes[vnf_event_details]
         if notification_attributes is None:
             # internal event; no ETSI mapping, ignoring
@@ -923,7 +923,7 @@ class TackerManoAdapter(object):
     def ns_query(self, filter, attribute_selector=None):
         ns_instance_id = filter['ns_instance_id']
         ns_info = NsInfo()
-        ns_info.ns_instance_id = ns_instance_id.encode()
+        ns_info.ns_instance_id = str(ns_instance_id)
 
         try:
             tacker_show_ns = self.tacker_client.show_ns(ns_instance_id)['ns']
@@ -934,9 +934,9 @@ class TackerManoAdapter(object):
             LOG.exception(e)
             raise TackerManoAdapterError('Unable to get details for NS %s - %s' % (ns_instance_id, e))
 
-        ns_info.ns_name = tacker_show_ns['name'].encode()
-        ns_info.description = tacker_show_ns['description'].encode()
-        ns_info.nsd_id = tacker_show_ns['nsd_id'].encode()
+        ns_info.ns_name = str(tacker_show_ns['name'])
+        ns_info.description = str(tacker_show_ns['description'])
+        ns_info.nsd_id = str(tacker_show_ns['nsd_id'])
         ns_info.ns_state = constants.NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'][tacker_show_ns['status']]
 
         # Build the VnfInfo data structure for each VNF that is part of the NS
@@ -947,7 +947,7 @@ class TackerManoAdapter(object):
         for vnf_name in vnf_ids_dict.keys():
             vnf_instance_id = vnf_ids_dict[vnf_name]
             vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
-            vnf_info.vnf_product_name = vnf_name.encode()
+            vnf_info.vnf_product_name = str(vnf_name)
             ns_info.vnf_info.append(vnf_info)
 
         return ns_info

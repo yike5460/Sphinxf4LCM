@@ -139,7 +139,7 @@ class DummyManoAdapter(object):
     def vnf_query(self, filter, attribute_selector=None):
         vnf_instance_id = filter['vnf_instance_id']
         vnf_info = VnfInfo()
-        vnf_info.vnf_instance_id = vnf_instance_id.encode()
+        vnf_info.vnf_instance_id = str(vnf_instance_id)
 
         # Build the vnf_info data structure
         vnf_info.vnf_instance_name = 'instance_name'
