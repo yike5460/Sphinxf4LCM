@@ -18,6 +18,7 @@ from datetime import datetime
 from glob import glob
 from multiprocessing import Process, Queue, Event
 from threading import Lock, Thread
+from Queue import Queue as InternalQueue
 
 from bottle import route, request, response, run, static_file
 
@@ -26,8 +27,9 @@ from utils import reporting, logging_module
 from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
 from utils.misc import generate_timestamp
 
-execution_queues = dict()
+result_queues = dict()
 message_queues = dict()
+step_queues = dict()
 step_triggers = dict()
 execution_processes = dict()
 tc_results = dict()
@@ -91,7 +93,7 @@ def _delete_config(key):
         json.dump(config, config_file, sort_keys=True, indent=2)
 
 
-def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger):
+def execute_test(tc_exec_request, tc_input, result_queue, message_queue, step_trigger):
     """
     This function is used as a process target and it starts the execution of a test case.
     """
@@ -118,7 +120,7 @@ def execute_test(tc_exec_request, tc_input, execution_queue, message_queue, step
     tc_result['tc_end_time'] = tc_end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     tc_result['tc_duration'] = str(tc_end_time - tc_start_time)
 
-    execution_queue.put(tc_result)
+    result_queue.put(tc_result)
 
     kibana_srv = _read_config('kibana-srv')
     if kibana_srv is not None:
@@ -139,13 +141,27 @@ def process_reaper(execution_id):
     message_queue = message_queues[execution_id]
     message_queue.put(None)
 
-    execution_queue = execution_queues[execution_id]
-    if not execution_queue.empty():
-        tc_result = execution_queue.get_nowait()
+    result_queue = result_queues[execution_id]
+    if not result_queue.empty():
+        tc_result = result_queue.get_nowait()
         tc_results[execution_id] = tc_result
-    execution_queues[execution_id] = None
+    result_queues[execution_id] = None
 
     step_triggers[execution_id] = None
+
+
+def step_consumer(execution_id):
+    message_queue = message_queues[execution_id]
+    step_queue = step_queues[execution_id]
+
+    while True:
+        msg = message_queue.get()
+        step_queue.put(msg)
+
+        if msg is None:
+            break
+
+    message_queues[execution_id] = None
 
 
 @route('/version')
@@ -238,26 +254,31 @@ def do_exec():
             tc_input['vnf'] = dict()
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
     execution_id = str(uuid.uuid4())
-    execution_queue = Queue()
+    result_queue = Queue()
     message_queue = Queue()
+    step_queue = InternalQueue()
     if _read_config('debug') is True:
         step_trigger = Event()
     else:
         step_trigger = None
     execution_process = Process(target=execute_test,
-                                args=(tc_exec_request, tc_input, execution_queue, message_queue, step_trigger))
+                                args=(tc_exec_request, tc_input, result_queue, message_queue, step_trigger))
     execution_process.start()
 
     tc_inputs[execution_id] = tc_input
     tc_results[execution_id] = {}
 
     execution_processes[execution_id] = execution_process
-    execution_queues[execution_id] = execution_queue
+    result_queues[execution_id] = result_queue
     message_queues[execution_id] = message_queue
+    step_queues[execution_id] = step_queue
     step_triggers[execution_id] = step_trigger
 
     process_reaper_thread = Thread(target=process_reaper, args=(execution_id,))
     process_reaper_thread.start()
+
+    step_consumer_thread = Thread(target=step_consumer, args=(execution_id,))
+    step_consumer_thread.start()
 
     return {'execution_id': execution_id}
 
@@ -480,18 +501,18 @@ def wait_for_exec(execution_id):
 @route('/v1.0/step/<execution_id>')
 def wait_for_step(execution_id):
     try:
-        message_queue = message_queues[execution_id]
+        step_queue = step_queues[execution_id]
     except KeyError:
         response.status = 404
         return {'error': 'NOT_FOUND'}
 
-    if message_queue is None:
+    if step_queue is None:
         msg = None
     else:
-        msg = message_queue.get()
+        msg = step_queue.get()
 
     if msg is None:
-        message_queues[execution_id] = None
+        step_queues[execution_id] = None
         response.status = 204
         return {'status': 'DONE'}
     else:
