@@ -59,9 +59,17 @@ class RiftManoAdapter(object):
         try:
             response = self.session.get(url=self.url + resource)
             assert response.status_code == 200
+        except AssertionError as e:
+            LOG.exception(e)
+            if response.status_code == 204:
+                raise RiftManoAdapterError('Unable to create %s instance - invalid project name: %s'
+                                           % (self.__class__.__name__, self.project))
+            else:
+                raise RiftManoAdapterError('Unable to create %s instance - %s: %s'
+                                           % (self.__class__.__name__, response.status_code, response.content))
         except Exception as e:
             LOG.exception(e)
-            raise RiftManoAdapterError('Unable to connect to REST server: %s' % self.url)
+            raise RiftManoAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
         self.nsr_metadata = {}
         self.nsd_info_ids = dict()
