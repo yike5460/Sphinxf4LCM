@@ -311,6 +311,8 @@ def do_stop_exec(execution_id):
     execution_process = execution_processes[execution_id]
     if execution_process is not None:
         execution_process.terminate()
+    response.status = 200
+    return {}
 
 
 @route('/v1.0/exec')
@@ -454,6 +456,8 @@ def set_config(name):
     """
     with lock['config']:
         _write_config(name, request.json)
+    response.status = 200
+    return {}
 
 
 @route('/v1.0/config/<name>', method='DELETE')
@@ -464,6 +468,8 @@ def delete_config(name):
     """
     with lock['config']:
         _delete_config(name)
+    response.status = 200
+    return {}
 
 
 @route('/v1.0/validate/<resource:re:vim|mano>', method="PUT")
