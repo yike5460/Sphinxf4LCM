@@ -114,7 +114,7 @@ class TD_NFV_NSLCM_UPDATE_VNF_DF_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering a NS update changing the deployment flavour of one or more VNF instances in a NS instance '
                  'on NFVO')
-        self.change_vnf_flavour_data_list = list()
+        self.change_vnf_flavour_data_list = []
         for target_vnf in self.tc_input['change_vnf_df_list']:
                 change_vnf_flavour_data = ChangeVnfFlavourData()
                 change_vnf_flavour_data.vnf_instance_id = self.mano.get_vnf_instance_id_from_ns_vnf_name(

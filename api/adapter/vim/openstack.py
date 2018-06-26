@@ -204,7 +204,7 @@ class OpenstackVimAdapter(object):
         virtual_storage.size_of_storage = flavor_details['disk']
         virtual_compute.virtual_disks = [virtual_storage]
 
-        virtual_compute.virtual_network_interface = list()
+        virtual_compute.virtual_network_interface = []
         port_dict = self.port_list(device_id=compute_id)
         for port_list in port_dict:
             for port in port_list['ports']:
@@ -214,7 +214,7 @@ class OpenstackVimAdapter(object):
                 virtual_network_interface.network_id = str(port['network_id'])
                 virtual_network_interface.type_virtual_nic = str(port['binding:vnic_type'])
                 virtual_network_interface.mac_address = str(port['mac_address'])
-                virtual_network_interface.acceleration_capability = list()
+                virtual_network_interface.acceleration_capability = []
                 virtual_compute.virtual_network_interface.append(virtual_network_interface)
 
         virtual_compute.vc_image_id = server_details['image_id']

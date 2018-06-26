@@ -203,7 +203,7 @@ class OpenbatonManoAdapter(object):
             ns_info.ns_state = constants.NS_INSTANTIATED
         else:
             ns_info.ns_state = constants.NS_NOT_INSTANTIATED
-        ns_info.vnf_info = list()
+        ns_info.vnf_info = []
         for constituent_vnfr in ns_config['vnfr']:
             vnf_info = self.build_vnf_info(constituent_vnfr)
             ns_info.vnf_info.append(vnf_info)
@@ -337,7 +337,7 @@ class OpenbatonManoAdapter(object):
         expected_vdu_flavours = {}
         for vdu in vnfd['vdu']:
             vdu_id = str(vdu['id'])
-            expected_vdu_flavours[vdu_id] = list()
+            expected_vdu_flavours[vdu_id] = []
             if vdu.get('computation_requirement') is not None:
                 vdu_flavour = str(vdu.get('computation_requirement', ''))
                 expected_vdu_flavours[vdu_id].append(vdu_flavour)
@@ -393,7 +393,7 @@ class OpenbatonManoAdapter(object):
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         LOG.debug('Cannot get VNF management address in Openbaton')
-        mgmt_addr_list = list()
+        mgmt_addr_list = []
         # TODO The rest of the function is commented because Openbaton populates vnf_address field with the IP addresses
         # TODO of all interfaces, hence the tests fail when we ping the management addresses. The comments should be
         # TODO removed when Openbaton will populate vnf_address field only with the management interface IP address.
@@ -426,8 +426,8 @@ class OpenbatonManoAdapter(object):
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
         vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENBATON_VNF_STATE'][vnf_config['status']]
 
-        vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
-        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+        vnf_info.instantiated_vnf_info.vnfc_resource_info = []
+        vnf_info.instantiated_vnf_info.ext_cp_info = []
 
         for vdu in vnf_config['vdu']:
             for vnfc_instance in vdu['vnfc_instance']:
@@ -514,7 +514,7 @@ class OpenbatonManoAdapter(object):
         nsd_id = str(body['id'])
 
         # Storing the IDs of the VNFDs to be deleted after the NSD is deleted
-        constituent_vnfd_ids = list()
+        constituent_vnfd_ids = []
         for vnfd in body['vnfd']:
             constituent_vnfd_ids.append(vnfd['id'])
         self.nsd_info_id_to_vnfd_ids[nsd_info_id] = constituent_vnfd_ids
