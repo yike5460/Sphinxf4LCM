@@ -657,12 +657,9 @@ class Mano(object):
 
         operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, additional_param)
 
-        if operation_status != constants.OPERATION_SUCCESS:
-            LOG.debug('Expected termination operation status %s, got %s'
-                      % (constants.OPERATION_SUCCESS, operation_status))
-            raise ManoGenericError('NS termination operation failed')
-
         self.ns_delete_id(ns_instance_id)
+
+        return operation_status
 
     @log_entry_exit(LOG)
     def ns_terminate_sync(self, ns_instance_id, terminate_time=None, additional_param=None):
