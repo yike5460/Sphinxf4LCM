@@ -73,7 +73,8 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
                 'additional_affinity_or_anti_affinity_rule'))
 
         self.register_for_cleanup(index=10, function_reference=self.mano.ns_terminate_and_delete, verify_result=True,
-                                  expected_result=constants.OPERATION_SUCCESS, ns_instance_id=self.ns_instance_id_nested,
+                                  expected_result=constants.OPERATION_SUCCESS,
+                                  ns_instance_id=self.ns_instance_id_nested,
                                   terminate_time=self.nested_ns_params.get('terminate_time'),
                                   additional_param=self.nested_ns_params.get('termination_params'))
         self.register_for_cleanup(index=20, function_reference=self.mano.wait_for_ns_stable_state,
