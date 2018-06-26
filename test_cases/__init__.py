@@ -18,7 +18,8 @@ from api import ApiError
 from api.generic import constants, construct_generic
 from utils import timestamps
 
-Function = collections.namedtuple('Function', 'function_reference function_args function_kwargs')
+Function = collections.namedtuple('Function',
+                                  'function_reference verify_result expected_result function_args function_kwargs')
 
 
 class TestExecutionError(Exception):
@@ -234,7 +235,8 @@ class TestCase(object):
                 self.tc_result['steps'][step.index]['duration'] = step_duration
                 self._LOG.info('Exiting step %s' % step.name)
 
-    def register_for_cleanup(self, index, function_reference, *args, **kwargs):
+    def register_for_cleanup(self, index, function_reference, verify_result=False, expected_result=None, *args,
+                             **kwargs):
         """
         This method adds a "Function" named tuple to the cleanup_registrations dictionary as a value to the key
         indicated in the index (the index must be an integer).
@@ -250,7 +252,8 @@ class TestCase(object):
             for key, value in kwargs.iteritems():
                 kv_args.append('%s=%s' % (key, value))
             self._LOG.debug('Function will be called with keyword arguments: (%s)' % ', '.join(map(str, kv_args)))
-        new_function = Function(function_reference=function_reference, function_args=args, function_kwargs=kwargs)
+        new_function = Function(function_reference=function_reference, verify_result=verify_result,
+                                expected_result=expected_result, function_args=args, function_kwargs=kwargs)
         self.cleanup_registrations[index] = new_function
 
     def unregister_from_cleanup(self, index):
@@ -271,7 +274,12 @@ class TestCase(object):
         for index in reversed(sorted(self.cleanup_registrations.keys())):
             function = self.cleanup_registrations[index]
             try:
-                function.function_reference(*function.function_args, **function.function_kwargs)
+                actual_result = function.function_reference(*function.function_args, **function.function_kwargs)
+                if function.verify_result:
+                    self._LOG.debug('Expected result for cleanup function %s.%s: %s; actual result: %s'
+                                    % (function.function_reference.__module__, function.function_reference.__name__,
+                                       function.expected_result, actual_result))
+                    assert actual_result == function.expected_result
             except Exception as e:
                 self._LOG.exception(e)
                 raise TestCleanupError('Function %s.%s crashed during cleanup - %s'
