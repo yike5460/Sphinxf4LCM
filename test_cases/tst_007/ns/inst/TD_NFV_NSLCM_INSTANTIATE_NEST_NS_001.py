@@ -179,7 +179,7 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
             filter={'ns_instance_id': self.ns_instance_id_nesting,
                     'additional_param': self.tc_input['mano'].get('query_params')})
         for vnf_info in self.ns_info_nesting_after_instantiation.vnf_info:
-            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 

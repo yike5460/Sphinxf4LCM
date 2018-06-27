@@ -207,7 +207,7 @@ def mano_add(mano_type, warning=None, message=None, mano=None, name=None, additi
     """
 
     if additional_params == None:
-        additional_params = dict()
+        additional_params = {}
         additional_params['vim_list'] = prepare_option_list(option_type="vim")
     return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano, name=name,
                     additional_params=additional_params)
@@ -366,7 +366,7 @@ def mano_validate():
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            additional_params = dict()
+            additional_params = {}
             additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=vim_name)
             return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name,
                             additional_params=additional_params)
@@ -374,7 +374,7 @@ def mano_validate():
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            additional_params = dict()
+            additional_params = {}
             additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=vim_name)
             return mano_update(warning=warning, message=message, mano=new_mano, name=name,
                                additional_params=additional_params)
@@ -404,7 +404,7 @@ def mano_update(warning=None, message=None, mano=None, name=None, additional_par
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
         if additional_params == None:
-            additional_params = dict()
+            additional_params = {}
             if mano_json['client_config'].get('vim_info', {}):
                 selected_vim = mano_json['client_config']['vim_info'].keys()[0]
             else:

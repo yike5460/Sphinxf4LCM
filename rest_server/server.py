@@ -27,20 +27,20 @@ from utils import reporting, logging_module
 from utils.constructors.mapping import get_constructor_mapping, get_tc_constructor_class
 from utils.misc import generate_timestamp
 
-result_queues = dict()
-message_queues = dict()
-step_queues = dict()
-step_triggers = dict()
-execution_processes = dict()
-tc_results = dict()
-tc_inputs = dict()
+result_queues = {}
+message_queues = {}
+step_queues = {}
+step_triggers = {}
+execution_processes = {}
+tc_results = {}
+tc_inputs = {}
 
 json_file_path = '/etc/vnflcv'
 config_file_name = 'config.json'
 reports_dir = '/var/log/vnflcv'
 
 lock_types = ['vim', 'mano', 'em', 'vnf', 'traffic', 'env', 'config']
-lock = dict()
+lock = {}
 for lock_type in lock_types:
     lock[lock_type] = Lock()
 
@@ -196,10 +196,10 @@ def do_exec():
             response.status = 400
             return {'error': 'Active environment not set'}
 
-        tc_input = dict()
+        tc_input = {}
         for resource_type, resource_name in _read_resource('env', active_env).items():
             resource_params = _read_resource(resource_type, resource_name)
-            tc_input[resource_type] = dict()
+            tc_input[resource_type] = {}
             tc_input[resource_type]['type'] = resource_params['type']
             tc_input[resource_type]['name'] = resource_name
             tc_input[resource_type]['adapter_config'] = resource_params['client_config']
@@ -238,7 +238,7 @@ def do_exec():
                     except Exception as e:
                         response.status = 504
                         return {'Error': '%s' % e}
-                tc_input[resource_type]['generic_config'] = dict()
+                tc_input[resource_type]['generic_config'] = {}
                 for timeout_timer in timeout_timers:
                     timeout = _read_config(timeout_timer)
                     if timeout is not None:
@@ -251,7 +251,7 @@ def do_exec():
 
         # TODO: remove
         if 'vnf' not in tc_input.keys():
-            tc_input['vnf'] = dict()
+            tc_input['vnf'] = {}
             tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
     execution_id = str(uuid.uuid4())
     result_queue = Queue()
@@ -322,7 +322,7 @@ def all_status():
     """
     status_list = []
     for execution_id, execution_process in execution_processes.items():
-        execution_status = dict()
+        execution_status = {}
         execution_status['execution_id'] = execution_id
         if execution_process is not None:
             execution_status['status'] = 'PENDING'
@@ -340,7 +340,7 @@ def get_tcs():
     Request mapped function that returns the mappings between all existing test case names and their module path.
     Example: "TC_VNF_STATE_TERM_003": "vnf/state/term"
     """
-    tc_list = dict()
+    tc_list = {}
     tc_name_module_mapping = get_constructor_mapping('tc')
     for tc_name, tc_module_name in tc_name_module_mapping.items():
         tc_path = tc_module_name.rsplit('.', 1)[0].split('.', 1)[1].replace('.', '/')

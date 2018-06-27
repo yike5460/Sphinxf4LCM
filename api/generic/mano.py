@@ -44,7 +44,7 @@ class Mano(object):
         """
         self.set_generic_config(**generic_config)
         self.mano_adapter = construct_adapter(vendor, module_type='mano', **adapter_config)
-        self.notification_queues = dict()
+        self.notification_queues = {}
 
     def set_generic_config(self,
                            VNF_INSTANTIATE_TIMEOUT=constants.VNF_INSTANTIATE_TIMEOUT,
@@ -351,7 +351,7 @@ class Mano(object):
         """
 
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
-        vresources = dict()
+        vresources = {}
 
         # Check if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
@@ -1260,7 +1260,7 @@ class Mano(object):
     @log_entry_exit(LOG)
     def search_in_notification_queue(self, notification_queue, notification_type, notification_pattern, timeout):
         timeout_occurred = Event()
-        result = dict()
+        result = {}
         lock = Lock()
 
         def notification_loop():
@@ -1376,7 +1376,7 @@ class Mano(object):
         # ingress_cp_list = ['VNF1:CP1:ip', 'VNF2:CP2:mac', 'VNF1:CP3:ip']
         # ns_ingress_cps = {'VNF1': ['CP1:ip', 'CP3:ip'],
         #                   'VNF2': ['CP2:mac']}
-        ns_ingress_cps = dict()
+        ns_ingress_cps = {}
         for ingress_cp in ingress_cp_list:
             vnf_name, cp_details = ingress_cp.split(':', 1)
             if vnf_name not in ns_ingress_cps.keys():
@@ -1509,7 +1509,7 @@ class Mano(object):
         :return:                            True if the number of VNFC instances for each VNF is correct,
                                             False otherwise.
         """
-        vnf_name_level_id_mapping = dict()
+        vnf_name_level_id_mapping = {}
         for scale_to_level in instantiation_level_list:
             vnf_name = scale_to_level['target_vnf_name']
             target_instantiation_level_id = scale_to_level['target_instantiation_level_id']

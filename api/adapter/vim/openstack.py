@@ -295,7 +295,7 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get details for server %s - %s' % (server_id, e))
 
-        server_details = dict()
+        server_details = {}
         server_details['flavor_id'] = str(server.flavor['id'])
         server_details['hostId'] = str(server.hostId)
         server_details['image_id'] = str(server.image['id'])
@@ -357,11 +357,11 @@ class OpenstackVimAdapter(object):
     @log_entry_exit(LOG)
     def query_compute_capacity(self, zone_id, compute_resource_type_id, resource_criteria, attribute_selector,
                                time_period):
-        limits = dict()
+        limits = {}
         resource_types = ['vcpu', 'vmem', 'instances']
 
         for resource_type in resource_types:
-            limits[resource_type] = dict()
+            limits[resource_type] = {}
 
         try:
             nova_limits = self.nova_client.limits.get().absolute
@@ -387,11 +387,11 @@ class OpenstackVimAdapter(object):
     @log_entry_exit(LOG)
     def query_storage_capacity(self, zone_id, storage_resource_type_id, resource_criteria, attribute_selector,
                                time_period):
-        limits = dict()
+        limits = {}
         resource_types = ['vstorage']
 
         for resource_type in resource_types:
-            limits[resource_type] = dict()
+            limits[resource_type] = {}
 
         try:
             cinder_limits = self.cinder_client.limits.get().absolute
@@ -481,7 +481,7 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get details for flavor %s - %s' % (flavor_id, e))
 
-        flavor_details = dict()
+        flavor_details = {}
         flavor_details['name'] = flavor.name
         flavor_details['vcpus'] = flavor.vcpus
         flavor_details['ram'] = flavor.ram

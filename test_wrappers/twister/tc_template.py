@@ -93,7 +93,7 @@ def twister_run():
         print 'Test case overall status: %s' % tc_result.get('overall_status', 'N/A')
         print 'Test case error info: %s' % tc_result.get('error_info', 'N/A')
 
-    durations = dict()
+    durations = {}
     durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
     durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
     durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')

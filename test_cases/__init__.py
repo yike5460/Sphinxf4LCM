@@ -120,17 +120,17 @@ class TestCase(object):
     def __init__(self, tc_input):
         self.tc_input = tc_input
         self.tc_name = type(self).__name__
-        self.tc_result = dict()
+        self.tc_result = {}
         self.tc_result['overall_status'] = constants.TEST_PASSED
         self.tc_result['error_info'] = 'No errors'
         self.tc_result['events'] = collections.OrderedDict()
         self.tc_result['resources'] = collections.OrderedDict()
-        self.tc_result['scaling_out'] = dict()
-        self.tc_result['scaling_in'] = dict()
-        self.tc_result['scaling_up'] = dict()
-        self.tc_result['scaling_down'] = dict()
-        self.tc_result['scaling_to_level'] = dict()
-        self.tc_result['scaling_from_level'] = dict()
+        self.tc_result['scaling_out'] = {}
+        self.tc_result['scaling_in'] = {}
+        self.tc_result['scaling_up'] = {}
+        self.tc_result['scaling_down'] = {}
+        self.tc_result['scaling_to_level'] = {}
+        self.tc_result['scaling_from_level'] = {}
         self.tc_result['timestamps'] = collections.OrderedDict()
         self.tc_result['steps'] = collections.OrderedDict()
         self.time_record = timestamps.TimeRecord()
@@ -140,7 +140,7 @@ class TestCase(object):
         self.vim = None
         self.vnf = None
         self.vnfm = None
-        self.cleanup_registrations = dict()
+        self.cleanup_registrations = {}
         self.message_queue = None
         self.step_trigger = None
 
@@ -177,7 +177,7 @@ class TestCase(object):
 
     def initialize_events(self):
         for event in self.TESTCASE_EVENTS:
-            self.tc_result['events'][event] = dict()
+            self.tc_result['events'][event] = {}
             self.tc_result['events'][event]['details'] = 'N/A'
 
     def initialize_steps(self):
