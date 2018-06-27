@@ -130,8 +130,8 @@ class CiscoNFVManoAdapter(object):
             LOG.exception(e)
             raise CiscoNFVManoAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
-        self.vnf_vnfd_mapping = dict()
-        self.lifecycle_operation_occurrence_ids = dict()
+        self.vnf_vnfd_mapping = {}
+        self.lifecycle_operation_occurrence_ids = {}
 
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
@@ -733,7 +733,7 @@ class CiscoNFVManoAdapter(object):
 
             vim_type = vim_xml.find('.//{http://www.cisco.com/esc/esc}type').text
             if vim_type == 'OPENSTACK':
-                client_params = dict()
+                client_params = {}
                 property_name_mapping = {
                     'os_auth_url': 'auth_url',
                     'os_password': 'password',

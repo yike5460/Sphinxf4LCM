@@ -30,7 +30,7 @@ base_wrappers_dir = '/home/%s/twister/demo' % twister_username
 server_response = requests.get(url='http://%s:8080/v1.0/tcs' % serveraddr)
 tc_mapping = server_response.json()
 
-tc_reverse_mapping = dict()
+tc_reverse_mapping = {}
 for tc_name, tc_path in tc_mapping.iteritems():
     tc_reverse_mapping.setdefault(tc_path, []).append(tc_name)
 

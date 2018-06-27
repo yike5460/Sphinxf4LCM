@@ -286,11 +286,11 @@ class CiscoNFVManoAdapter(object):
             LOG.exception(e)
             raise CiscoNFVManoAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
-        self.vnf_vnfd_mapping = dict()
-        self.ns_nsd_mapping = dict()
-        self.lifecycle_operation_occurrence_ids = dict()
-        self.vnf_instance_id_metadata = dict()
-        self.nsd_info_ids = dict()
+        self.vnf_vnfd_mapping = {}
+        self.ns_nsd_mapping = {}
+        self.lifecycle_operation_occurrence_ids = {}
+        self.vnf_instance_id_metadata = {}
+        self.nsd_info_ids = {}
 
     def __del__(self):
         try:
@@ -1538,7 +1538,7 @@ class CiscoNFVManoAdapter(object):
 
             vim_type = vim_xml.find('.//{http://www.cisco.com/esc/esc}type').text
             if vim_type == 'OPENSTACK':
-                client_params = dict()
+                client_params = {}
                 property_name_mapping = {
                     'os_auth_url': 'auth_url',
                     'os_password': 'password',
@@ -1933,7 +1933,7 @@ class CiscoNFVManoAdapter(object):
                                            '[{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id="%s"]/'
                                            '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnf-profile'
                                            % ns_deployment_flavor)
-        vnf_name_vnfd_id_mapping = dict()
+        vnf_name_vnfd_id_mapping = {}
         for vnf_profile in vnf_profile_list_xml:
             vnf_profile_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id').text
             vnfd_id = vnf_profile.find('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd').text
@@ -1979,7 +1979,7 @@ class CiscoNFVManoAdapter(object):
             return mgmt_addr_list
 
         # Building a mapping between VM group name and management interface ID
-        vm_group_name_mgmt_if_id = dict()
+        vm_group_name_mgmt_if_id = {}
         vdu_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vnfd/'
                                     '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu')
         for vdu in vdu_list:
@@ -2122,7 +2122,7 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError('Instantiation level ID not available for VNF %s' % vnf_name)
 
         # Create dictionary with expected number of VNFC instances for each VDU
-        expected_vnfc_count = dict()
+        expected_vnfc_count = {}
         vdu_id_list = vnfd_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}vdu/'
                                        '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo}id')
 

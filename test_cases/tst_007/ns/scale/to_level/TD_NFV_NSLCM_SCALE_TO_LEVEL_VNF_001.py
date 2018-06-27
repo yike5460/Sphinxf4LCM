@@ -106,7 +106,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in self.ns_info_before_scale_to_level.vnf_info:
-            self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (Before scale to level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
@@ -167,7 +167,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
             raise TestRunError('Incorrect number of VNFCs')
 
         for vnf_info in self.ns_info_after_scale_to_level.vnf_info:
-            self.tc_result['resources']['%s (After scale to level)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After scale to level)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (After scale to level)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 

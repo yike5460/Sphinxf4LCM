@@ -56,9 +56,9 @@ class OpenbatonManoAdapter(object):
             'project-id': self.project,
             'Authorization': self.token
         }
-        self.vnf_to_ns_mapping = dict()
-        self.nsd_info_ids = dict()
-        self.nsd_info_id_to_vnfd_ids = dict()
+        self.vnf_to_ns_mapping = {}
+        self.nsd_info_ids = {}
+        self.nsd_info_id_to_vnfd_ids = {}
 
     @log_entry_exit(LOG)
     def get_token(self, username, password):
@@ -367,7 +367,7 @@ class OpenbatonManoAdapter(object):
         ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
-        expected_vnf_vnfd_mapping = dict()
+        expected_vnf_vnfd_mapping = {}
         for vnfd in nsd['vnfd']:
             vnf_product_name = str(vnfd['type'])
             expected_vnf_vnfd_mapping[vnf_product_name] = str(vnfd['id'])

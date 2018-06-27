@@ -236,7 +236,7 @@ class TC_VNF_SCALE_OUT_004__MANO_ONDEMAND__EM_IND__STEP_1(TestCase):
                                        self.tc_input['desired_scale_out_steps']:
             raise TestRunError('NS did not scale out to the max NFVI limit')
 
-        self.tc_result['resources']['After scale out'] = dict()
+        self.tc_result['resources']['After scale out'] = {}
         for vnf_instance_id in ns_info.vnf_info_id:
             self.tc_result['resources']['After scale out'].update(
                 self.mano.get_allocated_vresources(vnf_instance_id, self.tc_input['mano'].get('query_params')))

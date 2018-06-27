@@ -222,7 +222,7 @@ class TimeRecordMomentEntry(object):
         else:
             raise ValueError('The label must not contain the "." character')
         self._MARK = None
-        self.dump_dict = dict()
+        self.dump_dict = {}
 
     @property
     def MARK(self):

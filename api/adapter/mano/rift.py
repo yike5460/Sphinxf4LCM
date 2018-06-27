@@ -72,7 +72,7 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
 
         self.nsr_metadata = {}
-        self.nsd_info_ids = dict()
+        self.nsd_info_ids = {}
 
         self.vim_helpers = {}
 
@@ -588,8 +588,8 @@ class RiftManoAdapter(object):
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
 
-        expected_vdu_flavor = dict()
-        expected_vdu_resources = dict()
+        expected_vdu_flavor = {}
+        expected_vdu_resources = {}
         for vdu in vnfd['vdu']:
             expected_vdu_flavor[vdu['id']] = {
                 'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
@@ -820,7 +820,7 @@ class RiftManoAdapter(object):
         nsd = self.get_nsd(nsd_id)
 
         # Create dictionary with expected number of instances for each VNF
-        expected_vnf_count = dict()
+        expected_vnf_count = {}
         # Since the NS is instantiated, for each VNF in the NS, set the number of instances to 1.
         for constituent_vnfd in nsd['constituent-vnfd']:
             expected_vnf_count[str(constituent_vnfd['member-vnf-index'])] = 1

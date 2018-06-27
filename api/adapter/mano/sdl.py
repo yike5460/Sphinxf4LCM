@@ -43,8 +43,8 @@ class SdlManoAdapter(object):
 
         self.tenant_id = tenant_id
 
-        self.ns_update_json_mapping = dict()
-        self.ns_nsd_mapping = dict()
+        self.ns_update_json_mapping = {}
+        self.ns_nsd_mapping = {}
 
     @log_entry_exit(LOG)
     def get_token(self, username, password):
@@ -124,7 +124,7 @@ class SdlManoAdapter(object):
         ns_update_dict['is_enabled'] = True
 
         # TODO: expose via params
-        ns_update_dict['default_location_constraints'] = dict()
+        ns_update_dict['default_location_constraints'] = {}
         ns_update_dict['default_location_constraints']['virp_type'] = 'OPENSTACK'
 
         response = requests.put(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
@@ -475,7 +475,7 @@ class SdlManoAdapter(object):
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
 
-        service_name_type_mapping = dict()
+        service_name_type_mapping = {}
         for service_desc in nsd['service_desc_list']:
             service_name_type_mapping[service_desc['name']] = service_desc['service_type']
 

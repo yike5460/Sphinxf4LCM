@@ -133,7 +133,7 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
                 row = [key, vnfc_id]
-                t_inside = dict()
+                t_inside = {}
                 t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 t_inside['Expected'] = prettytable.PrettyTable(['resource'], border=False, header=False)
                 t_inside['Actual'] = prettytable.PrettyTable(['resource'], border=False, header=False)
@@ -387,7 +387,7 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
 
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
-    json_dict = dict()
+    json_dict = {}
     json_dict['run_id'] = int(tc_exec_request['run_id'])
     json_dict['suite_name'] = tc_exec_request['suite_name']
     json_dict['tc_name'] = tc_exec_request['tc_name']
@@ -397,14 +397,14 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
     json_dict['tc_status'] = tc_result['overall_status']
     json_dict['error_info'] = tc_result['error_info']
 
-    json_dict['environment'] = dict()
+    json_dict['environment'] = {}
     json_dict['environment']['vim'] = 'OpenStack'
     json_dict['environment']['mano'] = tc_input['mano']['type']
     json_dict['environment']['vnf'] = 'CirrOS'
     json_dict['environment']['traffic'] = 'STCv'
     json_dict['environment']['em'] = 'None'
 
-    durations = dict()
+    durations = {}
     durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or \
                                tc_result.get('events', {}).get('instantiate_ns', {}).get('duration')
     durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \

@@ -103,7 +103,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
                                            % constants.NS_INSTANTIATED)
 
         for vnf_info in self.ns_info_before_scale_out.vnf_info:
-            self.tc_result['resources']['%s (Before scale out)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (Before scale out)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (Before scale out)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 
@@ -117,7 +117,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         LOG.info('Triggering NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator '
                  'action')
         scale_vnf_data_list = list()
-        self.expected_vnfc_count = dict()
+        self.expected_vnfc_count = {}
         for vnf_sp in self.tc_input['scaling_policy_list']:
             vnf_name, sp_name = vnf_sp.split(':')
             vnfd_name = self.mano.get_vnfd_name_from_nsd_vnf_name(self.tc_input['nsd_id'], vnf_name)
@@ -170,7 +170,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
                     raise TestRunError('VNFCs not added after VNF scaled out')
 
         for vnf_info in self.ns_info_after_scale_out.vnf_info:
-            self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name] = dict()
+            self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (After scale out)' % vnf_info.vnf_product_name].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
 

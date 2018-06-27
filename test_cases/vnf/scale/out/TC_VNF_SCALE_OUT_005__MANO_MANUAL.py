@@ -192,7 +192,7 @@ class TC_VNF_SCALE_OUT_005__MANO_MANUAL(TestCase):
         if len(ns_info.vnf_info_id) != sp['default_instances'] + sp['increment']:
             raise TestRunError('VNFs not added after NS scaled out')
 
-        self.tc_result['resources']['After scale out'] = dict()
+        self.tc_result['resources']['After scale out'] = {}
         for vnf_instance_id in ns_info.vnf_info_id:
             self.tc_result['resources']['After scale out'].update(
                 self.mano.get_allocated_vresources(vnf_instance_id, self.tc_input['mano'].get('query_params')))

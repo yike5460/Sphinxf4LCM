@@ -164,7 +164,7 @@ class TackerManoAdapter(object):
                 if scaling_policy_name in sp.keys():
                     # TOSCA policies regarding Tacker scaling indicate that all scaling properties are required, except
                     # the cooldown, which has a default value of 120 seconds
-                    sp_properties = dict()
+                    sp_properties = {}
                     sp_properties['increment'] = sp[scaling_policy_name]['properties']['increment']
                     sp_properties['targets'] = sp[scaling_policy_name]['properties']['targets']
                     sp_properties['min_instances'] = sp[scaling_policy_name]['properties']['min_instances']
@@ -384,7 +384,7 @@ class TackerManoAdapter(object):
                     return False
 
             expected_num_vnics = 0
-            expected_vnic_types = dict()
+            expected_vnic_types = {}
             for node in vnfd['topology_template']['node_templates'].keys():
                 if vnfd['topology_template']['node_templates'][node]['type'] == 'tosca.nodes.nfv.CP.Tacker':
                     for req in vnfd['topology_template']['node_templates'][node]['requirements']:
@@ -766,7 +766,7 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def _get_vnf_events(self, starting_from=None, event_type=None, resource_id=None):
-        params = dict()
+        params = {}
         if resource_id is not None:
             params['resource_id'] = resource_id
         if event_type is not None:

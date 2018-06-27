@@ -37,7 +37,7 @@ VNF_FINAL_STATES = [VNF_STARTED, VNF_STOPPED]
 VIRTUAL_RESOURCE_ENABLED = 'ENABLED'
 VIRTUAL_RESOURCE_DISABLED = 'DISABLED'
 
-OPERATION_STATUS = dict()
+OPERATION_STATUS = {}
 # Mapping between operation results and OpenStack VNF states
 OPERATION_STATUS['OPENSTACK_VNF_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
                                            'ERROR': OPERATION_FAILED,
@@ -65,7 +65,7 @@ OPERATION_STATUS['OPENSTACK_NS_STATE'] = {'ACTIVE': OPERATION_SUCCESS,
                                           'PENDING_DELETE': OPERATION_PENDING}
 
 # Mapping between OpenStack VNF states and ETSI VNF instantiation states
-VNF_INSTANTIATION_STATE = dict()
+VNF_INSTANTIATION_STATE = {}
 VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
                                                   'ERROR': VNF_NOT_INSTANTIATED,
                                                   'PENDING_CREATE': VNF_NOT_INSTANTIATED,
@@ -74,7 +74,7 @@ VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'] = {'ACTIVE': VNF_INSTANTIATED,
                                                   'PENDING_DELETE': VNF_NOT_INSTANTIATED}
 
 # Mapping between OpenStack NS states and ETSI NS instantiation states
-NS_INSTANTIATION_STATE = dict()
+NS_INSTANTIATION_STATE = {}
 NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'] = {'ACTIVE': NS_INSTANTIATED,
                                                 'ERROR': NS_NOT_INSTANTIATED,
                                                 'PENDING_CREATE': NS_NOT_INSTANTIATED,
@@ -82,7 +82,7 @@ NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'] = {'ACTIVE': NS_INSTANTIATED,
 
 
 # Mapping between OpenStack Heat stack states and ETSI VNF states
-VNF_STATE = dict()
+VNF_STATE = {}
 VNF_STATE['OPENSTACK_STACK_STATE'] = {'CREATE_COMPLETE': VNF_STARTED,
                                       'RESUME_COMPLETE': VNF_STARTED,
                                       'SUSPEND_COMPLETE': VNF_STOPPED}

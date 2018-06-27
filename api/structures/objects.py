@@ -22,7 +22,7 @@ this_module = sys.modules[__name__]
 
 schema_locations_file_name = 'schemas/schemas.json'
 schema_locations = None
-schemas = dict()
+schemas = {}
 
 
 def get_schema(name):
@@ -285,7 +285,7 @@ class InformationElement(object):
 
     @property
     def dump(self):
-        data = dict()
+        data = {}
         for key, value in type(self).__dict__.items():
             if isinstance(value, Attribute):
                 data_value = getattr(self, key)

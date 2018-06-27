@@ -102,7 +102,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
 
         for vnf_info in ns_info_before_scale_out.vnf_info:
             self.tc_result['resources'][
-                '%s / %s (Before scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+                '%s / %s (Before scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = {}
             self.tc_result['resources'][
                 '%s / %s (Before scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))
@@ -154,7 +154,7 @@ class TD_NFV_NSLCM_SCALE_OUT_001(TestCase):
                                                                       'query_params')})
         for vnf_info in self.ns_info_after_scale_out.vnf_info:
             self.tc_result['resources'][
-                '%s / %s (After scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = dict()
+                '%s / %s (After scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)] = {}
             self.tc_result['resources'][
                 '%s / %s (After scale out)' % (vnf_info.vnf_product_name, vnf_info.vnf_instance_id)].update(
                 self.mano.get_allocated_vresources(vnf_info.vnf_instance_id, self.tc_input['mano'].get('query_params')))

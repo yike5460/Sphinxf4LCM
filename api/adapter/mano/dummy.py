@@ -79,11 +79,11 @@ class DummyManoAdapter(object):
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
         vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
 
-        vresources = dict()
+        vresources = {}
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            vresources[resource_id] = dict()
+            vresources[resource_id] = {}
             vresources[resource_id]['vCPU'] = '1'
             vresources[resource_id]['vMemory'] = '64 MB'
             vresources[resource_id]['vStorage'] = '1 GB'
