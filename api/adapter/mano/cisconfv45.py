@@ -769,7 +769,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def get_vm_groups_aggregated_deployment_state(self, vm_group_list, deployment_name):
         # If the VM group list is empty, report the deployment state as 'not-reached.
-        if vm_group_list == list():
+        if vm_group_list == []:
             return 'not-reached'
 
         # Get the NSO deployment plan xml
@@ -801,7 +801,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def get_vm_groups_aggregated_service_state(self, vm_group_list, tenant_name, deployment_name):
         # If the VM group list is empty, report the VNF state as STOPPED.
-        if vm_group_list == list():
+        if vm_group_list == []:
             raise CiscoNFVManoAdapterError('Cannot get VNF state for empty VM group in deployment %s' % deployment_name)
 
         # Get the ESC deployment xml
@@ -884,10 +884,10 @@ class CiscoNFVManoAdapter(object):
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['ESC_DEPLOYMENT_STATE'][vnf_service_state]
 
             # Initialize the VnfcResourceInfo list
-            vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+            vnf_info.instantiated_vnf_info.vnfc_resource_info = []
 
             # Initialize the VnfExtCpInfo list
-            vnf_info.instantiated_vnf_info.ext_cp_info = list()
+            vnf_info.instantiated_vnf_info.ext_cp_info = []
 
             # Get the operational data deployment XML from the ESC
             opdata_deployment_xml = self.esc.get(('xpath',
@@ -1747,7 +1747,7 @@ class CiscoNFVManoAdapter(object):
         ns_info.flavor_id = ns_deployment_flavor
 
         # Build the VnfInfo data structure for each VNF that is part of the NS
-        ns_info.vnf_info = list()
+        ns_info.vnf_info = []
         vnf_ids = nso_deployment_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name')
         for vnf_name in vnf_ids:
@@ -1794,7 +1794,7 @@ class CiscoNFVManoAdapter(object):
     def get_vm_groups_for_vnf(self, vnf_instance_id, additional_param):
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         tenant_name = additional_param['tenant']
-        vm_group_list = list()
+        vm_group_list = []
 
         # Get from the NSO the name of the ESC this deployment belongs to
         try:
@@ -1958,7 +1958,7 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
-        mgmt_addr_list = list()
+        mgmt_addr_list = []
 
         # Get the VNFD corresponding to this VNF instance
         tenant_name = additional_param['tenant']
@@ -2510,7 +2510,7 @@ class CiscoNFVManoAdapter(object):
             raise CiscoNFVManoAdapterError('Unable to communicate with the NSO Netconf server - %s' % e)
 
         # Build the alarm list
-        alarm_list = list()
+        alarm_list = []
         for netconf_notification in netconf_notifications:
             # Get notification details
             try:

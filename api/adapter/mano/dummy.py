@@ -152,7 +152,7 @@ class DummyManoAdapter(object):
             vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()
             vnf_info.instantiated_vnf_info.vnf_state = 'STARTED'
 
-            vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+            vnf_info.instantiated_vnf_info.vnfc_resource_info = []
 
             for vnf_resource in range(0, 2):
 

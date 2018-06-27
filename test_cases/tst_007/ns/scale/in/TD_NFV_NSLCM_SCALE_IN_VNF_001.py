@@ -118,7 +118,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator '
                  'action')
-        self.scale_vnf_data_list = list()
+        self.scale_vnf_data_list = []
         self.expected_vnfc_count = dict()
         for vnf_sp in self.tc_input['scaling_policy_list']:
             vnf_name, sp_name = vnf_sp.split(':')
@@ -157,7 +157,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
                                                                   'additional_param': self.tc_input['mano'].get(
                                                                       'query_params')})
 
-        self.vnf_info_impacted_list = list()
+        self.vnf_info_impacted_list = []
         for vnf_info in self.ns_info_before_scale_in.vnf_info:
             self.tc_result['resources']['%s (Before scale in)' % vnf_info.vnf_product_name] = dict()
             self.tc_result['resources']['%s (Before scale in)' % vnf_info.vnf_product_name].update(

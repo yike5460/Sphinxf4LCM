@@ -116,7 +116,7 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator '
                  'action')
-        scale_vnf_data_list = list()
+        scale_vnf_data_list = []
         self.expected_vnfc_count = dict()
         for vnf_sp in self.tc_input['scaling_policy_list']:
             vnf_name, sp_name = vnf_sp.split(':')

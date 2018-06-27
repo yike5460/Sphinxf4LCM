@@ -209,7 +209,7 @@ class SdlManoAdapter(object):
         else:
             ns_info.ns_state = constants.NS_NOT_INSTANTIATED
 
-        ns_info.vnf_info = list()
+        ns_info.vnf_info = []
         for service_desc in ns_instance_dict['service_desc_list']:
             vnf_instance_id = service_desc['instance_id']
             if vnf_instance_id != '':
@@ -244,7 +244,7 @@ class SdlManoAdapter(object):
         else:
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STOPPED
 
-        vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+        vnf_info.instantiated_vnf_info.vnfc_resource_info = []
         for _, vnfc_details in vnf_instance_dict['vnf-instance']['vnfc_instance_list'].items():
             vnfc_resource_info = VnfcResourceInfo()
             vnfc_resource_info.vnfc_instance_id = str(vnfc_details['vnfc_id'])
@@ -256,7 +256,7 @@ class SdlManoAdapter(object):
                                                                   ['vi_resources']['mgmt_objects']['OPENSTACK_SERVER'])
             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+        vnf_info.instantiated_vnf_info.ext_cp_info = []
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
             vim_id = vnfc_resource_info.compute_resource.vim_id
@@ -497,7 +497,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
-        vnf_mgmt_addr_list = list()
+        vnf_mgmt_addr_list = []
 
         response = requests.get(url=self.nfv_api_url + '/nfv/vnf/vnf-instance/%s' % vnf_instance_id)
         vnf_instance_dict = response.json()
