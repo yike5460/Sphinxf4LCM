@@ -1388,7 +1388,7 @@ def validate(element, struct):
 
 
 def get_list_by_string(raw_input):
-    result_list = list()
+    result_list = []
     for element in raw_input.split(','):
         element = element.lstrip()
         element = element.rstrip()
@@ -1402,7 +1402,7 @@ def get_string_by_list(elem_list):
 
 
 def get_str_by_unicode(raw_input):
-    result_list = list()
+    result_list = []
     result_string = ''
     temp_list = raw_input.lstrip('[').rstrip(']').split(',')
     for item in temp_list:

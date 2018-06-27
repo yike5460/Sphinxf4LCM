@@ -120,7 +120,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering NS scale by scaling to another existing instantiation level a VNF in the NS in NFVO with '
                  'an operator action')
-        scale_vnf_data_list = list()
+        scale_vnf_data_list = []
         for scale_to_level in self.tc_input['scale_to_level_list']:
             vnf_name = scale_to_level['target_vnf_name']
             instantiation_level_id = scale_to_level['target_instantiation_level_id']

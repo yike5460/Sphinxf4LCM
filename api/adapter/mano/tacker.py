@@ -558,7 +558,7 @@ class TackerManoAdapter(object):
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STATE['OPENSTACK_STACK_STATE'][
                 heat_stack.stack_status]
 
-            vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+            vnf_info.instantiated_vnf_info.vnfc_resource_info = []
             try:
                 tacker_list_vnf_resources = self.tacker_client.list_vnf_resources(vnf_instance_id)['resources']
                 scaling_resources = [vnf_resource for vnf_resource in tacker_list_vnf_resources
@@ -626,7 +626,7 @@ class TackerManoAdapter(object):
                             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
                 # Build the VnfExtCpInfo data structure
-                vnf_info.instantiated_vnf_info.ext_cp_info = list()
+                vnf_info.instantiated_vnf_info.ext_cp_info = []
                 for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
 
                     vnf_resource_id = vnfc_resource_info.compute_resource.resource_id
@@ -940,7 +940,7 @@ class TackerManoAdapter(object):
         ns_info.ns_state = constants.NS_INSTANTIATION_STATE['OPENSTACK_NS_STATE'][tacker_show_ns['status']]
 
         # Build the VnfInfo data structure for each VNF that is part of the NS
-        ns_info.vnf_info = list()
+        ns_info.vnf_info = []
         vnf_ids = tacker_show_ns['vnf_ids']
         vnf_ids_str = str(vnf_ids).replace("'", '"')
         vnf_ids_dict = json.loads(vnf_ids_str)
@@ -1021,7 +1021,7 @@ class TackerManoAdapter(object):
             LOG.exception(e)
             raise TackerManoAdapterError('Unable to get management URL for VNF %s - %s' % (vnf_instance_id, e))
 
-        mgmt_addr_list = list()
+        mgmt_addr_list = []
         for vnf_mgmt_url_elem in vnf_mgmt_url_dict.values():
             if isinstance(vnf_mgmt_url_elem, list):
                 mgmt_addr_list += vnf_mgmt_url_elem

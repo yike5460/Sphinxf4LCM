@@ -1380,7 +1380,7 @@ class Mano(object):
         for ingress_cp in ingress_cp_list:
             vnf_name, cp_details = ingress_cp.split(':', 1)
             if vnf_name not in ns_ingress_cps.keys():
-                ns_ingress_cps[vnf_name] = list()
+                ns_ingress_cps[vnf_name] = []
             ns_ingress_cps[vnf_name].append(cp_details)
 
         # Build the list with the destination addresses

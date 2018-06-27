@@ -156,7 +156,7 @@ class TestCase(object):
         This method verifies that the test case instance tc_input dictionary contains all the required items, if any.
         """
         required_items = self.REQUIRED_APIS + self.REQUIRED_ELEMENTS
-        missing_items = list()
+        missing_items = []
         for element in required_items:
             if element not in self.tc_input.keys():
                 missing_items.append(element)
@@ -248,7 +248,7 @@ class TestCase(object):
         if args:
             self._LOG.debug('Function will be called with arguments: (%s)' % ', '.join(map(str, args)))
         if kwargs:
-            kv_args = list()
+            kv_args = []
             for key, value in kwargs.iteritems():
                 kv_args.append('%s=%s' % (key, value))
             self._LOG.debug('Function will be called with keyword arguments: (%s)' % ', '.join(map(str, kv_args)))

@@ -232,7 +232,7 @@ class SchemaLoader(type):
     def __new__(meta, name, bases, class_dict):
         if bases != (InformationElement,):
             information_element_names = [name]
-            class_schemas = list()
+            class_schemas = []
 
             for information_element_name in information_element_names:
                 class_schema = get_schema(information_element_name)

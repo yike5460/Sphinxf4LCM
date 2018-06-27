@@ -435,7 +435,7 @@ class RiftManoAdapter(object):
         else:
             vnf_info.instantiated_vnf_info.vnf_state = constants.VNF_STOPPED
 
-        vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+        vnf_info.instantiated_vnf_info.vnfc_resource_info = []
         for vdur in vnfr['vdur']:
             vnfc_resource_info = VnfcResourceInfo()
             vnfc_resource_info.vnfc_instance_id = str(vdur['id'])
@@ -446,7 +446,7 @@ class RiftManoAdapter(object):
             vnfc_resource_info.compute_resource.resource_id = str(vdur['vim-id'])
             vnf_info.instantiated_vnf_info.vnfc_resource_info.append(vnfc_resource_info)
 
-        vnf_info.instantiated_vnf_info.ext_cp_info = list()
+        vnf_info.instantiated_vnf_info.ext_cp_info = []
         for connection_point in vnfr['connection-point']:
             vnf_ext_cp_info = VnfExtCpInfo()
             vnf_ext_cp_info.cp_instance_id = str(connection_point['connection-point-id'])
@@ -490,7 +490,7 @@ class RiftManoAdapter(object):
         else:
             ns_info.ns_state = constants.NS_NOT_INSTANTIATED
 
-        ns_info.vnf_info = list()
+        ns_info.vnf_info = []
         for constituent_vnfr in ns_opdata['constituent-vnfr-ref']:
             vnf_info = self.vnf_query(filter={'vnf_instance_id': constituent_vnfr['vnfr-id']})
             ns_info.vnf_info.append(vnf_info)
@@ -679,7 +679,7 @@ class RiftManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_vnf_mgmt_addr_list(self, vnf_instance_id, additional_param=None):
-        vnf_mgmt_addr_list = list()
+        vnf_mgmt_addr_list = []
 
         resource = '/api/operational/project/vnfr-catalog/vnfr/%s' % vnf_instance_id
         try:

@@ -352,10 +352,10 @@ class CiscoNFVManoAdapter(object):
                 esc_vnf_deployment_state]
 
             # Initialize the VnfcResourceInfo list
-            vnf_info.instantiated_vnf_info.vnfc_resource_info = list()
+            vnf_info.instantiated_vnf_info.vnfc_resource_info = []
 
             # Initialize the VnfExtCpInfo list
-            vnf_info.instantiated_vnf_info.ext_cp_info = list()
+            vnf_info.instantiated_vnf_info.ext_cp_info = []
 
             # Get the deployment XML from the ESC
             deployment_xml = self.esc.get(('xpath',

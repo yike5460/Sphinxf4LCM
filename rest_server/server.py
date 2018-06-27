@@ -320,7 +320,7 @@ def all_status():
     """
     Request mapped function that returns the status of all test execution IDs.
     """
-    status_list = list()
+    status_list = []
     for execution_id, execution_process in execution_processes.items():
         execution_status = {}
         execution_status['execution_id'] = execution_id

@@ -118,7 +118,7 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
         # 3. Trigger the NFVO to stop the target VNF instance inside the NS
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Triggering the NFVO to stop the target VNF instance inside the NS')
-        self.operate_vnf_data_list = list()
+        self.operate_vnf_data_list = []
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
             if vnf_info.vnf_product_name in self.tc_input['operate_vnf_data']:
                 vnf_data = OperateVnfData()
