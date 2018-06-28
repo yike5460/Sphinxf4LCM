@@ -27,7 +27,6 @@ class TD_NFV_BASE_TEARDOWN_DELETE_NSD_001(TestCase):
     2. Trigger the deletion of NSD on MANO
     3. Verify that the NSD and referenced VLD(s) and VNFFGD(s) no longer exist on MANO
     """
-
     REQUIRED_APIS = ('mano', )
     REQUIRED_ELEMENTS = ('nsd', )
 

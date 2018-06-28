@@ -21,7 +21,6 @@ class TimeRecord(object):
     Attributes:
         time_records:   Dictionary containing time record names as keys and time record objects as values.
         dump_dict:      Ordered dictionary containing object names as keys and timestamps as values.
-
     """
     def __init__(self):
         """
@@ -127,7 +126,6 @@ class TimeRecordEventEntry(object):
         _END:       Floating number representing the end timestamp.
         dump_dict:  Dictionary containing object name as key and timestamps as values.
     """
-
     def __init__(self, name):
         """
         This method sets the name of the time record to the provided name and the start and end labels to None.
@@ -210,7 +208,6 @@ class TimeRecordMomentEntry(object):
         _MARK:      Floating number representing the timestamp.
         dump_dict:  Dictionary containing object name as key and timestamp as value.
     """
-
     def __init__(self, name):
         """
         This method sets the name of the time record and the timestamp to None.

@@ -26,7 +26,6 @@ class TestExecutionError(Exception):
     """
     Generic exception for test execution.
     """
-
     def __init__(self, message, err_details=None):
         if err_details is None:
             err_details = message
@@ -85,7 +84,6 @@ class TestMeta(type):
     """
     Meta class that adds the logger object to the class dictionary of the class that is an instance of this meta class.
     """
-
     def __new__(meta, name, bases, class_dict):
         if bases != (object,):
             originating_module = importlib.import_module(class_dict['__module__'])

@@ -46,7 +46,6 @@ class TD_NFV_NSLCM_UPDATE_START_001(TestCase):
     13. Trigger the termination of the NS instance on the NFVO
     14. Verify that the NS is terminated and that all resources have been released by the VIM
     """
-
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'operate_vnf_data')
     TESTCASE_EVENTS = ('instantiate_ns', 'ns_update_stop_vnf', 'ns_update_start_vnf', 'terminate_ns')

@@ -48,7 +48,6 @@ class Vnf(object):
 
         :return:            True if the configuration has been applied successfully, False otherwise.
         """
-
         LOG.debug('We are currently not checking if the configuration has been applied to the VNF')
         return self.vnf_adapter.config_applied()
 
@@ -58,7 +57,6 @@ class Vnf(object):
 
         :return:            True if the license has been applied successfully, False otherwise.
         """
-
         LOG.debug('We are currently not checking if the license has been applied to the VNF')
         return self.vnf_adapter.license_applied()
 
@@ -72,7 +70,6 @@ class Vnf(object):
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    Status of the operation ex. 'Processing', 'Failed'.
         """
-
         if lifecycle_operation_occurrence_id is None:
             return constants.OPERATION_FAILED
         else:
@@ -128,7 +125,6 @@ class Vnf(object):
                                     to the VNF being scaled.
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.vnf_adapter.scale(vnf_instance_id, type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)

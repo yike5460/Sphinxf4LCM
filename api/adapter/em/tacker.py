@@ -38,12 +38,8 @@ class TackerEmAdapter(object):
     Class of functions that map the ETSI standard operations exposed by the EM to the operations exposed by the
     OpenStack Tacker client management driver.
     """
-
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        """
-        Create the Tacker Client.
-        """
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,

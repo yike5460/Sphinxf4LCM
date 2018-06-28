@@ -50,7 +50,6 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
     15. Trigger the termination of the nested NS instance on the NFVO
     16. Verify that the nested NS is terminated and that all resources have been released by the VIM
     """
-
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nested_ns_params', 'nsd_id')
     TESTCASE_EVENTS = ('instantiate_ns', 'terminate_ns')

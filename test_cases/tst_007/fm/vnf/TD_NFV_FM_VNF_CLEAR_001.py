@@ -41,7 +41,6 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
     9. Trigger the termination of the NS instance on the NFVO
     10. Verify that the NS is terminated and that all resources have been released by the VIM
     """
-
     REQUIRED_APIS = ('mano', 'vim')
     REQUIRED_ELEMENTS = ('nsd_id',)
     TESTCASE_EVENTS = ('instantiate_ns', 'terminate_ns')

@@ -44,7 +44,6 @@ class Traffic(object):
         :param tolerance:   Acceptable percent of lost traffic.
         :return:            True if traffic flows with dropped packets, False otherwise
         """
-
         return self.traffic_adapter.any_traffic_loss(delay_time, tolerance)
 
     @log_entry_exit(LOG)
@@ -54,7 +53,6 @@ class Traffic(object):
 
         :return:    True if all counters have been cleared, False otherwise.
         """
-
         return self.traffic_adapter.clear_counters()
 
     @log_entry_exit(LOG)
@@ -76,7 +74,6 @@ class Traffic(object):
         :param traffic_config:  Specific information required to run the traffic.
         :return:                True if traffic load and configuration parameter were applied, False otherwise.
         """
-
         return self.traffic_adapter.configure(traffic_load, traffic_config)
 
     @log_entry_exit(LOG)
@@ -88,7 +85,6 @@ class Traffic(object):
         :param delay_time:  Time, in seconds, to wait until polling for traffic.
         :return:            True if traffic flow is detected, False otherwise
         """
-
         return self.traffic_adapter.does_traffic_flow(delay_time)
 
     @log_entry_exit(LOG)
@@ -125,7 +121,6 @@ class Traffic(object):
                                             the emission actually stopped.
         :return:                            True if emission stopped, False otherwise.
         """
-
         return self.traffic_adapter.stop(delay_time, return_when_emission_stops)
 
     @log_entry_exit(LOG)

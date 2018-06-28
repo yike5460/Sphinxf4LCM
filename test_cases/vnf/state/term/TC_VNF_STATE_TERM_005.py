@@ -36,7 +36,6 @@ class TC_VNF_STATE_TERM_005(TestCase):
     9. Validate VNF is terminated and all resources have been released
     10. Validate no traffic has been forwarded while the termination
     """
-
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('vnfd_id',)
     TESTCASE_EVENTS = ('instantiate_vnf', 'stop_vnf', 'terminate_vnf')
