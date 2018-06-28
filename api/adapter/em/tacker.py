@@ -86,9 +86,9 @@ class TackerEmAdapter(object):
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None,
                                  vnfc_configuration_data=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
-        # "vnf": {
-        #     "attributes": {
-        #         "config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"
+        # 'vnf': {
+        #     'attributes': {
+        #         'config': 'vdus:\n  vdu1: <sample_vdu_config> \n\n'
         #     }
         # }
         if vnf_configuration_data is not None:

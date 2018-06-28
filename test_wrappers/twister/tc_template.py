@@ -31,9 +31,9 @@ def twister_run():
     set_details({'run_id': run_id})
 
     # Build test case JSON
-    tc_exec_request = {"tc_name": tc_name,
-                       "run_id": run_id,
-                       "suite_name": SUITE_NAME}
+    tc_exec_request = {'tc_name': tc_name,
+                       'run_id': run_id,
+                       'suite_name': SUITE_NAME}
 
     # Start test case
     try:
