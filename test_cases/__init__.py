@@ -26,6 +26,7 @@ class TestExecutionError(Exception):
     """
     Generic exception for test execution.
     """
+
     def __init__(self, message, err_details=None):
         if err_details is None:
             err_details = message
