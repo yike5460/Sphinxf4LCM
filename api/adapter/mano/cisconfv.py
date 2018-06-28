@@ -113,6 +113,7 @@ class CiscoNFVManoAdapter(object):
     Class of functions that map the generic operations exposed by the MANO to the operations exposed by the
     Cisco NFV MANO solution.
     """
+
     def __init__(self, nso_hostname, nso_username, nso_password, esc_hostname, esc_username, esc_password,
                  nso_port=2022, esc_port=830):
         try:

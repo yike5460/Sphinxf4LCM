@@ -45,6 +45,7 @@ class TackerManoAdapter(object):
     Class of functions that map the generic operations exposed by the MANO to the operations exposed by the
     OpenStack Tacker client.
     """
+
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
         try:

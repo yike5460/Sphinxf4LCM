@@ -34,6 +34,7 @@ class Vim(object):
     Class of generic functions representing operations exposed by the VIM towards the NFVO as defined by
     ETSI GS NFV-IFA 005 v2.1.1 (2016-04).
     """
+
     def __init__(self, vendor, adapter_config, **kwargs):
         """
         Construct the VIM object corresponding to the specified vendor.

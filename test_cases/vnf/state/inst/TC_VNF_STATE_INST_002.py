@@ -35,6 +35,7 @@ class TC_VNF_STATE_INST_002(TestCase):
     8. Terminate the VNF
     9. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
+
     REQUIRED_APIS = ('mano', 'vnf', 'traffic')
     REQUIRED_ELEMENTS = ('vnfd_id',)
     TESTCASE_EVENTS = ('instantiate_vnf', 'terminate_vnf')

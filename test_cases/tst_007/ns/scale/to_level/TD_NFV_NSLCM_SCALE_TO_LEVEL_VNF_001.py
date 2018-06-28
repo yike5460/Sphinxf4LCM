@@ -44,6 +44,7 @@ class TD_NFV_NSLCM_SCALE_TO_LEVEL_VNF_001(TestCase):
     11. Trigger the termination of the NS instance on the NFVO
     12. Verify that the NS is terminated and that all resources have been released by the VIM
     """
+
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'scale_to_level_list')
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_to_level_ns', 'terminate_ns')

@@ -27,6 +27,7 @@ class TD_NFV_BASE_ONBOARD_NSD_001(TestCase):
     2. Verify that NSD is successfully on-boarded in MANO (i.e query, display, ...)
     3. Verify that all VLDs and VNFFGDs referenced in the NSD have been successfully on-boarded in MANO
     """
+
     REQUIRED_APIS = ('mano', )
     REQUIRED_ELEMENTS = ('nsd', )
 

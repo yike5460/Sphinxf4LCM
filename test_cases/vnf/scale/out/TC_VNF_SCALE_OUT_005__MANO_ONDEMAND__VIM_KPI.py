@@ -46,6 +46,7 @@ class TC_VNF_SCALE_OUT_005__MANO_ONDEMAND__VIM_KPI(TestCase):
     15. Terminate the NS
     16. Validate that the NS is terminated and that all resources have been released by the VIM
     """
+
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('nsd_id', 'scaling_policy_name')
     TESTCASE_EVENTS = ('instantiate_ns', 'scale_out_ns', 'service_disruption', 'scale_in_ns', 'terminate_ns')

@@ -32,6 +32,7 @@ class TC_VNF_STATE_INST_007(TestCase):
     3. Terminate the VNF
     4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
+
     REQUIRED_APIS = ('mano', 'vim')
     REQUIRED_ELEMENTS = ('vnfd_id',)
     TESTCASE_EVENTS = ('instantiate_vnf',)
@@ -183,6 +184,7 @@ class TC_VNF_STATE_INST_007_005(TC_VNF_STATE_INST_007):
     3. Terminate the VNF
     4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
+
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vMemory for the VNF to be instantiated')
         reservation_id = self.mano.limit_compute_resources_for_vnf_instantiation(
@@ -220,6 +222,7 @@ class TC_VNF_STATE_INST_007_007(TC_VNF_STATE_INST_007):
     3. Terminate the VNF
     4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
+
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vStorage for the VNF to be instantiated')
         reservation_id = self.mano.limit_storage_resources_for_vnf_instantiation(
@@ -244,6 +247,7 @@ class TC_VNF_STATE_INST_007_008(TC_VNF_STATE_INST_007):
     3. Terminate the VNF
     4. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
+
     def setup(self):
         LOG.debug('Ensuring NFVI has not enough vCPUs for the VNF to be instantiated')
         reservation_id = self.mano.limit_compute_resources_for_vnf_instantiation(

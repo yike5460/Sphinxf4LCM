@@ -41,6 +41,7 @@ class TC_VNFC_SCALE_OUT_003__VNF_ONDEMAND(TestCase):
     13. Terminate the VNF
     14. Validate that the VNF is terminated and that all resources have been released by the VIM
     """
+
     REQUIRED_APIS = ('mano', 'traffic')
     REQUIRED_ELEMENTS = ('vnfd_id', 'scaling_policy_name')
     TESTCASE_EVENTS = ('instantiate_vnf', 'scale_out_vnf', 'service_disruption', 'scale_in_vnf', 'terminate_vnf')

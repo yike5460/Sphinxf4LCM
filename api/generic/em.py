@@ -34,6 +34,7 @@ class Em(object):
     Class of generic functions representing operations exposed by the EM towards the Test Interface as defined by
     ETSI GS NFV-TST 002 v1.1.1 (2016-10).
     """
+
     def __init__(self, vendor, generic_config, adapter_config):
         """
         Construct the EM object corresponding to the specified vendor.

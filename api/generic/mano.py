@@ -37,6 +37,7 @@ class Mano(object):
     """
     Class of generic functions representing operations exposed by the MANO.
     """
+
     def __init__(self, vendor, generic_config, adapter_config):
         """
         Construct the Mano object corresponding to the specified vendor.

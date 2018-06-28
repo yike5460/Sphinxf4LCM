@@ -33,6 +33,7 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
     5. Verify that the resources allocated to the NS and VNF instance(s) have been released by the VIM
     6. Verify that the NFVO indicates NS instance operation termination operation result as successful
     """
+
     REQUIRED_APIS = ('mano',)
     REQUIRED_ELEMENTS = ('nsd_id',)
     TESTCASE_EVENTS = ('instantiate_ns', 'terminate_ns')
