@@ -21,7 +21,6 @@ def generate_timestamp():
     """
     This function generates a timestamp.
     """
-
     return '{:%Y%m%d_%H%M%S}'.format(datetime.datetime.now())
 
 
@@ -29,7 +28,6 @@ def generate_name(name):
     """
     This function generates a unique name by adding a timestamp at the end of the provided name.
     """
-
     return '%s_%s' % (name, generate_timestamp())
 
 

@@ -119,7 +119,6 @@ class SdlManoAdapter(object):
                        nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
-
         ns_update_dict = self.ns_update_json_mapping[ns_instance_id]
         ns_update_dict['is_enabled'] = True
 
@@ -135,7 +134,6 @@ class SdlManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         # TODO :Refactor using logic from cisconfv.py (lifecycle_operation_occurrence_ids dict)
-
         operation_type, resource_id = lifecycle_operation_occurrence_id
 
         if operation_type == 'ns_instantiate':
