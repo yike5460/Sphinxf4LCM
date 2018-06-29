@@ -141,7 +141,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
         self.nfvo_alarm_filter.update({'alarm_state': 'ALARM_CLEARED'})
         elapsed_time = 0
         while elapsed_time < constants.ALARM_CLEAR_TIMEOUT:
-            nfvo_alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
+            nfvo_alarm_list = self.mano.ns_get_alarm_list(query_filter=self.nfvo_alarm_filter)
             if len(nfvo_alarm_list) != 0:
                 for alarm in nfvo_alarm_list:
                     resource_type = alarm.root_cause_faulty_resource.faulty_resource_type
@@ -202,7 +202,7 @@ class TD_NFV_FM_VNF_CLEAR_001(TestCase):
                  'fault alarms')
         elapsed_time = 0
         while elapsed_time < constants.ALARM_CLEAR_TIMEOUT:
-            alarm_list = self.mano.ns_get_alarm_list(self.nfvo_alarm_filter)
+            alarm_list = self.mano.ns_get_alarm_list(query_filter=self.nfvo_alarm_filter)
             if len(alarm_list) != 0:
                 break
             else:
