@@ -41,13 +41,13 @@ def tee(iterable, n=2):
     A lock was added for making it safe to use the teed iterators in separate threads.
     """
     it = iter(iterable)
-    l = Lock()
+    lock = Lock()
     deques = [collections.deque() for i in range(n)]
 
     def gen(mydeque):
         while True:
             if not mydeque:  # when the local deque is empty
-                with l:
+                with lock:
                     newval = next(it)  # fetch a new value and
                 for d in deques:  # load it to all the deques
                     d.append(newval)
