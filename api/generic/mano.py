@@ -231,7 +231,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
         return self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
@@ -315,8 +316,8 @@ class Mano(object):
 
         VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
                                     constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                          'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
 
         # Check if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
@@ -350,7 +351,8 @@ class Mano(object):
         :return:                    Dictionary with the resources for each VNFC.
         """
 
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
         vresources = {}
 
         # Check if the VNF instantiation state is INSTANTIATED
@@ -1045,14 +1047,14 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
+    def vnf_query(self, query_filter, attribute_selector=None):
         """
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
         filtering criteria, and the information can be restricted to selected attributes.
 
         This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
-        :param filter:              Filter to select the VNF instance(s) about which information is queried.
+        :param query_filter:        Filter to select the VNF instance(s) about which information is queried.
         :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
                                     for the VNF instance(s) matching the filter. If absent, the complete information is
                                     returned for the VNF instance(s) matching the filter.
@@ -1061,7 +1063,7 @@ class Mano(object):
                                     returned for the selected VNF instance(s).
         """
 
-        return self.mano_adapter.vnf_query(filter, attribute_selector)
+        return self.mano_adapter.vnf_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
@@ -1401,7 +1403,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
         return self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
