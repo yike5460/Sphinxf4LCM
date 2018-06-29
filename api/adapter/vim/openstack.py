@@ -60,6 +60,7 @@ class OpenstackVimAdapter(object):
     def build_clients(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                       project_domain_name=None, user_domain_name=None, verify=False):
         try:
+            raise DiscoveryFailure
             self.heat_client = os_client_config.make_client('orchestration',
                                                             auth_url=auth_url,
                                                             username=username,
@@ -109,11 +110,12 @@ class OpenstackVimAdapter(object):
                                                               project_domain_name=project_domain_name,
                                                               user_domain_name=user_domain_name,
                                                               verify=verify)
-        except DiscoveryFailure:
+        except DiscoveryFailure as e:
             if user_domain_name is None and project_domain_name is None:
-                raise
+                LOG.debug('Domain params are not present, so not attempting to retry building adapter without them')
+                raise e
 
-            LOG.debug('Unable to build adapter, because auth_url is v2.0 and domain params are present. '
+            LOG.debug('Unable to build adapter, because auth_url may be v2.0 and domain params are present. '
                       'Retrying without domain params')
             self.build_clients(auth_url=auth_url,
                                username=username,
