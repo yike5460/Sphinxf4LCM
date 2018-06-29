@@ -48,9 +48,6 @@ class TackerManoAdapter(object):
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        """
-        Create the Tacker client.
-        """
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,
@@ -784,7 +781,6 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval):
-
         if vnf_instance_id is None:
             raise TackerManoAdapterError('VNF instance ID is absent')
 
@@ -858,7 +854,6 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
-
         if ns_instance_id is None:
             raise TackerManoAdapterError('NS instance ID is absent')
 

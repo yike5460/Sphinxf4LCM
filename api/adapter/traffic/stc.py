@@ -256,7 +256,6 @@ class StcTrafficAdapter(object):
 
     @log_entry_exit(LOG)
     def configure(self, traffic_load, traffic_config):
-
         self.create_session()
 
         if traffic_config['type'] == 'VNF_TERMINATED':

@@ -41,9 +41,6 @@ class TackerEmAdapter(object):
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        """
-        Create the Tacker Client.
-        """
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,

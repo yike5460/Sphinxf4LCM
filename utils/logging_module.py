@@ -36,7 +36,6 @@ def configure_logger(logger, file_level=None, log_filename=None, console_level=N
     :param override_parent: Set to True to set current logger as parent of the RootLogger.
     :return:                None
     """
-
     # create logger with the name specified by logger_name
     logger.setLevel(logging.DEBUG)
 

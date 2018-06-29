@@ -640,7 +640,6 @@ class CiscoNFVManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_instantiate(self, vnf_instance_id, flavour_id, instantiation_level_id=None, ext_virtual_link=None,
                         ext_managed_virtual_link=None, localization_language=None, additional_param=None):
-
         vnfr_xml = self.build_vnfr(vnf_instance_id, flavour_id, instantiation_level_id, additional_param)
         try:
             netconf_reply = self.nso.edit_config(target='running', config=vnfr_xml)
