@@ -142,8 +142,8 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the VNF instance operational state on the VNFM is indicated as "stopped"')
         for vnf_data in self.operate_vnf_data_list:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_data.vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_data.vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiated_vnf_info.vnf_state != constants.VNF_STOPPED:
                 raise TestRunError('Target VNF %s was not stopped' % vnf_info.vnf_product_name)
 
@@ -235,8 +235,8 @@ class TD_NFV_NSLCM_UPDATE_STOP_001(TestCase):
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_after_stop.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))

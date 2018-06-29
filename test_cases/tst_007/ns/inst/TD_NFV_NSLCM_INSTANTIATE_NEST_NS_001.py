@@ -352,8 +352,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         LOG.info('Verifying that all nesting NS VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_nesting_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError(
                     'Nesting NS VNF instance %s was not terminated correctly. Expected state was %s but got %s'
@@ -400,8 +400,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         LOG.info('Verifying that all nested NS VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_nested_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.nested_ns_params.get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.nested_ns_params.get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError(
                     'Nested NS VNF instance %s was not terminated correctly. Expected state was %s but got %s'
