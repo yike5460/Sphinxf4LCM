@@ -244,7 +244,7 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         for vnf_info in ns_info.vnf_info:
             if not self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param):
                 LOG.debug('For VNF instance ID %s expected resources do not match the actual ones'
@@ -561,14 +561,14 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
+    def ns_query(self, query_filter, attribute_selector=None):
         """
         This function enables the OSS/BSS to query from the NFVO information on one or more NS(s). The operation also
         supports querying information about VNF instance(s) that is (are) part of an NS.
 
         This function was written in accordance with section 7.3.6 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
 
-        :param filter:              Filter defining the NSs on which the query applies, based on attributes of the
+        :param query_filter:        Filter defining the NSs on which the query applies, based on attributes of the
                                     Network Service.
         :param attribute_selector:  Provides a list of attribute names of NS. If present, only these attributes are
                                     returned for the instances of NS matching the filter. If absent, the complete
@@ -578,7 +578,7 @@ class Mano(object):
                                     returned for the selected NSs and VNF instances.
         """
 
-        return self.mano_adapter.ns_query(filter, attribute_selector)
+        return self.mano_adapter.ns_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
@@ -1417,7 +1417,7 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         for vnf_info in ns_info.vnf_info:
             if not self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param):
                 LOG.error('Not all VNFCs in VNF with instance ID %s use the correct images' % vnf_info.vnf_instance_id)
