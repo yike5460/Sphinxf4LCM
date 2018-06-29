@@ -2469,13 +2469,13 @@ class CiscoNFVManoAdapter(object):
         return nsd_info_id
 
     @log_entry_exit(LOG)
-    def ns_get_alarm_list(self, filter):
-        tenant_name = filter['tenant']
-        deployment_name = filter['ns_instance_id']
-        alarm_state = filter['alarm_state']
+    def ns_get_alarm_list(self, query_filter):
+        tenant_name = query_filter['tenant']
+        deployment_name = query_filter['ns_instance_id']
+        alarm_state = query_filter['alarm_state']
 
         try:
-            event_type = filter['alarm_state_mapping'][alarm_state]
+            event_type = query_filter['alarm_state_mapping'][alarm_state]
         except KeyError:
             raise CiscoNFVManoAdapterError('No mapping defined in the alarm filter for alarm state %s' % alarm_state)
 
