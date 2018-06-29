@@ -296,7 +296,7 @@ class Mano(object):
                 vim = self.get_vim_helper(vim_id)
                 resource_id = vnfc_resource_info.compute_resource.resource_id
                 try:
-                    vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
                     LOG.debug('Resource ID %s found in VIM, not as expected' % resource_id)
                     return False
                 except Exception:
@@ -332,7 +332,8 @@ class Mano(object):
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
             try:
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                virtual_compute = vim.query_virtualised_compute_resource(
+                    query_compute_filter={'compute_id': resource_id})
                 if virtual_compute.operational_state != VNF_TO_VRESOURCE_MAPPING[vnf_state]:
                     return False
             except Exception:
@@ -367,7 +368,7 @@ class Mano(object):
             vim = self.get_vim_helper(vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
 
             resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
             vresources[resource_string] = OrderedDict()

@@ -568,7 +568,7 @@ class RiftManoAdapter(object):
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             image_id = virtual_compute.vc_image_id
             image_details = vim.query_image(image_id)
             image_name_vim = image_details.name
@@ -623,7 +623,8 @@ class RiftManoAdapter(object):
                     LOG.debug('Unexpected value for flavor: %s. Expected: %s' % (flavor_name_vnfd, flavor_name_nova))
                     validation_result = False
             else:
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                virtual_compute = vim.query_virtualised_compute_resource(
+                    query_compute_filter={'compute_id': resource_id})
 
                 actual_vdu_resources = {
                     'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
