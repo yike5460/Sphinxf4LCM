@@ -21,8 +21,8 @@ class TimeRecord(object):
     Attributes:
         time_records:   Dictionary containing time record names as keys and time record objects as values.
         dump_dict:      Ordered dictionary containing object names as keys and timestamps as values.
-
     """
+
     def __init__(self):
         """
         This method initializes the time records dictionary.

@@ -31,6 +31,7 @@ class DummyVimAdapter(object):
     """
     Class of stub functions representing operations exposed by the VIM towards the NFVO/VNFM.
     """
+
     def __init__(self, **kwargs):
         pass
 

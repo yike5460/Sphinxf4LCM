@@ -32,6 +32,7 @@ class DummyVnfmAdapter(object):
     """
     Class of stub functions representing operations exposed by the VNFM towards the NFVO.
     """
+
     def __init__(self, **kwargs):
         pass
 
