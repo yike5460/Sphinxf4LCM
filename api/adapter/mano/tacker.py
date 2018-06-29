@@ -920,8 +920,8 @@ class TackerManoAdapter(object):
             return 'stack-list', vnf_list
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = str(ns_instance_id)
 
@@ -954,7 +954,7 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
         for vnf_info in ns_info.vnf_info:

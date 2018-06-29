@@ -112,9 +112,9 @@ class DummyManoAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
+    def ns_query(self, query_filter, attribute_selector=None):
 
-        ns_instance_id = filter['ns_instance_id']
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo
         ns_info.ns_instance_id = ns_instance_id
         ns_info.ns_name = 'ns_name'

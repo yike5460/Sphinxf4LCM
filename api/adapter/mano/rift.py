@@ -460,8 +460,8 @@ class RiftManoAdapter(object):
         return vnf_info
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = str(ns_instance_id)
 
@@ -645,7 +645,7 @@ class RiftManoAdapter(object):
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         validation_result = True
 
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
 
@@ -840,7 +840,7 @@ class RiftManoAdapter(object):
 
         # Create dictionary with actual number of instances for each VNF
         actual_vnf_count = defaultdict(int)
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id})
         for vnf_info in ns_info.vnf_info:
             vnf_product_name = vnf_info.vnf_product_name
             actual_vnf_count[vnf_product_name] += 1

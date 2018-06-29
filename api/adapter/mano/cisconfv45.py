@@ -1715,9 +1715,9 @@ class CiscoNFVManoAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
-        additional_param = filter['additional_param']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
+        additional_param = query_filter['additional_param']
         ns_info = NsInfo()
         ns_info.ns_instance_id = ns_instance_id
 
@@ -1920,7 +1920,7 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         ns_deployment_flavor = ns_info.flavor_id
         nsd = self.get_nsd(nsd_id)

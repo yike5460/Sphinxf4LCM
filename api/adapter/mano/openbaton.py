@@ -182,8 +182,8 @@ class OpenbatonManoAdapter(object):
                 return constants.OPERATION_PENDING
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = ns_instance_id
         try:
@@ -364,7 +364,7 @@ class OpenbatonManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
         expected_vnf_vnfd_mapping = {}
