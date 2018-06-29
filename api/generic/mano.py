@@ -1664,16 +1664,17 @@ class Mano(object):
         return data
 
     @log_entry_exit(LOG)
-    def ns_get_alarm_list(self, filter):
+    def ns_get_alarm_list(self, query_filter):
         """
         This function enables the OSS/BSSs to query the active alarms from the NFVO.
 
         This function was written in accordance with section 7.6.4 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
 
-        :param filter:  Input filter for selecting alarms. This can contain the list of the NS identifiers, severity and
-                        cause.
-        :return:        Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The cardinality
-                        can be "0" to indicate that no Alarm could be retrieved based on the input filter information.
+        :param query_filter:    Input filter for selecting alarms. This can contain the list of the NS identifiers,
+                                severity and cause.
+        :return:                Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The
+                                cardinality can be "0" to indicate that no Alarm could be retrieved based on the input
+                                filter information.
         """
 
-        return self.mano_adapter.ns_get_alarm_list(filter)
+        return self.mano_adapter.ns_get_alarm_list(query_filter)
