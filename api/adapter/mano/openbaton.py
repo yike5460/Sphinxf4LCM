@@ -483,8 +483,8 @@ class OpenbatonManoAdapter(object):
         return nsd_info_id
 
     @log_entry_exit(LOG)
-    def nsd_info_query(self, filter, attribute_selector=None):
-        nsd_info_id = filter['nsd_info_id']
+    def nsd_info_query(self, query_filter, attribute_selector=None):
+        nsd_info_id = query_filter['nsd_info_id']
         return self.nsd_info_ids.get(nsd_info_id)
 
     @log_entry_exit(LOG)
