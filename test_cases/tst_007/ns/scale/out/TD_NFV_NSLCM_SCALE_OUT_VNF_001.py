@@ -94,9 +94,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        self.ns_info_before_scale_out = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                   'additional_param': self.tc_input['mano'].get(
-                                                                       'query_params')})
+        self.ns_info_before_scale_out = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                         'additional_param': self.tc_input['mano'].get(
+                                                                             'query_params')})
         if self.ns_info_before_scale_out.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
@@ -160,9 +160,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # 4. Verify that the additional VNFC instance(s) have been deployed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the additional VNFC instance(s) have been deployed for the VNF by querying the VNFM')
-        self.ns_info_after_scale_out = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                  'additional_param': self.tc_input['mano'].get(
-                                                                      'query_params')})
+        self.ns_info_after_scale_out = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                        'additional_param': self.tc_input['mano'].get(
+                                                                            'query_params')})
         for vnf_info in self.ns_info_after_scale_out.vnf_info:
             vnf_name = vnf_info.vnf_product_name
             if vnf_name in self.expected_vnfc_count.keys():
@@ -316,9 +316,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
         # 12. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
-        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                               'additional_param': self.tc_input['mano'].get(
-                                                                   'query_params')})
+        ns_info_after_termination = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                     'additional_param': self.tc_input['mano'].get(
+                                                                         'query_params')})
         if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'

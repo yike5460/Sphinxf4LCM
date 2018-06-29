@@ -86,9 +86,9 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        self.ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                      'additional_param': self.tc_input['mano'].get(
-                                                                          'query_params')})
+        self.ns_info_after_instantiation = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                            'additional_param': self.tc_input[
+                                                                                'mano'].get('query_params')})
         if self.ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was instantiated'
@@ -160,9 +160,9 @@ class TD_NFV_NSLCM_TERMINATE_001(TestCase):
         # 6. Verify that the NFVO indicates NS instance operation termination operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instance operation termination operation result as successful')
-        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                               'additional_param': self.tc_input['mano'].get(
-                                                                   'query_params')})
+        ns_info_after_termination = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                     'additional_param': self.tc_input['mano'].get(
+                                                                         'query_params')})
         if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError(
                 'NS instance was not terminated correctly. NS instance ID %s expected state was %s, but got %s'

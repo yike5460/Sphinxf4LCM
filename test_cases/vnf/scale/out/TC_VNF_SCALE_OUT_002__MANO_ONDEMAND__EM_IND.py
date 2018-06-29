@@ -84,7 +84,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__EM_IND(TestCase):
         # 2. Validate NS state is INSTANTIATED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating NS state is INSTANTIATED')
-        ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
+        ns_info = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id})
         if ns_info.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
@@ -182,7 +182,7 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__EM_IND(TestCase):
         self.time_record.START('scale_out_ns')
         elapsed_time = 0
         while elapsed_time < constants.NS_SCALE_TIMEOUT:
-            ns_info = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id})
+            ns_info = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id})
             if len(ns_info.vnf_info_id) == sp['max_instances']:
                 break
             else:
@@ -269,8 +269,8 @@ class TC_VNF_SCALE_OUT_002__MANO_ONDEMAND__EM_IND(TestCase):
         # 11. Validate that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that the NS is terminated')
-        ns_info_final = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+        ns_info_final = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info_final.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'

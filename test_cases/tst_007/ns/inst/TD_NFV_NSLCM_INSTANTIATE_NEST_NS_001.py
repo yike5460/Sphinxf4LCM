@@ -101,8 +101,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates nested NS instantiation operation result as successful')
         self.ns_info_nested_after_instantiation = self.mano.ns_query(
-            filter={'ns_instance_id': self.ns_instance_id_nested,
-                    'additional_param': self.nested_ns_params.get('query_params')})
+            query_filter={'ns_instance_id': self.ns_instance_id_nested,
+                          'additional_param': self.nested_ns_params.get('query_params')})
         if self.ns_info_nested_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nested NS instantiation state was not "%s" after the NS was instantiated'
@@ -176,8 +176,8 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
             raise TestRunError('Nesting NS allocated vResources could not be validated')
 
         self.ns_info_nesting_after_instantiation = self.mano.ns_query(
-            filter={'ns_instance_id': self.ns_instance_id_nesting,
-                    'additional_param': self.tc_input['mano'].get('query_params')})
+            query_filter={'ns_instance_id': self.ns_instance_id_nesting,
+                          'additional_param': self.tc_input['mano'].get('query_params')})
         for vnf_info in self.ns_info_nesting_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
@@ -341,9 +341,9 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 14. Verify that the nesting NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the nesting NS is terminated')
-        ns_info_nesting_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nesting,
-                                                                       'additional_param': self.tc_input['mano'].get(
-                                                                           'query_params')})
+        ns_info_nesting_after_termination = self.mano.ns_query(
+            query_filter={'ns_instance_id': self.ns_instance_id_nesting,
+                          'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info_nesting_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nesting NS instantiation state was not "%s" after the NS was terminated'
@@ -389,9 +389,9 @@ class TD_NFV_NSLCM_INSTANTIATE_NEST_NS_001(TestCase):
         # 16. Verify that the nested NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the nested NS is terminated')
-        ns_info_nested_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nested,
-                                                                      'additional_param': self.nested_ns_params.get(
-                                                                          'query_params')})
+        ns_info_nested_after_termination = self.mano.ns_query(
+            query_filter={'ns_instance_id': self.ns_instance_id_nested,
+                          'additional_param': self.nested_ns_params.get('query_params')})
         if ns_info_nested_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nested NS instantiation state was not "%s" after the NS was terminated'
