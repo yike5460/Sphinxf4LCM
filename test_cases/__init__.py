@@ -272,18 +272,18 @@ class TestCase(object):
         """
         self._LOG.info('Starting main cleanup')
         for index in reversed(sorted(self.cleanup_registrations.keys())):
-            function = self.cleanup_registrations[index]
+            func_tuple = self.cleanup_registrations[index]
             try:
-                actual_result = function.function_reference(*function.function_args, **function.function_kwargs)
-                if function.verify_result:
+                actual_result = func_tuple.function_reference(*func_tuple.function_args, **func_tuple.function_kwargs)
+                if func_tuple.verify_result:
                     self._LOG.debug('Expected result for cleanup function %s.%s: %s; actual result: %s'
-                                    % (function.function_reference.__module__, function.function_reference.__name__,
-                                       function.expected_result, actual_result))
-                    assert actual_result == function.expected_result
+                                    % (func_tuple.function_reference.__module__, func_tuple.function_reference.__name__,
+                                       func_tuple.expected_result, actual_result))
+                    assert actual_result == func_tuple.expected_result
             except Exception as e:
                 self._LOG.exception(e)
-                raise TestCleanupError('Function %s.%s crashed during cleanup - %s'
-                                   % (function.function_reference.__module__, function.function_reference.__name__, e))
+                raise TestCleanupError('Function %s.%s crashed during cleanup - %s' % (
+                    func_tuple.function_reference.__module__, func_tuple.function_reference.__name__, e))
         self._LOG.info('Finished main cleanup')
 
     def collect_timestamps(self):
