@@ -110,7 +110,7 @@ class OpenstackVimAdapter(object):
                                                               user_domain_name=user_domain_name,
                                                               verify=verify)
         except DiscoveryFailure:
-            if user_domain_name is None and project_name is None:
+            if user_domain_name is None and project_domain_name is None:
                 raise
 
             LOG.debug('Unable to build adapter, because auth_url is v2.0 and domain params are present. '
