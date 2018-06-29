@@ -77,7 +77,7 @@ class DummyManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id})
 
         vresources = {}
 
@@ -136,8 +136,8 @@ class DummyManoAdapter(object):
         return 'vnf', ns_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 

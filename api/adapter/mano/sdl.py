@@ -213,14 +213,14 @@ class SdlManoAdapter(object):
         for service_desc in ns_instance_dict['service_desc_list']:
             vnf_instance_id = service_desc['instance_id']
             if vnf_instance_id != '':
-                vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+                vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id})
                 ns_info.vnf_info.append(vnf_info)
 
         return ns_info
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 

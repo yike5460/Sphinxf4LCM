@@ -839,9 +839,9 @@ class CiscoNFVManoAdapter(object):
         return 'SERVICE_ACTIVE_STATE'
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
-        additional_param = filter['additional_param']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
+        additional_param = query_filter['additional_param']
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         tenant_name = additional_param['tenant']
 
@@ -1752,8 +1752,8 @@ class CiscoNFVManoAdapter(object):
                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name')
         for vnf_name in vnf_ids:
             vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id, vnf_name=vnf_name.text)
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                              'additional_param': additional_param})
+            vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                    'additional_param': additional_param})
             vnf_info.vnf_product_name = vnf_name.text
             ns_info.vnf_info.append(vnf_info)
 
@@ -1962,8 +1962,8 @@ class CiscoNFVManoAdapter(object):
 
         # Get the VNFD corresponding to this VNF instance
         tenant_name = additional_param['tenant']
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                          'additional_param': {'tenant': tenant_name}})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': {'tenant': tenant_name}})
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
         vnfd_xml = etree.fromstring(vnfd)

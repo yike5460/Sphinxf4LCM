@@ -210,8 +210,8 @@ class OpenbatonManoAdapter(object):
         return ns_info
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id
         ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id, '')

@@ -172,7 +172,7 @@ class RiftManoAdapter(object):
                 raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
                                            (scaling_group_record_id, ns_instance_id))
             scaling_group_record = json_content.get('nsr:scaling-group-record')
-            if scaling_group_record == None:
+            if scaling_group_record is None:
                 return constants.OPERATION_SUCCESS
             elif 'instance' in scaling_group_record:
                 return constants.OPERATION_PENDING
@@ -401,8 +401,8 @@ class RiftManoAdapter(object):
         return 'ns_instantiate', ns_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 
@@ -492,7 +492,7 @@ class RiftManoAdapter(object):
 
         ns_info.vnf_info = []
         for constituent_vnfr in ns_opdata['constituent-vnfr-ref']:
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': constituent_vnfr['vnfr-id']})
+            vnf_info = self.vnf_query(query_filter={'vnf_instance_id': constituent_vnfr['vnfr-id']})
             ns_info.vnf_info.append(vnf_info)
 
         return ns_info
