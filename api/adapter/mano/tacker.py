@@ -419,9 +419,9 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
-        # "vnf": {
-        #     "attributes": {
-        #         "config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"
+        # 'vnf': {
+        #     'attributes': {
+        #         'config': 'vdus:\n  vdu1: <sample_vdu_config> \n\n'
         #     }
         # }
         if vnf_configuration_data is not None:
@@ -660,9 +660,9 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
-        # "scale": {
-        #   "type": "<type>",
-        #   "policy" : "<scaling-policy-name>"}
+        # 'scale': {
+        #   'type': '<type>',
+        #   'policy' : '<scaling-policy-name>'}
         try:
             body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
             self.tacker_client.scale_vnf(vnf_instance_id, body)

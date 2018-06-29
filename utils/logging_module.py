@@ -51,7 +51,7 @@ def configure_logger(logger, file_level=None, log_filename=None, console_level=N
             os.mkdir(LOG_DIR)
 
         # Create file handler
-        fh = logging.FileHandler(filename=log_file_path, mode="w")
+        fh = logging.FileHandler(filename=log_file_path, mode='w')
         fh.setLevel(getattr(logging, str(file_level)))
 
         # Create formatter and add it to the handlers
@@ -86,9 +86,9 @@ def log_entry_exit(LOG):
     def func_wrapper(func):
         @functools.wraps(func)
         def logger_wrapper(*args, **kwargs):
-            LOG.debug("Entering function %s" % func.__name__)
+            LOG.debug('Entering function %s' % func.__name__)
             func_result = func(*args, **kwargs)
-            LOG.debug("Exiting function %s" % func.__name__)
+            LOG.debug('Exiting function %s' % func.__name__)
             return func_result
         return logger_wrapper
     return func_wrapper
