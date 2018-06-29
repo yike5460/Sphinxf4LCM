@@ -206,7 +206,7 @@ def mano_add(mano_type, warning=None, message=None, mano=None, name=None, additi
     :param name: Name of MANO element
     """
 
-    if additional_params == None:
+    if additional_params is None:
         additional_params = {}
         additional_params['vim_list'] = prepare_option_list(option_type="vim")
     return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano, name=name,
@@ -403,7 +403,7 @@ def mano_update(warning=None, message=None, mano=None, name=None, additional_par
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
-        if additional_params == None:
+        if additional_params is None:
             additional_params = {}
             if mano_json['client_config'].get('vim_info', {}):
                 selected_vim = mano_json['client_config']['vim_info'].keys()[0]

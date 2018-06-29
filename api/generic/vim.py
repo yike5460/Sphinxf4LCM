@@ -282,10 +282,10 @@ class Vim(object):
 
         This function was written in accordance with section 7.3.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).
 
-        :param query_compute_filter:        Query filter based on e.g. name, identifier, meta-data information or status
-                                            information.
-        :return:                            Element containing information about the virtual compute resource(s)
-                                            matching the filter.
+        :param query_compute_filter:    Query filter based on e.g. name, identifier, meta-data information or status
+                                        information.
+        :return:                        Element containing information about the virtual compute resource(s) matching
+                                        the filter.
         """
 
         return self.vim_adapter.query_virtualised_compute_resource(query_compute_filter)
