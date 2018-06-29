@@ -177,10 +177,10 @@ class OpenstackVimAdapter(object):
         return str(project_id)
 
     @log_entry_exit(LOG)
-    def query_virtualised_compute_resource(self, filter):
+    def query_virtualised_compute_resource(self, query_compute_filter):
         virtual_compute = VirtualCompute()
 
-        compute_id = filter['compute_id']
+        compute_id = query_compute_filter['compute_id']
         virtual_compute.compute_id = compute_id
         server_details = self.server_get(compute_id)
         server_flavor_id = server_details['flavor_id']
