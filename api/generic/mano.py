@@ -1587,14 +1587,14 @@ class Mano(object):
         return self.mano_adapter.nsd_info_create(user_defined_data)
 
     @log_entry_exit(LOG)
-    def nsd_info_query(self, filter, attribute_selector=None):
+    def nsd_info_query(self, query_filter, attribute_selector=None):
         """
         This function will enable the OSS/BSS to query the NFVO concerning details of one or more NSD information
         objects.
 
         This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
 
-        :param filter:              Filter defining the NSD information objects on which the query applies, based on
+        :param query_filter:        Filter defining the NSD information objects on which the query applies, based on
                                     attributes of the NSD information objects. It can also be used to specify one or
                                     more NSD information objects to be queried by providing their identifiers.
         :param attribute_selector:  Provides a list of attribute names of the NSD information objects. If present, only
@@ -1603,7 +1603,7 @@ class Mano(object):
         :return:                    Details of the NSD information objects matching the input filter.
         """
 
-        return self.mano_adapter.nsd_info_query(filter, attribute_selector)
+        return self.mano_adapter.nsd_info_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def nsd_upload(self, nsd_info_id, nsd):
