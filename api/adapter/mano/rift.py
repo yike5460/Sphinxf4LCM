@@ -79,7 +79,6 @@ class RiftManoAdapter(object):
     @log_entry_exit(LOG)
     def get_operation_status(self, lifecycle_operation_occurrence_id):
         # TODO: the get logic inside ifs should be moved into functions
-
         operation_type, resource_id = lifecycle_operation_occurrence_id
 
         if operation_type == 'ns_instantiate':
@@ -381,7 +380,6 @@ class RiftManoAdapter(object):
                        nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
-
         resource = '/api/config/project/%s/ns-instance-config/nsr' % self.project
 
         nsr_metadata = self.nsr_metadata[ns_instance_id]
@@ -702,7 +700,6 @@ class RiftManoAdapter(object):
     @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
         # TODO: add support for scaling steps > 1?
-
         if scale_type == 'SCALE_VNF':
             raise NotImplementedError
         elif scale_type == 'SCALE_NS':

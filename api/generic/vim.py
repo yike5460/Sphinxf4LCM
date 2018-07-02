@@ -50,7 +50,6 @@ class Vim(object):
         :param operation_id:    ID of the operation.
         :return:                The status of the operation ex. 'Processing', 'Failed'.
         """
-
         return self.vim_adapter.get_operation_status(operation_id)
 
     @log_entry_exit(LOG)
@@ -99,7 +98,6 @@ class Vim(object):
         :param vc_instances:        Desired number of VC instances be available after limiting the compute resources
         :return:                    The reservation ID if the reservation was successful, None otherwise.
         """
-
         # Get the available compute resources from the VIM.
         virtual_compute_quota = self.query_compute_resource_quota()
         if virtual_compute_quota.num_vcpus is not None:
@@ -284,7 +282,6 @@ class Vim(object):
         :return:                        Element containing information about the virtual compute resource(s) matching
                                         the filter.
         """
-
         return self.vim_adapter.query_virtualised_compute_resource(query_compute_filter)
 
     @log_entry_exit(LOG)
@@ -296,7 +293,6 @@ class Vim(object):
         :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.
         :return:            Identifier of operation.
         """
-
         return self.vim_adapter.trigger_compute_resource_terminate(compute_id)
 
     @log_entry_exit(LOG)
@@ -309,7 +305,6 @@ class Vim(object):
         :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.
         :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.
         """
-
         operation_id = self.trigger_compute_resource_terminate(compute_id)
 
         operation_status = self.poll_for_operation_completion(operation_id,
@@ -384,7 +379,6 @@ class Vim(object):
         :return:                            Element containing information about the virtual network resource(s)
                                             matching the filter.
         """
-
         return self.vim_adapter.query_virtualised_network_resource(query_network_filter)
 
     @log_entry_exit(LOG)
@@ -399,7 +393,6 @@ class Vim(object):
         :return:                            Element containing information about the virtual storage resource(s)
                                             matching the filter.
         """
-
         return self.vim_adapter.query_virtualised_storage_resource(query_storage_filter)
 
     @log_entry_exit(LOG)
@@ -467,7 +460,6 @@ class Vim(object):
         :param reservation_id:      Identifier of the resource reservation(s) to terminate.
         :return: reservation_id:    Identifier of the resource reservation(s) successfully terminated.
         """
-
         return self.vim_adapter.terminate_compute_resource_reservation(reservation_id)
 
     @log_entry_exit(LOG)
@@ -500,7 +492,6 @@ class Vim(object):
                                             requested to be reserved, e.g. in what particular Resource Zone.
         :return: reservation_data:          Element containing information about the reserved resource.
         """
-
         return self.vim_adapter.create_network_resource_reservation(network_reservation, resource_group_id,
                                                                     start_time, end_time, expiry_time,
                                                                     affinity_constraint, anti_affinity_constraint,
@@ -518,7 +509,6 @@ class Vim(object):
         :param reservation_id:      Identifier of the resource reservation(s) to terminate.
         :return: reservation_id:    Identifier of the resource reservation(s) successfully terminated.
         """
-
         return self.vim_adapter.terminate_network_resource_reservation(reservation_id)
 
     @log_entry_exit(LOG)
@@ -552,7 +542,6 @@ class Vim(object):
                                             requested to be reserved, e.g. in what particular Resource Zone.
         :return: reservation_data:          Element containing information about the reserved resource.
         """
-
         return self.vim_adapter.create_storage_resource_reservation(resource_group_id, storage_pool_reservation,
                                                                     start_time, end_time, expiry_time,
                                                                     affinity_constraint, anti_affinity_constraint,
@@ -570,7 +559,6 @@ class Vim(object):
         :param reservation_id:      Identifier of the resource reservation(s) to terminate.
         :return: reservation_id:    Identifier of the resource reservation(s) successfully terminated.
         """
-
         return self.vim_adapter.terminate_storage_resource_reservation(reservation_id)
 
     @log_entry_exit(LOG)
@@ -584,5 +572,4 @@ class Vim(object):
         :param image_id:    The identifier of the software image to be queried.
         :return:            The information of the software image matching the query.
         """
-
         return self.vim_adapter.query_image(image_id)

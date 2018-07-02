@@ -36,9 +36,6 @@ class DummyManoAdapter(object):
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        """
-        Create the dummy client.
-        """
         pass
 
     @log_entry_exit(LOG)
@@ -113,7 +110,6 @@ class DummyManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_query(self, query_filter, attribute_selector=None):
-
         ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo
         ns_info.ns_instance_id = ns_instance_id

@@ -82,7 +82,6 @@ class Mano(object):
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    The status of the operation ex. 'Processing', 'Failed'.
         """
-
         return self.mano_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
@@ -95,7 +94,6 @@ class Mano(object):
         :param scaling_policy_name: Name of the scaling policy to get the properties for.
         :return:                    Dictionary with the scaling properties.
         """
-
         return self.mano_adapter.get_vnfd_scaling_properties(vnfd_id, scaling_policy_name)
 
     @log_entry_exit(LOG)
@@ -105,7 +103,6 @@ class Mano(object):
         :param vim_id:      ID of the VIM as known by the MANO element
         :return:            Vim object
         """
-
         return self.mano_adapter.get_vim_helper(vim_id)
 
     @log_entry_exit(LOG)
@@ -118,7 +115,6 @@ class Mano(object):
         :param scaling_policy_name: Name of the scaling policy to get the properties for.
         :return:                    Dictionary with the scaling properties.
         """
-
         return self.mano_adapter.get_nsd_scaling_properties(nsd_id, scaling_policy_name)
 
     @log_entry_exit(LOG)
@@ -276,7 +272,6 @@ class Mano(object):
         :return:                    True if the resources allocated to the initial VNF and not allocated to the final
                                     VNF have been released, False otherwise.
         """
-
         vnfc_resource_id_list_final = []
         if vnf_info_final is not None:
             if vnf_info_final.instantiation_state == constants.VNF_NOT_INSTANTIATED:
@@ -313,7 +308,6 @@ class Mano(object):
         :return:                    True if the the VNF state in the VNFM matches the state indicated by the VIM,
                                     False otherwise
         """
-
         VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
                                     constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
         vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
@@ -351,7 +345,6 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    Dictionary with the resources for each VNFC.
         """
-
         vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
                                                 'additional_param': additional_param})
         vresources = {}
@@ -401,7 +394,6 @@ class Mano(object):
         :param ext_virtual_link:        Information about external VLs to connect the VNF to.
         :return:                        None.
         """
-
         return self.mano_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link)
 
     @log_entry_exit(LOG)
@@ -418,7 +410,6 @@ class Mano(object):
         :param ns_description:  Human readable description of the NS instance.
         :return:                Identifier of the instance of an NS that has been created.
         """
-
         return self.mano_adapter.ns_create_id(nsd_id, ns_name, ns_description)
 
     @log_entry_exit(LOG)
@@ -473,7 +464,6 @@ class Mano(object):
         :param ns_instance_id:  NS instance identifier to be deleted.
         :return:                None
         """
-
         return self.mano_adapter.ns_delete_id(ns_instance_id)
 
     @log_entry_exit(LOG)
@@ -507,9 +497,7 @@ class Mano(object):
                                                             for the VNF instances to be instantiated as part of the NS
                                                             instantiation.
         :return:                                            Identifier of the NS lifecycle operation occurrence.
-
         """
-
         return self.mano_adapter.ns_instantiate(ns_instance_id, flavour_id, sap_data, pnf_info, vnf_instance_data,
                                                 nested_ns_instance_data, location_constraints, additional_param_for_ns,
                                                 additional_param_for_vnf, start_time, ns_instantiation_level_id,
@@ -546,7 +534,6 @@ class Mano(object):
                                                             instantiation.
         :return:                                            Operation status.
         """
-
         lifecycle_operation_occurrence_id = self.ns_instantiate(ns_instance_id, flavour_id, sap_data, pnf_info,
                                                                 vnf_instance_data, nested_ns_instance_data,
                                                                 location_constraints, additional_param_for_ns,
@@ -578,7 +565,6 @@ class Mano(object):
                                     If attributeSelector is present, only the attributes listed in attributeSelector are
                                     returned for the selected NSs and VNF instances.
         """
-
         return self.mano_adapter.ns_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
@@ -597,9 +583,7 @@ class Mano(object):
         :param scale_time:      Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
                                 timestamp.
         :return:                Identifier of the NS lifecycle operation occurrence.
-
         """
-
         return self.mano_adapter.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data, scale_time)
 
     @log_entry_exit(LOG)
@@ -617,7 +601,6 @@ class Mano(object):
                                 timestamp.
         :return:                Operation status.
         """
-
         lifecycle_operation_occurrence_id = self.ns_scale(ns_instance_id, scale_type, scale_ns_data, scale_vnf_data,
                                                           scale_time)
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
@@ -632,7 +615,7 @@ class Mano(object):
         This function terminates an NS.
 
         This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10). The
-        additional_param inout is not part of the standard specification.
+        additional_param input is not part of the standard specification.
 
         :param ns_instance_id:      Identifier of the NS instance to terminate.
         :param terminate_time:      Timestamp indicating the end time of the NS, i.e. the NS will be terminated
@@ -640,9 +623,7 @@ class Mano(object):
         :param additional_param:    Additional parameters passed by the NFVO as input to the Terminate NS operation,
                                     specific to the NS being terminated.
         :return:                    Identifier of the NS lifecycle operation occurrence.
-
         """
-
         return self.mano_adapter.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
     @log_entry_exit(LOG)
@@ -657,7 +638,6 @@ class Mano(object):
                                     specific to the NS being terminated.
         :return:                    'SUCCESS' if both operations were successful, 'FAILED' otherwise.
         """
-
         operation_status = self.ns_terminate_sync(ns_instance_id, terminate_time, additional_param)
 
         self.ns_delete_id(ns_instance_id)
@@ -676,7 +656,6 @@ class Mano(object):
                                     specific to the NS being terminated.
         :return:                    Operation status.
         """
-
         lifecycle_operation_occurrence_id = self.ns_terminate(ns_instance_id, terminate_time, additional_param)
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
@@ -859,7 +838,6 @@ class Mano(object):
                                                     takes place immediately.
         :return:                                    Operation status.
         """
-
         lifecycle_operation_occurrence_id = self.ns_update(ns_instance_id, update_type, add_vnf_instance,
                                                            remove_vnf_instance_id, instantiate_vnf_data,
                                                            change_vnf_flavour_data, operate_vnf_data,
@@ -891,7 +869,6 @@ class Mano(object):
         :param vnf_instance_description:    Human-readable description of the VNF instance to be created.
         :return:                            VNF instance identifier just created.
         """
-
         return self.mano_adapter.vnf_create_id(vnfd_id, vnf_instance_name, vnf_instance_description)
 
     @log_entry_exit(LOG)
@@ -937,7 +914,6 @@ class Mano(object):
         :param vnf_instance_id: VNF instance identifier to be deleted.
         :return:                None.
         """
-
         return self.mano_adapter.vnf_delete_id(vnf_instance_id)
 
     @log_entry_exit(LOG)
@@ -961,7 +937,6 @@ class Mano(object):
                                             to the VNF being instantiated.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.mano_adapter.vnf_instantiate(vnf_instance_id, flavour_id, instantiation_level_id, ext_virtual_link,
                                                  ext_managed_virtual_link, localization_language, additional_param)
 
@@ -1014,7 +989,6 @@ class Mano(object):
                                         specific to the VNF being operated.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.mano_adapter.vnf_operate(vnf_instance_id, change_state_to, stop_type, graceful_stop_timeout,
                                              additional_param)
 
@@ -1063,7 +1037,6 @@ class Mano(object):
                                     attribute_selector is present, only the attributes listed in attribute_selector are
                                     returned for the selected VNF instance(s).
         """
-
         return self.mano_adapter.vnf_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
@@ -1083,7 +1056,6 @@ class Mano(object):
                                     to the VNF being scaled.
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.mano_adapter.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)
@@ -1104,7 +1076,6 @@ class Mano(object):
                                         VNF being scaled.
         :return:                        Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.mano_adapter.vnf_scale_to_level(vnf_instance_id, instantiation_level_id, scale_info,
                                                     additional_param)
 
@@ -1177,7 +1148,6 @@ class Mano(object):
                                                 operation, specific to the VNF being terminated.
         :return:                                Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.mano_adapter.vnf_terminate(vnf_instance_id, termination_type, graceful_termination_timeout,
                                                additional_param)
 
@@ -1550,7 +1520,6 @@ class Mano(object):
                                             process, specific to the VNF being modified as declared in the VNFD.
         :return:                            Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.mano_adapter.vnf_change_flavour(vnf_instance_id, new_flavour_id, instantiation_level_id,
                                                     ext_virtual_link, ext_managed_virtual_link, vim_connection_info,
                                                     additional_param)
@@ -1570,7 +1539,6 @@ class Mano(object):
         :return:                                True if the VNF instance uses the correct deployment flavor and
                                                 instantiation level ID, False otherwise.
         """
-
         return self.mano_adapter.validate_vnf_deployment_flavour(vnf_instance_id, expected_flavour_id,
                                                                  expected_instantiation_level_id, additional_param)
 
@@ -1584,7 +1552,6 @@ class Mano(object):
         :param user_defined_data:   User defined data for the NSD to be uploaded.
         :return:                    Identifier of the created NSD information object.
         """
-
         return self.mano_adapter.nsd_info_create(user_defined_data)
 
     @log_entry_exit(LOG)
@@ -1603,7 +1570,6 @@ class Mano(object):
                                     If absent, the complete NSD information objects are returned.
         :return:                    Details of the NSD information objects matching the input filter.
         """
-
         return self.mano_adapter.nsd_info_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
@@ -1617,7 +1583,6 @@ class Mano(object):
         :param nsd:         NSD to be uploaded.
         :return:            None.
         """
-
         return self.mano_adapter.nsd_upload(nsd_info_id, nsd)
 
     @log_entry_exit(LOG)
@@ -1630,7 +1595,6 @@ class Mano(object):
         :param nsd_info_id: Identifier of the NSD information object associated with the NSD to be fetched.
         :return:            The fetched NSD.
         """
-
         return self.mano_adapter.nsd_fetch(nsd_info_id)
 
     @log_entry_exit(LOG)
@@ -1643,7 +1607,6 @@ class Mano(object):
         :param nsd_info_id: Identifier of the NSD information objects to be deleted.
         :return:            Identifier of the deleted NSD information objects.
         """
-
         return self.mano_adapter.nsd_delete(nsd_info_id)
 
     @recursive_map
@@ -1656,7 +1619,6 @@ class Mano(object):
         :param data:        Data structure containing patterns that may need resolving.
         :return:            Data structure with resolved patterns.
         """
-
         pattern = '\$\{(.*?)\}'
 
         data = re.sub(pattern, lambda x: self.get_ns_ingress_cp_addr_list(ns_info, [x.group(1)]), data)
@@ -1677,5 +1639,4 @@ class Mano(object):
                                 cardinality can be "0" to indicate that no Alarm could be retrieved based on the input
                                 filter information.
         """
-
         return self.mano_adapter.ns_get_alarm_list(query_filter)

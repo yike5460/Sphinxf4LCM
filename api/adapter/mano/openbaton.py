@@ -63,7 +63,7 @@ class OpenbatonManoAdapter(object):
     @log_entry_exit(LOG)
     def get_token(self, username, password):
         http_headers = {
-            "Accept": "application/json",
+            'Accept': 'application/json',
         }
         body = {'username': username, 'password': password, 'grant_type': 'password'}
         try:
@@ -99,7 +99,7 @@ class OpenbatonManoAdapter(object):
 
         status_code = resp.status_code
         if status_code == 401:
-            raise OpenbatonManoAdapterUnauthorized("Access token %s is invalid" % self.token)
+            raise OpenbatonManoAdapterUnauthorized('Access token %s is invalid' % self.token)
 
         try:
             body = resp.json()

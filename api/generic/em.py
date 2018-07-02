@@ -34,6 +34,7 @@ class Em(object):
     Class of generic functions representing operations exposed by the EM towards the Test Interface as defined by
     ETSI GS NFV-TST 002 v1.1.1 (2016-10).
     """
+
     def __init__(self, vendor, generic_config, adapter_config):
         """
         Construct the EM object corresponding to the specified vendor.
@@ -55,7 +56,6 @@ class Em(object):
         :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.
         :return:                                    The status of the operation ex. 'Processing', 'Failed'.
         """
-
         return self.em_adapter.get_operation_status(lifecycle_operation_occurrence_id)
 
     @log_entry_exit(LOG)
@@ -105,7 +105,6 @@ class Em(object):
         :param vnfc_configuration_data: Configuration data related to VNFC instance(s).
         :return:                        None.
         """
-
         return self.em_adapter.modify_vnf_configuration(vnf_instance_id, vnf_configuration_data, ext_virtual_link,
                                                         vnfc_configuration_data)
 
@@ -130,7 +129,6 @@ class Em(object):
                                     to the VNF being scaled.
         :return:                    Identifier of the VNF lifecycle operation occurrence.
         """
-
         return self.em_adapter.vnf_scale(vnf_instance_id, scale_type, aspect_id, number_of_steps, additional_param)
 
     @log_entry_exit(LOG)

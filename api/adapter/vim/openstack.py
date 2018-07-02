@@ -12,6 +12,7 @@
 
 import logging
 from novaclient.exceptions import NotFound
+from keystoneauth1.exceptions import DiscoveryFailure
 
 import os_client_config
 
@@ -39,9 +40,22 @@ class OpenstackVimAdapter(object):
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None, verify=False, **kwargs):
-        """
-        Create the Heat, Neutron and Nova clients.
-        """
+        try:
+            self.build_clients(auth_url=auth_url,
+                               username=username,
+                               password=password,
+                               identity_api_version=identity_api_version,
+                               project_name=project_name,
+                               project_domain_name=project_domain_name,
+                               user_domain_name=user_domain_name,
+                               verify=verify)
+        except Exception as e:
+            LOG.exception(e)
+            raise OpenstackVimAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
+
+    @log_entry_exit(LOG)
+    def build_clients(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
+                      project_domain_name=None, user_domain_name=None, verify=False):
         try:
             self.heat_client = os_client_config.make_client('orchestration',
                                                             auth_url=auth_url,
@@ -92,10 +106,19 @@ class OpenstackVimAdapter(object):
                                                               project_domain_name=project_domain_name,
                                                               user_domain_name=user_domain_name,
                                                               verify=verify)
+        except DiscoveryFailure as e:
+            if user_domain_name is None and project_domain_name is None:
+                LOG.debug('Domain params are not present, so not attempting to retry building adapter without them')
+                raise e
 
-        except Exception as e:
-            LOG.exception(e)
-            raise OpenstackVimAdapterError('Unable to create %s instance - %s' % (self.__class__.__name__, e))
+            LOG.debug('Unable to build adapter, because auth_url may be v2.0 and domain params are present. '
+                      'Retrying without domain params')
+            self.build_clients(auth_url=auth_url,
+                               username=username,
+                               password=password,
+                               identity_api_version=identity_api_version,
+                               project_name=project_name,
+                               verify=verify)
 
     @log_entry_exit(LOG)
     def get_operation_status(self, operation_id):

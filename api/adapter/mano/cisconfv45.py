@@ -1690,7 +1690,6 @@ class CiscoNFVManoAdapter(object):
                        nested_ns_instance_data=None, location_constraints=None, additional_param_for_ns=None,
                        additional_param_for_vnf=None, start_time=None, ns_instantiation_level_id=None,
                        additional_affinity_or_anti_affinity_rule=None):
-
         nsr_xml = self.build_nsr(ns_instance_id, flavour_id, sap_data, nested_ns_instance_data,
                                  ns_instantiation_level_id, additional_param_for_ns, additional_param_for_vnf)
         try:

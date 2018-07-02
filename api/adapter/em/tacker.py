@@ -41,9 +41,6 @@ class TackerEmAdapter(object):
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        """
-        Create the Tacker Client.
-        """
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,
@@ -86,9 +83,9 @@ class TackerEmAdapter(object):
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None,
                                  vnfc_configuration_data=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
-        # "vnf": {
-        #     "attributes": {
-        #         "config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"
+        # 'vnf': {
+        #     'attributes': {
+        #         'config': 'vdus:\n  vdu1: <sample_vdu_config> \n\n'
         #     }
         # }
         if vnf_configuration_data is not None:

@@ -472,7 +472,7 @@ def delete_config(name):
     return {}
 
 
-@route('/v1.0/validate/<resource:re:vim|mano>', method="PUT")
+@route('/v1.0/validate/<resource:re:vim|mano>', method='PUT')
 def validate(resource):
     """
     Validate parameters for connecting to resource.
@@ -484,7 +484,7 @@ def validate(resource):
             response.status = 504
             return {'warning': '%s' % e}
         response.status = 200
-        return {'message': "Object validated."}
+        return {'message': 'Object validated.'}
 
 
 @route('/v1.0/wait/<execution_id>')

@@ -29,7 +29,6 @@ def index():
     """
     This function displays the available environments.
     """
-
     get_env_raw = requests.get(url='http://localhost:8080/v1.0/env')
     active_env_name_raw = requests.get(url='http://localhost:8080/v1.0/config/active-env')
     active_env_name = active_env_name_raw.json()
@@ -69,7 +68,6 @@ def env_add(warning=None, message=None):
     """
     This function displays the required form to add a new Environment.
     """
-
     mano_list_raw = requests.get(url='http://localhost:8080/v1.0/mano')
     vim_list_raw = requests.get(url='http://localhost:8080/v1.0/vim')
     em_list_raw = requests.get(url='http://localhost:8080/v1.0/em')
@@ -99,13 +97,12 @@ def env_add(warning=None, message=None):
     return template('env_add.html', env_list=env_list, warning=warning, message=message)
 
 
-@route('/env/delete/', method="POST")
+@route('/env/delete/', method='POST')
 def env_delete():
     """
     This function displays the required form to delete an existing Environment.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         env_name = request.forms.get('delete_env')
         env_data_raw = requests.get(url='http://localhost:8080/v1.0/env/%s' % env_name)
         env_data_filtered = env_data_raw.json()[env_name]
@@ -116,13 +113,12 @@ def env_delete():
         return index()
 
 
-@route('/env/update/', method="POST")
+@route('/env/update/', method='POST')
 def env_update():
     """
     This function displays the required form to update an existing Environment.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         env_name = request.forms.get('update_env')
         env_data_raw = requests.get(url='http://localhost:8080/v1.0/env/%s' % env_name)
         env_data_filtered = env_data_raw.json()[env_name]
@@ -156,15 +152,14 @@ def env_update():
         return index()
 
 
-@route('/env/data/', method="POST")
+@route('/env/data/', method='POST')
 def env_data():
     """
     This function is used by the env_add function to send the new data to the REST server with 'PUT' command.
     """
-
     env_name = request.forms.get('env_name')
     if not env_name:
-        return env_add(warning="Missing mandatory field: name", message=None)
+        return env_add(warning='Missing mandatory field: name', message=None)
     new_env = {}
     for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
         if request.forms.get(element) != '':
@@ -206,7 +201,6 @@ def mano_add(mano_type, warning=None, message=None, mano_obj=None, name=None, ad
     :param name:                Name of MANO element.
     :param additional_params:   Additional parameters.
     """
-
     if additional_params is None:
         additional_params = {}
         additional_params['vim_list'] = prepare_option_list(option_type="vim")
@@ -220,7 +214,6 @@ def mano_validate():
     This function is used by the mano_add and mano_update functions to send the new data to the REST server with 'PUT'
     command and to validate the MANO configuration.
     """
-
     mano_type = request.forms.get('type')
     if mano_type == 'tacker':
         name = request.forms.get('name')
@@ -401,7 +394,6 @@ def mano_update(warning=None, message=None, mano_obj=None, name=None, additional
     :param name:                Name of MANO element.
     :param additional_params:   Additional parameters.
     """
-
     if mano_obj is None:
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
@@ -412,7 +404,7 @@ def mano_update(warning=None, message=None, mano_obj=None, name=None, additional
                 selected_vim = mano_json['client_config']['vim_info'].keys()[0]
             else:
                 selected_vim = None
-            additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=selected_vim)
+            additional_params['vim_list'] = prepare_option_list(option_type='vim', selected=selected_vim)
         return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name,
                         additional_params=additional_params)
     else:
@@ -425,8 +417,7 @@ def mano_delete():
     """
     This function displays the required form to delete an existing MANO platform.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         mano_name = request.forms.get('delete_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % mano_name)
         mano_json = mano_data.json()
@@ -507,7 +498,6 @@ def vim_update(warning=None, message=None, vim_obj=None, name=None):
     """
     This function displays the required form to update an existing VIM platform.
     """
-
     if vim_obj is None:
         name = request.forms.get('update_vim')
         vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % name)
@@ -522,8 +512,7 @@ def vim_delete():
     """
     This function displays the required form to delete an existing VIM platform.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         vim_name = request.forms.get('delete_vim')
         vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name)
         vim_json = vim_data.json()
@@ -555,7 +544,6 @@ def vim_add(vim_type, warning=None, message=None, vim_obj=None, name=None):
     :param vim_obj:     VIM structure containing data to reach the VIM element.
     :param name:        Name of VIM element.
     """
-
     return template('vim_add.html', vim_type=vim_type, warning=warning, message=message, vim=vim_obj, name=name)
 
 
@@ -565,7 +553,6 @@ def vim_validate():
     This function is used by the vim_add and vim_update functions to send the new data to the REST server with 'PUT'
     command and to validate the VIM configuration.
     """
-
     vim_type = request.forms.get('type')
     if vim_type == 'openstack':
         name = request.forms.get('name')
@@ -608,7 +595,6 @@ def em():
     """
     This function displays the available Element Manager platforms configured.
     """
-
     get_ems = requests.get(url='http://localhost:8080/v1.0/em')
     em_list = []
     i = 1
@@ -626,7 +612,6 @@ def em_add(em_type, warning=None, message=None, em_obj=None, name=None):
     """
     This function displays the required form to add a new Element Manager platform.
     """
-
     return template('em_add.html', em_type=em_type, warning=warning, message=message, em=em_obj, name=name)
 
 
@@ -636,7 +621,6 @@ def em_validate():
     This function is used by the vim_add and em_update functions to send the new data to the REST server with 'PUT'
     command and to validate the EM configuration.
     """
-
     em_type = request.forms.get('type')
     if em_type == 'tacker':
         name = request.forms.get('name')
@@ -669,7 +653,6 @@ def em_update(warning=None, message=None, em_obj=None, name=None):
     """
     This function displays the required form to update an existing Element Manager platform.
     """
-
     if em_obj is None:
         name = request.forms.get('update_em')
         em_data = requests.get(url='http://localhost:8080/v1.0/em/%s' % name)
@@ -684,8 +667,7 @@ def em_delete():
     """
     This function displays the required form to delete an existing Element Manager platform.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         em_name = request.forms.get('delete_em')
         em_data = requests.get(url='http://localhost:8080/v1.0/em/%s' % em_name)
         em_json = em_data.json()
@@ -711,7 +693,6 @@ def traffic():
     """
     This function displays the available Traffic generation platforms configured.
     """
-
     get_traffics = requests.get(url='http://localhost:8080/v1.0/traffic')
     traffic_list = []
     i = 1
@@ -729,7 +710,6 @@ def traffic():
 def traffic_add(traffic_type, warning=None, message=None, traffic_obj=None, name=None):
     """
     This function displays the required form to add a new Traffic generation element.
-
     """
     return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic_obj,
                     name=name)
@@ -741,7 +721,6 @@ def traffic_validate():
     This function is used by the traffic_add and traffic_update functions to send the new data to the REST server with
     'PUT' command and to validate the MANO configuration.
     """
-
     traffic_type = request.forms.get('type')
 
     # The first case is when the VNF has traffic_type VNF_TRANSIENT
@@ -824,7 +803,6 @@ def traffic_update(warning=None, message=None, traffic_obj=None, name=None):
     """
     This function displays the required form to update an existing Traffic generation element.
     """
-
     if traffic_obj is None:
         name = request.forms.get('update_traffic')
         traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % name)
@@ -841,8 +819,7 @@ def traffic_delete():
     """
     This function displays the required form to delete an existing Traffic generation element.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         traffic_name = request.forms.get('delete_traffic')
         traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % traffic_name)
         traffic_json = traffic_data.json()
@@ -882,7 +859,6 @@ def vnf(warning=None):
     """
     This function displays the available Virtual Network Functions configured.
     """
-
     get_vnfs = requests.get(url='http://localhost:8080/v1.0/vnf')
     vnf_list = []
     for vnf_name in sorted(get_vnfs.json().iterkeys()):
@@ -899,7 +875,6 @@ def vnf_add(warning=None, message=None, vnf_obj=None, instance_name=None):
     """
     This function displays the required form to add a new Virtual Network Function element.
     """
-
     return template('vnf_add.html', warning=warning, message=message, vnf=vnf_obj, instance_name=None)
 
 
@@ -908,7 +883,6 @@ def vnf_data():
     """
     This function is used by the vnf_add function to send the new data to the REST server with 'PUT' command.
     """
-
     vim_type = request.forms.get('type')
     instance_name = request.forms.get('instance_name')
     mgmt_ip_addr = request.forms.get('mgmt_ip_addr')
@@ -942,8 +916,7 @@ def vnf_update():
     """
     This function displays the required form to update an existing VNF element.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         vnf_name = request.forms.get('update_vnf')
         vnf_data_raw = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
         vnf_json = vnf_data_raw.json()
@@ -978,8 +951,7 @@ def vnf_delete():
     """
     This function displays the required form to delete an existing Virtual Network Function element.
     """
-
-    if request.forms.get('confirmed') == "no":
+    if request.forms.get('confirmed') == 'no':
         vnf_name = request.forms.get('delete_vnf')
         vnf_data_raw = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
         vnf_json = vnf_data_raw.json()
@@ -1043,12 +1015,11 @@ def additional():
     return template('additional_params.html', additional_params=additional_params)
 
 
-@route('/additional/update/', method="POST")
+@route('/additional/update/', method='POST')
 def additional_update():
     """
     This function displays a form to update the additional parameters that a customer has setup.
     """
-
     confirmed = request.forms.get('confirmed')
     if confirmed == 'yes':
         scaling_policy_name = request.forms.get('scaling_policy_name')
@@ -1158,7 +1129,7 @@ def all_css(filename):
     :param filename: Name of the css file
     """
     return static_file(filename,
-                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/css/")))
+                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), 'bootstrap-3.3.7-dist/css/')))
 
 
 @route('/static/<filename:re:.*\.png|.*\.jpeg>')
@@ -1167,9 +1138,8 @@ def all_img(filename):
     This function is for bottle to find the path to the image files.
     :param filename: Name of the image file
     """
-
     return static_file(filename,
-                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/img/")))
+                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), 'bootstrap-3.3.7-dist/img/')))
 
 
 @route('/static/<filename:re:.*\.js>')
@@ -1178,9 +1148,8 @@ def all_js(filename):
     This function is for bottle to find the path to the javascript files.
     :param filename: Name of the javascript file
     """
-
     return static_file(filename,
-                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/js/")))
+                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), 'bootstrap-3.3.7-dist/js/')))
 
 
 @route('/fonts/<font>')
@@ -1189,9 +1158,8 @@ def all_img(font):
     This function is for bottle to find the path to the font files.
     :param font: Name of the font file
     """
-
     return static_file(font,
-                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), "bootstrap-3.3.7-dist/fonts/")))
+                       root=os.path.abspath(os.path.join(os.path.dirname(__file__), 'bootstrap-3.3.7-dist/fonts/')))
 
 
 def set_default_additional():
@@ -1320,7 +1288,6 @@ def struct_vim(vim_type, name, user_domain_name, username, password, project_dom
     :param identity_api_version:    Keystone version.
     :return:                        The function returns a tuple containing MANO name and associated structure
     """
-
     vim_dict = {
         'type': vim_type,
         'client_config': {

@@ -48,9 +48,6 @@ class TackerManoAdapter(object):
 
     def __init__(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                  project_domain_name=None, user_domain_name=None):
-        """
-        Create the Tacker client.
-        """
         try:
             self.keystone_client = os_client_config.make_client('identity',
                                                                 auth_url=auth_url,
@@ -422,9 +419,9 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def modify_vnf_configuration(self, vnf_instance_id, vnf_configuration_data=None, ext_virtual_link=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
-        # "vnf": {
-        #     "attributes": {
-        #         "config": "vdus:\n  vdu1: <sample_vdu_config> \n\n"
+        # 'vnf': {
+        #     'attributes': {
+        #         'config': 'vdus:\n  vdu1: <sample_vdu_config> \n\n'
         #     }
         # }
         if vnf_configuration_data is not None:
@@ -663,9 +660,9 @@ class TackerManoAdapter(object):
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         # Build a dict with the following structure (this is specified by the Tacker API):
-        # "scale": {
-        #   "type": "<type>",
-        #   "policy" : "<scaling-policy-name>"}
+        # 'scale': {
+        #   'type': '<type>',
+        #   'policy' : '<scaling-policy-name>'}
         try:
             body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
             self.tacker_client.scale_vnf(vnf_instance_id, body)
@@ -784,7 +781,6 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def wait_for_vnf_stable_state(self, vnf_instance_id, max_wait_time, poll_interval):
-
         if vnf_instance_id is None:
             raise TackerManoAdapterError('VNF instance ID is absent')
 
@@ -858,7 +854,6 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def wait_for_ns_stable_state(self, ns_instance_id, max_wait_time, poll_interval):
-
         if ns_instance_id is None:
             raise TackerManoAdapterError('NS instance ID is absent')
 
