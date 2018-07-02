@@ -100,9 +100,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 2. Verify that the NFVO indicates NS instantiation operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates NS instantiation operation result as successful')
-        self.ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                      'additional_param': self.tc_input['mano'].get(
-                                                                          'query_params')})
+        self.ns_info_after_instantiation = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                            'additional_param': self.tc_input[
+                                                                                'mano'].get('query_params')})
         if self.ns_info_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS state',
                                err_details='NS state was not "%s" after the NS was instantiated'
@@ -161,9 +161,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 4. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
-        self.ns_info_before_scale_from_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                          'additional_param': self.tc_input['mano'].get(
-                                                                              'query_params')})
+        self.ns_info_before_scale_from_level = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                                'additional_param': self.tc_input[
+                                                                                    'mano'].get('query_params')})
         if not self.mano.validate_ns_instantiation_level(self.ns_info_before_scale_from_level,
                                                          self.tc_input['scale_to_level_list'],
                                                          self.tc_input['mano'].get('scale_params')):
@@ -232,9 +232,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 6. Verify that the number of VNFC instance(s) has changed for the VNF by querying the VNFM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the number of VNFC instance(s) has changed for the VNF by querying the VNFM')
-        self.ns_info_after_scale_from_level = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                         'additional_param': self.tc_input['mano'].get(
-                                                                             'query_params')})
+        self.ns_info_after_scale_from_level = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                               'additional_param': self.tc_input[
+                                                                                   'mano'].get('query_params')})
         if not self.mano.validate_ns_instantiation_level(self.ns_info_after_scale_from_level,
                                                          self.tc_input['scale_from_level_list'],
                                                          self.tc_input['mano'].get('scale_params')):
@@ -382,9 +382,9 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         # 14. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
-        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                               'additional_param': self.tc_input['mano'].get(
-                                                                   'query_params')})
+        ns_info_after_termination = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                     'additional_param': self.tc_input['mano'].get(
+                                                                         'query_params')})
         if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'
@@ -393,8 +393,8 @@ class TD_NFV_NSLCM_SCALE_FROM_LEVEL_VNF_001(TestCase):
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_after_scale_from_level.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))

@@ -74,7 +74,7 @@ class DummyManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_allocated_vresources(self, vnf_instance_id, additional_param=None):
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id})
 
         vresources = {}
 
@@ -109,8 +109,8 @@ class DummyManoAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo
         ns_info.ns_instance_id = ns_instance_id
         ns_info.ns_name = 'ns_name'
@@ -132,8 +132,8 @@ class DummyManoAdapter(object):
         return 'vnf', ns_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 

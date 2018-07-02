@@ -190,8 +190,8 @@ class SdlManoAdapter(object):
                 return constants.OPERATION_SUCCESS
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = str(ns_instance_id)
 
@@ -211,14 +211,14 @@ class SdlManoAdapter(object):
         for service_desc in ns_instance_dict['service_desc_list']:
             vnf_instance_id = service_desc['instance_id']
             if vnf_instance_id != '':
-                vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+                vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id})
                 ns_info.vnf_info.append(vnf_info)
 
         return ns_info
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 
@@ -382,7 +382,7 @@ class SdlManoAdapter(object):
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             image_id = virtual_compute.vc_image_id
             image_details = vim.query_image(image_id)
             image_name_vim = image_details.name
@@ -435,7 +435,7 @@ class SdlManoAdapter(object):
             vim = self.get_vim_helper(vnfc_resource_info.compute_resource.vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             actual_cpu_count = virtual_compute.virtual_cpu.num_virtual_cpu
             actual_memory_size = virtual_compute.virtual_memory.virtual_mem_size
             actual_disk_size = virtual_compute.virtual_disks[0].size_of_storage
@@ -469,7 +469,7 @@ class SdlManoAdapter(object):
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         validation_result = True
 
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
 

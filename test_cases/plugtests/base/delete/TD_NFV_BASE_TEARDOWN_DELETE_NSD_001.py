@@ -64,7 +64,7 @@ class TD_NFV_BASE_TEARDOWN_DELETE_NSD_001(TestCase):
         # 3. Verify that the NSD and referenced VLD(s) and VNFFGD(s) no longer exist on MANO
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NSD and referenced VLD(s) and VNFFGD(s) no longer exist on MANO')
-        if self.mano.nsd_info_query(filter={'nsd_info_id': self.nsd_info_id}) is not None:
+        if self.mano.nsd_info_query(query_filter={'nsd_info_id': self.nsd_info_id}) is not None:
             raise TestRunError('The NsdInfo object still exists')
 
         # TODO: Verify that VLD(s) and VNFFGD(s) no longer exist

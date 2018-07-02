@@ -84,8 +84,8 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VIM_KPI(TestCase):
         # 2. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                               'additional_param': self.tc_input['mano'].get('query_params')})
+        vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                     'additional_param': self.tc_input['mano'].get('query_params')})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -169,8 +169,8 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VIM_KPI(TestCase):
         self.time_record.START('scale_out_vnf')
         elapsed_time = 0
         while elapsed_time < constants.VNF_SCALE_TIMEOUT:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances'] + sp['increment']:
                 break
             else:
@@ -259,8 +259,8 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VIM_KPI(TestCase):
         self.time_record.START('scale_in_vnf')
         elapsed_time = 0
         while elapsed_time < constants.VNF_SCALE_TIMEOUT:
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) == sp['default_instances']:
                 break
             else:
@@ -343,8 +343,9 @@ class TC_VNFC_SCALE_OUT_003__MANO_ONDEMAND__VIM_KPI(TestCase):
         # 14. Validate that the VNF is terminated and all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that the VNF is terminated')
-        vnf_info_final = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                                     'additional_param': self.tc_input['mano'].get('query_params')})
+        vnf_info_final = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                           'additional_param': self.tc_input['mano'].get(
+                                                               'query_params')})
         if vnf_info_final.instantiation_state != constants.VNF_NOT_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was terminated'

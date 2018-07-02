@@ -80,7 +80,7 @@ class DummyVnfmAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
+    def vnf_query(self, query_filter, attribute_selector=None):
         vnf_info = VnfInfo()
         vnf_info.instantiation_state = 'INSTANTIATED'
         vnf_info.instantiated_vnf_info = InstantiatedVnfInfo()

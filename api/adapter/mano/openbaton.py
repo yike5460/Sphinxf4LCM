@@ -182,8 +182,8 @@ class OpenbatonManoAdapter(object):
                 return constants.OPERATION_PENDING
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = ns_instance_id
         try:
@@ -210,8 +210,8 @@ class OpenbatonManoAdapter(object):
         return ns_info
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = vnf_instance_id
         ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id, '')
@@ -314,7 +314,7 @@ class OpenbatonManoAdapter(object):
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             image_id = virtual_compute.vc_image_id
             image_details = vim.query_image(image_id)
             image_name_vim = image_details.name
@@ -364,7 +364,7 @@ class OpenbatonManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
         expected_vnf_vnfd_mapping = {}
@@ -483,8 +483,8 @@ class OpenbatonManoAdapter(object):
         return nsd_info_id
 
     @log_entry_exit(LOG)
-    def nsd_info_query(self, filter, attribute_selector=None):
-        nsd_info_id = filter['nsd_info_id']
+    def nsd_info_query(self, query_filter, attribute_selector=None):
+        nsd_info_id = query_filter['nsd_info_id']
         return self.nsd_info_ids.get(nsd_info_id)
 
     @log_entry_exit(LOG)

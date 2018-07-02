@@ -293,9 +293,9 @@ class CiscoNFVManoAdapter(object):
         raise CiscoNFVManoAdapterError('Cannot get operation status for operation type %s' % operation_type)
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
-        tenant_name = filter['additional_param']['tenant']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
+        tenant_name = query_filter['additional_param']['tenant']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 
