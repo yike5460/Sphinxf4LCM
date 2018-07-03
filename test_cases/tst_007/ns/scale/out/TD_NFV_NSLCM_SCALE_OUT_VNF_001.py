@@ -131,7 +131,9 @@ class TD_NFV_NSLCM_SCALE_OUT_VNF_001(TestCase):
             scale_vnf_data.scale_by_step_data = ScaleByStepData()
             scale_vnf_data.scale_by_step_data.aspect_id = sp['targets'][0]
             scale_vnf_data.scale_by_step_data.number_of_steps = sp['increment']
-            scale_vnf_data.scale_by_step_data.additional_param = {'scaling_policy_name': sp_name}
+            scale_vnf_data.scale_by_step_data.additional_param = {
+                'scaling_policy_name': sp_name
+            }
 
             scale_vnf_data_list.append(scale_vnf_data)
 

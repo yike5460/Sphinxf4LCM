@@ -80,11 +80,12 @@ class DummyManoAdapter(object):
 
         for vnfc_resource_info in vnf_info.instantiated_vnf_info.vnfc_resource_info:
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            vresources[resource_id] = {}
-            vresources[resource_id]['vCPU'] = '1'
-            vresources[resource_id]['vMemory'] = '64 MB'
-            vresources[resource_id]['vStorage'] = '1 GB'
-            vresources[resource_id]['vNIC'] = '3'
+            vresources[resource_id] = {
+                'vCPU': '1',
+                'vMemory': '64 MB',
+                'vStorage': '1 GB',
+                'vNIC': '3'
+            }
 
         return vresources
 

@@ -199,10 +199,11 @@ def do_exec():
         tc_input = {}
         for resource_type, resource_name in _read_resource('env', active_env).items():
             resource_params = _read_resource(resource_type, resource_name)
-            tc_input[resource_type] = {}
-            tc_input[resource_type]['type'] = resource_params['type']
-            tc_input[resource_type]['name'] = resource_name
-            tc_input[resource_type]['adapter_config'] = resource_params['client_config']
+            tc_input[resource_type] = {
+                'type': resource_params['type'],
+                'name': resource_name,
+                'adapter_config': resource_params['client_config']
+            }
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
             if resource_type == 'mano':
@@ -251,8 +252,9 @@ def do_exec():
 
         # TODO: remove
         if 'vnf' not in tc_input.keys():
-            tc_input['vnf'] = {}
-            tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
+            tc_input['vnf'] = {
+                'instance_name': tc_exec_request['tc_name']
+            }
     execution_id = str(uuid.uuid4())
     result_queue = Queue()
     message_queue = Queue()
@@ -295,12 +297,16 @@ def get_status(execution_id):
         return {'status': 'NOT_FOUND'}
 
     if execution_process is not None:
-        return {'status': 'PENDING',
-                'tc_input': tc_inputs[execution_id]}
+        return {
+            'status': 'PENDING',
+            'tc_input': tc_inputs[execution_id]
+        }
     else:
-        return {'status': 'DONE',
-                'tc_result': tc_results[execution_id],
-                'tc_input': tc_inputs[execution_id]}
+        return {
+            'status': 'DONE',
+            'tc_result': tc_results[execution_id],
+            'tc_input': tc_inputs[execution_id]
+        }
 
 
 @route('/v1.0/exec/<execution_id>', method='DELETE')
@@ -322,8 +328,9 @@ def all_status():
     """
     status_list = []
     for execution_id, execution_process in execution_processes.items():
-        execution_status = {}
-        execution_status['execution_id'] = execution_id
+        execution_status = {
+            'execution_id': execution_id
+        }
         if execution_process is not None:
             execution_status['status'] = 'PENDING'
         else:

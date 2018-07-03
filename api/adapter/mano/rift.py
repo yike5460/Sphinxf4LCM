@@ -269,15 +269,9 @@ class RiftManoAdapter(object):
                 # Example:
                 # {
                 #   '1': {
-                #     'link1': [
-                #       'mgmt'
-                #     ],
-                #     'link3': [
-                #       'east'
-                #     ],
-                #     'link2': [
-                #       'west'
-                #     ]
+                #     'link1': ['mgmt'],
+                #     'link3': ['east'],
+                #     'link2': ['west']
                 #   }
                 # }
                 for cp in vld['vnfd-connection-point-ref']:
@@ -589,9 +583,7 @@ class RiftManoAdapter(object):
         expected_vdu_flavor = {}
         expected_vdu_resources = {}
         for vdu in vnfd['vdu']:
-            expected_vdu_flavor[vdu['id']] = {
-                'vm-flavor-name': vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
-            }
+            expected_vdu_flavor[vdu['id']] = vdu['vm-flavor'].get('rw-project-vnfd:vm-flavor-name')
             expected_vdu_resources[vdu['id']] = {
                 'vcpu-count': vdu['vm-flavor'].get('vcpu-count'),
                 'memory-mb': vdu['vm-flavor'].get('memory-mb'),
@@ -607,7 +599,7 @@ class RiftManoAdapter(object):
             resource_id = vnfc_resource_info.compute_resource.resource_id
 
             # Get the flavor name from the VNFD
-            flavor_name_vnfd = expected_vdu_flavor[vdu_id]['vm-flavor-name']
+            flavor_name_vnfd = expected_vdu_flavor[vdu_id]
             if flavor_name_vnfd is not None:
 
                 # Get the flavor name from the VIM
@@ -825,8 +817,10 @@ class RiftManoAdapter(object):
 
         scaling_group_record_list = nsr['scaling-group-record']
         scaling_group_descriptor_list = nsd['scaling-group-descriptor']
-        scaling_group_descriptor_dict = {scaling_group_descriptor['name']: scaling_group_descriptor for
-                                         scaling_group_descriptor in scaling_group_descriptor_list}
+        scaling_group_descriptor_dict = {
+            scaling_group_descriptor['name']: scaling_group_descriptor for scaling_group_descriptor in
+                scaling_group_descriptor_list
+        }
         for scaling_group_record in scaling_group_record_list:
             scaling_group_name = str(scaling_group_record['scaling-group-name-ref'])
             number_of_instances = len(scaling_group_record.get('instance', []))
@@ -894,7 +888,9 @@ class RiftManoAdapter(object):
             raise RiftManoAdapterError('Unable to parse vendor NSD')
 
         resource = '/api/config/project/%s/nsd-catalog' % self.project
-        request_body = {'nsd': [vendor_nsd]}
+        request_body = {
+            'nsd': [vendor_nsd]
+        }
         try:
             response = self.session.post(url=self.url + resource, json=request_body)
             assert response.status_code == 201

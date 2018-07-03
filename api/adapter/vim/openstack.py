@@ -318,13 +318,14 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get details for server %s - %s' % (server_id, e))
 
-        server_details = {}
-        server_details['flavor_id'] = str(server.flavor['id'])
-        server_details['hostId'] = str(server.hostId)
-        server_details['image_id'] = str(server.image['id'])
-        server_details['name'] = str(server.name)
-        server_details['status'] = str(server.status)
-        server_details['user_id'] = str(server.user_id)
+        server_details = {
+            'flavor_id': str(server.flavor['id']),
+            'hostId': str(server.hostId),
+            'image_id': str(server.image['id']),
+            'name': str(server.name),
+            'status': str(server.status),
+            'user_id': str(server.user_id)
+        }
 
         return server_details
 
@@ -442,7 +443,11 @@ class OpenstackVimAdapter(object):
             raise OpenstackVimAdapterError('Unable to get compute resource quota - %s' % e)
         virtual_compute_quota = VirtualComputeQuota()
         virtual_compute_quota.resource_group_id = str(quotas._info['id'])
-        resources = {'num_vcpus': quotas.cores, 'num_vc_instances': quotas.instances, 'virtual_mem_size': quotas.ram}
+        resources = {
+            'num_vcpus': quotas.cores,
+            'num_vc_instances': quotas.instances,
+            'virtual_mem_size': quotas.ram
+        }
         for item, value in resources.items():
             if value != -1:
                 setattr(virtual_compute_quota, item, value)
@@ -462,8 +467,11 @@ class OpenstackVimAdapter(object):
             raise OpenstackVimAdapterError('Unable to get network resource quota - %s' % e)
         virtual_network_quota = VirtualNetworkQuota()
         virtual_network_quota.resource_group_id = str(project_id)
-        resources = {'num_public_ips': quotas['quota']['floatingip'], 'num_ports': quotas['quota']['port'],
-                     'num_subnets': quotas['quota']['subnet']}
+        resources = {
+            'num_public_ips': quotas['quota']['floatingip'],
+            'num_ports': quotas['quota']['port'],
+            'num_subnets': quotas['quota']['subnet']
+        }
         for item, value in resources.items():
             if value != -1:
                 setattr(virtual_network_quota, item, value)
@@ -483,8 +491,11 @@ class OpenstackVimAdapter(object):
             raise OpenstackVimAdapterError('Unable to get storage resource quota - %s' % e)
         virtual_storage_quota = VirtualStorageQuota()
         virtual_storage_quota.resource_group_id = str(project_id)
-        resources = {'storage_size': quotas.gigabytes, 'num_snapshots': quotas.snapshots,
-                     'num_volumes': quotas.volumes}
+        resources = {
+            'storage_size': quotas.gigabytes,
+            'num_snapshots': quotas.snapshots,
+            'num_volumes': quotas.volumes
+        }
         for item, value in resources.items():
             if value != -1:
                 setattr(virtual_storage_quota, item, value)
@@ -504,11 +515,12 @@ class OpenstackVimAdapter(object):
             LOG.exception(e)
             raise OpenstackVimAdapterError('Unable to get details for flavor %s - %s' % (flavor_id, e))
 
-        flavor_details = {}
-        flavor_details['name'] = flavor.name
-        flavor_details['vcpus'] = flavor.vcpus
-        flavor_details['ram'] = flavor.ram
-        flavor_details['disk'] = flavor.disk
+        flavor_details = {
+            'name': flavor.name,
+            'vcpus': flavor.vcpus,
+            'ram': flavor.ram,
+            'disk': flavor.disk
+        }
 
         return flavor_details
 

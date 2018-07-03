@@ -120,19 +120,20 @@ class TestCase(object):
     def __init__(self, tc_input):
         self.tc_input = tc_input
         self.tc_name = type(self).__name__
-        self.tc_result = {}
-        self.tc_result['overall_status'] = constants.TEST_PASSED
-        self.tc_result['error_info'] = 'No errors'
-        self.tc_result['events'] = collections.OrderedDict()
-        self.tc_result['resources'] = collections.OrderedDict()
-        self.tc_result['scaling_out'] = {}
-        self.tc_result['scaling_in'] = {}
-        self.tc_result['scaling_up'] = {}
-        self.tc_result['scaling_down'] = {}
-        self.tc_result['scaling_to_level'] = {}
-        self.tc_result['scaling_from_level'] = {}
-        self.tc_result['timestamps'] = collections.OrderedDict()
-        self.tc_result['steps'] = collections.OrderedDict()
+        self.tc_result = {
+            'overall_status': constants.TEST_PASSED,
+            'error_info': 'No errors',
+            'events': collections.OrderedDict(),
+            'resources': collections.OrderedDict(),
+            'scaling_out': {},
+            'scaling_in': {},
+            'scaling_up': {},
+            'scaling_down': {},
+            'scaling_to_level': {},
+            'scaling_from_level': {},
+            'timestamps': collections.OrderedDict(),
+            'steps': collections.OrderedDict()
+        }
         self.time_record = timestamps.TimeRecord()
         self.traffic = None
         self.em = None
@@ -177,8 +178,9 @@ class TestCase(object):
 
     def initialize_events(self):
         for event in self.TESTCASE_EVENTS:
-            self.tc_result['events'][event] = {}
-            self.tc_result['events'][event]['details'] = 'N/A'
+            self.tc_result['events'][event] = {
+                'details': 'N/A'
+            }
 
     def initialize_steps(self):
         for step in self.steps:

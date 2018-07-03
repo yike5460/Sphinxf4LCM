@@ -16,11 +16,16 @@ import importlib
 
 from api import ApiError
 
-mapping_type = {'adapter': 'adapters.json',
-                'generic': 'generics.json',
-                'tc': 'tc_map.json'
-                }
-_constructor_mapping = {'adapter': None, 'generic': None, 'tc': None}
+mapping_type = {
+    'adapter': 'adapters.json',
+    'generic': 'generics.json',
+    'tc': 'tc_map.json'
+}
+_constructor_mapping = {
+    'adapter': None,
+    'generic': None,
+    'tc': None
+}
 
 
 class ConstructorError(ApiError):

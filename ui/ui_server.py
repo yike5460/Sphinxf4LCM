@@ -73,7 +73,6 @@ def env_add(warning=None, message=None):
     em_list_raw = requests.get(url='http://localhost:8080/v1.0/em')
     traffic_list_raw = requests.get(url='http://localhost:8080/v1.0/traffic')
     vnf_list_raw = requests.get(url='http://localhost:8080/v1.0/vnf')
-    env_list = {}
     mano_list = mano_list_raw.json().keys()
     vim_list = vim_list_raw.json().keys()
     em_list = em_list_raw.json().keys()
@@ -89,11 +88,13 @@ def env_add(warning=None, message=None):
     em_list.sort()
     traffic_list.sort()
     vnf_list.sort()
-    env_list['mano'] = mano_list
-    env_list['vim'] = vim_list
-    env_list['em'] = em_list
-    env_list['traffic'] = traffic_list
-    env_list['vnf'] = vnf_list
+    env_list = {
+        'mano': mano_list,
+        'vim': vim_list,
+        'em': em_list,
+        'traffic': traffic_list,
+        'vnf': vnf_list
+    }
     return template('env_add.html', env_list=env_list, warning=warning, message=message)
 
 
@@ -127,12 +128,13 @@ def env_update():
         em_list_raw = requests.get(url='http://localhost:8080/v1.0/em')
         traffic_list_raw = requests.get(url='http://localhost:8080/v1.0/traffic')
         vnf_list_raw = requests.get(url='http://localhost:8080/v1.0/vnf')
-        env_list = {}
-        env_list['mano'] = mano_list_raw.json().keys()
-        env_list['vim'] = vim_list_raw.json().keys()
-        env_list['em'] = em_list_raw.json().keys()
-        env_list['traffic'] = traffic_list_raw.json().keys()
-        env_list['vnf'] = vnf_list_raw.json().keys()
+        env_list = {
+            'mano': mano_list_raw.json().keys(),
+            'vim': vim_list_raw.json().keys(),
+            'em': em_list_raw.json().keys(),
+            'traffic': traffic_list_raw.json().keys(),
+            'vnf': vnf_list_raw.json().keys()
+        }
         for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
             env_list[element].insert(0, '')
             if element in env_data_filtered.keys():
@@ -202,9 +204,10 @@ def mano_add(mano_type, warning=None, message=None, mano_obj=None, name=None, ad
     :param additional_params:   Additional parameters.
     """
     if additional_params is None:
-        additional_params = {}
-        additional_params['vim_list'] = prepare_option_list(option_type="vim")
-    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano_obj, name=name,
+        additional_params = {
+            'vim_list': prepare_option_list(option_type='vim')
+        }
+    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano_obj, name=name,    
                     additional_params=additional_params)
 
 
@@ -360,16 +363,18 @@ def mano_validate():
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            additional_params = {}
-            additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=vim_name)
+            additional_params = {
+                'vim_list': prepare_option_list(option_type='vim', selected=vim_name)
+            }
             return mano_add(mano_type=mano_type, warning=warning, message=message, mano_obj=new_mano, name=name,
                             additional_params=additional_params)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            additional_params = {}
-            additional_params['vim_list'] = prepare_option_list(option_type="vim", selected=vim_name)
+            additional_params = {
+                'vim_list': prepare_option_list(option_type='vim', selected=vim_name)
+            }
             return mano_update(warning=warning, message=message, mano_obj=new_mano, name=name,
                                additional_params=additional_params)
         elif request.forms.get('add'):
@@ -398,13 +403,14 @@ def mano_update(warning=None, message=None, mano_obj=None, name=None, additional
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
-        if additional_params is None:
-            additional_params = {}
+        if additional_params is None:            
             if mano_json['client_config'].get('vim_info', {}):
                 selected_vim = mano_json['client_config']['vim_info'].keys()[0]
             else:
                 selected_vim = None
-            additional_params['vim_list'] = prepare_option_list(option_type='vim', selected=selected_vim)
+            additional_params = {
+                'vim_list': prepare_option_list(option_type='vim', selected=selected_vim)
+            }
         return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name,
                         additional_params=additional_params)
     else:
@@ -933,14 +939,15 @@ def vnf_update():
         vnf_data_raw = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
         vnf_json = vnf_data_raw.json()
         vnf_type = vnf_json[vnf_name]['type']
-        vnf_to_add = {'client_config': {},
-                      'type': vnf_type,
-                      'instance_name': request.forms.get('instance_name'),
-                      'config': request.forms.get('config')}
-        vnf_to_add['client_config'] = {
-            'mgmt_ip_addr': request.forms.get('mgmt_ip_addr'),
-            'username': request.forms.get('username'),
-            'password': request.forms.get('password'),
+        vnf_to_add = {
+            'client_config': {
+                'mgmt_ip_addr': request.forms.get('mgmt_ip_addr'),
+                'username': request.forms.get('username'),
+                'password': request.forms.get('password')
+            },
+            'type': vnf_type,
+            'instance_name': request.forms.get('instance_name'),
+            'config': request.forms.get('config')
         }
         requests.put(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name, json=vnf_to_add)
         return vnf()
@@ -1163,20 +1170,24 @@ def all_img(font):
 
 
 def set_default_additional():
-    timers = {'VNF_INSTANTIATE_TIMEOUT': 600,
-              'VNF_SCALE_TIMEOUT': 360,
-              'VNF_START_TIMEOUT': 300,
-              'VNF_STOP_TIMEOUT': 300,
-              'VNF_TERMINATE_TIMEOUT': 300,
-              'VNF_STABLE_STATE_TIMEOUT': 360,
-              'NS_INSTANTIATE_TIMEOUT': 600,
-              'NS_SCALE_TIMEOUT': 360,
-              'NS_TERMINATE_TIMEOUT': 300,
-              'POLL_INTERVAL': 5,
-              'TRAFFIC_TOLERANCE': 1}
-    traffic_load_values = {'LOW_TRAFFIC_LOAD': 1,
-                           'NORMAL_TRAFFIC_LOAD': 3,
-                           'MAX_TRAFFIC_LOAD': 5}
+    timers = {
+        'VNF_INSTANTIATE_TIMEOUT': 600,
+        'VNF_SCALE_TIMEOUT': 360,
+        'VNF_START_TIMEOUT': 300,
+        'VNF_STOP_TIMEOUT': 300,
+        'VNF_TERMINATE_TIMEOUT': 300,
+        'VNF_STABLE_STATE_TIMEOUT': 360,
+        'NS_INSTANTIATE_TIMEOUT': 600,
+        'NS_SCALE_TIMEOUT': 360,
+        'NS_TERMINATE_TIMEOUT': 300,
+        'POLL_INTERVAL': 5,
+        'TRAFFIC_TOLERANCE': 1
+    }
+    traffic_load_values = {
+        'LOW_TRAFFIC_LOAD': 1,
+        'NORMAL_TRAFFIC_LOAD': 3,
+        'MAX_TRAFFIC_LOAD': 5
+    }
     for item in timers.keys():
         config = requests.get(url='http://localhost:8080/v1.0/config/' + item)
         if str(config.json()) == 'None':
@@ -1252,8 +1263,12 @@ def struct_mano(mano_type, name, **kwargs):
                 'password': kwargs['password'],
                 'project': kwargs['project']
             },
-            'instantiation_params_for_ns': {'datacenter': kwargs['datacenter']},
-            'scale_params': {'scaling_group_name': kwargs['scaling_group_name']},
+            'instantiation_params_for_ns': {
+                'datacenter': kwargs['datacenter']
+            },
+            'scale_params': {
+                'scaling_group_name': kwargs['scaling_group_name']
+            },
             'nsd_id': kwargs['nsd_id']
         }
     elif mano_type == 'openbaton':
@@ -1349,10 +1364,16 @@ def validate(element, element_data):
     response = requests.put(url='http://localhost:8080/v1.0/validate/%s' % element, json=element_data)
     if response.status_code == 504:
         warning = response.json().get('warning')
-        return {'warning': warning, 'message': None}
+        return {
+            'warning': warning,
+            'message': None
+        }
     elif response.status_code == 200:
         message = response.json().get('message')
-        return {'warning': None, 'message': message}
+        return {
+            'warning': None,
+            'message': message
+        }
 
 
 def get_list_by_string(input_string):

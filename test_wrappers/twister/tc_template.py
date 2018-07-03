@@ -31,9 +31,11 @@ def twister_run():
     set_details({'run_id': run_id})
 
     # Build test case JSON
-    tc_exec_request = {'tc_name': tc_name,
-                       'run_id': run_id,
-                       'suite_name': SUITE_NAME}
+    tc_exec_request = {
+        'tc_name': tc_name,
+        'run_id': run_id,
+        'suite_name': SUITE_NAME
+    }
 
     # Start test case
     try:
@@ -93,13 +95,14 @@ def twister_run():
         print 'Test case overall status: %s' % tc_result.get('overall_status', 'N/A')
         print 'Test case error info: %s' % tc_result.get('error_info', 'N/A')
 
-    durations = {}
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration')
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration')
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration')
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration')
-    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
-    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
+    durations = {
+        'instantiate': tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration'),
+        'stop': tc_result.get('events', {}).get('stop_vnf', {}).get('duration'),
+        'scale_out': tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration'),
+        'scale_in': tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration'),
+        'service_disruption': tc_result.get('events', {}).get('service_disruption', {}).get('duration'),
+        'traffic_fwd_disruption': tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
+    }
 
     for duration_type, duration_value in durations.items():
         set_details({duration_type: duration_value})

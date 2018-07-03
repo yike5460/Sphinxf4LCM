@@ -308,8 +308,10 @@ class Mano(object):
         :return:                    True if the the VNF state in the VNFM matches the state indicated by the VIM,
                                     False otherwise
         """
-        VNF_TO_VRESOURCE_MAPPING = {constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
-                                    constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED}
+        VNF_TO_VRESOURCE_MAPPING = {
+            constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
+            constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED
+        }      
         vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
                                                 'additional_param': additional_param})
 
@@ -1011,8 +1013,10 @@ class Mano(object):
         lifecycle_operation_occurrence_id = self.vnf_operate(vnf_instance_id, change_state_to, stop_type,
                                                              graceful_stop_timeout, additional_param)
 
-        operate_timeouts = {'start': self.VNF_START_TIMEOUT,
-                            'stop': self.VNF_STOP_TIMEOUT}
+        operate_timeouts = {
+            'start': self.VNF_START_TIMEOUT,
+            'stop': self.VNF_STOP_TIMEOUT
+        }
 
         operation_status = self.poll_for_operation_completion(lifecycle_operation_occurrence_id,
                                                               final_states=constants.OPERATION_FINAL_STATES,
@@ -1347,8 +1351,10 @@ class Mano(object):
         # values lists with CPs whose addresses need to be retrieved
         # Example:
         # ingress_cp_list = ['VNF1:CP1:ip', 'VNF2:CP2:mac', 'VNF1:CP3:ip']
-        # ns_ingress_cps = {'VNF1': ['CP1:ip', 'CP3:ip'],
-        #                   'VNF2': ['CP2:mac']}
+        # ns_ingress_cps = {
+        #     'VNF1': ['CP1:ip', 'CP3:ip'#     ],
+        #     'VNF2': ['CP2:mac'#     ]
+        # }
         ns_ingress_cps = {}
         for ingress_cp in ingress_cp_list:
             vnf_name, cp_details = ingress_cp.split(':', 1)
