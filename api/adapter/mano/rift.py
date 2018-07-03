@@ -269,15 +269,9 @@ class RiftManoAdapter(object):
                 # Example:
                 # {
                 #   '1': {
-                #     'link1': [
-                #       'mgmt'
-                #     ],
-                #     'link3': [
-                #       'east'
-                #     ],
-                #     'link2': [
-                #       'west'
-                #     ]
+                #     'link1': ['mgmt'],
+                #     'link3': ['east'],
+                #     'link2': ['west']
                 #   }
                 # }
                 for cp in vld['vnfd-connection-point-ref']:

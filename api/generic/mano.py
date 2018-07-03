@@ -1348,13 +1348,8 @@ class Mano(object):
         # Example:
         # ingress_cp_list = ['VNF1:CP1:ip', 'VNF2:CP2:mac', 'VNF1:CP3:ip']
         # ns_ingress_cps = {
-        #     'VNF1': [
-        #         'CP1:ip',
-        #         'CP3:ip'
-        #     ],
-        #     'VNF2': [
-        #         'CP2:mac'
-        #     ]
+        #     'VNF1': ['CP1:ip', 'CP3:ip'#     ],
+        #     'VNF2': ['CP2:mac'#     ]
         # }
         ns_ingress_cps = {}
         for ingress_cp in ingress_cp_list:
