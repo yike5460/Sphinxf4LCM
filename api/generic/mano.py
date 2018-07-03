@@ -227,7 +227,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
         return self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
@@ -239,7 +240,7 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if the allocated resources are as expected, False otherwise.
         """
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         for vnf_info in ns_info.vnf_info:
             if not self.mano_adapter.validate_vnf_allocated_vresources(vnf_info, additional_param):
                 LOG.debug('For VNF instance ID %s expected resources do not match the actual ones'
@@ -290,7 +291,7 @@ class Mano(object):
                 vim = self.get_vim_helper(vim_id)
                 resource_id = vnfc_resource_info.compute_resource.resource_id
                 try:
-                    vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                    vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
                     LOG.debug('Resource ID %s found in VIM, not as expected' % resource_id)
                     return False
                 except Exception:
@@ -310,8 +311,9 @@ class Mano(object):
         VNF_TO_VRESOURCE_MAPPING = {
             constants.VNF_STARTED: constants.VIRTUAL_RESOURCE_ENABLED,
             constants.VNF_STOPPED: constants.VIRTUAL_RESOURCE_DISABLED
-        }
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        }      
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
 
         # Check if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_NOT_INSTANTIATED:
@@ -326,7 +328,8 @@ class Mano(object):
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
             try:
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                virtual_compute = vim.query_virtualised_compute_resource(
+                    query_compute_filter={'compute_id': resource_id})
                 if virtual_compute.operational_state != VNF_TO_VRESOURCE_MAPPING[vnf_state]:
                     return False
             except Exception:
@@ -344,7 +347,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    Dictionary with the resources for each VNFC.
         """
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
         vresources = {}
 
         # Check if the VNF instantiation state is INSTANTIATED
@@ -359,7 +363,7 @@ class Mano(object):
             vim = self.get_vim_helper(vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
 
             resource_string = '%s (%s)' % (resource_id, vnfc_resource_info.vdu_id)
             vresources[resource_string] = OrderedDict()
@@ -547,14 +551,14 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
+    def ns_query(self, query_filter, attribute_selector=None):
         """
         This function enables the OSS/BSS to query from the NFVO information on one or more NS(s). The operation also
         supports querying information about VNF instance(s) that is (are) part of an NS.
 
         This function was written in accordance with section 7.3.6 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).
 
-        :param filter:              Filter defining the NSs on which the query applies, based on attributes of the
+        :param query_filter:        Filter defining the NSs on which the query applies, based on attributes of the
                                     Network Service.
         :param attribute_selector:  Provides a list of attribute names of NS. If present, only these attributes are
                                     returned for the instances of NS matching the filter. If absent, the complete
@@ -563,7 +567,7 @@ class Mano(object):
                                     If attributeSelector is present, only the attributes listed in attributeSelector are
                                     returned for the selected NSs and VNF instances.
         """
-        return self.mano_adapter.ns_query(filter, attribute_selector)
+        return self.mano_adapter.ns_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def ns_scale(self, ns_instance_id, scale_type, scale_ns_data=None, scale_vnf_data=None, scale_time=None):
@@ -1022,14 +1026,14 @@ class Mano(object):
         return operation_status
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
+    def vnf_query(self, query_filter, attribute_selector=None):
         """
         This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
         filtering criteria, and the information can be restricted to selected attributes.
 
         This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).
 
-        :param filter:              Filter to select the VNF instance(s) about which information is queried.
+        :param query_filter:        Filter to select the VNF instance(s) about which information is queried.
         :param attribute_selector:  Provides a list of attribute names. If present, only these attributes are returned
                                     for the VNF instance(s) matching the filter. If absent, the complete information is
                                     returned for the VNF instance(s) matching the filter.
@@ -1037,7 +1041,7 @@ class Mano(object):
                                     attribute_selector is present, only the attributes listed in attribute_selector are
                                     returned for the selected VNF instance(s).
         """
-        return self.mano_adapter.vnf_query(filter, attribute_selector)
+        return self.mano_adapter.vnf_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def vnf_scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
@@ -1376,7 +1380,8 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': additional_param})
         return self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param)
 
     @log_entry_exit(LOG)
@@ -1389,7 +1394,7 @@ class Mano(object):
         :param additional_param:    Additional parameters used for filtering.
         :return:                    True if all VNFCs use the correct images, False otherwise.
         """
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         for vnf_info in ns_info.vnf_info:
             if not self.mano_adapter.verify_vnf_sw_images(vnf_info, additional_param):
                 LOG.error('Not all VNFCs in VNF with instance ID %s use the correct images' % vnf_info.vnf_instance_id)
@@ -1556,14 +1561,14 @@ class Mano(object):
         return self.mano_adapter.nsd_info_create(user_defined_data)
 
     @log_entry_exit(LOG)
-    def nsd_info_query(self, filter, attribute_selector=None):
+    def nsd_info_query(self, query_filter, attribute_selector=None):
         """
         This function will enable the OSS/BSS to query the NFVO concerning details of one or more NSD information
         objects.
 
         This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
 
-        :param filter:              Filter defining the NSD information objects on which the query applies, based on
+        :param query_filter:        Filter defining the NSD information objects on which the query applies, based on
                                     attributes of the NSD information objects. It can also be used to specify one or
                                     more NSD information objects to be queried by providing their identifiers.
         :param attribute_selector:  Provides a list of attribute names of the NSD information objects. If present, only
@@ -1571,7 +1576,7 @@ class Mano(object):
                                     If absent, the complete NSD information objects are returned.
         :return:                    Details of the NSD information objects matching the input filter.
         """
-        return self.mano_adapter.nsd_info_query(filter, attribute_selector)
+        return self.mano_adapter.nsd_info_query(query_filter, attribute_selector)
 
     @log_entry_exit(LOG)
     def nsd_upload(self, nsd_info_id, nsd):
@@ -1628,15 +1633,16 @@ class Mano(object):
         return data
 
     @log_entry_exit(LOG)
-    def ns_get_alarm_list(self, filter):
+    def ns_get_alarm_list(self, query_filter):
         """
         This function enables the OSS/BSSs to query the active alarms from the NFVO.
 
         This function was written in accordance with section 7.6.4 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).
 
-        :param filter:  Input filter for selecting alarms. This can contain the list of the NS identifiers, severity and
-                        cause.
-        :return:        Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The cardinality
-                        can be "0" to indicate that no Alarm could be retrieved based on the input filter information.
+        :param query_filter:    Input filter for selecting alarms. This can contain the list of the NS identifiers,
+                                severity and cause.
+        :return:                Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The
+                                cardinality can be "0" to indicate that no Alarm could be retrieved based on the input
+                                filter information.
         """
-        return self.mano_adapter.ns_get_alarm_list(filter)
+        return self.mano_adapter.ns_get_alarm_list(query_filter)

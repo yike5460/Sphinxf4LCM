@@ -106,8 +106,8 @@ def env_delete():
     if request.forms.get('confirmed') == 'no':
         env_name = request.forms.get('delete_env')
         env_data_raw = requests.get(url='http://localhost:8080/v1.0/env/%s' % env_name)
-        env_data = env_data_raw.json()[env_name]
-        return template('env_delete.html', env_data=env_data, env_name=env_name)
+        env_data_filtered = env_data_raw.json()[env_name]
+        return template('env_delete.html', env_data=env_data_filtered, env_name=env_name)
     else:
         env_name = request.forms.get('env_name')
         requests.delete(url='http://localhost:8080/v1.0/env/%s' % env_name)
@@ -122,7 +122,7 @@ def env_update():
     if request.forms.get('confirmed') == 'no':
         env_name = request.forms.get('update_env')
         env_data_raw = requests.get(url='http://localhost:8080/v1.0/env/%s' % env_name)
-        env_data = env_data_raw.json()[env_name]
+        env_data_filtered = env_data_raw.json()[env_name]
         mano_list_raw = requests.get(url='http://localhost:8080/v1.0/mano')
         vim_list_raw = requests.get(url='http://localhost:8080/v1.0/vim')
         em_list_raw = requests.get(url='http://localhost:8080/v1.0/em')
@@ -137,10 +137,10 @@ def env_update():
         }
         for element in ['mano', 'vim', 'em', 'traffic', 'vnf']:
             env_list[element].insert(0, '')
-            if element in env_data.keys():
-                if env_data[element] in env_list[element]:
-                    env_list[element].remove(env_data[element])
-                    env_list[element].insert(0, env_data[element])
+            if element in env_data_filtered.keys():
+                if env_data_filtered[element] in env_list[element]:
+                    env_list[element].remove(env_data_filtered[element])
+                    env_list[element].insert(0, env_data_filtered[element])
                 else:
                     continue
         return template('env_update.html', env_name=env_name, env_list=env_list)
@@ -157,8 +157,7 @@ def env_update():
 @route('/env/data/', method='POST')
 def env_data():
     """
-    This function is used by the env_add function to send the new data to the REST server with 'PUT'
-    command.
+    This function is used by the env_add function to send the new data to the REST server with 'PUT' command.
     """
     env_name = request.forms.get('env_name')
     if not env_name:
@@ -184,29 +183,31 @@ def mano():
     """
     get_manos = requests.get(url='http://localhost:8080/v1.0/mano')
     mano_list = []
-    for mano in sorted(get_manos.json().iterkeys()):
-        if 'type' in get_manos.json()[mano].keys() and get_manos.json()[mano]['type'] in MANO_TYPES:
-            mano_list.append((mano, get_manos.json()[mano]['type']))
+    for mano_name in sorted(get_manos.json().iterkeys()):
+        if 'type' in get_manos.json()[mano_name].keys() and get_manos.json()[mano_name]['type'] in MANO_TYPES:
+            mano_list.append((mano_name, get_manos.json()[mano_name]['type']))
         else:
             continue
     return template('mano.html', mano_list=mano_list)
 
 
 @route('/mano/add/<mano_type>/')
-def mano_add(mano_type, warning=None, message=None, mano=None, name=None, additional_params=None):
+def mano_add(mano_type, warning=None, message=None, mano_obj=None, name=None, additional_params=None):
     """
     This function displays the required form to add a new MANO platform.
-    :param mano_type: Type of MANO platform to be added
-    :param warning: Warning information from the REST server at the validation operation.
-    :param message: Success message from the REST server at the validation operation.
-    :param mano: MANO element data structure
-    :param name: Name of MANO element
+
+    :param mano_type:           Type of MANO platform to be added.
+    :param warning:             Warning information from the REST server at the validation operation.
+    :param message:             Success message from the REST server at the validation operation.
+    :param mano_obj:            MANO element data structure.
+    :param name:                Name of MANO element.
+    :param additional_params:   Additional parameters.
     """
-    if additional_params == None:
+    if additional_params is None:
         additional_params = {
             'vim_list': prepare_option_list(option_type='vim')
         }
-    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano, name=name,
+    return template('mano_add.html', mano_type=mano_type, warning=warning, message=message, mano=mano_obj, name=name,    
                     additional_params=additional_params)
 
 
@@ -216,8 +217,8 @@ def mano_validate():
     This function is used by the mano_add and mano_update functions to send the new data to the REST server with 'PUT'
     command and to validate the MANO configuration.
     """
-    type = request.forms.get('type')
-    if type == 'tacker':
+    mano_type = request.forms.get('type')
+    if mano_type == 'tacker':
         name = request.forms.get('name')
         user_domain_name = request.forms.get('user_domain_name')
         username = request.forms.get('username')
@@ -231,28 +232,28 @@ def mano_validate():
             identity_api_version = 0
         else:
             identity_api_version = int(request.forms.get('identity_api_version'))
-        (name, new_mano) = struct_mano(type=type, name=name, user_domain_name=user_domain_name, username=username,
-                                       password=password, project_domain_name=project_domain_name,
+        (name, new_mano) = struct_mano(mano_type=mano_type, name=name, user_domain_name=user_domain_name,
+                                       username=username, password=password, project_domain_name=project_domain_name,
                                        project_name=project_name, auth_url=auth_url,
                                        identity_api_version=identity_api_version, vnfd_id=vnfd_id, nsd_id=nsd_id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+            return mano_add(mano_type=mano_type, warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+            return mano_update(warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('add'):
             if not name:
-                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
-                                mano=new_mano, name=name)
+                return mano_add(mano_type=mano_type, warning='Mandatory field missing: name', message=None,
+                                mano_obj=new_mano, name=name)
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
-    if type == 'cisco':
+    if mano_type == 'cisco':
         name = request.forms.get('name')
         nso_hostname = request.forms.get('nso_hostname')
         nso_username = request.forms.get('nso_username')
@@ -266,29 +267,29 @@ def mano_validate():
         flavour_id = request.forms.get('flavour_id')
         nsd_id = request.forms.get('nsd_id')
         instantiation_level__id = request.forms.get('instantiation_level_id')
-        (name, new_mano) = struct_mano(type=type, name=name, nso_hostname=nso_hostname, nso_username=nso_username,
-                                       nso_password=nso_password, nso_port=nso_port, esc_hostname=esc_hostname,
-                                       esc_username=esc_username, esc_password=esc_password, esc_port=esc_port,
-                                       vnfd_id=vnfd_id, flavour_id=flavour_id,
+        (name, new_mano) = struct_mano(mano_type=mano_type, name=name, nso_hostname=nso_hostname,
+                                       nso_username=nso_username, nso_password=nso_password, nso_port=nso_port,
+                                       esc_hostname=esc_hostname, esc_username=esc_username, esc_password=esc_password,
+                                       esc_port=esc_port, vnfd_id=vnfd_id, flavour_id=flavour_id,
                                        instantiation_level_id=instantiation_level__id, nsd_id=nsd_id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+            return mano_add(mano_type=mano_type, warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+            return mano_update(warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('add'):
             if not name:
-                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
-                                mano=new_mano, name=name)
+                return mano_add(mano_type=mano_type, warning='Mandatory field missing: name', message=None,
+                                mano_obj=new_mano, name=name)
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
-    if type == 'sdl':
+    if mano_type == 'sdl':
         name = request.forms.get('name')
         nfv_api_url = request.forms.get('nfv_api_url')
         ui_api_url = request.forms.get('ui_api_url')
@@ -296,26 +297,26 @@ def mano_validate():
         username = request.forms.get('username')
         password = request.forms.get('password')
         nsd_id = request.forms.get('nsd_id')
-        (name, new_mano) = struct_mano(type=type, name=name, nfv_api_url=nfv_api_url, ui_api_url=ui_api_url,
+        (name, new_mano) = struct_mano(mano_type=mano_type, name=name, nfv_api_url=nfv_api_url, ui_api_url=ui_api_url,
                                        tenant_id=tenant_id, username=username, password=password, nsd_id=nsd_id)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+            return mano_add(mano_type=mano_type, warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+            return mano_update(warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('add'):
             if not name:
-                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
-                                mano=new_mano, name=name)
+                return mano_add(mano_type=mano_type, warning='Mandatory field missing: name', message=None,
+                                mano_obj=new_mano, name=name)
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
-    if type == 'rift':
+    if mano_type == 'rift':
         name = request.forms.get('name')
         url = request.forms.get('url')
         username = request.forms.get('username')
@@ -324,27 +325,27 @@ def mano_validate():
         nsd_id = request.forms.get('nsd_id')
         datacenter = request.forms.get('datacenter')
         scaling_group_name = request.forms.get('scaling_group_name')
-        (name, new_mano) = struct_mano(type=type, name=name, url=url, username=username, password=password,
+        (name, new_mano) = struct_mano(mano_type=mano_type, name=name, url=url, username=username, password=password,
                                        project=project, nsd_id=nsd_id, datacenter=datacenter,
                                        scaling_group_name=scaling_group_name)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name)
+            return mano_add(mano_type=mano_type, warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
             warning = validation['warning']
             message = validation['message']
-            return mano_update(warning=warning, message=message, mano=new_mano, name=name)
+            return mano_update(warning=warning, message=message, mano_obj=new_mano, name=name)
         elif request.forms.get('add'):
             if not name:
-                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
-                                mano=new_mano, name=name)
+                return mano_add(mano_type=mano_type, warning='Mandatory field missing: name', message=None,
+                                mano_obj=new_mano, name=name)
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
-    if type == 'openbaton':
+    if mano_type == 'openbaton':
         name = request.forms.get('name')
         url = request.forms.get('url')
         username = request.forms.get('username')
@@ -356,7 +357,7 @@ def mano_validate():
             vim_info = requests.get(url='http://localhost:8080/v1.0/vim/%s' % vim_name).json()
         else:
             vim_info = None
-        (name, new_mano) = struct_mano(type=type, name=name, url=url, username=username, password=password,
+        (name, new_mano) = struct_mano(mano_type=mano_type, name=name, url=url, username=username, password=password,
                                        project=project, nsd_id=nsd_id, vim_info=vim_info)
         if request.forms.get('validate') and request.forms.get('action') == 'Add':
             validation = validate('mano', new_mano)
@@ -365,7 +366,7 @@ def mano_validate():
             additional_params = {
                 'vim_list': prepare_option_list(option_type='vim', selected=vim_name)
             }
-            return mano_add(mano_type=type, warning=warning, message=message, mano=new_mano, name=name,
+            return mano_add(mano_type=mano_type, warning=warning, message=message, mano_obj=new_mano, name=name,
                             additional_params=additional_params)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('mano', new_mano)
@@ -374,12 +375,12 @@ def mano_validate():
             additional_params = {
                 'vim_list': prepare_option_list(option_type='vim', selected=vim_name)
             }
-            return mano_update(warning=warning, message=message, mano=new_mano, name=name,
+            return mano_update(warning=warning, message=message, mano_obj=new_mano, name=name,
                                additional_params=additional_params)
         elif request.forms.get('add'):
             if not name:
-                return mano_add(mano_type=type, warning='Mandatory field missing: name', message=None,
-                                mano=new_mano, name=name)
+                return mano_add(mano_type=mano_type, warning='Mandatory field missing: name', message=None,
+                                mano_obj=new_mano, name=name)
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/mano/%s' % name, json=new_mano)
@@ -388,19 +389,21 @@ def mano_validate():
 
 
 @route('/mano/update/', method='POST')
-def mano_update(warning=None, message=None, mano=None, name=None, additional_params=None):
+def mano_update(warning=None, message=None, mano_obj=None, name=None, additional_params=None):
     """
     This function displays the required form to update an existing MANO platform.
-    :param warning: Warning information from the REST server at the validation operation.
-    :param message: Success message from the REST server at the validation operation.
-    :param mano: MANO structure containing data to reach the MANO element.
-    :param name: name of MANO element.
+
+    :param warning:             Warning information from the REST server at the validation operation.
+    :param message:             Success message from the REST server at the validation operation.
+    :param mano_obj:            MANO structure containing data to reach the MANO element.
+    :param name:                Name of MANO element.
+    :param additional_params:   Additional parameters.
     """
-    if mano is None:
+    if mano_obj is None:
         name = request.forms.get('update_mano')
         mano_data = requests.get(url='http://localhost:8080/v1.0/mano/%s' % name)
         mano_json = mano_data.json()[name]
-        if additional_params == None:
+        if additional_params is None:            
             if mano_json['client_config'].get('vim_info', {}):
                 selected_vim = mano_json['client_config']['vim_info'].keys()[0]
             else:
@@ -411,7 +414,7 @@ def mano_update(warning=None, message=None, mano=None, name=None, additional_par
         return template('mano_update.html', warning=warning, message=message, mano=mano_json, name=name,
                         additional_params=additional_params)
     else:
-        return template('mano_update.html', warning=warning, message=message, mano=mano, name=name,
+        return template('mano_update.html', warning=warning, message=message, mano=mano_obj, name=name,
                         additional_params=additional_params)
 
 
@@ -487,9 +490,9 @@ def vim(warning=None):
     get_vims = requests.get(url='http://localhost:8080/v1.0/vim')
     vim_list = []
     i = 1
-    for vim in sorted(get_vims.json().iterkeys()):
-        if 'type' in get_vims.json()[vim].keys() and get_vims.json()[vim]['type'] in VIM_TYPES:
-            vim_list.append((vim, get_vims.json()[vim]['type']))
+    for vim_name in sorted(get_vims.json().iterkeys()):
+        if 'type' in get_vims.json()[vim_name].keys() and get_vims.json()[vim_name]['type'] in VIM_TYPES:
+            vim_list.append((vim_name, get_vims.json()[vim_name]['type']))
         else:
             continue
         i = i + 1
@@ -497,17 +500,17 @@ def vim(warning=None):
 
 
 @route('/vim/update/', method='POST')
-def vim_update(warning=None, message=None, vim=None, name=None):
+def vim_update(warning=None, message=None, vim_obj=None, name=None):
     """
     This function displays the required form to update an existing VIM platform.
     """
-    if vim is None:
+    if vim_obj is None:
         name = request.forms.get('update_vim')
         vim_data = requests.get(url='http://localhost:8080/v1.0/vim/%s' % name)
         vim_json = vim_data.json()[name]
         return template('vim_update.html', warning=warning, message=message, vim=vim_json, name=name)
     else:
-        return template('vim_update.html', warning=warning, message=message, vim=vim, name=name)
+        return template('vim_update.html', warning=warning, message=message, vim=vim_obj, name=name)
 
 
 @route('/vim/delete/', method='POST')
@@ -537,16 +540,17 @@ def vim_delete():
 
 
 @route('/vim/add/<vim_type>/')
-def vim_add(vim_type, warning=None, message=None, vim=None, name=None):
+def vim_add(vim_type, warning=None, message=None, vim_obj=None, name=None):
     """
     This function displays the required form to add a new VIM platform.
-    :param vim_type: Type of VIM platform to be added
-    :param warning: Warning information from the REST server at the validation operation.
-    :param message: Success message from the REST server at the validation operation.
-    :param vim: VIM structure containing data to reach the VIM element.
-    :param name: name of VIM element.
+
+    :param vim_type:    Type of VIM platform to be added
+    :param warning:     Warning information from the REST server at the validation operation.
+    :param message:     Success message from the REST server at the validation operation.
+    :param vim_obj:     VIM structure containing data to reach the VIM element.
+    :param name:        Name of VIM element.
     """
-    return template('vim_add.html', vim_type=vim_type, warning=warning, message=message, vim=vim, name=name)
+    return template('vim_add.html', vim_type=vim_type, warning=warning, message=message, vim=vim_obj, name=name)
 
 
 @route('/vim/validate/', method='POST')
@@ -555,8 +559,8 @@ def vim_validate():
     This function is used by the vim_add and vim_update functions to send the new data to the REST server with 'PUT'
     command and to validate the VIM configuration.
     """
-    type = request.forms.get('type')
-    if type == 'openstack':
+    vim_type = request.forms.get('type')
+    if vim_type == 'openstack':
         name = request.forms.get('name')
         user_domain_name = request.forms.get('user_domain_name')
         username = request.forms.get('username')
@@ -568,7 +572,7 @@ def vim_validate():
             identity_api_version = 0
         else:
             identity_api_version = int(request.forms.get('identity_api_version'))
-        (name, new_vim) = struct_vim(type=type, name=name, user_domain_name=user_domain_name, username=username,
+        (name, new_vim) = struct_vim(vim_type=vim_type, name=name, user_domain_name=user_domain_name, username=username,
                                      password=password, project_domain_name=project_domain_name,
                                      project_name=project_name, auth_url=auth_url,
                                      identity_api_version=identity_api_version)
@@ -576,16 +580,16 @@ def vim_validate():
             validation = validate('vim', new_vim)
             warning = validation['warning']
             message = validation['message']
-            return vim_add(vim_type=type, warning=warning, message=message, vim=new_vim, name=name)
+            return vim_add(vim_type=vim_type, warning=warning, message=message, vim_obj=new_vim, name=name)
         elif request.forms.get('validate') and request.forms.get('action') == 'Update':
             validation = validate('vim', new_vim)
             warning = validation['warning']
             message = validation['message']
-            return vim_update(warning=warning, message=message, vim=new_vim, name=name)
+            return vim_update(warning=warning, message=message, vim_obj=new_vim, name=name)
         elif request.forms.get('add'):
             if not name:
-                return vim_add(vim_type=type, warning='Mandatory field missing: name', message=None,
-                               vim=new_vim, name=name)
+                return vim_add(vim_type=vim_type, warning='Mandatory field missing: name', message=None,
+                               vim_obj=new_vim, name=name)
             requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/vim/%s' % name, json=new_vim)
@@ -600,9 +604,9 @@ def em():
     get_ems = requests.get(url='http://localhost:8080/v1.0/em')
     em_list = []
     i = 1
-    for em in sorted(get_ems.json().iterkeys()):
-        if 'type' in get_ems.json()[em].keys() and get_ems.json()[em]['type'] in EM_TYPES:
-            em_list.append((em, get_ems.json()[em]['type']))
+    for em_name in sorted(get_ems.json().iterkeys()):
+        if 'type' in get_ems.json()[em_name].keys() and get_ems.json()[em_name]['type'] in EM_TYPES:
+            em_list.append((em_name, get_ems.json()[em_name]['type']))
         else:
             continue
         i = i + 1
@@ -610,12 +614,11 @@ def em():
 
 
 @route('/em/add/<em_type>/')
-def em_add(em_type, warning=None, message=None, em=None, name=None):
+def em_add(em_type, warning=None, message=None, em_obj=None, name=None):
     """
     This function displays the required form to add a new Element Manager platform.
-    :param em_type: Type of Element Manager platform to be added
     """
-    return template('em_add.html', em_type=em_type, warning=warning, message=message, em=em, name=name)
+    return template('em_add.html', em_type=em_type, warning=warning, message=message, em=em_obj, name=name)
 
 
 @route('/em/validate/', method='POST')
@@ -624,8 +627,8 @@ def em_validate():
     This function is used by the vim_add and em_update functions to send the new data to the REST server with 'PUT'
     command and to validate the EM configuration.
     """
-    type = request.forms.get('type')
-    if type == 'tacker':
+    em_type = request.forms.get('type')
+    if em_type == 'tacker':
         name = request.forms.get('name')
         user_domain_name = request.forms.get('user_domain_name')
         username = request.forms.get('username')
@@ -637,14 +640,14 @@ def em_validate():
             identity_api_version = 0
         else:
             identity_api_version = int(request.forms.get('identity_api_version'))
-        (name, new_em) = struct_em(type=type, name=name, user_domain_name=user_domain_name, username=username,
+        (name, new_em) = struct_em(em_type=em_type, name=name, user_domain_name=user_domain_name, username=username,
                                    password=password, project_domain_name=project_domain_name,
                                    project_name=project_name, auth_url=auth_url,
                                    identity_api_version=identity_api_version)
         if request.forms.get('add'):
             if not name:
-                return em_add(em_type=type, warning='Mandatory field missing: name', message=None,
-                              em=new_em, name=name)
+                return em_add(em_type=em_type, warning='Mandatory field missing: name', message=None,
+                              em_obj=new_em, name=name)
             requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/em/%s' % name, json=new_em)
@@ -652,17 +655,17 @@ def em_validate():
 
 
 @route('/em/update/', method='POST')
-def em_update(warning=None, message=None, em=None, name=None):
+def em_update(warning=None, message=None, em_obj=None, name=None):
     """
     This function displays the required form to update an existing Element Manager platform.
     """
-    if em is None:
+    if em_obj is None:
         name = request.forms.get('update_em')
         em_data = requests.get(url='http://localhost:8080/v1.0/em/%s' % name)
         em_json = em_data.json()[name]
         return template('em_update.html', warning=warning, message=message, em=em_json, name=name)
     else:
-        return template('em_update.html', warning=warning, message=message, em=em, name=name)
+        return template('em_update.html', warning=warning, message=message, em=em_obj, name=name)
 
 
 @route('/em/delete/', method='POST')
@@ -699,9 +702,10 @@ def traffic():
     get_traffics = requests.get(url='http://localhost:8080/v1.0/traffic')
     traffic_list = []
     i = 1
-    for traffic in sorted(get_traffics.json().iterkeys()):
-        if 'type' in get_traffics.json()[traffic].keys() and get_traffics.json()[traffic]['type'] in TRAFFIC_TYPES:
-            traffic_list.append((traffic, get_traffics.json()[traffic]['type']))
+    for traffic_name in sorted(get_traffics.json().iterkeys()):
+        if 'type' in get_traffics.json()[traffic_name].keys() and \
+                get_traffics.json()[traffic_name]['type'] in TRAFFIC_TYPES:
+            traffic_list.append((traffic_name, get_traffics.json()[traffic_name]['type']))
         else:
             continue
         i = i + 1
@@ -709,11 +713,11 @@ def traffic():
 
 
 @route('/traffic/add/<traffic_type>/')
-def traffic_add(traffic_type, warning=None, message=None, traffic=None, name=None):
+def traffic_add(traffic_type, warning=None, message=None, traffic_obj=None, name=None):
     """
     This function displays the required form to add a new Traffic generation element.
     """
-    return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic,
+    return template('traffic_add', traffic_type=traffic_type, warning=warning, message=message, traffic=traffic_obj,
                     name=name)
 
 
@@ -723,10 +727,10 @@ def traffic_validate():
     This function is used by the traffic_add and traffic_update functions to send the new data to the REST server with
     'PUT' command and to validate the MANO configuration.
     """
-    type = request.forms.get('type')
+    traffic_type = request.forms.get('type')
 
-    # The first case is when the VNF has type VNF_TRANSIENT
-    if type == 'VNF_TRANSIENT':
+    # The first case is when the VNF has traffic_type VNF_TRANSIENT
+    if traffic_type == 'VNF_TRANSIENT':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         left_port_location = request.forms.get('left_port_location')
@@ -760,14 +764,14 @@ def traffic_validate():
         }
         if request.forms.get('add'):
             if not name:
-                return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
-                                   traffic=new_traffic, name=name)
+                return traffic_add(traffic_type=traffic_type, warning='Mandatory field missing: name', message=None,
+                                   traffic_obj=new_traffic, name=name)
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
 
-            # The second case is when the VNF has type VNF_TERMINATED
-    if type == 'VNF_TERMINATED':
+            # The second case is when the VNF has traffic_type VNF_TERMINATED
+    if traffic_type == 'VNF_TERMINATED':
         name = request.forms.get('name')
         lab_server_addr = request.forms.get('lab_server_addr')
         payload = request.forms.get('payload')
@@ -791,8 +795,8 @@ def traffic_validate():
         }
         if request.forms.get('add'):
             if not name:
-                return traffic_add(traffic_type=type, warning='Mandatory field missing: name', message=None,
-                                   traffic=new_traffic, name=name)
+                return traffic_add(traffic_type=traffic_type, warning='Mandatory field missing: name', message=None,
+                                   traffic_obj=new_traffic, name=name)
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
         elif request.forms.get('update'):
             requests.put(url='http://localhost:8080/v1.0/traffic/%s' % name, json=new_traffic)
@@ -801,11 +805,11 @@ def traffic_validate():
 
 
 @route('/traffic/update/', method='POST')
-def traffic_update(warning=None, message=None, traffic=None, name=None):
+def traffic_update(warning=None, message=None, traffic_obj=None, name=None):
     """
     This function displays the required form to update an existing Traffic generation element.
     """
-    if traffic is None:
+    if traffic_obj is None:
         name = request.forms.get('update_traffic')
         traffic_data = requests.get(url='http://localhost:8080/v1.0/traffic/%s' % name)
         traffic_json = traffic_data.json()[name]
@@ -813,7 +817,7 @@ def traffic_update(warning=None, message=None, traffic=None, name=None):
             traffic_json['traffic_config']['ingress_cp_name'])
         return template('traffic_update.html', warning=warning, message=message, traffic=traffic_json, name=name)
     else:
-        return template('traffic_update.html', warning=warning, message=message, traffic=traffic, name=name)
+        return template('traffic_update.html', warning=warning, message=message, traffic=traffic_obj, name=name)
 
 
 @route('/traffic/delete/', method='POST')
@@ -863,30 +867,29 @@ def vnf(warning=None):
     """
     get_vnfs = requests.get(url='http://localhost:8080/v1.0/vnf')
     vnf_list = []
-    for vnf in sorted(get_vnfs.json().iterkeys()):
-        if 'type' in get_vnfs.json()[vnf].keys():
-            vnf_type = get_vnfs.json()[vnf]['type']
-            vnf_list.append((vnf, vnf_type))
+    for vnf_name in sorted(get_vnfs.json().iterkeys()):
+        if 'type' in get_vnfs.json()[vnf_name].keys():
+            vnf_type = get_vnfs.json()[vnf_name]['type']
+            vnf_list.append((vnf_name, vnf_type))
         else:
             continue
     return template('vnf.html', vnf_list=vnf_list, warning=warning)
 
 
-@route('/vnf/add/', method='POST')
-def vnf_add(warning=None, message=None, vnf=None, instance_name=None):
+@route('/vnf/add/', method="POST")
+def vnf_add(warning=None, message=None, vnf_obj=None, instance_name=None):
     """
     This function displays the required form to add a new Virtual Network Function element.
     """
-    return template('vnf_add.html', warning=warning, message=message, vnf=vnf, instance_name=None)
+    return template('vnf_add.html', warning=warning, message=message, vnf=vnf_obj, instance_name=None)
 
 
 @route('/vnf/data/', method='POST')
 def vnf_data():
     """
-    This function is used by the vnf_add function to send the new data to the REST server with 'PUT'
-    command.
+    This function is used by the vnf_add function to send the new data to the REST server with 'PUT' command.
     """
-    type = request.forms.get('type')
+    vim_type = request.forms.get('type')
     instance_name = request.forms.get('instance_name')
     mgmt_ip_addr = request.forms.get('mgmt_ip_addr')
     username = request.forms.get('username')
@@ -898,15 +901,15 @@ def vnf_data():
             'password': password,
             'username': username
         },
-        'type': type,
+        'type': vim_type,
         'instance_name': instance_name,
         'config': config
     }
     if not instance_name:
-        return vnf_add(warning='Mandatory field missing: Instance Name', message=None, vnf=new_vnf,
+        return vnf_add(warning='Mandatory field missing: Instance Name', message=None, vnf_obj=new_vnf,
                        instance_name=instance_name)
     elif not type:
-        return vnf_add(warning='Mandatory field missing: Type', message=None, vnf=new_vnf,
+        return vnf_add(warning='Mandatory field missing: Type', message=None, vnf_obj=new_vnf,
                        instance_name=instance_name)
     response = requests.put(url='http://localhost:8080/v1.0/vnf/%s' % instance_name, json=new_vnf)
     if response.status_code == 504:
@@ -921,8 +924,8 @@ def vnf_update():
     """
     if request.forms.get('confirmed') == 'no':
         vnf_name = request.forms.get('update_vnf')
-        vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
-        vnf_json = vnf_data.json()
+        vnf_data_raw = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        vnf_json = vnf_data_raw.json()
         vnf_info = OrderedDict()
         vnf_info['type'] = vnf_json[vnf_name]['type']
         vnf_info['instance_name'] = vnf_json[vnf_name]['instance_name']
@@ -933,8 +936,8 @@ def vnf_update():
         return template('vnf_update.html', vnf=vnf_info, vnf_name=vnf_name)
     else:
         vnf_name = request.forms.get('instance_name')
-        vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
-        vnf_json = vnf_data.json()
+        vnf_data_raw = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        vnf_json = vnf_data_raw.json()
         vnf_type = vnf_json[vnf_name]['type']
         vnf_to_add = {
             'client_config': {
@@ -957,8 +960,8 @@ def vnf_delete():
     """
     if request.forms.get('confirmed') == 'no':
         vnf_name = request.forms.get('delete_vnf')
-        vnf_data = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
-        vnf_json = vnf_data.json()
+        vnf_data_raw = requests.get(url='http://localhost:8080/v1.0/vnf/%s' % vnf_name)
+        vnf_json = vnf_data_raw.json()
         vnf_info = OrderedDict()
         vnf_info['type'] = vnf_json[vnf_name]['type']
         vnf_info['instance_name'] = vnf_name
@@ -1197,23 +1200,18 @@ def set_default_additional():
             requests.put(url='http://localhost:8080/v1.0/config/' + item, json=default_value)
 
 
-def struct_mano(type, name, **kwargs):
+def struct_mano(mano_type, name, **kwargs):
     """
-    This is a helper function for building the JSON for a MANO element
-    :param type: MANO type
-    :param name: MANO name
-    :param user_domain_name: User Domain Name
-    :param username: Username
-    :param password: Password
-    :param project_domain_name: Project Domain Name
-    :param project_name: Project Name
-    :param auth_url: Authentication URL
-    :param identity_api_version: Keystone version
-    :return: The function returns a tuple containing MANO name and associated structure
+    This is a helper function for building the JSON for a MANO element.
+
+    :param mano_type:   MANO type.
+    :param name:        MANO name.
+    :return:            The function returns a tuple containing MANO name and associated structure.
     """
-    if type == 'tacker':
-        mano = {
-            'type': type,
+    mano_dict = {}
+    if mano_type == 'tacker':
+        mano_dict = {
+            'type': mano_type,
             'client_config': {
                 'user_domain_name': kwargs['user_domain_name'],
                 'username': kwargs['username'],
@@ -1226,9 +1224,9 @@ def struct_mano(type, name, **kwargs):
             'vnfd_id': kwargs['vnfd_id'],
             'nsd_id': kwargs['nsd_id']
         }
-    elif type == 'cisco':
-        mano = {
-            'type': type,
+    elif mano_type == 'cisco':
+        mano_dict = {
+            'type': mano_type,
             'client_config': {
                 'nso_hostname': kwargs['nso_hostname'],
                 'nso_username': kwargs['nso_username'],
@@ -1244,9 +1242,9 @@ def struct_mano(type, name, **kwargs):
             'flavour_id': kwargs['flavour_id'],
             'instantiation_level_id': kwargs['instantiation_level_id']
         }
-    elif type == 'sdl':
-        mano = {
-            'type': type,
+    elif mano_type == 'sdl':
+        mano_dict = {
+            'type': mano_type,
             'client_config': {
                 'nfv_api_url': kwargs['nfv_api_url'],
                 'ui_api_url': kwargs['ui_api_url'],
@@ -1256,9 +1254,9 @@ def struct_mano(type, name, **kwargs):
             },
             'nsd_id': kwargs['nsd_id']
         }
-    elif type == 'rift':
-        mano = {
-            'type': type,
+    elif mano_type == 'rift':
+        mano_dict = {
+            'type': mano_type,
             'client_config': {
                 'url': kwargs['url'],
                 'username': kwargs['username'],
@@ -1273,9 +1271,9 @@ def struct_mano(type, name, **kwargs):
             },
             'nsd_id': kwargs['nsd_id']
         }
-    elif type == 'openbaton':
-        mano = {
-            'type': type,
+    elif mano_type == 'openbaton':
+        mano_dict = {
+            'type': mano_type,
             'client_config': {
                 'url': kwargs['url'],
                 'username': kwargs['username'],
@@ -1286,26 +1284,27 @@ def struct_mano(type, name, **kwargs):
             'nsd_id': kwargs['nsd_id']
         }
 
-    return (name, mano)
+    return name, mano_dict
 
 
-def struct_vim(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
+def struct_vim(vim_type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
                identity_api_version):
     """
-    This is a helper function for building the JSON for a VIM element
-    :param type: VIM type
-    :param name: VIM name
-    :param user_domain_name: User Domain Name
-    :param username: Username
-    :param password: Password
-    :param project_domain_name: Project Domain Name
-    :param project_name: Project Name
-    :param auth_url: Authentication URL
-    :param identity_api_version: Keystone version
-    :return: The function returns a tuple containing MANO name and associated structure
+    This is a helper function for building the JSON for a VIM element.
+
+    :param vim_type:                VIM type.
+    :param name:                    VIM name.
+    :param user_domain_name:        User Domain Name.
+    :param username:                Username.
+    :param password:                Password.
+    :param project_domain_name:     Project Domain Name.
+    :param project_name:            Project Name.
+    :param auth_url:                Authentication URL.
+    :param identity_api_version:    Keystone version.
+    :return:                        The function returns a tuple containing MANO name and associated structure
     """
-    vim = {
-        'type': type,
+    vim_dict = {
+        'type': vim_type,
         'client_config': {
             'user_domain_name': user_domain_name,
             'username': username,
@@ -1316,26 +1315,28 @@ def struct_vim(type, name, user_domain_name, username, password, project_domain_
             'identity_api_version': identity_api_version
         }
     }
-    return (name, vim)
+    return name, vim_dict
 
 
-def struct_em(type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
+def struct_em(em_type, name, user_domain_name, username, password, project_domain_name, project_name, auth_url,
               identity_api_version):
     """
-    This is a helper function for building the JSON for a VIM element
-    :param type: EM type
-    :param name: EM name
-    :param user_domain_name: User Domain Name
-    :param username: Username
-    :param password: Password
-    :param project_domain_name: Project Domain Name
-    :param project_name: Project Name
-    :param auth_url: Authentication URL
-    :param identity_api_version: Keystone version
-    :return: The function returns a tuple containing MANO name and associated structure
+    This is a helper function for building the JSON for a VIM element.
+
+    :param em_type:                 EM type.
+    :param name:                    EM name.
+    :param user_domain_name:        User Domain Name.
+    :param username:                Username.
+    :param password:                Password.
+    :param project_domain_name:     Project Domain Name.
+    :param project_name:            Project Name.
+    :param auth_url:                Authentication URL.
+    :param identity_api_version:    Keystone version.
+    :return:                        The function returns a tuple containing MANO name and associated structure
     """
-    em = {
-        'type': type,
+
+    em_dict = {
+        'type': em_type,
         'client_config': {
             'user_domain_name': user_domain_name,
             'username': username,
@@ -1346,19 +1347,21 @@ def struct_em(type, name, user_domain_name, username, password, project_domain_n
             'identity_api_version': identity_api_version
         }
     }
-    return (name, em)
+    return name, em_dict
 
 
-def validate(element, struct):
+def validate(element, element_data):
     """
     This is a helper function to validate one configured MANO or VIM against the REST API server. The REST server
     actually tries to connect to the configured element.
-    :param element: Element can be a MANO or a VIM
-    :param struct: a dictionary containing the
-    :return: The function returns a dictionary containig either warning or message keys. If warning is set, then
-    connection to the element has failed. If message is set, then connection to the element succeeded.
+
+    :param element:         Element can be a MANO or a VIM.
+    :param element_data:    A dictionary containing details about the element.
+    :return:                The function returns a dictionary containing either warning or message keys. If warning is
+                            set, then connection to the element has failed. If message is set, then connection to the
+                            element succeeded.
     """
-    response = requests.put(url='http://localhost:8080/v1.0/validate/%s' % element, json=struct)
+    response = requests.put(url='http://localhost:8080/v1.0/validate/%s' % element, json=element_data)
     if response.status_code == 504:
         warning = response.json().get('warning')
         return {
@@ -1373,9 +1376,9 @@ def validate(element, struct):
         }
 
 
-def get_list_by_string(raw_input):
+def get_list_by_string(input_string):
     result_list = []
-    for element in raw_input.split(','):
+    for element in input_string.split(','):
         element = element.lstrip()
         element = element.rstrip()
         result_list.append(element)
@@ -1387,10 +1390,9 @@ def get_string_by_list(elem_list):
     return result
 
 
-def get_str_by_unicode(raw_input):
+def get_str_by_unicode(input_unicode):
     result_list = []
-    result_string = ''
-    temp_list = raw_input.lstrip('[').rstrip(']').split(',')
+    temp_list = input_unicode.lstrip('[').rstrip(']').split(',')
     for item in temp_list:
         item = item.lstrip()
         item = item.lstrip('u')
@@ -1401,7 +1403,8 @@ def get_str_by_unicode(raw_input):
 
 
 def prepare_option_list(option_type, selected=None):
-    if option_type == 'vim':
+    option_list = []
+    if option_type == "vim":
         option_list = requests.get(url='http://localhost:8080/v1.0/vim').json().keys()
         if selected and selected in option_list:
             option_list.remove(selected)

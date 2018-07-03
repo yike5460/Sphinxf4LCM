@@ -171,7 +171,7 @@ class RiftManoAdapter(object):
                 raise RiftManoAdapterError('Unable to get opdata for scaling-group-record %s, NS %s' %
                                            (scaling_group_record_id, ns_instance_id))
             scaling_group_record = json_content.get('nsr:scaling-group-record')
-            if scaling_group_record == None:
+            if scaling_group_record is None:
                 return constants.OPERATION_SUCCESS
             elif 'instance' in scaling_group_record:
                 return constants.OPERATION_PENDING
@@ -393,8 +393,8 @@ class RiftManoAdapter(object):
         return 'ns_instantiate', ns_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 
@@ -452,8 +452,8 @@ class RiftManoAdapter(object):
         return vnf_info
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = str(ns_instance_id)
 
@@ -484,7 +484,7 @@ class RiftManoAdapter(object):
 
         ns_info.vnf_info = []
         for constituent_vnfr in ns_opdata['constituent-vnfr-ref']:
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': constituent_vnfr['vnfr-id']})
+            vnf_info = self.vnf_query(query_filter={'vnf_instance_id': constituent_vnfr['vnfr-id']})
             ns_info.vnf_info.append(vnf_info)
 
         return ns_info
@@ -560,7 +560,7 @@ class RiftManoAdapter(object):
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             image_id = virtual_compute.vc_image_id
             image_details = vim.query_image(image_id)
             image_name_vim = image_details.name
@@ -613,7 +613,8 @@ class RiftManoAdapter(object):
                     LOG.debug('Unexpected value for flavor: %s. Expected: %s' % (flavor_name_vnfd, flavor_name_nova))
                     validation_result = False
             else:
-                virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+                virtual_compute = vim.query_virtualised_compute_resource(
+                    query_compute_filter={'compute_id': resource_id})
 
                 actual_vdu_resources = {
                     'vcpu-count': virtual_compute.virtual_cpu.num_virtual_cpu,
@@ -635,7 +636,7 @@ class RiftManoAdapter(object):
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
         validation_result = True
 
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
 
@@ -831,7 +832,7 @@ class RiftManoAdapter(object):
 
         # Create dictionary with actual number of instances for each VNF
         actual_vnf_count = defaultdict(int)
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id})
         for vnf_info in ns_info.vnf_info:
             vnf_product_name = vnf_info.vnf_product_name
             actual_vnf_count[vnf_product_name] += 1
@@ -861,8 +862,8 @@ class RiftManoAdapter(object):
         return nsd_info_id
 
     @log_entry_exit(LOG)
-    def nsd_info_query(self, filter, attribute_selector=None):
-        nsd_info_id = filter['nsd_info_id']
+    def nsd_info_query(self, query_filter, attribute_selector=None):
+        nsd_info_id = query_filter['nsd_info_id']
         return self.nsd_info_ids.get(nsd_info_id)
 
     @log_entry_exit(LOG)

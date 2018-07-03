@@ -38,5 +38,5 @@ class OpenwrtVnfAdapter(object):
         return True
 
     @log_entry_exit(LOG)
-    def scale(self, vnf_instance_id, type, aspect_id, number_of_steps=1, additional_param=None):
+    def scale(self, vnf_instance_id, scale_type, aspect_id, number_of_steps=1, additional_param=None):
         return None

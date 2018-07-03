@@ -338,7 +338,7 @@ class TackerManoAdapter(object):
             vim = self.get_vim_helper(vim_id)
 
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
 
             # Get expected values
             if 'capabilities' in vnfd['topology_template']['node_templates'][vnfc_resource_info.vdu_id].keys():
@@ -514,7 +514,7 @@ class TackerManoAdapter(object):
         stack_id = tacker_show_vnf['instance_id']
 
         # Get VNF state
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id})
         vnf_state = vnf_info.instantiated_vnf_info.vnf_state
 
         # Change VNF state
@@ -532,8 +532,8 @@ class TackerManoAdapter(object):
         return 'stack', vnf_instance_id
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
         vnf_info = VnfInfo()
         vnf_info.vnf_instance_id = str(vnf_instance_id)
 
@@ -940,8 +940,8 @@ class TackerManoAdapter(object):
             return 'stack-list', vnf_list
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
         ns_info = NsInfo()
         ns_info.ns_instance_id = str(ns_instance_id)
 
@@ -966,7 +966,7 @@ class TackerManoAdapter(object):
         vnf_ids_dict = json.loads(vnf_ids_str)
         for vnf_name in vnf_ids_dict.keys():
             vnf_instance_id = vnf_ids_dict[vnf_name]
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id})
+            vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id})
             vnf_info.vnf_product_name = str(vnf_name)
             ns_info.vnf_info.append(vnf_info)
 
@@ -974,7 +974,7 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         nsd = self.get_nsd(nsd_id)
         for vnf_info in ns_info.vnf_info:
@@ -1010,7 +1010,7 @@ class TackerManoAdapter(object):
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             image_id = virtual_compute.vc_image_id
             image_details = vim.query_image(image_id)
             image_name_vim = image_details.name

@@ -109,9 +109,9 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
                                                           self.tc_input['mano'].get('query_params')):
             raise TestRunError('Allocated vResources could not be validated')
 
-        self.ns_info_after_instantiation = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                                      'additional_param': self.tc_input['mano'].get(
-                                                                          'query_params')})
+        self.ns_info_after_instantiation = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                            'additional_param': self.tc_input[
+                                                                                'mano'].get('query_params')})
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
             self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name] = {}
             self.tc_result['resources']['%s (After instantiation)' % vnf_info.vnf_product_name].update(
@@ -245,9 +245,9 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         # 11. Verify that the NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NS is terminated')
-        ns_info_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id,
-                                                               'additional_param': self.tc_input['mano'].get(
-                                                                   'query_params')})
+        ns_info_after_termination = self.mano.ns_query(query_filter={'ns_instance_id': self.ns_instance_id,
+                                                                     'additional_param': self.tc_input['mano'].get(
+                                                                         'query_params')})
         if ns_info_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='NS instantiation state was not "%s" after the NS was terminated'
@@ -256,8 +256,8 @@ class TD_NFV_NSLCM_INSTANTIATE_001(TestCase):
         LOG.info('Verifying that all the VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError('VNF instance %s was not terminated correctly. Expected state was %s but got %s'
                                    % (vnf_instance_id, constants.VNF_NOT_INSTANTIATED, vnf_info.instantiation_state))

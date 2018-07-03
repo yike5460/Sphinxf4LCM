@@ -27,7 +27,7 @@ def twister_run():
     # Get run ID
     run_id_file = os.path.expanduser('~/current')
     with open(run_id_file) as f:
-       run_id = f.read()
+        run_id = f.read()
     set_details({'run_id': run_id})
 
     # Build test case JSON
@@ -121,5 +121,6 @@ def twister_run():
         _RESULT = 'PASS'
     else:
         _RESULT = 'FAIL'
+
 
 twister_run()

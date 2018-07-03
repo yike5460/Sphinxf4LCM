@@ -98,8 +98,8 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # 3. Validate VNF instantiation state is INSTANTIATED and VNF state is STARTED
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF instantiation state is INSTANTIATED')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                               'additional_param': self.tc_input['mano'].get('query_params')})
+        vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                     'additional_param': self.tc_input['mano'].get('query_params')})
         if vnf_info.instantiation_state != constants.VNF_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was instantiated'
@@ -175,8 +175,8 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # The VNF should have default_instances + desired_scale_out_steps * increment VNFCs after scale out
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating VNF has resized to the max (limited by NFVI)')
-        vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                               'additional_param': self.tc_input['mano'].get('query_params')})
+        vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                     'additional_param': self.tc_input['mano'].get('query_params')})
         if len(vnf_info.instantiated_vnf_info.vnfc_resource_info) != sp['default_instances'] + sp['increment'] * \
                                                                      self.tc_input['desired_scale_out_steps']:
             raise TestRunError('VNF did not scale out to the max NFVI limit')
@@ -254,8 +254,9 @@ class TC_VNFC_SCALE_OUT_004__MANO_MANUAL__STEP_1(TestCase):
         # 12. Validate that the VNF is terminated and all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Validating that the VNF is terminated')
-        vnf_info_final = self.mano.vnf_query(filter={'vnf_instance_id': self.vnf_instance_id,
-                                                     'additional_param': self.tc_input['mano'].get('query_params')})
+        vnf_info_final = self.mano.vnf_query(query_filter={'vnf_instance_id': self.vnf_instance_id,
+                                                           'additional_param': self.tc_input['mano'].get(
+                                                               'query_params')})
         if vnf_info_final.instantiation_state != constants.VNF_NOT_INSTANTIATED:
             raise TestRunError('Unexpected VNF instantiation state',
                                err_details='VNF instantiation state was not "%s" after the VNF was terminated'

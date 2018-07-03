@@ -839,9 +839,9 @@ class CiscoNFVManoAdapter(object):
         return 'SERVICE_ACTIVE_STATE'
 
     @log_entry_exit(LOG)
-    def vnf_query(self, filter, attribute_selector=None):
-        vnf_instance_id = filter['vnf_instance_id']
-        additional_param = filter['additional_param']
+    def vnf_query(self, query_filter, attribute_selector=None):
+        vnf_instance_id = query_filter['vnf_instance_id']
+        additional_param = query_filter['additional_param']
         deployment_name, vnf_name = self.vnf_instance_id_metadata[vnf_instance_id]
         tenant_name = additional_param['tenant']
 
@@ -1714,9 +1714,9 @@ class CiscoNFVManoAdapter(object):
         return lifecycle_operation_occurrence_id
 
     @log_entry_exit(LOG)
-    def ns_query(self, filter, attribute_selector=None):
-        ns_instance_id = filter['ns_instance_id']
-        additional_param = filter['additional_param']
+    def ns_query(self, query_filter, attribute_selector=None):
+        ns_instance_id = query_filter['ns_instance_id']
+        additional_param = query_filter['additional_param']
         ns_info = NsInfo()
         ns_info.ns_instance_id = ns_instance_id
 
@@ -1750,8 +1750,9 @@ class CiscoNFVManoAdapter(object):
         vnf_ids = nso_deployment_xml.findall('.//{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}vnf-info/'
                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name')
         for vnf_name in vnf_ids:
-            vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id, vnf_name=vnf_name.text)
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
+            vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id, vnf_name=vnf_name.text)            
+            vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                    'additional_param': additional_param})
             vnf_info.vnf_product_name = vnf_name.text
             ns_info.vnf_info.append(vnf_info)
 
@@ -1903,7 +1904,7 @@ class CiscoNFVManoAdapter(object):
             vim_id = vnfc_resource_info.compute_resource.vim_id
             vim = self.get_vim_helper(vim_id)
             resource_id = vnfc_resource_info.compute_resource.resource_id
-            virtual_compute = vim.query_virtualised_compute_resource(filter={'compute_id': resource_id})
+            virtual_compute = vim.query_virtualised_compute_resource(query_compute_filter={'compute_id': resource_id})
             image_id = virtual_compute.vc_image_id
             image_details = vim.query_image(image_id)
             image_name_vim = image_details.name
@@ -1918,7 +1919,7 @@ class CiscoNFVManoAdapter(object):
 
     @log_entry_exit(LOG)
     def verify_vnf_nsd_mapping(self, ns_instance_id, additional_param=None):
-        ns_info = self.ns_query(filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
+        ns_info = self.ns_query(query_filter={'ns_instance_id': ns_instance_id, 'additional_param': additional_param})
         nsd_id = ns_info.nsd_id
         ns_deployment_flavor = ns_info.flavor_id
         nsd = self.get_nsd(nsd_id)
@@ -1960,8 +1961,8 @@ class CiscoNFVManoAdapter(object):
 
         # Get the VNFD corresponding to this VNF instance
         tenant_name = additional_param['tenant']
-        vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                          'additional_param': {'tenant': tenant_name}})
+        vnf_info = self.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                'additional_param': {'tenant': tenant_name}})
         vnfd_id = vnf_info.vnfd_id
         vnfd = self.get_vnfd(vnfd_id)
         vnfd_xml = etree.fromstring(vnfd)
@@ -2374,8 +2375,8 @@ class CiscoNFVManoAdapter(object):
         return nsd_info_id
 
     @log_entry_exit(LOG)
-    def nsd_info_query(self, filter, attribute_selector=None):
-        nsd_info_id = filter['nsd_info_id']
+    def nsd_info_query(self, query_filter, attribute_selector=None):
+        nsd_info_id = query_filter['nsd_info_id']
         return self.nsd_info_ids.get(nsd_info_id)
 
     @log_entry_exit(LOG)
@@ -2469,13 +2470,13 @@ class CiscoNFVManoAdapter(object):
         return nsd_info_id
 
     @log_entry_exit(LOG)
-    def ns_get_alarm_list(self, filter):
-        tenant_name = filter['tenant']
-        deployment_name = filter['ns_instance_id']
-        alarm_state = filter['alarm_state']
+    def ns_get_alarm_list(self, query_filter):
+        tenant_name = query_filter['tenant']
+        deployment_name = query_filter['ns_instance_id']
+        alarm_state = query_filter['alarm_state']
 
         try:
-            event_type = filter['alarm_state_mapping'][alarm_state]
+            event_type = query_filter['alarm_state_mapping'][alarm_state]
         except KeyError:
             raise CiscoNFVManoAdapterError('No mapping defined in the alarm filter for alarm state %s' % alarm_state)
 

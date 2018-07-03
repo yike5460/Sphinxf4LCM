@@ -57,7 +57,6 @@ class OpenstackVimAdapter(object):
     def build_clients(self, auth_url=None, username=None, password=None, identity_api_version=None, project_name=None,
                       project_domain_name=None, user_domain_name=None, verify=False):
         try:
-            raise DiscoveryFailure
             self.heat_client = os_client_config.make_client('orchestration',
                                                             auth_url=auth_url,
                                                             username=username,
@@ -201,10 +200,10 @@ class OpenstackVimAdapter(object):
         return str(project_id)
 
     @log_entry_exit(LOG)
-    def query_virtualised_compute_resource(self, filter):
+    def query_virtualised_compute_resource(self, query_compute_filter):
         virtual_compute = VirtualCompute()
 
-        compute_id = filter['compute_id']
+        compute_id = query_compute_filter['compute_id']
         virtual_compute.compute_id = compute_id
         server_details = self.server_get(compute_id)
         server_flavor_id = server_details['flavor_id']
@@ -432,7 +431,7 @@ class OpenstackVimAdapter(object):
         return limits
 
     @log_entry_exit(LOG)
-    def query_compute_resource_quota(self, filter):
+    def query_compute_resource_quota(self, query_quota_filter=None):
         """
         This function gets quota information for resources specified in the filter for project_id retrieved from nova.
         """
@@ -455,7 +454,7 @@ class OpenstackVimAdapter(object):
         return virtual_compute_quota
 
     @log_entry_exit(LOG)
-    def query_network_resource_quota(self, filter):
+    def query_network_resource_quota(self, query_quota_filter=None):
         """
         This function gets quota information for resources specified in the filter for project_id retrieved from
         neutron.
@@ -479,7 +478,7 @@ class OpenstackVimAdapter(object):
         return virtual_network_quota
 
     @log_entry_exit(LOG)
-    def query_storage_resource_quota(self, filter):
+    def query_storage_resource_quota(self, query_quota_filter=None):
         """
         This function gets quota information for resources specified in the filter for project_id retrieved from
         neutron.

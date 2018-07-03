@@ -94,8 +94,8 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates nested NS instantiation operation result as successful')
         self.ns_info_nested_after_instantiation = self.mano.ns_query(
-            filter={'ns_instance_id': self.ns_instance_id_nested,
-                    'additional_param': self.nested_ns_params.get('query_params')})
+            query_filter={'ns_instance_id': self.ns_instance_id_nested,
+                          'additional_param': self.nested_ns_params.get('query_params')})
         if self.ns_info_nested_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nested NS instantiation state was not "%s" after the NS was instantiated'
@@ -149,8 +149,8 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates nesting NS instantiation operation result as successful')
         self.ns_info_nesting_after_instantiation = self.mano.ns_query(
-            filter={'ns_instance_id': self.ns_instance_id_nesting,
-                    'additional_param': self.tc_input['mano'].get('query_params')})
+            query_filter={'ns_instance_id': self.ns_instance_id_nesting,
+                          'additional_param': self.tc_input['mano'].get('query_params')})
         if self.ns_info_nesting_after_instantiation.ns_state != constants.NS_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nesting NS instantiation state was not "%s" after the NS was instantiated'
@@ -199,8 +199,8 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
                  'been released by the VIM')
         for vnf_info in self.ns_info_nesting_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.tc_input['mano'].get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.tc_input['mano'].get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError(
                     'Nesting NS VNF instance %s was not terminated correctly. Expected state was %s but got %s'
@@ -242,9 +242,9 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         # 9. Verify that the NFVO indicates the nesting NS instance termination operation result as successful
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the NFVO indicates the nesting NS instance termination operation result as successful')
-        ns_info_nesting_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nesting,
-                                                                       'additional_param': self.tc_input['mano'].get(
-                                                                           'query_params')})
+        ns_info_nesting_after_termination = self.mano.ns_query(
+            query_filter={'ns_instance_id': self.ns_instance_id_nesting,
+                          'additional_param': self.tc_input['mano'].get('query_params')})
         if ns_info_nesting_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nesting NS instantiation state was not "%s" after the NS was terminated'
@@ -314,9 +314,9 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         # 12. Verify that the nested NS is terminated and that all resources have been released by the VIM
         # --------------------------------------------------------------------------------------------------------------
         LOG.info('Verifying that the nested NS is terminated')
-        ns_info_nested_after_termination = self.mano.ns_query(filter={'ns_instance_id': self.ns_instance_id_nested,
-                                                                      'additional_param': self.nested_ns_params.get(
-                                                                          'query_params')})
+        ns_info_nested_after_termination = self.mano.ns_query(
+            query_filter={'ns_instance_id': self.ns_instance_id_nested,
+                          'additional_param': self.nested_ns_params.get('query_params')})
         if ns_info_nested_after_termination.ns_state != constants.NS_NOT_INSTANTIATED:
             raise TestRunError('Unexpected NS instantiation state',
                                err_details='Nested NS instantiation state was not "%s" after the NS was terminated'
@@ -325,8 +325,8 @@ class TD_NFV_NSLCM_TERMINATE_NESTED_NS_001(TestCase):
         LOG.info('Verifying that all nested NS VNF instance(s) have been terminated')
         for vnf_info in self.ns_info_nested_after_instantiation.vnf_info:
             vnf_instance_id = vnf_info.vnf_instance_id
-            vnf_info = self.mano.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                                   'additional_param': self.nested_ns_params.get('query_params')})
+            vnf_info = self.mano.vnf_query(query_filter={'vnf_instance_id': vnf_instance_id,
+                                                         'additional_param': self.nested_ns_params.get('query_params')})
             if vnf_info.instantiation_state != constants.VNF_NOT_INSTANTIATED:
                 raise TestRunError(
                     'Nested NS VNF instance %s was not terminated correctly. Expected state was %s but got %s'
