@@ -133,11 +133,12 @@ def report_test_case(report_file_name, tc_exec_request, tc_input, tc_result):
         for key in tc_result.get('resources', {}).keys():
             for vnfc_id, vnfc_resources in tc_result['resources'].get(key, {}).items():
                 row = [key, vnfc_id]
-                t_inside = {}
-                t_inside['Resource type'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Expected'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Actual'] = prettytable.PrettyTable(['resource'], border=False, header=False)
-                t_inside['Validation'] = prettytable.PrettyTable(['resource'], border=False, header=False)
+                t_inside = {
+                    'Resource type': prettytable.PrettyTable(['resource'], border=False, header=False),
+                    'Expected': prettytable.PrettyTable(['resource'], border=False, header=False),
+                    'Actual': prettytable.PrettyTable(['resource'], border=False, header=False),
+                    'Validation': prettytable.PrettyTable(['resource'], border=False, header=False)
+                }
                 for resource_type, resource_size in vnfc_resources.items():
                     t_inside['Resource type'].add_row([resource_type])
                     t_inside['Expected'].add_row([resource_size])
@@ -213,11 +214,13 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                             <td>%(step_duration)s</td>
                                             <td>%(step_status)s</td>
                                         </tr>'''
-        substitutes_local = {'step_index': str(step_index),
-                             'step_name': str(step_details['name']),
-                             'step_description': str(step_details['description']),
-                             'step_duration': ('%.3f' % step_details.get('duration', 0)),
-                             'step_status': str(step_details['status'])}
+        substitutes_local = {
+            'step_index': str(step_index),
+            'step_name': str(step_details['name']),
+            'step_description': str(step_details['description']),
+            'step_duration': ('%.3f' % step_details.get('duration', 0)),
+            'step_status': str(step_details['status'])
+        }
         steps_summary_body = steps_summary_body + (steps_summary_some_part % substitutes_local)
 
     # Write VNF resources
@@ -237,12 +240,14 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                                                  <td>%(resource_size)s</td>
                                                                  <td>%(status)s</td>
                                                              </tr>'''
-                    substitutes_local = {'size': size,
-                                         'vnfc': str(key),
-                                         'vnfcd': str(vnfc_id),
-                                         'resource_type': str(resource_type),
-                                         'resource_size': str(resource_size),
-                                         'status': 'OK'}
+                    substitutes_local = {
+                        'size': size,
+                        'vnfc': str(key),
+                        'vnfcd': str(vnfc_id),
+                        'resource_type': str(resource_type),
+                        'resource_size': str(resource_size),
+                        'status': 'OK'
+                    }
                     vnf_resources = vnf_resources + (vnf_resources_some_part % substitutes_local)
                 else:
                     vnf_resources_some_part = '''
@@ -252,9 +257,11 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                                                  <td>%(resource_size)s</td>
                                                                  <td>%(status)s</td>
                                                              </tr>'''
-                    substitutes_local = {'resource_type': str(resource_type),
-                                         'resource_size': str(resource_size),
-                                         'status': 'OK'}
+                    substitutes_local = {
+                        'resource_type': str(resource_type),
+                        'resource_size': str(resource_size),
+                        'status': 'OK'
+                    }
                     vnf_resources = vnf_resources + (vnf_resources_some_part % substitutes_local)
                 count += 1
 
@@ -307,11 +314,13 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                         <td>%(traffic_after_scaling)s</td>
                                     </tr>'''
 
-            substitutes_local = {'scale_type': scale_type,
-                                 'status': status,
-                                 'scale_level': scale_level,
-                                 'traffic_before_scaling': traffic_before_scaling,
-                                 'traffic_after_scaling': traffic_after_scaling}
+            substitutes_local = {
+                'scale_type': scale_type,
+                'status': status,
+                'scale_level': scale_level,
+                'traffic_before_scaling': traffic_before_scaling,
+                'traffic_after_scaling': traffic_after_scaling
+            }
             scaling_info = scaling_info + (scaling_results_some_part % substitutes_local)
 
     if written_header:
@@ -330,7 +339,10 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                         <td>%(event_name)s</td>
                                         <td>%(time_stamp)s</td>
                                     </tr>'''
-        substitutes_local = {'event_name': str(event_name), 'time_stamp': str(timestamp)}
+        substitutes_local = {
+            'event_name': str(event_name),
+            'time_stamp': str(timestamp)
+        }
         time_stamps = time_stamps + (time_stamps_part % substitutes_local)
 
     # Write test case events
@@ -348,9 +360,11 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
                                         <td>%(event_duration)s</td>
                                         <td>%(event_details)s</td>
                                     </tr>'''
-        substitutes_local = {'event_name': str(event_name),
-                             'event_duration': str(event_duration),
-                             'event_details': str(event_details)}
+        substitutes_local = {
+            'event_name': str(event_name),
+            'event_duration': str(event_duration),
+            'event_details': str(event_details)
+        }
         events = events + (events_part % substitutes_local)
 
     # Write the main substitution dictionary
@@ -379,7 +393,8 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
         'time_stamps': time_stamps,
         'events': events,
         'jquery_js_data': jquery_js_data,
-        'bootstrap_js_data': bootstrap_js_data}
+        'bootstrap_js_data': bootstrap_js_data
+    }
 
     # Write the html report file
     with open(report_file_path, 'w') as report_file:
@@ -387,42 +402,43 @@ def html_report_test_case(html_report_file_name, tc_exec_request, tc_input, tc_r
 
 
 def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
-    json_dict = {}
-    json_dict['run_id'] = int(tc_exec_request['run_id'])
-    json_dict['suite_name'] = tc_exec_request['suite_name']
-    json_dict['tc_name'] = tc_exec_request['tc_name']
-    json_dict['tc_start_time'] = tc_result['tc_start_time']
-    json_dict['tc_end_time'] = tc_result['tc_end_time']
-    json_dict['tc_duration'] = tc_result['tc_duration']
-    json_dict['tc_status'] = tc_result['overall_status']
-    json_dict['error_info'] = tc_result['error_info']
+    durations = {
+        'instantiate': tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or
+                       tc_result.get('events', {}).get('instantiate_ns', {}).get('duration'),
+        'terminate': tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
+                     tc_result.get('events', {}).get('terminate_ns', {}).get('duration'),
+        'start': tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
+                 tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration'),
+        'stop': tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
+                tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration'),
+        'scale_out': tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \
+                     tc_result.get('events', {}).get('scale_out_ns', {}).get('duration'),
+        'scale_in': tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration') or \
+                    tc_result.get('events', {}).get('scale_in_ns', {}).get('duration'),
+        'scale_to_level': tc_result.get('events', {}).get('scale_to_level_ns', {}).get('duration'),
+        'scale_from_level': tc_result.get('events', {}).get('scale_from_level_ns', {}).get('duration'),
+        'service_disruption': tc_result.get('events', {}).get('service_disruption', {}).get('duration'),
+        'traffic_fwd_disruption': tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
+    }
 
-    json_dict['environment'] = {}
-    json_dict['environment']['vim'] = 'OpenStack'
-    json_dict['environment']['mano'] = tc_input['mano']['type']
-    json_dict['environment']['vnf'] = 'CirrOS'
-    json_dict['environment']['traffic'] = 'STCv'
-    json_dict['environment']['em'] = 'None'
-
-    durations = {}
-    durations['instantiate'] = tc_result.get('events', {}).get('instantiate_vnf', {}).get('duration') or \
-                               tc_result.get('events', {}).get('instantiate_ns', {}).get('duration')
-    durations['terminate'] = tc_result.get('events', {}).get('terminate_vnf', {}).get('duration') or \
-                             tc_result.get('events', {}).get('terminate_ns', {}).get('duration')
-    durations['start'] = tc_result.get('events', {}).get('start_vnf', {}).get('duration') or \
-                         tc_result.get('events', {}).get('ns_update_start_vnf', {}).get('duration')
-    durations['stop'] = tc_result.get('events', {}).get('stop_vnf', {}).get('duration') or \
-                        tc_result.get('events', {}).get('ns_update_stop_vnf', {}).get('duration')
-    durations['scale_out'] = tc_result.get('events', {}).get('scale_out_vnf', {}).get('duration') or \
-                             tc_result.get('events', {}).get('scale_out_ns', {}).get('duration')
-    durations['scale_in'] = tc_result.get('events', {}).get('scale_in_vnf', {}).get('duration') or \
-                            tc_result.get('events', {}).get('scale_in_ns', {}).get('duration')
-    durations['scale_to_level'] = tc_result.get('events', {}).get('scale_to_level_ns', {}).get('duration')
-    durations['scale_from_level'] = tc_result.get('events', {}).get('scale_from_level_ns', {}).get('duration')
-    durations['service_disruption'] = tc_result.get('events', {}).get('service_disruption', {}).get('duration')
-    durations['traffic_fwd_disruption'] = tc_result.get('events', {}).get('traffic_fwd_disruption', {}).get('duration')
-
-    json_dict['durations'] = dict((k, v) for k, v in durations.iteritems() if v is not None)
+    json_dict = {
+        'run_id': int(tc_exec_request['run_id']),
+        'suite_name': tc_exec_request['suite_name'],
+        'tc_name': tc_exec_request['tc_name'],
+        'tc_start_time': tc_result['tc_start_time'],
+        'tc_end_time': tc_result['tc_end_time'],
+        'tc_duration': tc_result['tc_duration'],
+        'tc_status': tc_result['overall_status'],
+        'error_info': tc_result['error_info'],
+        'durations': dict((k, v) for k, v in durations.iteritems() if v is not None),
+        'environment': {
+            'vim': 'OpenStack',
+            'mano': tc_input['mano']['type'],
+            'vnf': 'CirrOS',
+            'traffic': 'STCv',
+            'em': 'None'
+        }
+    }
 
     try:
         requests.post(url='http://' + kibana_srv + ':9200/nfv/tc-exec', json=json_dict)

@@ -63,9 +63,13 @@ class OpenbatonManoAdapter(object):
     @log_entry_exit(LOG)
     def get_token(self, username, password):
         http_headers = {
-            'Accept': 'application/json',
+            'Accept': 'application/json'
         }
-        body = {'username': username, 'password': password, 'grant_type': 'password'}
+        body = {
+            'username': username,
+            'password': password,
+            'grant_type': 'password'
+        }
         try:
             response = requests.post(url=self.url + '/oauth/token',
                                      auth=HTTPBasicAuth('openbatonOSClient', 'secret'),

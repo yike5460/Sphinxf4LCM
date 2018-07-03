@@ -48,9 +48,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_token(self, username, password):
-        response = requests.post(url=self.ui_api_url + '/token', data={
-            'user': username,
-            'passwd': password})
+        response = requests.post(url=self.ui_api_url + '/token', data={'user': username, 'passwd': password})
 
         assert response.status_code == 200
         token = response.json()['token']
@@ -59,9 +57,7 @@ class SdlManoAdapter(object):
 
     @log_entry_exit(LOG)
     def get_cookies(self, username, password):
-        response = requests.post(url=self.ui_api_url + '/token', data={
-            'user': username,
-            'passwd': password})
+        response = requests.post(url=self.ui_api_url + '/token', data={'user': username, 'passwd': password})
 
         assert response.status_code == 200
         return response.cookies
@@ -123,8 +119,9 @@ class SdlManoAdapter(object):
         ns_update_dict['is_enabled'] = True
 
         # TODO: expose via params
-        ns_update_dict['default_location_constraints'] = {}
-        ns_update_dict['default_location_constraints']['virp_type'] = 'OPENSTACK'
+        ns_update_dict['default_location_constraints'] = {
+            'virp_type': 'OPENSTACK'
+        }
 
         response = requests.put(url=self.nfv_api_url + '/nfv_network_service/%s' % ns_instance_id, json=ns_update_dict)
         assert response.status_code == 200

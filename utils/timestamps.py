@@ -249,5 +249,7 @@ class TimeRecordMomentEntry(object):
 
         :return:    Dictionary containing object name as key and timestamp as value.
         """
-        self.dump_dict = {self.name: self._MARK}
+        self.dump_dict = {
+            self.name: self._MARK
+        }
         return self.dump_dict

@@ -119,7 +119,7 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
         LOG.info('Triggering NS scale out by adding VNFC instance(s) to a VNF in the NS in NFVO with an operator '
                  'action')
         self.scale_vnf_data_list = []
-        self.expected_vnfc_count = {}                
+        self.expected_vnfc_count = {}
         for vnf_sp in self.tc_input['scaling_policy_list']:
             vnf_name, sp_name = vnf_sp.split(':')
             vnfd_name = self.mano.get_vnfd_name_from_nsd_vnf_name(self.tc_input['nsd_id'], vnf_name)
@@ -133,7 +133,9 @@ class TD_NFV_NSLCM_SCALE_IN_VNF_001(TestCase):
             scale_vnf_data.scale_by_step_data = ScaleByStepData()
             scale_vnf_data.scale_by_step_data.aspect_id = sp['targets'][0]
             scale_vnf_data.scale_by_step_data.number_of_steps = sp['increment']
-            scale_vnf_data.scale_by_step_data.additional_param = {'scaling_policy_name': sp_name}
+            scale_vnf_data.scale_by_step_data.additional_param = {
+                'scaling_policy_name': sp_name
+            }
 
             self.scale_vnf_data_list.append(scale_vnf_data)
 

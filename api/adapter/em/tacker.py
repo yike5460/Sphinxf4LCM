@@ -91,7 +91,13 @@ class TackerEmAdapter(object):
         if vnf_configuration_data is not None:
             LOG.debug('Sleeping 10 seconds to allow the VNF to boot')
             time.sleep(10)
-            vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
+            vnf_attributes = {
+                'vnf': {
+                    'attributes': {
+                        'config': vnf_configuration_data
+                    }
+                }
+            }
             try:
                 self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
             except Exception as e:

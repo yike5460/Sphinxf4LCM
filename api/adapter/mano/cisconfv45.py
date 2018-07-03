@@ -1163,7 +1163,7 @@ class CiscoNFVManoAdapter(object):
         device_template_xml = ''
         if 'name' in device_template_params:
             device_template_values = {
-                'device_template_name': device_template_params['name'],
+                'device_template_name': device_template_params['name']
             }
             device_template_xml = DEVICE_TEMPLATE % device_template_values
 
@@ -1751,8 +1751,7 @@ class CiscoNFVManoAdapter(object):
                                              '{http://tail-f.com/pkg/tailf-etsi-rel2-nfvo-esc}name')
         for vnf_name in vnf_ids:
             vnf_instance_id = self.generate_vnf_instance_id(deployment_name=ns_instance_id, vnf_name=vnf_name.text)
-            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id,
-                                              'additional_param': additional_param})
+            vnf_info = self.vnf_query(filter={'vnf_instance_id': vnf_instance_id, 'additional_param': additional_param})
             vnf_info.vnf_product_name = vnf_name.text
             ns_info.vnf_info.append(vnf_info)
 
@@ -2234,7 +2233,7 @@ class CiscoNFVManoAdapter(object):
         lifecycle_operations_occurrence_id = uuid.uuid4()
         lifecycle_operations_occurrence_dict = {
             'operation_type': 'vnf_change_df',
-            'deployment_name': deployment_name,
+            'deployment_name': deployment_name
         }
         self.lifecycle_operation_occurrence_ids[lifecycle_operations_occurrence_id] = \
             lifecycle_operations_occurrence_dict
@@ -2440,7 +2439,9 @@ class CiscoNFVManoAdapter(object):
         nsd_id = nsd_info.nsd_id
         if nsd_id is not None:
             # Build the NSD_DELETE_TEMPLATE
-            nsd_template_values = {'nsd_id': nsd_id}
+            nsd_template_values = {
+                'nsd_id': nsd_id
+            }
             nsd_delete_xml = NSD_DELETE_TEMPLATE % nsd_template_values
 
             # Delete the NSD from the NSO

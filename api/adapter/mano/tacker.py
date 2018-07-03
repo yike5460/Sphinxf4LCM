@@ -138,8 +138,10 @@ class TackerManoAdapter(object):
         group of VNF instance IDs.
         """
         resource_type, resource_id = lifecycle_operation_occurrence_id
-        resource_type_mapping = {'vnf-list': 'vnf',
-                                 'stack-list': 'stack'}
+        resource_type_mapping = {
+            'vnf-list': 'vnf',
+            'stack-list': 'stack'
+        }
         vnf_status_list = []
         for vnf in resource_id:
             vnf_operation_status = self.get_operation_status((resource_type_mapping[resource_type], vnf))
@@ -161,13 +163,14 @@ class TackerManoAdapter(object):
                 if scaling_policy_name in sp.keys():
                     # TOSCA policies regarding Tacker scaling indicate that all scaling properties are required, except
                     # the cooldown, which has a default value of 120 seconds
-                    sp_properties = {}
-                    sp_properties['increment'] = sp[scaling_policy_name]['properties']['increment']
-                    sp_properties['targets'] = sp[scaling_policy_name]['properties']['targets']
-                    sp_properties['min_instances'] = sp[scaling_policy_name]['properties']['min_instances']
-                    sp_properties['max_instances'] = sp[scaling_policy_name]['properties']['max_instances']
-                    sp_properties['default_instances'] = sp[scaling_policy_name]['properties']['default_instances']
-                    sp_properties['cooldown'] = sp[scaling_policy_name]['properties'].get('cooldown', 120)
+                    sp_properties = {
+                        'increment': sp[scaling_policy_name]['properties']['increment'],
+                        'targets': sp[scaling_policy_name]['properties']['targets'],
+                        'min_instances': sp[scaling_policy_name]['properties']['min_instances'],
+                        'max_instances': sp[scaling_policy_name]['properties']['max_instances'],
+                        'default_instances': sp[scaling_policy_name]['properties']['default_instances'],
+                        'cooldown': sp[scaling_policy_name]['properties'].get('cooldown', 120)
+                    }
                     break
             else:
                 raise TackerManoAdapterError('No scaling policy named %s in the VNFD with ID %s'
@@ -427,7 +430,13 @@ class TackerManoAdapter(object):
         if vnf_configuration_data is not None:
             LOG.debug('Sleeping 10 seconds to allow the VNF to boot')
             time.sleep(10)
-            vnf_attributes = {'vnf': {'attributes': {'config': vnf_configuration_data}}}
+            vnf_attributes = {
+                'vnf': {
+                    'attributes': {
+                        'config': vnf_configuration_data
+                    }
+                }
+            }
             try:
                 self.tacker_client.update_vnf(vnf_instance_id, body=vnf_attributes)
             except Exception as e:
@@ -458,8 +467,12 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def vnf_create_id(self, vnfd_id, vnf_instance_name=None, vnf_instance_description=None):
-        vnf_dict = {'vnf': {'vnfd_id': vnfd_id,
-                            'name': vnf_instance_name}}
+        vnf_dict = {
+            'vnf': {
+                'vnfd_id': vnfd_id,
+                'name': vnf_instance_name
+            }
+        }
 
         try:
             vnf_instance = self.tacker_client.create_vnf(body=vnf_dict)
@@ -546,8 +559,10 @@ class TackerManoAdapter(object):
         vnf_info.vnfd_id = str(tacker_show_vnf['vnfd_id'])
         vnf_info.instantiation_state = constants.VNF_INSTANTIATION_STATE['OPENSTACK_VNF_STATE'][
             tacker_show_vnf['status']]
-        vnf_info.metadata = {'error_reason': str(tacker_show_vnf['error_reason']),
-                             'heat_stack_id': str(stack_id)}
+        vnf_info.metadata = {
+            'error_reason': str(tacker_show_vnf['error_reason']),
+            'heat_stack_id': str(stack_id)
+        }
 
         # Build the InstantiatedVnfInfo information element only if the VNF instantiation state is INSTANTIATED
         if vnf_info.instantiation_state == constants.VNF_INSTANTIATED:
@@ -662,9 +677,15 @@ class TackerManoAdapter(object):
         # Build a dict with the following structure (this is specified by the Tacker API):
         # 'scale': {
         #   'type': '<type>',
-        #   'policy' : '<scaling-policy-name>'}
+        #   'policy' : '<scaling-policy-name>'
+        # }
         try:
-            body = {'scale': {'type': scale_type, 'policy': additional_param['scaling_policy_name']}}
+            body = {
+                'scale': {
+                    'type': scale_type,
+                    'policy': additional_param['scaling_policy_name']
+                }
+            }
             self.tacker_client.scale_vnf(vnf_instance_id, body)
         except tackerclient.common.exceptions.NotFound as e:
             LOG.exception(e)
@@ -815,8 +836,12 @@ class TackerManoAdapter(object):
 
     @log_entry_exit(LOG)
     def ns_create_id(self, nsd_id, ns_name, ns_description):
-        ns_dict = {'ns': {'nsd_id': nsd_id,
-                          'name': ns_name}}
+        ns_dict = {
+            'ns': {
+                'nsd_id': nsd_id,
+                'name': ns_name
+            }
+        }
 
         try:
             ns_instance = self.tacker_client.create_ns(body=ns_dict)

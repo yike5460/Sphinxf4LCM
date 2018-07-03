@@ -169,7 +169,11 @@ def get_version():
     """
     Request mapped function that returns the list of REST server supported versions.
     """
-    return {'versions': ['v1.0']}
+    return {
+        'versions': [
+            'v1.0'
+        ]
+    }
 
 
 @route('/v1.0/exec', method='POST')
@@ -187,22 +191,27 @@ def do_exec():
         get_tc_constructor_class(tc_name)
     except KeyError:
         response.status = 404
-        return {'error': 'Test case %s not found' % tc_name}
+        return {
+            'error': 'Test case %s not found' % tc_name
+        }
 
     tc_input = tc_exec_request.get('tc_input')
     if tc_input is None:
         active_env = _read_config('active-env')
         if active_env is None:
             response.status = 400
-            return {'error': 'Active environment not set'}
+            return {
+                'error': 'Active environment not set'
+            }
 
         tc_input = {}
         for resource_type, resource_name in _read_resource('env', active_env).items():
             resource_params = _read_resource(resource_type, resource_name)
-            tc_input[resource_type] = {}
-            tc_input[resource_type]['type'] = resource_params['type']
-            tc_input[resource_type]['name'] = resource_name
-            tc_input[resource_type]['adapter_config'] = resource_params['client_config']
+            tc_input[resource_type] = {
+                'type': resource_params['type'],
+                'name': resource_name,
+                'adapter_config': resource_params['client_config']
+            }
             if resource_type == 'traffic':
                 tc_input[resource_type]['traffic_config'] = resource_params['traffic_config']
             if resource_type == 'mano':
@@ -251,8 +260,9 @@ def do_exec():
 
         # TODO: remove
         if 'vnf' not in tc_input.keys():
-            tc_input['vnf'] = {}
-            tc_input['vnf']['instance_name'] = tc_exec_request['tc_name']
+            tc_input['vnf'] = {
+                'instance_name': tc_exec_request['tc_name']
+            }
     execution_id = str(uuid.uuid4())
     result_queue = Queue()
     message_queue = Queue()
@@ -280,7 +290,9 @@ def do_exec():
     step_consumer_thread = Thread(target=step_consumer, args=(execution_id,))
     step_consumer_thread.start()
 
-    return {'execution_id': execution_id}
+    return {
+        'execution_id': execution_id
+    }
 
 
 @route('/v1.0/exec/<execution_id>')
@@ -292,15 +304,21 @@ def get_status(execution_id):
         execution_process = execution_processes[execution_id]
     except KeyError:
         response.status = 404
-        return {'status': 'NOT_FOUND'}
+        return {
+            'status': 'NOT_FOUND'
+        }
 
     if execution_process is not None:
-        return {'status': 'PENDING',
-                'tc_input': tc_inputs[execution_id]}
+        return {
+            'status': 'PENDING',
+            'tc_input': tc_inputs[execution_id]
+        }
     else:
-        return {'status': 'DONE',
-                'tc_result': tc_results[execution_id],
-                'tc_input': tc_inputs[execution_id]}
+        return {
+            'status': 'DONE',
+            'tc_result': tc_results[execution_id],
+            'tc_input': tc_inputs[execution_id]
+        }
 
 
 @route('/v1.0/exec/<execution_id>', method='DELETE')
@@ -322,8 +340,9 @@ def all_status():
     """
     status_list = []
     for execution_id, execution_process in execution_processes.items():
-        execution_status = {}
-        execution_status['execution_id'] = execution_id
+        execution_status = {
+            'execution_id': execution_id
+        }
         if execution_process is not None:
             execution_status['status'] = 'PENDING'
         else:
@@ -331,7 +350,9 @@ def all_status():
 
         status_list.append(execution_status)
 
-    return {'status_list': status_list}
+    return {
+        'status_list': status_list
+    }
 
 
 @route('/v1.0/tcs')
@@ -394,7 +415,9 @@ def get_resource(resource, name):
         if resource_params == {}:
             response.status = 404
 
-        return {name: resource_params}
+        return {
+            name: resource_params
+        }
 
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>')
@@ -419,7 +442,9 @@ def set_resource(resource, name):
 
         _write_resources(resource, all_resources)
 
-        return {name: request.json}
+        return {
+            name: request.json
+        }
 
 
 @route('/v1.0/<resource:re:vim|mano|em|vnf|traffic|env>/<name>', method='DELETE')
@@ -436,7 +461,9 @@ def delete_resource(resource, name):
         if resource_params == {}:
             response.status = 404
 
-        return {name: resource_params}
+        return {
+            name: resource_params
+        }
 
 
 @route('/v1.0/config/<name>')
@@ -482,9 +509,13 @@ def validate(resource):
             construct_adapter(request.json['type'], resource, **request.json['client_config'])
         except Exception as e:
             response.status = 504
-            return {'warning': '%s' % e}
+            return {
+                'warning': '%s' % e
+            }
         response.status = 200
-        return {'message': 'Object validated.'}
+        return {
+            'message': 'Object validated.'
+        }
 
 
 @route('/v1.0/wait/<execution_id>')
@@ -497,11 +528,15 @@ def wait_for_exec(execution_id):
         execution_process = execution_processes[execution_id]
     except KeyError:
         response.status = 404
-        return {'status': 'NOT_FOUND'}
+        return {
+            'status': 'NOT_FOUND'
+        }
 
     if execution_process is not None:
         execution_process.join()
-    return {'status': 'DONE'}
+    return {
+        'status': 'DONE'
+    }
 
 
 @route('/v1.0/step/<execution_id>')
@@ -510,7 +545,9 @@ def wait_for_step(execution_id):
         step_queue = step_queues[execution_id]
     except KeyError:
         response.status = 404
-        return {'error': 'NOT_FOUND'}
+        return {
+            'error': 'NOT_FOUND'
+        }
 
     if step_queue is None:
         msg = None
@@ -520,7 +557,9 @@ def wait_for_step(execution_id):
     if msg is None:
         step_queues[execution_id] = None
         response.status = 204
-        return {'status': 'DONE'}
+        return {
+            'status': 'DONE'
+        }
     else:
         response.status = 200
         return msg
@@ -532,11 +571,15 @@ def trigger_step(execution_id):
         step_trigger = step_triggers[execution_id]
     except KeyError:
         response.status = 404
-        return {'error': 'NOT_FOUND'}
+        return {
+            'error': 'NOT_FOUND'
+        }
 
     if step_trigger is None:
         response.status = 204
-        return {'error': 'Not running in debug mode'}
+        return {
+            'error': 'Not running in debug mode'
+        }
     else:
         step_trigger.set()
         response.status = 200
@@ -554,7 +597,9 @@ def list_reports():
     report_names = map(get_basename, report_files_list)
     report_names.sort()
 
-    return {'reports': report_names}
+    return {
+        'reports': report_names
+    }
 
 
 @route('/v1.0/reports/<name>')
