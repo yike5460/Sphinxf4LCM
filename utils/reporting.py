@@ -430,7 +430,7 @@ def kibana_report(kibana_srv, tc_exec_request, tc_input, tc_result):
         'tc_duration': tc_result['tc_duration'],
         'tc_status': tc_result['overall_status'],
         'error_info': tc_result['error_info'],
-        'durations': {(k, v) for k, v in durations.iteritems() if v is not None},
+        'durations': {k: v for k, v in durations.iteritems() if v is not None},
         'environment': {
             'vim': 'OpenStack',
             'mano': tc_input['mano']['type'],
