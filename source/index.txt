@@ -14,7 +14,8 @@ Welcome to LCM's documentation!
 
 Indices and tables
 ==================
-*.rst
+Sphinxf4LCM.test_cases.vnf.scale.out.rst
+
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
