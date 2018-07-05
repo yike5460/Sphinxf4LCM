@@ -10,17 +10,17 @@ Welcome to LCM's documentation!
    :maxdepth: 5 
    :caption: Contents:
 
-   Sphinxf4LCM
-   Sphinxf4LCM.api 
-   Sphinxf4LCM.api.adapter
-   Sphinxf4LCM.api.adapter.em
-   Sphinxf4LCM.api.adapter.mano
-   Sphinxf4LCM.api.adapter.traffic
-   Sphinxf4LCM.api.adapter.vim 
-   Sphinxf4LCM.api.adapter.vnf
-   Sphinxf4LCM.api.adapter.vnfm
-   Sphinxf4LCM.api.generic
-   Sphinxf4LCM.api.structures
+
+   api 
+   api.adapter
+   api.adapter.em
+   api.adapter.mano
+   api.adapter.traffic
+   api.adapter.vim 
+   api.adapter.vnf
+   api.adapter.vnfm
+   api.generic
+   api.structures
    modules
 
 Indices and tables
