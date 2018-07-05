@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.generic.vnf &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.structures.html">api.structures package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../generic.html">api.generic</a> &raquo;</li>
+        
+      <li>api.generic.vnf</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.generic.vnf</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter</span> <span class="k">import</span> <span class="n">construct_adapter</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">ApiGenericError</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+
+<span class="c1"># Instantiate logger</span>
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="VnfGenericError"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.VnfGenericError">[docs]</a><span class="k">class</span> <span class="nc">VnfGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation VNF generic API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Vnf"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf">[docs]</a><span class="k">class</span> <span class="nc">Vnf</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class of generic functions representing operations exposed by the VNF towards the VNFM as defined by</span>
+<span class="sd">    ETSI GS NFV-IFA 008 v2.1.1 (2016-10).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vendor</span><span class="p">,</span> <span class="n">adapter_config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the VNF object corresponding to the specified vendor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span> <span class="o">=</span> <span class="n">vendor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vnf_adapter</span> <span class="o">=</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="p">,</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;vnf&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">adapter_config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vnf.config_applied"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf.config_applied">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">config_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if the configuration has been applied to the VNF.</span>
+
+<span class="sd">        :return:            True if the configuration has been applied successfully, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;We are currently not checking if the configuration has been applied to the VNF&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vnf_adapter</span><span class="o">.</span><span class="n">config_applied</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Vnf.license_applied"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf.license_applied">[docs]</a>    <span class="k">def</span> <span class="nf">license_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if the license has been applied to the VNF.</span>
+
+<span class="sd">        :return:            True if the license has been applied successfully, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;We are currently not checking if the license has been applied to the VNF&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vnf_adapter</span><span class="o">.</span><span class="n">license_applied</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Vnf.get_operation_status"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides the status of a VNF lifecycle management operation.</span>
+
+<span class="sd">        This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 008 v2.1.1 (2016-10).</span>
+
+<span class="sd">        :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.</span>
+<span class="sd">        :return:                                    Status of the operation ex. &#39;Processing&#39;, &#39;Failed&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">lifecycle_operation_occurrence_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span></div>
+
+<div class="viewcode-block" id="Vnf.poll_for_operation_completion"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf.poll_for_operation_completion">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">poll_for_operation_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">,</span> <span class="n">final_states</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">,</span>
+                                      <span class="n">poll_interval</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function polls the status of an operation until it reaches a final state or time is up.</span>
+
+<span class="sd">        :param lifecycle_operation_occurrence_id:   ID of the VNF lifecycle operation occurrence.</span>
+<span class="sd">        :param final_states:                        List of states of the operation that when reached, the polling</span>
+<span class="sd">                                                    stops.</span>
+<span class="sd">        :param max_wait_time:                       Maximum interval of time in seconds to wait for the operation to</span>
+<span class="sd">                                                    reach a final state.</span>
+<span class="sd">        :param poll_interval:                       Interval of time in seconds between consecutive polls.</span>
+<span class="sd">        :return:                                    Operation status.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation_pending</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">operation_pending</span> <span class="ow">and</span> <span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
+            <span class="n">operation_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_operation_status</span><span class="p">(</span><span class="n">lifecycle_operation_occurrence_id</span><span class="p">)</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Got status </span><span class="si">%s</span><span class="s1"> for operation with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">operation_status</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">operation_status</span> <span class="ow">in</span> <span class="n">final_states</span><span class="p">:</span>
+                <span class="n">operation_pending</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected state to be one of </span><span class="si">%s</span><span class="s1">, got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">final_states</span><span class="p">,</span> <span class="n">operation_status</span><span class="p">))</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">poll_interval</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
+                <span class="n">elapsed_time</span> <span class="o">+=</span> <span class="n">poll_interval</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Elapsed time </span><span class="si">%s</span><span class="s1"> seconds out of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elapsed_time</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">operation_status</span></div>
+
+<div class="viewcode-block" id="Vnf.scale"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf.scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is exposed by the VNF at the Vnf-tst interface and is used by the Test System to trigger VNF scale</span>
+<span class="sd">        operation at the VNF.</span>
+
+<span class="sd">        This function is a re-exposure of the VNF Lifecycle Management interface at the Ve-Vnfm-vnf reference point.</span>
+<span class="sd">        See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.2.4.</span>
+
+<span class="sd">        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.</span>
+<span class="sd">        :param scale_type:          Defines the type of the scale operation requested (scale out, scale in).</span>
+<span class="sd">        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the</span>
+<span class="sd">                                    VNFD.</span>
+<span class="sd">        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.</span>
+<span class="sd">                                    Defaults to 1.</span>
+<span class="sd">        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific</span>
+<span class="sd">                                    to the VNF being scaled.</span>
+<span class="sd">        :return:                    Identifier of the VNF lifecycle operation occurrence.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vnf_adapter</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vnf.scale_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vnf.Vnf.scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">scale_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">poll_interval</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function synchronously scales the VNF horizontally (out/in).</span>
+
+<span class="sd">        :param vnf_instance_id:     Identifier of the VNF instance to which this scaling request is related.</span>
+<span class="sd">        :param scale_type:          Defines the type of the scale operation requested. Possible values: &#39;in&#39;, or &#39;out&#39;</span>
+<span class="sd">        :param aspect_id:           Identifies the aspect of the VNF that is requested to be scaled, as declared in the</span>
+<span class="sd">                                    VNFD.</span>
+<span class="sd">        :param number_of_steps:     Number of scaling steps to be executed as part of this ScaleVnf operation.</span>
+<span class="sd">                                    Defaults to 1.</span>
+<span class="sd">        :param additional_param:    Additional parameters passed by the NFVO as input to the scaling process, specific</span>
+<span class="sd">                                    to the VNF being scaled.</span>
+<span class="sd">        :param poll_interval:       Interval of time in seconds between consecutive polls on the scaling operation</span>
+<span class="sd">                                    result.</span>
+<span class="sd">        :return:                    Operation status.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lifecycle_operation_occurrence_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="p">,</span>
+                                                       <span class="n">additional_param</span><span class="p">)</span>
+
+        <span class="n">operation_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_for_operation_completion</span><span class="p">(</span><span class="n">lifecycle_operation_occurrence_id</span><span class="p">,</span>
+                                                              <span class="n">final_states</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FINAL_STATES</span><span class="p">,</span>
+                                                              <span class="n">max_wait_time</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">VNF_SCALE_TIMEOUT</span><span class="p">,</span>
+                                                              <span class="n">poll_interval</span><span class="o">=</span><span class="n">poll_interval</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">operation_status</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

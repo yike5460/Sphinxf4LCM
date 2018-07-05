@@ -10,6 +10,7 @@ Welcome to LCM's documentation!
    :maxdepth: 5 
    :caption: Contents:
 
+   module
    api
    api.adapter
    api.adapter.mano

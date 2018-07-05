@@ -1,0 +1,2569 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.generic package &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="api.structures package" href="api.structures.html" />
+    <link rel="prev" title="api.adapter.vnfm package" href="api.adapter.vnfm.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">api package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="api.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">api.generic package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.constants">api.generic.constants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.em">api.generic.em module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.mano">api.generic.mano module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.traffic">api.generic.traffic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-generic-vim-module">api.generic.vim module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.vnf">api.generic.vnf module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-api.generic">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.structures.html">api.structures package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-api">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">api.generic package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.constants">api.generic.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.em">api.generic.em module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.mano">api.generic.mano module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.traffic">api.generic.traffic module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api-generic-vim-module">api.generic.vim module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.vnf">api.generic.vnf module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.structures.html">api.structures package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="api.html">api package</a> &raquo;</li>
+        
+      <li>api.generic package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.generic.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-generic-package">
+<h1>api.generic package<a class="headerlink" href="#api-generic-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-api.generic.constants">
+<span id="api-generic-constants-module"></span><h2>api.generic.constants module<a class="headerlink" href="#module-api.generic.constants" title="Permalink to this headline">¶</a></h2>
+<p>Various constants and mappings.</p>
+</div>
+<div class="section" id="module-api.generic.em">
+<span id="api-generic-em-module"></span><h2>api.generic.em module<a class="headerlink" href="#module-api.generic.em" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.generic.em.Em">
+<em class="property">class </em><code class="descclassname">api.generic.em.</code><code class="descname">Em</code><span class="sig-paren">(</span><em>vendor</em>, <em>generic_config</em>, <em>adapter_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of generic functions representing operations exposed by the EM towards the Test Interface as defined by
+ETSI GS NFV-TST 002 v1.1.1 (2016-10).</p>
+<dl class="method">
+<dt id="api.generic.em.Em.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the status of a VNF lifecycle management operation.</p>
+<p>This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lifecycle_operation_occurrence_id</strong> – ID of the VNF lifecycle operation occurrence.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The status of the operation ex. ‘Processing’, ‘Failed’.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.em.Em.modify_vnf_configuration">
+<code class="descname">modify_vnf_configuration</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em.modify_vnf_configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em.modify_vnf_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is exposed by the EM at the Em-tst interface and is used by the Test System to trigger
+ModifyConfiguration on the VNF from the EM (and through the VNFM).</p>
+<p>This function is a re-exposure of the VNF Configuration Management interface offered by the VNF/VNFM over the
+Ve-Vnfm reference points. See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.6.2.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>vnf_configuration_data</strong> – Configuration data for the VNF instance.</li>
+<li><strong>ext_virtual_link</strong> – Information about external VLs to connect the VNF to.</li>
+<li><strong>vnfc_configuration_data</strong> – Configuration data related to VNFC instance(s).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.em.Em.poll_for_operation_completion">
+<code class="descname">poll_for_operation_completion</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em.poll_for_operation_completion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em.poll_for_operation_completion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function polls the status of an operation until it reaches a final state or time is up.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lifecycle_operation_occurrence_id</strong> – ID of the VNF lifecycle operation occurrence.</li>
+<li><strong>final_states</strong> – List of states of the operation that when reached, the polling
+stops.</li>
+<li><strong>max_wait_time</strong> – Maximum interval of time in seconds to wait for the operation to
+reach a final state.</li>
+<li><strong>poll_interval</strong> – Interval of time in seconds between consecutive polls.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.em.Em.set_generic_config">
+<code class="descname">set_generic_config</code><span class="sig-paren">(</span><em>VNF_SCALE_TIMEOUT=360</em>, <em>POLL_INTERVAL=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em.set_generic_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em.set_generic_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.em.Em.vnf_scale">
+<code class="descname">vnf_scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em.vnf_scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em.vnf_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is exposed by the EM at the Em-tst interface and is used by the Test System to trigger VNF scale
+operation and check results at the EM.</p>
+<p>This function scales a VNF horizontally (out/in).</p>
+<p>This function is a re-exposure of the VNF Lifecycle Management interface at the Ve-Vnfm-em reference point.
+See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.2.4.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>scale_type</strong> – Defines the type of the scale operation requested (scale out, scale in).</li>
+<li><strong>aspect_id</strong> – Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+VNFD.</li>
+<li><strong>number_of_steps</strong> – Number of scaling steps to be executed as part of this ScaleVnf operation.
+Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the scaling process, specific
+to the VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.em.Em.vnf_scale_sync">
+<code class="descname">vnf_scale_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em.vnf_scale_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em.vnf_scale_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously scales a VNF horizontally (out/in).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>scale_type</strong> – Defines the type of the scale operation requested. Possible values: ‘in’, or ‘out’</li>
+<li><strong>aspect_id</strong> – Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+VNFD.</li>
+<li><strong>number_of_steps</strong> – Number of scaling steps to be executed as part of this ScaleVnf operation.
+Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the scaling process, specific
+to the VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.generic.em.EmGenericError">
+<em class="property">exception </em><code class="descclassname">api.generic.em.</code><code class="descname">EmGenericError</code><a class="reference internal" href="_modules/api/generic/em.html#EmGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.EmGenericError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.generic.ApiGenericError" title="api.generic.ApiGenericError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.generic.ApiGenericError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation EM generic API.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-api.generic.mano">
+<span id="api-generic-mano-module"></span><h2>api.generic.mano module<a class="headerlink" href="#module-api.generic.mano" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.generic.mano.Mano">
+<em class="property">class </em><code class="descclassname">api.generic.mano.</code><code class="descname">Mano</code><span class="sig-paren">(</span><em>vendor</em>, <em>generic_config</em>, <em>adapter_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of generic functions representing operations exposed by the MANO.</p>
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_allocated_vresources">
+<code class="descname">get_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary with the resources for each VNFC.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_notification_queue">
+<code class="descname">get_notification_queue</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_notification_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_notification_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_ns_ingress_cp_addr_list">
+<code class="descname">get_ns_ingress_cp_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_ns_ingress_cp_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_ns_ingress_cp_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function goes through each VNF inside the NS with the provided instance ID and retrieves the destination
+address(es) for each connection point in the ingress_cp_list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_info</strong> – NsInfo information element for the NS for which the ingress CP address list needs to
+be retrieved.</li>
+<li><strong>ingress_cp_list</strong> – List of connection points for which to get the corresponding address(es).
+Expected format: [‘VNF1:CP1:ip’, ‘VNF1:CP2:mac’, ‘VNF2:CP2:ip’ …]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String containing space-separated addresses.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_nsd_scaling_properties">
+<code class="descname">get_nsd_scaling_properties</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_nsd_scaling_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_nsd_scaling_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the scaling properties for the provided scaling policy name from the NSD with the
+provided ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nsd_id</strong> – ID of the NSD to get the scaling properties from.</li>
+<li><strong>scaling_policy_name</strong> – Name of the scaling policy to get the properties for.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary with the scaling properties.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the status of a VNF lifecycle management operation.</p>
+<p>This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lifecycle_operation_occurrence_id</strong> – ID of the VNF lifecycle operation occurrence.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The status of the operation ex. ‘Processing’, ‘Failed’.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_vim_helper">
+<code class="descname">get_vim_helper</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_vim_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_vim_helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns an instance of Vim class
+:param vim_id:      ID of the VIM as known by the MANO element
+:return:            Vim object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_vnf_ingress_cp_addr_list">
+<code class="descname">get_vnf_ingress_cp_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_vnf_ingress_cp_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_vnf_ingress_cp_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves from the provided VnfInfo information element the destination address(es) for each
+connection point in the ingress_cp_list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_info</strong> – VnfInfo information element for the VNF for which the ingress CP address list needs
+to be retrieved.</li>
+<li><strong>ingress_cp_list</strong> – List of connection points for which to get the corresponding address(es).
+Expected format: [‘CP1:ip’, ‘CP2:mac’, …]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String with space-separated addresses.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_vnf_instance_id_from_ns_vnf_name">
+<code class="descname">get_vnf_instance_id_from_ns_vnf_name</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_vnf_instance_id_from_ns_vnf_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_vnf_instance_id_from_ns_vnf_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves from the provided NsInfo information element the VNF instance ID that corresponds to the
+VNF with the provided name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_info</strong> – NsInfo information element for the NS that contains the VNF with the provided name.</li>
+<li><strong>vnf_name</strong> – Name of the VNF whose instance ID should be retrieved.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String representing the VNF instance ID.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_vnf_mgmt_addr_list">
+<code class="descname">get_vnf_mgmt_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_vnf_mgmt_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_vnf_mgmt_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves the management addresses of the VNFCs that belong to the VNF with the given instance ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of management addresses.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_vnfd_name_from_nsd_vnf_name">
+<code class="descname">get_vnfd_name_from_nsd_vnf_name</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_vnfd_name_from_nsd_vnf_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_vnfd_name_from_nsd_vnf_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves from the NSD with the provided instance ID the VNFD name that corresponds to the
+provided VNF name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nsd_id</strong> – Identifier of the NSD from which to retrieve the VNFD name.</li>
+<li><strong>vnf_name</strong> – Name of the VNF whose VNFD name should be retrieved.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String representing the name of the VNFD name.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.get_vnfd_scaling_properties">
+<code class="descname">get_vnfd_scaling_properties</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.get_vnfd_scaling_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.get_vnfd_scaling_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the scaling properties for the provided scaling policy name from the VNFD with the
+provided ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnfd_id</strong> – ID of the VNFD to get the scaling properties from.</li>
+<li><strong>scaling_policy_name</strong> – Name of the scaling policy to get the properties for.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary with the scaling properties.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.limit_compute_resources_for_ns_scaling">
+<code class="descname">limit_compute_resources_for_ns_scaling</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.limit_compute_resources_for_ns_scaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.limit_compute_resources_for_ns_scaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reserves compute resources so that the remaining resources are enough only for instantiating the
+NS defined by the provided nsd_id, with the provided number of default instances and scaling the NS
+desired_scale_out_steps times.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nsd_id</strong> – Identifier of the NSD which defines the NS.</li>
+<li><strong>scaling_policy_name</strong> – Name of the scaling policy as stated in the NSD.</li>
+<li><strong>desired_scale_out_steps</strong> – Desired number of steps the NS should be scaled out.</li>
+<li><strong>generic_vim_object</strong> – Generic VIM object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reservation ID if the reservation was successful, None otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.limit_compute_resources_for_vnf_instantiation">
+<code class="descname">limit_compute_resources_for_vnf_instantiation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.limit_compute_resources_for_vnf_instantiation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.limit_compute_resources_for_vnf_instantiation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reserves compute resources so that the remaining resources are not enough for instantiating the
+VNF defined by the provided vnfd_id and with the provided number of default instances.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnfd_id</strong> – Identifier of the VNFD which defines the VNF.</li>
+<li><strong>generic_vim_object</strong> – Generic VIM object.</li>
+<li><strong>limit_vcpus</strong> – Boolean, specifying whether vCPUs should be limited or not.</li>
+<li><strong>limit_vmem</strong> – Boolean, specifying whether vMemory should be limited or not.</li>
+<li><strong>limit_vc_instances</strong> – Boolean, specifying whether virtual container instances should be limited or
+not.</li>
+<li><strong>scaling_policy_name</strong> – Optional, name of the scaling policy as stated in the VNFD.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reservation ID if the reservation was successful, None otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.limit_compute_resources_for_vnf_scaling">
+<code class="descname">limit_compute_resources_for_vnf_scaling</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.limit_compute_resources_for_vnf_scaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.limit_compute_resources_for_vnf_scaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reserves compute resources so that the remaining resources are enough only for instantiating the
+VNF defined by the provided vnfd_id, and scaling the VNF desired_scale_out_steps times according to the provided
+scaling policy name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnfd_id</strong> – Identifier of the VNFD which defines the VNF.</li>
+<li><strong>scaling_policy_name</strong> – Name of the scaling policy as stated in the VNFD.</li>
+<li><strong>desired_scale_out_steps</strong> – Desired number of steps the VNF should be scaled out.</li>
+<li><strong>generic_vim_object</strong> – Generic VIM object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reservation ID if the reservation was successful, None otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.limit_storage_resources_for_vnf_instantiation">
+<code class="descname">limit_storage_resources_for_vnf_instantiation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.limit_storage_resources_for_vnf_instantiation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.limit_storage_resources_for_vnf_instantiation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reserves storage resources so that the remaining resources are not enough for instantiating the
+VNF defined by the provided vnfd_id and with the provided number of default instances.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnfd_id</strong> – Identifier of the VNFD which defines the VNF.</li>
+<li><strong>generic_vim_object</strong> – Generic VIM object.</li>
+<li><strong>scaling_policy_name</strong> – Optional, name of the scaling policy as stated in the VNFD.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reservation ID if the reservation was successful, None otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.modify_vnf_configuration">
+<code class="descname">modify_vnf_configuration</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.modify_vnf_configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.modify_vnf_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function enables providing configuration parameters information for a VNF instance.</p>
+<p>This function was written in accordance with section 7.6.2 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>vnf_configuration_data</strong> – Configuration data for the VNF instance.</li>
+<li><strong>ext_virtual_link</strong> – Information about external VLs to connect the VNF to.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_create_and_instantiate">
+<code class="descname">ns_create_and_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_create_and_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_create_and_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates an NS instance ID and synchronously instantiates an NS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nsd_id</strong> – Reference to the NSD used to create this NS instance.</li>
+<li><strong>ns_name</strong> – Human readable name of the NS instance.</li>
+<li><strong>ns_description</strong> – Human readable description of the NS instance.</li>
+<li><strong>flavour_id</strong> – Flavour of the NSD used to instantiate this NS.</li>
+<li><strong>sap_data</strong> – Create data concerning the SAPs of this NS.</li>
+<li><strong>pnf_info</strong> – Information on the PNF(s) that are part of this NS.</li>
+<li><strong>vnf_instance_data</strong> – Specify an existing VNF instance to be used in the NS.</li>
+<li><strong>nested_ns_instance_data</strong> – Specify an existing NS instance to be used as a nested NS
+within the NS.</li>
+<li><strong>location_constraints</strong> – Defines the location constraints for the VNF to be
+instantiated as part of the NS instantiation.</li>
+<li><strong>additional_param_for_ns</strong> – Allows the OSS/BSS to provide additional parameter(s) at the
+NS level.</li>
+<li><strong>additional_param_for_vnf</strong> – Allows the OSS/BSS to provide additional parameter(s) per
+VNF instance.</li>
+<li><strong>start_time</strong> – Timestamp indicating the earliest time to instantiate the
+NS.</li>
+<li><strong>ns_instantiation_level_id</strong> – Identifies one of the NS instantiation levels declared in
+the DF applicable to this NS instance.</li>
+<li><strong>additional_affinity_or_anti_affinity_rule</strong> – Specifies additional affinity or anti-affinity constraint
+for the VNF instances to be instantiated as part of the NS
+instantiation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the NS instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_create_id">
+<code class="descname">ns_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_create_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates an NS instance ID and an associated instance of a NsInfo information element, identified
+by that identifier, in the NOT_INSTANTIATED state without instantiating the NS or doing any additional lifecycle
+operation(s).</p>
+<p>This function was written in accordance with section 7.3.2 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nsd_id</strong> – Reference to the NSD used to create this NS instance.</li>
+<li><strong>ns_name</strong> – Human readable name of the NS instance.</li>
+<li><strong>ns_description</strong> – Human readable description of the NS instance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the instance of an NS that has been created.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_delete_id">
+<code class="descname">ns_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function an NS instance identifier and the associated NsInfo information element.</p>
+<p>This function was written in accordance with section 7.3.8 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ns_instance_id</strong> – NS instance identifier to be deleted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_get_alarm_list">
+<code class="descname">ns_get_alarm_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_get_alarm_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_get_alarm_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function enables the OSS/BSSs to query the active alarms from the NFVO.</p>
+<p>This function was written in accordance with section 7.6.4 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_filter</strong> – Input filter for selecting alarms. This can contain the list of the NS identifiers,
+severity and cause.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Information about an alarm including AlarmId, affected NS Id, and FaultDetails. The
+cardinality can be “0” to indicate that no Alarm could be retrieved based on the input
+filter information.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_instantiate">
+<code class="descname">ns_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation will instantiate an NS.</p>
+<p>This function was written in accordance with section 7.3.3 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the instance of the NS.</li>
+<li><strong>flavour_id</strong> – Flavour of the NSD used to instantiate this NS.</li>
+<li><strong>sap_data</strong> – Create data concerning the SAPs of this NS.</li>
+<li><strong>pnf_info</strong> – Information on the PNF(s) that are part of this NS.</li>
+<li><strong>vnf_instance_data</strong> – Specify an existing VNF instance to be used in the NS.</li>
+<li><strong>nested_ns_instance_data</strong> – Specify an existing NS instance to be used as a nested NS
+within the NS.</li>
+<li><strong>location_constraints</strong> – Defines the location constraints for the VNF to be
+instantiated as part of the NS instantiation.</li>
+<li><strong>additional_param_for_ns</strong> – Allows the OSS/BSS to provide additional parameter(s) at the
+NS level.</li>
+<li><strong>additional_param_for_vnf</strong> – Allows the OSS/BSS to provide additional parameter(s) per
+VNF instance.</li>
+<li><strong>start_time</strong> – Timestamp indicating the earliest time to instantiate the
+NS.</li>
+<li><strong>ns_instantiation_level_id</strong> – Identifies one of the NS instantiation levels declared in
+the DF applicable to this NS instance.</li>
+<li><strong>additional_affinity_or_anti_affinity_rule</strong> – Specifies additional affinity or anti-affinity constraint
+for the VNF instances to be instantiated as part of the NS
+instantiation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the NS lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_instantiate_sync">
+<code class="descname">ns_instantiate_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_instantiate_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_instantiate_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function performs a synchronous NS instantiation, i.e. instantiates an NS and then polls the operation
+status until the operation reaches a final state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the instance of the NS.</li>
+<li><strong>flavour_id</strong> – Flavour of the NSD used to instantiate this NS.</li>
+<li><strong>sap_data</strong> – Create data concerning the SAPs of this NS.</li>
+<li><strong>pnf_info</strong> – Information on the PNF(s) that are part of this NS.</li>
+<li><strong>vnf_instance_data</strong> – Specify an existing VNF instance to be used in the NS.</li>
+<li><strong>nested_ns_instance_data</strong> – Specify an existing NS instance to be used as a nested NS
+within the NS.</li>
+<li><strong>location_constraints</strong> – Defines the location constraints for the VNF to be
+instantiated as part of the NS instantiation.</li>
+<li><strong>additional_param_for_ns</strong> – Allows the OSS/BSS to provide additional parameter(s) at the
+NS level.</li>
+<li><strong>additional_param_for_vnf</strong> – Allows the OSS/BSS to provide additional parameter(s) per
+VNF instance.</li>
+<li><strong>start_time</strong> – Timestamp indicating the earliest time to instantiate the
+NS.</li>
+<li><strong>ns_instantiation_level_id</strong> – Identifies one of the NS instantiation levels declared in
+the DF applicable to this NS instance.</li>
+<li><strong>additional_affinity_or_anti_affinity_rule</strong> – Specifies additional affinity or anti-affinity constraint
+for the VNF instances to be instantiated as part of the NS
+instantiation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_lifecycle_change_notification_subscribe">
+<code class="descname">ns_lifecycle_change_notification_subscribe</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_lifecycle_change_notification_subscribe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_lifecycle_change_notification_subscribe" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function allows the OSS/BSS to subscribe to NS lifecycle change notifications, and the NFVO to provide such
+notifications to the subscriber.</p>
+<p>This function was written in accordance with section 7.4.2 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>notification_filter</strong> – Input filter for selecting the notifications.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Identifier of the subscription realized.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_query">
+<code class="descname">ns_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function enables the OSS/BSS to query from the NFVO information on one or more NS(s). The operation also
+supports querying information about VNF instance(s) that is (are) part of an NS.</p>
+<p>This function was written in accordance with section 7.3.6 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_filter</strong> – Filter defining the NSs on which the query applies, based on attributes of the
+Network Service.</li>
+<li><strong>attribute_selector</strong> – Provides a list of attribute names of NS. If present, only these attributes are
+returned for the instances of NS matching the filter. If absent, the complete
+instances of NS(s) are returned.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Information on the NS and VNF instances part of the NS matching the input filter.
+If attributeSelector is present, only the attributes listed in attributeSelector are
+returned for the selected NSs and VNF instances.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_scale">
+<code class="descname">ns_scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function scales an NS instance.</p>
+<p>This function was written in accordance with section 7.3.4 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the instance of the NS.</li>
+<li><strong>scale_type</strong> – Indicates the type of scaling to be performed. Possible values: ‘SCALE_NS, ‘SCALE_VNF’.</li>
+<li><strong>scale_ns_data</strong> – Provides the necessary information to scale the referenced NS instance. It shall be
+present when scale_type = ‘SCALE_NS’.</li>
+<li><strong>scale_vnf_data</strong> – Provides the information to scale a given VNF instance that is part of the referenced
+NS instance. Shall be present when scale_type = ‘SCALE_VNF’.</li>
+<li><strong>scale_time</strong> – Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
+timestamp.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the NS lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_scale_sync">
+<code class="descname">ns_scale_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_scale_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_scale_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously scales an NS instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the instance of the NS.</li>
+<li><strong>scale_type</strong> – Indicates the type of scaling to be performed. Possible values: ‘SCALE_NS, ‘SCALE_VNF’.</li>
+<li><strong>scale_ns_data</strong> – Provides the necessary information to scale the referenced NS instance. It shall be
+present when scale_type = ‘SCALE_NS’.</li>
+<li><strong>scale_vnf_data</strong> – Provides the information to scale a given VNF instance that is part of the referenced
+NS instance. Shall be present when scale_type = ‘SCALE_VNF’.</li>
+<li><strong>scale_time</strong> – Timestamp indicating the scale time of the NS, i.e. the NS will be scaled at this
+timestamp.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_terminate">
+<code class="descname">ns_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function terminates an NS.</p>
+<p>This function was written in accordance with section 7.3.7 of ETSI GS NFV-IFA 013 v2.1.1 (2016-10). The
+additional_param input is not part of the standard specification.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance to terminate.</li>
+<li><strong>terminate_time</strong> – Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+automatically at this timestamp.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Terminate NS operation,
+specific to the NS being terminated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the NS lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_terminate_and_delete">
+<code class="descname">ns_terminate_and_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_terminate_and_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_terminate_and_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously terminates an NS and deletes its instance ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance to terminate.</li>
+<li><strong>terminate_time</strong> – Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+automatically at this timestamp.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Terminate NS operation,
+specific to the NS being terminated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">‘SUCCESS’ if both operations were successful, ‘FAILED’ otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_terminate_sync">
+<code class="descname">ns_terminate_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_terminate_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_terminate_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously terminates an NS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance to terminate.</li>
+<li><strong>terminate_time</strong> – Timestamp indicating the end time of the NS, i.e. the NS will be terminated
+automatically at this timestamp.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Terminate NS operation,
+specific to the NS being terminated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_update">
+<code class="descname">ns_update</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function updates an NS instance. This operation is also used to embed VNF LCM operations in support of
+fine grained NS LCM approach. See the informative message flows in annex C. Actions that can be performed with
+an update include:
+- Adding existing VNF instances to the NS instance.
+- Removing VNF instances from the NS instance.
+- Instantiating new VNF instances and adding them to the NS instance.
+- Changing the DF of VNF instances belonging to the NS instance.
+- Changing the operational state of a VNF instance belonging to the NS instance.
+- Modifying information data and/or the configurable properties of a VNF instance belonging to the NS instance.
+- Changing the external connectivity of a VNF instance belonging to the NS instance.
+- Adding SAPs to the NS instance.
+- Removing SAPs from the NS instance.
+- Adding existing NS instances to the NS instance.
+- Removing nested NS instances from the NS instance.
+- Associate a new NSD version to the NS instance.
+- Moving VNF instances from one NS instance to another NS instance.
+- Adding VNFFGs to the NS instance.
+- Removing VNFFGs from the NS instance.
+- Update VNFFGs of the NS instance.
+- Changing the DF of the NS instance.
+Only one type of update shall be allowed per operation.</p>
+<p>This function was written in accordance with section 7.3.5 of ETSI GS NFV-IFA 013 v2.3.1 (2017-08).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance being updated.</li>
+<li><strong>update_type</strong> – Specifies the type of update. This parameter determines also which
+one of the following parameter is present in the operation. Possible
+values are:
+- AddVnf (adding existing VNF instance(s)),
+- RemoveVnf (removing VNF instance(s)),
+- InstantiateVnf (instantiating new VNF(s)),
+- ChangeVnfDf (Changing VNF DF),
+- OperateVnf (changing VNF state),
+- ModifyVnfInformation (modifying VNF information and/or the
+configurable properties of VNF instance(s)),
+- ChangeExtVnfConnectivity (changing the external connectivity of
+VNF instance(s))
+- AddSap (adding SAP(s)),
+- RemoveSap (removing SAP(s)),
+- AddNestedNs      (adding existing NS instance(s) as nested NS(s)),
+- RemoveNestedNs      (removing existing nested NS instance(s)),
+- AssocNewNsdVersion (associating a new NSD version to the NS
+instance),
+- MoveVnf (moving VNF instance(s) from one origin NS instance to a
+another target NS instance),
+- AddVnffg (adding VNFFG(s)),
+- RemoveVnffg      (removing VNFFG(s)),
+- UpdateVnffg      (updating VNFFG(s)),
+- ChangeNsDf (changing NS DF).</li>
+<li><strong>add_vnf_instance</strong> – Specify an existing VNF instance to be added to the NS instance.
+This parameter shall be present only if updateType=AddVnf.</li>
+<li><strong>remove_vnf_instance_id</strong> – Specify an existing VNF instance to be removed from the NS instance.
+The parameter contains the identifier(s) of the VNF instances to be
+removed. This parameter shall be present only if
+updateType=RemoveVnf.</li>
+<li><strong>instantiate_vnf_data</strong> – Specify the new VNF to be instantiated. This parameter can be used
+e.g. for the bottom-up NS creation. This parameter shall be present
+only if updateType=InstantiateVnf.</li>
+<li><strong>change_vnf_flavour_data</strong> – Specify the new DF of the VNF instance to be changed to. This
+parameter shall be present only if updateType=ChangeVnfDf.</li>
+<li><strong>operate_vnf_data</strong> – Specify the state of the VNF instance to be changed. This parameter
+shall be present only if updateType=OperateVnf.</li>
+<li><strong>modify_vnf_info_data</strong> – Specify the VNF Information parameters and/or the configurable
+properties of VNF instance to be modified. This parameter shall be
+present only if updateType=ModifyVnfInformation.</li>
+<li><strong>change_ext_vnf_connectivity_data</strong> – Specify the new external connectivity data of the VNF instance to
+be changed. This parameter shall be present only if
+updateType=ChangeExtVnfConnectivity.</li>
+<li><strong>add_sap</strong> – Specify a new SAP to be added to the NS instance. This parameter
+shall be present only if updateType=AddSap.</li>
+<li><strong>remove_sap_id</strong> – Specify an existing SAP to be removed from the NS instance. The
+parameter shall be present only if updateType=RemoveSap.</li>
+<li><strong>add_nested_ns_id</strong> – Specify an existing nested NS instance to be added to (nested
+within) the NS instance. This parameter shall be present only if
+updateType=AddNestedNs.</li>
+<li><strong>remove_nested_ns_id</strong> – Specify an existing nested NS instance to be removed from the NS
+instance. The parameter shall be present only if
+updateType=RemoveVnfNestedNs.</li>
+<li><strong>assoc_new_nsd_version_data</strong> – Specify the new NSD to be used for the NS instance. This parameter
+shall be present only if updateType=AssocNewNsdVersion.</li>
+<li><strong>move_vnf_instance_data</strong> – Specify existing VNF instance to be moved from one NS instance to
+another NS instance. This parameter shall be present only if
+updateType=MoveVnf.</li>
+<li><strong>add_vnffg</strong> – Specify the new VNFFG to be created to the NS Instance. This
+parameter shall be present only if updateType=AddVnffg.</li>
+<li><strong>remove_vnffg_id</strong> – Identifier of an existing VNFFG to be removed from the NS Instance.
+This parameter shall be present only if updateType=RemoveVnffg.</li>
+<li><strong>update_vnffg</strong> – Specify the new VNFFG Information data to be updated for a VNFFG of
+the NS Instance. This parameter shall be present only if
+updateType=UpdateVnffg.</li>
+<li><strong>change_ns_flavour_data</strong> – Specifies the new DF to be applied to the NS instance. It shall be
+present only if updateType=ChangeNsDf.</li>
+<li><strong>update_time</strong> – Timestamp indicating the update time of the NS, i.e. the NS will be
+updated at this timestamp. Cardinality “0” indicates the NS update
+takes place immediately.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the NS lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.ns_update_sync">
+<code class="descname">ns_update_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.ns_update_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.ns_update_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously updates an NS instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the instance of the NS.</li>
+<li><strong>update_type</strong> – Specifies the type of update. See function ns_update for explanation
+of allowed values.</li>
+<li><strong>add_vnf_instance</strong> – Specify an existing VNF instance to be added to the NS instance.
+This parameter shall be present only if updateType=AddVnf.</li>
+<li><strong>remove_vnf_instance_id</strong> – Specify an existing VNF instance to be removed from the NS instance.
+The parameter contains the identifier(s) of the VNF instances to be
+removed. This parameter shall be present only if
+updateType=RemoveVnf.</li>
+<li><strong>instantiate_vnf_data</strong> – Specify the new VNF to be instantiated. This parameter can be used
+e.g. for the bottom-up NS creation. This parameter shall be present
+only if updateType=InstantiateVnf.</li>
+<li><strong>change_vnf_flavour_data</strong> – Specify the new DF of the VNF instance to be changed to. This
+parameter shall be present only if updateType=ChangeVnfDf.</li>
+<li><strong>operate_vnf_data</strong> – Specify the state of the VNF instance to be changed. This parameter
+shall be present only if updateType=OperateVnf.</li>
+<li><strong>modify_vnf_info_data</strong> – Specify the VNF Information parameters and/or the configurable
+properties of VNF instance to be modified. This parameter shall
+be present only if updateType=ModifyVnfInformation.</li>
+<li><strong>change_ext_vnf_connectivity_data</strong> – Specify the new external connectivity data of the VNF instance to be
+changed. This parameter shall be present only if
+updateType=ChangeExtVnfConnectivity.</li>
+<li><strong>add_sap</strong> – Specify a new SAP to be added to the NS instance. This parameter
+shall be present only if updateType=AddSap.</li>
+<li><strong>remove_sap_id</strong> – Specify an existing SAP to be removed from the NS instance. The
+parameter shall be present only if updateType=RemoveSap.</li>
+<li><strong>add_nested_ns_id</strong> – Specify an existing nested NS instance to be added to (nested
+within) the NS instance. This parameter shall be present only if
+updateType=AddNestedNs.</li>
+<li><strong>remove_nested_ns_id</strong> – Specify an existing nested NS instance to be removed from the NS
+instance. The parameter shall be present only if
+updateType=RemoveVnfNestedNs.</li>
+<li><strong>assoc_new_nsd_version_data</strong> – Specify the new NSD to be used for the NS instance. This parameter
+shall be present only if updateType=AssocNewNsdVersion.</li>
+<li><strong>move_vnf_instance_data</strong> – Specify existing VNF instance to be moved from one NS instance to
+another NS instance. This parameter shall be present only if
+updateType=MoveVnf.</li>
+<li><strong>add_vnffg</strong> – Specify the new VNFFG to be created to the NS Instance. This
+parameter shall be present only if updateType=AddVnffg.</li>
+<li><strong>remove_vnffg_id</strong> – Identifier of an existing VNFFG to be removed from the NS Instance.
+This parameter shall be present only if updateType=RemoveVnffg.</li>
+<li><strong>update_vnffg</strong> – Specify the new VNFFG Information data to be updated for a VNFFG of
+the NS Instance. This parameter shall be present only if
+updateType=UpdateVnffg.</li>
+<li><strong>change_ns_flavour_data</strong> – Specifies the new DF to be applied to the NS instance. It shall be
+present only if updateType=ChangeNsDf.</li>
+<li><strong>update_time</strong> – Timestamp indicating the update time of the NS, i.e. the NS will be
+updated at this timestamp. Cardinality “0” indicates the NS update
+takes place immediately.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.nsd_delete">
+<code class="descname">nsd_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.nsd_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.nsd_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will delete one or more NSD(s). The associated NSD information objects will be deleted as well.</p>
+<p>This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nsd_info_id</strong> – Identifier of the NSD information objects to be deleted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Identifier of the deleted NSD information objects.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.nsd_fetch">
+<code class="descname">nsd_fetch</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.nsd_fetch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.nsd_fetch" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will fetch an NSD from the NFVO.</p>
+<p>This function was written in accordance with section 7.2.17 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nsd_info_id</strong> – Identifier of the NSD information object associated with the NSD to be fetched.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The fetched NSD.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.nsd_info_create">
+<code class="descname">nsd_info_create</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.nsd_info_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.nsd_info_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will create an NSD information object in the NFVO for the NSD to be uploaded.</p>
+<p>This function was written in accordance with section 7.2.16 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_defined_data</strong> – User defined data for the NSD to be uploaded.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Identifier of the created NSD information object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.nsd_info_query">
+<code class="descname">nsd_info_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.nsd_info_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.nsd_info_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will enable the OSS/BSS to query the NFVO concerning details of one or more NSD information
+objects.</p>
+<p>This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_filter</strong> – Filter defining the NSD information objects on which the query applies, based on
+attributes of the NSD information objects. It can also be used to specify one or
+more NSD information objects to be queried by providing their identifiers.</li>
+<li><strong>attribute_selector</strong> – Provides a list of attribute names of the NSD information objects. If present, only
+these attributes are returned for the NSD information objects matching the filter.
+If absent, the complete NSD information objects are returned.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Details of the NSD information objects matching the input filter.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.nsd_upload">
+<code class="descname">nsd_upload</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.nsd_upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.nsd_upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will upload an NSD to the NFVO.</p>
+<p>This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 013 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nsd_info_id</strong> – Identifier of the NSD information object associated with the NSD to be uploaded.</li>
+<li><strong>nsd</strong> – NSD to be uploaded.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.poll_for_operation_completion">
+<code class="descname">poll_for_operation_completion</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.poll_for_operation_completion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.poll_for_operation_completion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function polls the status of an operation until it reaches a final state or time is up.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lifecycle_operation_occurrence_id</strong> – ID of the VNF lifecycle operation occurrence.</li>
+<li><strong>final_states</strong> – List of states of the operation that when reached, the polling
+stops.</li>
+<li><strong>max_wait_time</strong> – Maximum interval of time in seconds to wait for the operation to
+reach a final state.</li>
+<li><strong>poll_interval</strong> – Interval of time in seconds between consecutive polls.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.resolve_ns_cp_addr">
+<code class="descname">resolve_ns_cp_addr</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.resolve_ns_cp_addr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.resolve_ns_cp_addr" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will search for pattern like ${vnf_name:cp_name:addr_type} (e.g ${VNF1:east:ip}) recursively
+inside ‘data’ and resolve them using information found in ‘ns_info’</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_info</strong> – NsInfo information element.</li>
+<li><strong>data</strong> – Data structure containing patterns that may need resolving.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Data structure with resolved patterns.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.search_in_notification_queue">
+<code class="descname">search_in_notification_queue</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.search_in_notification_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.search_in_notification_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.set_generic_config">
+<code class="descname">set_generic_config</code><span class="sig-paren">(</span><em>VNF_INSTANTIATE_TIMEOUT=600</em>, <em>VNF_SCALE_TIMEOUT=360</em>, <em>VNF_STOP_TIMEOUT=300</em>, <em>VNF_START_TIMEOUT=300</em>, <em>VNF_TERMINATE_TIMEOUT=300</em>, <em>VNF_STABLE_STATE_TIMEOUT=360</em>, <em>NS_INSTANTIATE_TIMEOUT=600</em>, <em>NS_SCALE_TIMEOUT=360</em>, <em>NS_UPDATE_TIMEOUT=360</em>, <em>NS_TERMINATE_TIMEOUT=300</em>, <em>NS_STABLE_STATE_TIMEOUT=360</em>, <em>POLL_INTERVAL=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.set_generic_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.set_generic_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_ns_allocated_vresources">
+<code class="descname">validate_ns_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_ns_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_ns_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks that the virtual resources allocated to the NS match the ones in the NSD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the allocated resources are as expected, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_ns_instantiation_level">
+<code class="descname">validate_ns_instantiation_level</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_ns_instantiation_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_ns_instantiation_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies that the number of VNFC instances for each VNF in the provided NsInfo information element
+matches the number of instances indicated by the instantiation level ID corresponding to that VNF.</p>
+<p>If no instantiation level ID corresponds to a particular VNF, the number of VNFC instances for that VNF will be
+compared to the number of instances indicated by the default instantiation level ID corresponding to that VNF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_info</strong> – NsInfo information element.</li>
+<li><strong>instantiation_level_list</strong> – <p>List of dictionaries containing the VNF name and the corresponding target
+instantiation level ID.
+Example: [{‘target_vnf_name’: ‘empirix’,</p>
+<blockquote>
+<div>’target_instantiation_level_id’: ‘scaled’}]</div></blockquote>
+</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the number of VNFC instances for each VNF is correct,
+False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_ns_released_vresources">
+<code class="descname">validate_ns_released_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_ns_released_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_ns_released_vresources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions validates that the resources allocated to an NS instance have been released.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ns_info</strong> – NsInfo structure holding information about the NS instance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the resources have been released, False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks that the virtual resources allocated to the VNF match the ones in the VNFD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the allocated resources are as expected, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_vnf_deployment_flavour">
+<code class="descname">validate_vnf_deployment_flavour</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_vnf_deployment_flavour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_vnf_deployment_flavour" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function validates that the VNF with the given instance ID uses the correct deployment flavor and
+instantiation level ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance whose deployment flavor and instantiation
+level ID should be validated.</li>
+<li><strong>expected_flavour_id</strong> – Expected deployment flavour of the VNF instance.</li>
+<li><strong>expected_instantiation_level_id</strong> – Expected instantiation level ID of the VNF instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the VNF instance uses the correct deployment flavor and
+instantiation level ID, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_vnf_instantiation_level">
+<code class="descname">validate_vnf_instantiation_level</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_vnf_instantiation_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_vnf_instantiation_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies that the number of VNFC instances in the provided VnfInfo information element matches the
+number of instances indicated by the provided instantiation level ID of the current deployment flavor.</p>
+<p>If the number of instances for a particular VDU is not present in the provided instantiation level ID, the
+number of instances for that VDU will be compared to the number of instances indicated by the default
+instantiation level ID of the current deployment flavor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_info</strong> – VnfInfo information element.</li>
+<li><strong>instantiation_level_id</strong> – ID of the instantiation level.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the number of VNFC instances is correct, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_vnf_released_vresources">
+<code class="descname">validate_vnf_released_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_vnf_released_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_vnf_released_vresources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions validates that the resources allocated to a VNF instance have been released.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_info_initial</strong> – VnfInfo structure holding information about the initial state of the VNF instance.</li>
+<li><strong>vnf_info_final</strong> – VnfInfo structure holding information about the final state of the VNF instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the resources allocated to the initial VNF and not allocated to the final
+VNF have been released, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.validate_vnf_vresource_state">
+<code class="descname">validate_vnf_vresource_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.validate_vnf_vresource_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.validate_vnf_vresource_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Vnf Instance ID value.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the the VNF state in the VNFM matches the state indicated by the VIM,
+False otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.verify_ns_sw_images">
+<code class="descname">verify_ns_sw_images</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.verify_ns_sw_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.verify_ns_sw_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies that each VNFC in each VNF of the NS with the given instance ID uses the image indicated
+in the corresponding VNFD at the corresponding VDU.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if all VNFCs use the correct images, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.verify_ns_vnf_instance_count">
+<code class="descname">verify_ns_vnf_instance_count</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.verify_ns_vnf_instance_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.verify_ns_vnf_instance_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies that the NS with the provided instance ID contains the correct number of VNF instances.
+It can also be used to validate the result of the NS scale in/out operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance.</li>
+<li><strong>aspect_id</strong> – Provides the aspect of the NS that is requested to be scaled, as declared in the
+NSD.</li>
+<li><strong>number_of_steps</strong> – Specifies the number of scaling steps to be performed. Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional scaling parameters.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the number of VNF instances is correct, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.verify_vnf_nsd_mapping">
+<code class="descname">verify_vnf_nsd_mapping</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.verify_vnf_nsd_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.verify_vnf_nsd_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies that the VNF instance(s) that are part of the NS with the provided instance ID have been
+deployed according to the NSD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ns_instance_id</strong> – Identifier of the NS instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the VNF instance(s) have been deployed according to the NSD, False
+otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.verify_vnf_sw_images">
+<code class="descname">verify_vnf_sw_images</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.verify_vnf_sw_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.verify_vnf_sw_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies that each VNFC part of the VNF with the given instance ID uses the image indicated in the
+VNFD at the corresponding VDU.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>additional_param</strong> – Additional parameters used for filtering.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if all VNFCs use the correct images, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_change_flavour">
+<code class="descname">vnf_change_flavour</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_change_flavour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_change_flavour" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function changes the deployment flavour of a VNF instance.</p>
+<p>This function was written in accordance with section 7.2.6 of ETSI GS NFV-IFA 007 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to be modified.</li>
+<li><strong>new_flavour_id</strong> – Identifier of the new VNF DF to apply to this VNF instance.</li>
+<li><strong>instantiation_level_id</strong> – Identifier of the instantiation level of the DF to be used. If not present,
+the default instantiation level as declared in the VNFD shall be used.</li>
+<li><strong>ext_virtual_link</strong> – Information about external VLs to connect the VNF to.</li>
+<li><strong>ext_managed_virtual_link</strong> – Information about internal VLs that are managed by other entities than the
+VNFM.</li>
+<li><strong>vim_connection_info</strong> – Information about VIM connection(s) for managing resources for the VNF
+instance, or external/externally-managed virtual links. This attribute shall
+be supported and present if VNF-related resource management in direct mode
+is applicable. In that case, this attribute shall be present if there is the
+need to communicate VIM connection information for external or
+externally-managed virtual links.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the flavour change
+process, specific to the VNF being modified as declared in the VNFD.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_create_and_instantiate">
+<code class="descname">vnf_create_and_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_create_and_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_create_and_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a VNF instance ID and synchronously instantiates a VNF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnfd_id</strong> – Identifier that identifies the VNFD which defines the VNF instance to be
+created.</li>
+<li><strong>flavour_id</strong> – Identifier of the VNF DF to be instantiated.</li>
+<li><strong>vnf_instance_name</strong> – Human-readable name of the VNF instance to be created.</li>
+<li><strong>vnf_instance_description</strong> – Human-readable description of the VNF instance to be created.</li>
+<li><strong>instantiation_level_id</strong> – Identifier of the instantiation level of the DF to be instantiated. If not
+present, the default instantiation level as declared in the VNFD shall be
+instantiated.</li>
+<li><strong>ext_virtual_link</strong> – Information about external VLs to connect the VNF to.</li>
+<li><strong>ext_managed_virtual_link</strong> – Information about internal VLs that are managed by other entities than the
+VNFM.</li>
+<li><strong>localization_language</strong> – Localization language of the VNF to be instantiated.</li>
+<li><strong>additional_param</strong> – Additional parameters passed as input to the instantiation process, specific
+to the VNF being instantiated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_create_id">
+<code class="descname">vnf_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_create_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified
+by that identifier, in the NOT_INSTANTIATED state without instantiating the VNF or doing any additional
+lifecycle operation(s).</p>
+<p>This function was written in accordance with section 7.2.2 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnfd_id</strong> – Identifier that identifies the VNFD which defines the VNF instance to be
+created.</li>
+<li><strong>vnf_instance_name</strong> – Human-readable name of the VNF instance to be created.</li>
+<li><strong>vnf_instance_description</strong> – Human-readable description of the VNF instance to be created.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">VNF instance identifier just created.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_delete_id">
+<code class="descname">vnf_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function deletes a VNF instance ID and the associated instance of a VnfInfo information element.</p>
+<p>This function was written in accordance with section 7.2.8 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vnf_instance_id</strong> – VNF instance identifier to be deleted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_instantiate">
+<code class="descname">vnf_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function instantiates a particular deployment flavour of a VNF based on the definition in the VNFD.</p>
+<p>This function was written in accordance with section 7.2.3 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>flavour_id</strong> – Identifier of the VNF DF to be instantiated.</li>
+<li><strong>instantiation_level_id</strong> – Identifier of the instantiation level of the DF to be instantiated. If not
+present, the default instantiation level as declared in the VNFD shall be
+instantiated.</li>
+<li><strong>ext_virtual_link</strong> – Information about external VLs to connect the VNF to.</li>
+<li><strong>ext_managed_virtual_link</strong> – Information about internal VLs that are managed by other entities than the
+VNFM.</li>
+<li><strong>localization_language</strong> – Localization language of the VNF to be instantiated.</li>
+<li><strong>additional_param</strong> – Additional parameters passed as input to the instantiation process, specific
+to the VNF being instantiated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_instantiate_sync">
+<code class="descname">vnf_instantiate_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_instantiate_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_instantiate_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function performs a synchronous VNF instantiation, i.e. instantiates a VNF and then polls the operation
+status until the operation reaches a final state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>flavour_id</strong> – Identifier of the VNF DF to be instantiated.</li>
+<li><strong>instantiation_level_id</strong> – Identifier of the instantiation level of the DF to be instantiated. If not
+present, the default instantiation level as declared in the VNFD shall be
+instantiated.</li>
+<li><strong>ext_virtual_link</strong> – Information about external VLs to connect the VNF to.</li>
+<li><strong>ext_managed_virtual_link</strong> – Information about internal VLs that are managed by other entities than the
+VNFM.</li>
+<li><strong>localization_language</strong> – Localization language of the VNF to be instantiated.</li>
+<li><strong>additional_param</strong> – Additional parameters passed as input to the instantiation process, specific
+to the VNF being instantiated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_lifecycle_change_notification_subscribe">
+<code class="descname">vnf_lifecycle_change_notification_subscribe</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_lifecycle_change_notification_subscribe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_lifecycle_change_notification_subscribe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_operate">
+<code class="descname">vnf_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_operate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function changes the state of a VNF instance.</p>
+<p>This function was written in accordance with section 7.2.11 of ETSI GS NFV-IFA 007 v2.1.6 (2017-06).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>change_state_to</strong> – Desired state to change the VNF to. Permitted values are: start, stop.</li>
+<li><strong>stop_type</strong> – It signals whether forceful or graceful stop is requested. Possible values:
+‘forceful’ and ‘graceful’.</li>
+<li><strong>graceful_stop_timeout</strong> – Time interval to wait for the VNF to be taken out of service during graceful
+stop, before stopping the VNF.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Operate VNF operation,
+specific to the VNF being operated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_operate_sync">
+<code class="descname">vnf_operate_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_operate_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_operate_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function performs a synchronous change of a VNF state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</li>
+<li><strong>change_state_to</strong> – Desired state to change the VNF to. Permitted values are: start, stop.</li>
+<li><strong>stop_type</strong> – It signals whether forceful or graceful stop is requested. Possible values:
+‘forceful’ and ‘graceful’.</li>
+<li><strong>graceful_stop_timeout</strong> – Time interval to wait for the VNF to be taken out of service during
+graceful stop, before stopping the VNF.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Operate VNF operation,
+specific to the VNF being operated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation provides information about VNF instances. The applicable VNF instances can be chosen based on
+filtering criteria, and the information can be restricted to selected attributes.</p>
+<p>This function was written in accordance with section 7.2.9 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query_filter</strong> – Filter to select the VNF instance(s) about which information is queried.</li>
+<li><strong>attribute_selector</strong> – Provides a list of attribute names. If present, only these attributes are returned
+for the VNF instance(s) matching the filter. If absent, the complete information is
+returned for the VNF instance(s) matching the filter.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The information items about the selected VNF instance(s) that are returned. If
+attribute_selector is present, only the attributes listed in attribute_selector are
+returned for the selected VNF instance(s).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_scale">
+<code class="descname">vnf_scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function scales a VNF horizontally (out/in).</p>
+<p>This function was written in accordance with section 7.2.4 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>scale_type</strong> – Defines the type of the scale operation requested (scale out, scale in).</li>
+<li><strong>aspect_id</strong> – Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+VNFD.</li>
+<li><strong>number_of_steps</strong> – Number of scaling steps to be executed as part of this ScaleVnf operation.
+Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the scaling process, specific
+to the VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_scale_sync">
+<code class="descname">vnf_scale_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_scale_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_scale_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously scales a VNF horizontally (out/in).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>scale_type</strong> – Defines the type of the scale operation requested. Possible values: ‘in’, or ‘out’</li>
+<li><strong>aspect_id</strong> – Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+VNFD.</li>
+<li><strong>number_of_steps</strong> – Number of scaling steps to be executed as part of this ScaleVnf operation.
+Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the scaling process, specific
+to the VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_scale_to_level">
+<code class="descname">vnf_scale_to_level</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_scale_to_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_scale_to_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function scales an instantiated VNF of a particular DF to a target size.</p>
+<p>This function was written in accordance with section 7.2.5 of ETSI GS NFV-IFA 007 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>instantiation_level_id</strong> – Identifier of the target instantiation level of the current DF to which the
+VNF is requested to be scaled. Either instantiationLevelId or scaleInfo
+but not both shall be present.</li>
+<li><strong>scale_info</strong> – For each scaling aspect of the current DF, defines the target scale level to
+which the VNF is to be scaled. Either instantiationLevelId or scaleInfo
+but not both shall be present.</li>
+<li><strong>additional_param</strong> – Additional parameters passed as input to the scaling process, specific to the
+VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_scale_to_level_sync">
+<code class="descname">vnf_scale_to_level_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_scale_to_level_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_scale_to_level_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously scales an instantiated VNF of a particular DF to a target size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>instantiation_level_id</strong> – Identifier of the target instantiation level of the current DF to which the
+VNF is requested to be scaled. Either instantiationLevelId or scaleInfo
+but not both shall be present.</li>
+<li><strong>scale_info</strong> – For each scaling aspect of the current DF, defines the target scale level to
+which the VNF is to be scaled. Either instantiationLevelId or scaleInfo
+but not both shall be present.</li>
+<li><strong>additional_param</strong> – Additional parameters passed as input to the scaling process, specific to the
+VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_terminate">
+<code class="descname">vnf_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function terminates a VNF.</p>
+<p>This function was written in accordance with section 7.2.7 of ETSI GS NFV-IFA 007 v2.1.6 (2017-06).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to be terminated.</li>
+<li><strong>termination_type</strong> – Signals whether forceful or graceful termination is requested.</li>
+<li><strong>graceful_termination_timeout</strong> – The time interval to wait for the VNF to be taken out of service during
+graceful termination, before shutting down the VNF and releasing the
+resources.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Terminate VNF
+operation, specific to the VNF being terminated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_terminate_and_delete">
+<code class="descname">vnf_terminate_and_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_terminate_and_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_terminate_and_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously terminates a VNF and deletes its instance ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to be terminated.</li>
+<li><strong>termination_type</strong> – Signals whether forceful or graceful termination is requested.</li>
+<li><strong>graceful_termination_timeout</strong> – The time interval to wait for the VNF to be taken out of service during
+graceful termination, before shutting down the VNF and releasing the
+resources.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Terminate VNF
+operation, specific to the VNF being terminated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">‘SUCCESS’ if both operations were successful, ‘FAILED’ otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.vnf_terminate_sync">
+<code class="descname">vnf_terminate_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.vnf_terminate_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.vnf_terminate_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously terminates a VNF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to be terminated.</li>
+<li><strong>termination_type</strong> – Signals whether forceful or graceful termination is requested.</li>
+<li><strong>graceful_termination_timeout</strong> – The time interval to wait for the VNF to be taken out of service during
+graceful termination, before shutting down the VNF and releasing the
+resources.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the Terminate VNF
+operation, specific to the VNF being terminated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.wait_for_notification">
+<code class="descname">wait_for_notification</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.wait_for_notification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.wait_for_notification" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.wait_for_ns_stable_state">
+<code class="descname">wait_for_ns_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.wait_for_ns_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.wait_for_ns_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function waits for the NS with the specified ID to be in a stable state. This is useful when an operation
+requires the NS to be in a particular state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ns_instance_id</strong> – Identifier of the NS instance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.mano.Mano.wait_for_vnf_stable_state">
+<code class="descname">wait_for_vnf_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano.wait_for_vnf_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano.wait_for_vnf_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function waits for the VNF with the specified ID to be in a stable state. This is useful when an operation
+requires the VNF to be in a particular state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vnf_instance_id</strong> – Identifier of the VNF instance.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.generic.mano.ManoGenericError">
+<em class="property">exception </em><code class="descclassname">api.generic.mano.</code><code class="descname">ManoGenericError</code><a class="reference internal" href="_modules/api/generic/mano.html#ManoGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.ManoGenericError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.generic.ApiGenericError" title="api.generic.ApiGenericError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.generic.ApiGenericError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation MANO generic API.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-api.generic.traffic">
+<span id="api-generic-traffic-module"></span><h2>api.generic.traffic module<a class="headerlink" href="#module-api.generic.traffic" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.generic.traffic.Traffic">
+<em class="property">class </em><code class="descclassname">api.generic.traffic.</code><code class="descname">Traffic</code><span class="sig-paren">(</span><em>vendor</em>, <em>adapter_config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of functions used to control the test traffic.</p>
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.any_traffic_loss">
+<code class="descname">any_traffic_loss</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.any_traffic_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.any_traffic_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if any packets are dropped.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>delay_time</strong> – Time, in seconds, to wait until polling for traffic.</li>
+<li><strong>tolerance</strong> – Acceptable percent of lost traffic.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if traffic flows with dropped packets, False otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.calculate_activation_time">
+<code class="descname">calculate_activation_time</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.calculate_activation_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.calculate_activation_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.calculate_deactivation_time">
+<code class="descname">calculate_deactivation_time</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.calculate_deactivation_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.calculate_deactivation_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.calculate_service_disruption_length">
+<code class="descname">calculate_service_disruption_length</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.calculate_service_disruption_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.calculate_service_disruption_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.clear_counters">
+<code class="descname">clear_counters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.clear_counters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.clear_counters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function clears all traffic counters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if all counters have been cleared, False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.config_traffic_load">
+<code class="descname">config_traffic_load</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.config_traffic_load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.config_traffic_load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function applies the new traffic load and traffic configurations. If the traffic already flows, the
+parameters get applied at run time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>traffic_load</strong> – Possible values: ‘LOW_TRAFFIC_LOAD’, ‘NORMAL_TRAFFIC_LOAD’, ‘MAX_TRAFFIC_LOAD’,
+‘INITIAL’, ‘PERCENTAGE’</li>
+<li><strong>traffic_config</strong> – Specific information required to run the traffic.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if traffic load and configuration parameter were applied, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.destroy">
+<code class="descname">destroy</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.does_traffic_flow">
+<code class="descname">does_traffic_flow</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.does_traffic_flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.does_traffic_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if packets are received. Dropped packets may occur, but are not considered as a negative
+outcome of the function. If all packets get dropped, the function fails.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>delay_time</strong> – Time, in seconds, to wait until polling for traffic.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if traffic flow is detected, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.reconfig_traffic_dest">
+<code class="descname">reconfig_traffic_dest</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.reconfig_traffic_dest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.reconfig_traffic_dest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function starts the traffic emission.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>delay_time</strong> – Time, in seconds, to wait until starting traffic.</li>
+<li><strong>return_when_emission_starts</strong> – Flag influencing if the command should return back immediately or only when
+the emission actually started.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if emission stared, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.traffic.Traffic.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function stops the traffic emission.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>delay_time</strong> – Time, in seconds, to wait until stopping traffic.</li>
+<li><strong>return_when_emission_stops</strong> – Flag influencing if the command should return back immediately or only when
+the emission actually stopped.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if emission stopped, False otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.generic.traffic.TrafficGenericError">
+<em class="property">exception </em><code class="descclassname">api.generic.traffic.</code><code class="descname">TrafficGenericError</code><a class="reference internal" href="_modules/api/generic/traffic.html#TrafficGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.TrafficGenericError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.generic.ApiGenericError" title="api.generic.ApiGenericError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.generic.ApiGenericError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation traffic generic API.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="api-generic-vim-module">
+<h2>api.generic.vim module<a class="headerlink" href="#api-generic-vim-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-api.generic.vnf">
+<span id="api-generic-vnf-module"></span><h2>api.generic.vnf module<a class="headerlink" href="#module-api.generic.vnf" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.generic.vnf.Vnf">
+<em class="property">class </em><code class="descclassname">api.generic.vnf.</code><code class="descname">Vnf</code><span class="sig-paren">(</span><em>vendor</em>, <em>adapter_config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of generic functions representing operations exposed by the VNF towards the VNFM as defined by
+ETSI GS NFV-IFA 008 v2.1.1 (2016-10).</p>
+<dl class="method">
+<dt id="api.generic.vnf.Vnf.config_applied">
+<code class="descname">config_applied</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf.config_applied"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf.config_applied" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if the configuration has been applied to the VNF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the configuration has been applied successfully, False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vnf.Vnf.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the status of a VNF lifecycle management operation.</p>
+<p>This function was written in accordance with section 7.2.13 of ETSI GS NFV-IFA 008 v2.1.1 (2016-10).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lifecycle_operation_occurrence_id</strong> – ID of the VNF lifecycle operation occurrence.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Status of the operation ex. ‘Processing’, ‘Failed’.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vnf.Vnf.license_applied">
+<code class="descname">license_applied</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf.license_applied"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf.license_applied" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if the license has been applied to the VNF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the license has been applied successfully, False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vnf.Vnf.poll_for_operation_completion">
+<code class="descname">poll_for_operation_completion</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf.poll_for_operation_completion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf.poll_for_operation_completion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function polls the status of an operation until it reaches a final state or time is up.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lifecycle_operation_occurrence_id</strong> – ID of the VNF lifecycle operation occurrence.</li>
+<li><strong>final_states</strong> – List of states of the operation that when reached, the polling
+stops.</li>
+<li><strong>max_wait_time</strong> – Maximum interval of time in seconds to wait for the operation to
+reach a final state.</li>
+<li><strong>poll_interval</strong> – Interval of time in seconds between consecutive polls.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vnf.Vnf.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is exposed by the VNF at the Vnf-tst interface and is used by the Test System to trigger VNF scale
+operation at the VNF.</p>
+<p>This function is a re-exposure of the VNF Lifecycle Management interface at the Ve-Vnfm-vnf reference point.
+See ETSI GS NFV-IFA 008 v2.1.1 (2016-10) section 7.2.4.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>scale_type</strong> – Defines the type of the scale operation requested (scale out, scale in).</li>
+<li><strong>aspect_id</strong> – Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+VNFD.</li>
+<li><strong>number_of_steps</strong> – Number of scaling steps to be executed as part of this ScaleVnf operation.
+Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the scaling process, specific
+to the VNF being scaled.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the VNF lifecycle operation occurrence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vnf.Vnf.scale_sync">
+<code class="descname">scale_sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf.scale_sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf.scale_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function synchronously scales the VNF horizontally (out/in).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vnf_instance_id</strong> – Identifier of the VNF instance to which this scaling request is related.</li>
+<li><strong>scale_type</strong> – Defines the type of the scale operation requested. Possible values: ‘in’, or ‘out’</li>
+<li><strong>aspect_id</strong> – Identifies the aspect of the VNF that is requested to be scaled, as declared in the
+VNFD.</li>
+<li><strong>number_of_steps</strong> – Number of scaling steps to be executed as part of this ScaleVnf operation.
+Defaults to 1.</li>
+<li><strong>additional_param</strong> – Additional parameters passed by the NFVO as input to the scaling process, specific
+to the VNF being scaled.</li>
+<li><strong>poll_interval</strong> – Interval of time in seconds between consecutive polls on the scaling operation
+result.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.generic.vnf.VnfGenericError">
+<em class="property">exception </em><code class="descclassname">api.generic.vnf.</code><code class="descname">VnfGenericError</code><a class="reference internal" href="_modules/api/generic/vnf.html#VnfGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.VnfGenericError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.generic.ApiGenericError" title="api.generic.ApiGenericError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.generic.ApiGenericError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation VNF generic API.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-api.generic">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-api.generic" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="api.generic.ApiGenericError">
+<em class="property">exception </em><code class="descclassname">api.generic.</code><code class="descname">ApiGenericError</code><a class="reference internal" href="_modules/api/generic.html#ApiGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.ApiGenericError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="api.html#api.ApiError" title="api.ApiError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.ApiError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation generic API.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="api.generic.construct_generic">
+<code class="descclassname">api.generic.</code><code class="descname">construct_generic</code><span class="sig-paren">(</span><em>vendor</em>, <em>module_type</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic.html#construct_generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.construct_generic" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function fetches the adapter constructor for the specified vendor and module type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vendor</strong> – The name of the vendor of the module. Ex “openstack”</li>
+<li><strong>module_type</strong> – The module type for which to fetch the constructor. Ex. “vnfm”</li>
+<li><strong>kwargs</strong> – Additional key-value pairs.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The constructor for the specified vendor and module type.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.structures.html" class="btn btn-neutral float-right" title="api.structures package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api.adapter.vnfm.html" class="btn btn-neutral" title="api.adapter.vnfm package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

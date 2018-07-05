@@ -7,10 +7,19 @@ Welcome to LCM's documentation!
 ===============================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5 
    :caption: Contents:
 
-
+   module
+   api
+   api.adapter
+   api.adapter.mano
+   api.adapter.traffic
+   api.adapter.vim
+   api.adapter.vnf
+   api.adapter.vnfm
+   api.generic
+   api.structures
 
 Indices and tables
 ==================
