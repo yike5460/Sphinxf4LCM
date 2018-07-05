@@ -1,10 +1,7 @@
-api.adapter.vim package
+api.adapter.vim
 =======================
 
-Submodules
-----------
-
-api.adapter.vim.dummy module
+api.adapter.vim.dummy 
 ----------------------------
 
 .. automodule:: api.adapter.vim.dummy
@@ -12,7 +9,7 @@ api.adapter.vim.dummy module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.vim.openstack module
+api.adapter.vim.openstack
 --------------------------------
 
 .. automodule:: api.adapter.vim.openstack
@@ -21,7 +18,7 @@ api.adapter.vim.openstack module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter.vim

@@ -1,10 +1,8 @@
-api.adapter.mano package
+api.adapter.mano
 ========================
 
-Submodules
-----------
 
-api.adapter.mano.cisconfv module
+api.adapter.mano.cisconfv
 --------------------------------
 
 .. automodule:: api.adapter.mano.cisconfv
@@ -12,7 +10,7 @@ api.adapter.mano.cisconfv module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.mano.cisconfv45 module
+api.adapter.mano.cisconfv45
 ----------------------------------
 
 .. automodule:: api.adapter.mano.cisconfv45
@@ -20,7 +18,7 @@ api.adapter.mano.cisconfv45 module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.mano.dummy module
+api.adapter.mano.dummy
 -----------------------------
 
 .. automodule:: api.adapter.mano.dummy
@@ -28,7 +26,7 @@ api.adapter.mano.dummy module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.mano.openbaton module
+api.adapter.mano.openbaton
 ---------------------------------
 
 .. automodule:: api.adapter.mano.openbaton
@@ -36,7 +34,7 @@ api.adapter.mano.openbaton module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.mano.rift module
+api.adapter.mano.rift
 ----------------------------
 
 .. automodule:: api.adapter.mano.rift
@@ -44,7 +42,7 @@ api.adapter.mano.rift module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.mano.sdl module
+api.adapter.mano.sdl
 ---------------------------
 
 .. automodule:: api.adapter.mano.sdl
@@ -52,7 +50,7 @@ api.adapter.mano.sdl module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.mano.tacker module
+api.adapter.mano.tacker
 ------------------------------
 
 .. automodule:: api.adapter.mano.tacker
@@ -61,7 +59,7 @@ api.adapter.mano.tacker module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter.mano

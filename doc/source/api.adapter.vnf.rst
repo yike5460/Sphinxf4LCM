@@ -1,10 +1,7 @@
-api.adapter.vnf package
+api.adapter.vnf 
 =======================
 
-Submodules
-----------
-
-api.adapter.vnf.cirros module
+api.adapter.vnf.cirros
 -----------------------------
 
 .. automodule:: api.adapter.vnf.cirros
@@ -12,7 +9,7 @@ api.adapter.vnf.cirros module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.vnf.dummy module
+api.adapter.vnf.dummy
 ----------------------------
 
 .. automodule:: api.adapter.vnf.dummy
@@ -20,7 +17,7 @@ api.adapter.vnf.dummy module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.vnf.openwrt module
+api.adapter.vnf.openwrt
 ------------------------------
 
 .. automodule:: api.adapter.vnf.openwrt
@@ -28,7 +25,7 @@ api.adapter.vnf.openwrt module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.vnf.ubuntu module
+api.adapter.vnf.ubuntu
 -----------------------------
 
 .. automodule:: api.adapter.vnf.ubuntu
@@ -37,7 +34,7 @@ api.adapter.vnf.ubuntu module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter.vnf

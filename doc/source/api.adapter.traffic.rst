@@ -1,10 +1,7 @@
-api.adapter.traffic package
+api.adapter.traffic 
 ===========================
 
-Submodules
-----------
-
-api.adapter.traffic.ping module
+api.adapter.traffic.ping 
 -------------------------------
 
 .. automodule:: api.adapter.traffic.ping
@@ -12,7 +9,7 @@ api.adapter.traffic.ping module
     :undoc-members:
     :show-inheritance:
 
-api.adapter.traffic.stc module
+api.adapter.traffic.stc
 ------------------------------
 
 .. automodule:: api.adapter.traffic.stc
@@ -21,7 +18,7 @@ api.adapter.traffic.stc module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter.traffic

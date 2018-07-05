@@ -1,10 +1,8 @@
-api.adapter.vnfm package
+api.adapter.vnfm 
 ========================
 
-Submodules
-----------
 
-api.adapter.vnfm.dummy module
+api.adapter.vnfm.dummy 
 -----------------------------
 
 .. automodule:: api.adapter.vnfm.dummy
@@ -13,7 +11,7 @@ api.adapter.vnfm.dummy module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter.vnfm

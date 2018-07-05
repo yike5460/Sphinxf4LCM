@@ -1,10 +1,7 @@
-api.adapter.em package
+api.adapter.em
 ======================
 
-Submodules
-----------
-
-api.adapter.em.tacker module
+api.adapter.em.tacker
 ----------------------------
 
 .. automodule:: api.adapter.em.tacker
@@ -13,7 +10,7 @@ api.adapter.em.tacker module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter.em

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>4. api.adapter.vim package &mdash; LCM 1.0 documentation</title>
+  <title>4. api.adapter.vim &mdash; LCM 1.0 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="5. api.adapter.vnf package" href="api.adapter.vnf.html" />
-    <link rel="prev" title="3. api.adapter.traffic package" href="api.adapter.traffic.html" /> 
+    <link rel="next" title="5. api.adapter.vnf" href="api.adapter.vnf.html" />
+    <link rel="prev" title="3. api.adapter.traffic" href="api.adapter.traffic.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,22 +80,23 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.em.html">1. api.adapter.em package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.mano.html">2. api.adapter.mano package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.traffic.html">3. api.adapter.traffic package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">4. api.adapter.vim package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">4.1. Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.vim.dummy">4.2. api.adapter.vim.dummy module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.vim.openstack">4.3. api.adapter.vim.openstack module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.vim">4.4. Module contents</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.adapter.html">api.adapter</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="api.adapter.em.html">1. api.adapter.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.adapter.mano.html">2. api.adapter.mano</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.adapter.traffic.html">3. api.adapter.traffic</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">4. api.adapter.vim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-api.adapter.vim.dummy">4.1. api.adapter.vim.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-api.adapter.vim.openstack">4.2. api.adapter.vim.openstack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-api.adapter.vim">4.3. __init__.py</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">5. api.adapter.vnf package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">6. api.adapter.vnfm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.adapter.vnf.html">5. api.adapter.vnf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.adapter.vnfm.html">6. api.adapter.vnfm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.adapter.html#module-api.adapter">__init__.py</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.generic.html">1. api.generic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.structures.html">2. api.structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">api</a></li>
 </ul>
 
             
@@ -143,7 +144,7 @@
         
           <li><a href="api.adapter.html">api.adapter</a> &raquo;</li>
         
-      <li>4. api.adapter.vim package</li>
+      <li>4. api.adapter.vim</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -162,13 +163,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-adapter-vim-package">
-<h1>4. api.adapter.vim package<a class="headerlink" href="#api-adapter-vim-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>4.1. Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
+  <div class="section" id="api-adapter-vim">
+<h1>4. api.adapter.vim<a class="headerlink" href="#api-adapter-vim" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-api.adapter.vim.dummy">
-<span id="api-adapter-vim-dummy-module"></span><h2>4.2. api.adapter.vim.dummy module<a class="headerlink" href="#module-api.adapter.vim.dummy" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-vim-dummy"></span><h2>4.1. api.adapter.vim.dummy<a class="headerlink" href="#module-api.adapter.vim.dummy" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.vim.dummy.DummyVimAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.vim.dummy.</code><code class="descname">DummyVimAdapter</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/vim/dummy.html#DummyVimAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.vim.dummy.DummyVimAdapter" title="Permalink to this definition">¶</a></dt>
@@ -200,7 +198,7 @@
 
 </div>
 <div class="section" id="module-api.adapter.vim.openstack">
-<span id="api-adapter-vim-openstack-module"></span><h2>4.3. api.adapter.vim.openstack module<a class="headerlink" href="#module-api.adapter.vim.openstack" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-vim-openstack"></span><h2>4.2. api.adapter.vim.openstack<a class="headerlink" href="#module-api.adapter.vim.openstack" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.vim.openstack.OpenstackVimAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.vim.openstack.</code><code class="descname">OpenstackVimAdapter</code><span class="sig-paren">(</span><em>auth_url=None</em>, <em>username=None</em>, <em>password=None</em>, <em>identity_api_version=None</em>, <em>project_name=None</em>, <em>project_domain_name=None</em>, <em>user_domain_name=None</em>, <em>verify=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/vim/openstack.html#OpenstackVimAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.vim.openstack.OpenstackVimAdapter" title="Permalink to this definition">¶</a></dt>
@@ -402,7 +400,7 @@ is a dictionary of key / value pairs that will be appended to the query string.<
 
 </div>
 <div class="section" id="module-api.adapter.vim">
-<span id="module-contents"></span><h2>4.4. Module contents<a class="headerlink" href="#module-api.adapter.vim" title="Permalink to this headline">¶</a></h2>
+<span id="init-py"></span><h2>4.3. __init__.py<a class="headerlink" href="#module-api.adapter.vim" title="Permalink to this headline">¶</a></h2>
 <dl class="exception">
 <dt id="api.adapter.vim.VimAdapterError">
 <em class="property">exception </em><code class="descclassname">api.adapter.vim.</code><code class="descname">VimAdapterError</code><a class="reference internal" href="_modules/api/adapter/vim.html#VimAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.vim.VimAdapterError" title="Permalink to this definition">¶</a></dt>
@@ -421,10 +419,10 @@ is a dictionary of key / value pairs that will be appended to the query string.<
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.adapter.vnf.html" class="btn btn-neutral float-right" title="5. api.adapter.vnf package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api.adapter.vnf.html" class="btn btn-neutral float-right" title="5. api.adapter.vnf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="api.adapter.traffic.html" class="btn btn-neutral" title="3. api.adapter.traffic package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="api.adapter.traffic.html" class="btn btn-neutral" title="3. api.adapter.traffic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
