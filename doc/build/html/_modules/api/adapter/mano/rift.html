@@ -1,0 +1,1171 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.adapter.mano.rift &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../../adapter.html">api.adapter</a> &raquo;</li>
+        
+          <li><a href="../mano.html">api.adapter.mano</a> &raquo;</li>
+        
+      <li>api.adapter.mano.rift</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.adapter.mano.rift</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.auth</span> <span class="k">import</span> <span class="n">HTTPBasicAuth</span>
+<span class="kn">from</span> <span class="nn">requests.packages.urllib3.exceptions</span> <span class="k">import</span> <span class="n">InsecureRequestWarning</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter</span> <span class="k">import</span> <span class="n">construct_adapter</span>
+<span class="kn">from</span> <span class="nn">api.adapter.mano</span> <span class="k">import</span> <span class="n">ManoAdapterError</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">api.structures.objects</span> <span class="k">import</span> <span class="n">NsInfo</span><span class="p">,</span> <span class="n">VnfInfo</span><span class="p">,</span> <span class="n">InstantiatedVnfInfo</span><span class="p">,</span> <span class="n">VnfcResourceInfo</span><span class="p">,</span> <span class="n">ResourceHandle</span><span class="p">,</span> <span class="n">NsdInfo</span><span class="p">,</span> \
+    <span class="n">VnfExtCpInfo</span><span class="p">,</span> <span class="n">Nsd</span><span class="p">,</span> <span class="n">VnfProfile</span><span class="p">,</span> <span class="n">NsDf</span><span class="p">,</span> <span class="n">NsVirtualLinkDesc</span><span class="p">,</span> <span class="n">NsVirtualLinkConnectivity</span><span class="p">,</span> <span class="n">Vnfd</span><span class="p">,</span> <span class="n">Vdu</span><span class="p">,</span> <span class="n">VirtualComputeDesc</span><span class="p">,</span> \
+    <span class="n">VirtualStorageDesc</span><span class="p">,</span> <span class="n">SwImageDesc</span><span class="p">,</span> <span class="n">VirtualCpuData</span><span class="p">,</span> <span class="n">VirtualCpuPinningData</span><span class="p">,</span> <span class="n">VirtualMemoryData</span><span class="p">,</span> <span class="n">VnfExtCpd</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">requests</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">(</span><span class="n">InsecureRequestWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RiftManoAdapterError"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapterError">[docs]</a><span class="k">class</span> <span class="nc">RiftManoAdapterError</span><span class="p">(</span><span class="n">ManoAdapterError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation Rift MANO adapter API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="RiftManoAdapter"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter">[docs]</a><span class="k">class</span> <span class="nc">RiftManoAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="s1">&#39;application/vnd.yang.data+json&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/vnd.yang.data+json&#39;</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">verify</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/</span><span class="si">%s</span><span class="s1">/project-config&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create </span><span class="si">%s</span><span class="s1"> instance - invalid project name: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                           <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create </span><span class="si">%s</span><span class="s1"> instance - </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                           <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create </span><span class="si">%s</span><span class="s1"> instance - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsr_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vim_helpers</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_operation_status"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">):</span>
+        <span class="c1"># TODO: the get logic inside ifs should be moved into functions</span>
+        <span class="n">operation_type</span><span class="p">,</span> <span class="n">resource_id</span> <span class="o">=</span> <span class="n">lifecycle_operation_occurrence_id</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;ns_instantiate&#39;</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+
+            <span class="n">ns_op_status</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">elif</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;failed&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;ns_terminate&#39;</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+
+            <span class="n">ns_op_status</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;failed&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;ns_scale_out&#39;</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+
+            <span class="n">ns_op_status</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">elif</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;scaling-out&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;ns_scale_in&#39;</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+
+            <span class="n">ns_op_status</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">elif</span> <span class="n">ns_op_status</span> <span class="o">==</span> <span class="s1">&#39;scaling-in&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;scaling_group_terminate&#39;</span><span class="p">:</span>
+            <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scaling_group_record_id</span> <span class="o">=</span> <span class="n">resource_id</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/</span><span class="si">%s</span><span class="s1">/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">/scaling-group-record/instance/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> \
+                       <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scaling_group_record_id</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for scaling-group-record </span><span class="si">%s</span><span class="s1">, NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                           <span class="p">(</span><span class="n">scaling_group_record_id</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">))</span>
+            <span class="n">scaling_group_record</span> <span class="o">=</span> <span class="n">json_content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nsr:scaling-group-record&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">scaling_group_record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">elif</span> <span class="s1">&#39;instance&#39;</span> <span class="ow">in</span> <span class="n">scaling_group_record</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;multiple_operations&#39;</span><span class="p">:</span>
+            <span class="n">operation_list</span> <span class="o">=</span> <span class="n">resource_id</span>
+            <span class="n">operation_status_list</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_operation_status</span><span class="p">,</span> <span class="n">operation_list</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span> <span class="ow">in</span> <span class="n">operation_status_list</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+            <span class="k">elif</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span> <span class="ow">in</span> <span class="n">operation_status_list</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+
+        <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unknown operation type &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">operation_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.ns_create_id"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.ns_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_create_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">ns_name</span><span class="p">,</span> <span class="n">ns_description</span><span class="p">):</span>
+        <span class="n">ns_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsr_metadata</span><span class="p">[</span><span class="n">ns_instance_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">ns_instance_id</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">ns_name</span><span class="p">,</span>
+            <span class="s1">&#39;nsd&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">),</span>
+            <span class="s1">&#39;short-name&#39;</span><span class="p">:</span> <span class="n">ns_name</span><span class="p">,</span>
+            <span class="s1">&#39;admin-status&#39;</span><span class="p">:</span> <span class="s1">&#39;ENABLED&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_description</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">ns_instance_id</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_nsd"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_nsd">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_nsd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">):</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/nsd-catalog/nsd/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get NSD </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="n">nsd</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;project-nsd:nsd-catalog&#39;</span><span class="p">][</span><span class="s1">&#39;nsd&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nsd</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rw-project-nsd:meta&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsd</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_nsd_generic"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_nsd_generic">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_nsd_generic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">):</span>
+        <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="c1"># Create empty generic Nsd object</span>
+        <span class="n">nsd_generic</span> <span class="o">=</span> <span class="n">Nsd</span><span class="p">()</span>
+
+        <span class="c1"># Populate Nsd generic data</span>
+        <span class="n">nsd_generic</span><span class="o">.</span><span class="n">nsd_identifier</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="n">nsd_generic</span><span class="o">.</span><span class="n">nsd_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">nsd_generic</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">])</span>
+        <span class="n">nsd_generic</span><span class="o">.</span><span class="n">designer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;vendor&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Populate VNFD IDs and build basic VnfProfile information elements</span>
+        <span class="n">nsd_generic</span><span class="o">.</span><span class="n">vnfd_id</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nsdf</span> <span class="o">=</span> <span class="n">NsDf</span><span class="p">()</span>
+        <span class="n">nsdf</span><span class="o">.</span><span class="n">vnf_profile</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ns_vlc</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vnfd</span> <span class="ow">in</span> <span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;constituent-vnfd&#39;</span><span class="p">]:</span>
+            <span class="n">vnfd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vnfd-id-ref&#39;</span><span class="p">])</span>
+            <span class="n">vnf_index</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;member-vnf-index&#39;</span><span class="p">])</span>
+            <span class="n">ns_vlc</span><span class="p">[</span><span class="n">vnf_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># Store the current VNFD</span>
+            <span class="k">if</span> <span class="n">vnfd_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nsd_generic</span><span class="o">.</span><span class="n">vnfd_id</span><span class="p">:</span>
+                <span class="n">nsd_generic</span><span class="o">.</span><span class="n">vnfd_id</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">)</span>
+
+            <span class="c1"># Build the VnfProfile information element for the VNF with the current VNF index</span>
+            <span class="n">vnf_profile</span> <span class="o">=</span> <span class="n">VnfProfile</span><span class="p">()</span>
+            <span class="n">vnf_profile</span><span class="o">.</span><span class="n">vnf_profile_id</span> <span class="o">=</span> <span class="n">vnf_index</span>
+            <span class="n">vnf_profile</span><span class="o">.</span><span class="n">vnfd_id</span> <span class="o">=</span> <span class="n">vnfd_id</span>
+            <span class="n">nsdf</span><span class="o">.</span><span class="n">vnf_profile</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnf_profile</span><span class="p">)</span>
+
+        <span class="c1"># Populate NsVirtualLinkDesc information element</span>
+        <span class="k">if</span> <span class="s1">&#39;vld&#39;</span> <span class="ow">in</span> <span class="n">nsd</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">nsd_generic</span><span class="o">.</span><span class="n">virtual_link_desc</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vld</span> <span class="ow">in</span> <span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;vld&#39;</span><span class="p">]:</span>
+                <span class="n">vld_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vld</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">ns_virtual_link_desc</span> <span class="o">=</span> <span class="n">NsVirtualLinkDesc</span><span class="p">()</span>
+                <span class="n">ns_virtual_link_desc</span><span class="o">.</span><span class="n">virtual_link_desc_id</span> <span class="o">=</span> <span class="n">vld_id</span>
+                <span class="n">nsd_generic</span><span class="o">.</span><span class="n">virtual_link_desc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ns_virtual_link_desc</span><span class="p">)</span>
+
+                <span class="c1"># Build dict containing the list of CPs for each VL, for each member VNF index</span>
+                <span class="c1"># Example:</span>
+                <span class="c1"># {</span>
+                <span class="c1">#   &#39;1&#39;: {</span>
+                <span class="c1">#     &#39;link1&#39;: [&#39;mgmt&#39;],</span>
+                <span class="c1">#     &#39;link3&#39;: [&#39;east&#39;],</span>
+                <span class="c1">#     &#39;link2&#39;: [&#39;west&#39;]</span>
+                <span class="c1">#   }</span>
+                <span class="c1"># }</span>
+                <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">vld</span><span class="p">[</span><span class="s1">&#39;vnfd-connection-point-ref&#39;</span><span class="p">]:</span>
+                    <span class="n">vnf_index</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cp</span><span class="p">[</span><span class="s1">&#39;member-vnf-index-ref&#39;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">vld_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ns_vlc</span><span class="p">[</span><span class="n">vnf_index</span><span class="p">]:</span>
+                        <span class="n">ns_vlc</span><span class="p">[</span><span class="n">vnf_index</span><span class="p">][</span><span class="n">vld_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">ns_vlc</span><span class="p">[</span><span class="n">vnf_index</span><span class="p">][</span><span class="n">vld_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cp</span><span class="p">[</span><span class="s1">&#39;vnfd-connection-point-ref&#39;</span><span class="p">]))</span>
+
+        <span class="c1"># Populate VNF profiles with NsVirtualLinkConnectivity information elements</span>
+        <span class="k">for</span> <span class="n">vnf_profile</span> <span class="ow">in</span> <span class="n">nsdf</span><span class="o">.</span><span class="n">vnf_profile</span><span class="p">:</span>
+            <span class="n">vnf_index</span> <span class="o">=</span> <span class="n">vnf_profile</span><span class="o">.</span><span class="n">vnf_profile_id</span>
+            <span class="n">vnf_profile</span><span class="o">.</span><span class="n">ns_virtual_link_connectivity</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vl_id</span> <span class="ow">in</span> <span class="n">ns_vlc</span><span class="p">[</span><span class="n">vnf_index</span><span class="p">]:</span>
+                <span class="n">ns_virtual_link_connectivity</span> <span class="o">=</span> <span class="n">NsVirtualLinkConnectivity</span><span class="p">()</span>
+                <span class="n">ns_virtual_link_connectivity</span><span class="o">.</span><span class="n">virtual_link_profile_id</span> <span class="o">=</span> <span class="n">vl_id</span>
+                <span class="n">ns_virtual_link_connectivity</span><span class="o">.</span><span class="n">cpd_id</span> <span class="o">=</span> <span class="n">ns_vlc</span><span class="p">[</span><span class="n">vnf_index</span><span class="p">][</span><span class="n">vl_id</span><span class="p">]</span>
+                <span class="n">vnf_profile</span><span class="o">.</span><span class="n">ns_virtual_link_connectivity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ns_virtual_link_connectivity</span><span class="p">)</span>
+
+        <span class="n">nsdf</span><span class="o">.</span><span class="n">ns_df_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">nsd_generic</span><span class="o">.</span><span class="n">nsdf</span> <span class="o">=</span> <span class="p">[</span><span class="n">nsdf</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">nsd_generic</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_vnfd"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_vnfd">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vnfd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">):</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/vnfd-catalog/vnfd/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnfd_id</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get VNFD </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="n">vnfd</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;project-vnfd:vnfd-catalog&#39;</span><span class="p">][</span><span class="s1">&#39;vnfd&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vnfd</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rw-project-vnfd:meta&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vnfd</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_vnfd_generic"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_vnfd_generic">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vnfd_generic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">):</span>
+        <span class="n">vnfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vnfd</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="c1"># Create empty generic Vnfd object</span>
+        <span class="n">vnfd_generic</span> <span class="o">=</span> <span class="n">Vnfd</span><span class="p">()</span>
+
+        <span class="c1"># Populate general VNFD data</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnf_product_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnf_product_info_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnf_product_info_description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">))</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnfd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnf_provider</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vendor&#39;</span><span class="p">])</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnfd_version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Populate Vdu, VirtualComputeDesc and VirtualStorageDesc information elements</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vdu</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">virtual_compute_desc</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">virtual_storage_desc</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vdu</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vdu&#39;</span><span class="p">]:</span>
+            <span class="n">generic_vdu</span> <span class="o">=</span> <span class="n">Vdu</span><span class="p">()</span>
+            <span class="n">generic_virtual_compute_desc</span> <span class="o">=</span> <span class="n">VirtualComputeDesc</span><span class="p">()</span>
+            <span class="n">generic_virtual_storage_desc</span> <span class="o">=</span> <span class="n">VirtualStorageDesc</span><span class="p">()</span>
+
+            <span class="n">generic_vdu</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">generic_vdu</span><span class="o">.</span><span class="n">vdu_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">generic_vdu</span><span class="o">.</span><span class="n">sw_image_desc</span> <span class="o">=</span> <span class="n">SwImageDesc</span><span class="p">()</span>
+            <span class="n">generic_vdu</span><span class="o">.</span><span class="n">sw_image_desc</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="s1">&#39;guest-epa&#39;</span> <span class="ow">in</span> <span class="n">vdu</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_cpu</span> <span class="o">=</span> <span class="n">VirtualCpuData</span><span class="p">()</span>
+                <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_cpu</span><span class="o">.</span><span class="n">virtual_cpu_pinning</span> <span class="o">=</span> <span class="n">VirtualCpuPinningData</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;guest-epa&#39;</span><span class="p">][</span><span class="s1">&#39;cpu-pinning-policy&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SHARED&#39;</span><span class="p">:</span>
+                    <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_cpu</span><span class="o">.</span><span class="n">virtual_cpu_pinning</span><span class="o">.</span><span class="n">virtual_cpu_pinning_policy</span> <span class="o">=</span> <span class="s1">&#39;dynamic&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_cpu</span><span class="o">.</span><span class="n">num_virtual_cpu</span> <span class="o">=</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">][</span><span class="s1">&#39;vcpu-count&#39;</span><span class="p">]</span>
+                <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_compute_desc_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+            <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_memory</span> <span class="o">=</span> <span class="n">VirtualMemoryData</span><span class="p">()</span>
+            <span class="n">generic_virtual_compute_desc</span><span class="o">.</span><span class="n">virtual_memory</span><span class="o">.</span><span class="n">virtual_mem_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">][</span><span class="s1">&#39;memory-mb&#39;</span><span class="p">])</span>
+
+            <span class="n">generic_virtual_storage_desc</span><span class="o">.</span><span class="n">size_of_storage</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;storage-gb&#39;</span><span class="p">))</span>
+            <span class="n">generic_virtual_storage_desc</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">))</span>
+
+            <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vdu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">generic_vdu</span><span class="p">)</span>
+            <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">virtual_compute_desc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">generic_virtual_compute_desc</span><span class="p">)</span>
+            <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">virtual_storage_desc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">generic_virtual_storage_desc</span><span class="p">)</span>
+
+        <span class="c1"># Populate VnfExtCpd information element</span>
+        <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnf_ext_cpd</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">connection_point</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;connection-point&#39;</span><span class="p">]:</span>
+            <span class="n">generic_vnf_ext_cpd</span> <span class="o">=</span> <span class="n">VnfExtCpd</span><span class="p">()</span>
+            <span class="n">generic_vnf_ext_cpd</span><span class="o">.</span><span class="n">cpd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">connection_point</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">vnfd_generic</span><span class="o">.</span><span class="n">vnf_ext_cpd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">generic_vnf_ext_cpd</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vnfd_generic</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.ns_instantiate"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.ns_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">sap_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pnf_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">nested_ns_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param_for_ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">additional_param_for_vnf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ns_instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">additional_affinity_or_anti_affinity_rule</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/</span><span class="si">%s</span><span class="s1">/ns-instance-config/nsr&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+
+        <span class="n">nsr_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsr_metadata</span><span class="p">[</span><span class="n">ns_instance_id</span><span class="p">]</span>
+        <span class="n">nsr_metadata</span><span class="p">[</span><span class="s1">&#39;datacenter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_param_for_ns</span><span class="p">[</span><span class="s1">&#39;datacenter&#39;</span><span class="p">]</span>
+        <span class="n">request_body</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;nsr&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">nsr_metadata</span><span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">request_body</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+            <span class="k">assert</span> <span class="s1">&#39;ok&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to instantiate NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;ns_instantiate&#39;</span><span class="p">,</span> <span class="n">ns_instance_id</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.vnf_query"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.vnf_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="n">query_filter</span><span class="p">[</span><span class="s1">&#39;vnf_instance_id&#39;</span><span class="p">]</span>
+        <span class="n">vnf_info</span> <span class="o">=</span> <span class="n">VnfInfo</span><span class="p">()</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">)</span>
+
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/vnfr-catalog/vnfr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
+                <span class="c1"># vnf-instance-id not found, so assuming NOT_INSTANTIATED</span>
+                <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiation_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_NOT_INSTANTIATED</span>
+                <span class="k">return</span> <span class="n">vnf_info</span>
+
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get VNFR data for VNF </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span><span class="p">)</span>
+
+        <span class="n">vnfr</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;vnfr:vnfr-catalog&#39;</span><span class="p">][</span><span class="s1">&#39;vnfr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;member-vnf-index-ref&#39;</span><span class="p">])</span>
+
+        <span class="c1"># TODO: add logic for all states</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiation_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_INSTANTIATED</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;vnfd&#39;</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span> <span class="o">=</span> <span class="n">InstantiatedVnfInfo</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+            <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnf_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_STARTED</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnf_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_STOPPED</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vdur</span> <span class="ow">in</span> <span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;vdur&#39;</span><span class="p">]:</span>
+            <span class="n">vnfc_resource_info</span> <span class="o">=</span> <span class="n">VnfcResourceInfo</span><span class="p">()</span>
+            <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vnfc_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdur</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vdu_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdur</span><span class="p">[</span><span class="s1">&#39;vdu-id-ref&#39;</span><span class="p">])</span>
+
+            <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span> <span class="o">=</span> <span class="n">ResourceHandle</span><span class="p">()</span>
+            <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">vim_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;rw-vnfr:datacenter&#39;</span><span class="p">])</span>
+            <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">resource_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdur</span><span class="p">[</span><span class="s1">&#39;vim-id&#39;</span><span class="p">])</span>
+            <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnfc_resource_info</span><span class="p">)</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">ext_cp_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">connection_point</span> <span class="ow">in</span> <span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;connection-point&#39;</span><span class="p">]:</span>
+            <span class="n">vnf_ext_cp_info</span> <span class="o">=</span> <span class="n">VnfExtCpInfo</span><span class="p">()</span>
+            <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">cp_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">connection_point</span><span class="p">[</span><span class="s1">&#39;connection-point-id&#39;</span><span class="p">])</span>
+            <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;mac&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">connection_point</span><span class="p">[</span><span class="s1">&#39;mac-address&#39;</span><span class="p">])],</span>
+                <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">connection_point</span><span class="p">[</span><span class="s1">&#39;ip-address&#39;</span><span class="p">])]</span>
+            <span class="p">}</span>
+            <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">cpd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">connection_point</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">ext_cp_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnf_ext_cp_info</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vnf_info</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.ns_query"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.ns_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">ns_instance_id</span> <span class="o">=</span> <span class="n">query_filter</span><span class="p">[</span><span class="s1">&#39;ns_instance_id&#39;</span><span class="p">]</span>
+        <span class="n">ns_info</span> <span class="o">=</span> <span class="n">NsInfo</span><span class="p">()</span>
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">)</span>
+
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
+                <span class="c1"># ns-instance-id not found, so assuming NOT_INSTANTIATED</span>
+                <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NS_NOT_INSTANTIATED</span>
+                <span class="k">return</span> <span class="n">ns_info</span>
+
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+        <span class="n">ns_opdata</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_opdata</span><span class="p">[</span><span class="s1">&#39;name-ref&#39;</span><span class="p">])</span>
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>  <span class="c1"># TODO: get from /api/config</span>
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">nsd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_opdata</span><span class="p">[</span><span class="s1">&#39;nsd-ref&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">ns_opdata</span><span class="p">[</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span>
+            <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NS_INSTANTIATED</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NS_NOT_INSTANTIATED</span>
+
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">constituent_vnfr</span> <span class="ow">in</span> <span class="n">ns_opdata</span><span class="p">[</span><span class="s1">&#39;constituent-vnfr-ref&#39;</span><span class="p">]:</span>
+            <span class="n">vnf_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vnf_query</span><span class="p">(</span><span class="n">query_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;vnf_instance_id&#39;</span><span class="p">:</span> <span class="n">constituent_vnfr</span><span class="p">[</span><span class="s1">&#39;vnfr-id&#39;</span><span class="p">]})</span>
+            <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnf_info</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ns_info</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.ns_terminate"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.ns_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">terminate_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/</span><span class="si">%s</span><span class="s1">/ns-instance-config/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to terminate NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;ns_terminate&#39;</span><span class="p">,</span> <span class="n">ns_instance_id</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.ns_delete_id"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.ns_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_delete_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsr_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_vim_helper"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_vim_helper">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vim_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vim_id</span><span class="p">):</span>
+        <span class="n">vim_helper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_helpers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vim_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vim_helper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">vim_helper</span>
+
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/cloud/account/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vim_id</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get VIM details for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vim_id</span><span class="p">)</span>
+
+        <span class="n">vim_details</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;rw-cloud:cloud&#39;</span><span class="p">][</span><span class="s1">&#39;account&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">vim_type</span> <span class="o">=</span> <span class="n">vim_details</span><span class="p">[</span><span class="s1">&#39;account-type&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">vim_type</span> <span class="o">==</span> <span class="s1">&#39;openstack&#39;</span><span class="p">:</span>
+            <span class="n">openstack_params</span> <span class="o">=</span> <span class="n">vim_details</span><span class="p">[</span><span class="s1">&#39;openstack&#39;</span><span class="p">]</span>
+
+            <span class="n">vim_vendor</span> <span class="o">=</span> <span class="n">vim_type</span>
+            <span class="n">vim_params</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;auth_url&#39;</span><span class="p">:</span> <span class="n">openstack_params</span><span class="p">[</span><span class="s1">&#39;auth_url&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">openstack_params</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">openstack_params</span><span class="p">[</span><span class="s1">&#39;secret&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;project_name&#39;</span><span class="p">:</span> <span class="n">openstack_params</span><span class="p">[</span><span class="s1">&#39;tenant&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;project_domain_name&#39;</span><span class="p">:</span> <span class="n">openstack_params</span><span class="p">[</span><span class="s1">&#39;project-domain&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;user_domain_name&#39;</span><span class="p">:</span> <span class="n">openstack_params</span><span class="p">[</span><span class="s1">&#39;user-domain&#39;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unsupported VIM type: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vim_type</span><span class="p">)</span>
+
+        <span class="n">vim_helper</span> <span class="o">=</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="o">=</span><span class="n">vim_vendor</span><span class="p">,</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;vim&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">vim_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vim_helpers</span><span class="p">[</span><span class="n">vim_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">vim_helper</span>
+
+        <span class="k">return</span> <span class="n">vim_helper</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.verify_vnf_sw_images"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.verify_vnf_sw_images">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">verify_vnf_sw_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnfd_id</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span>
+        <span class="n">vnfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vnfd</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="n">expected_vdu_images</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vdu</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vdu&#39;</span><span class="p">]:</span>
+            <span class="n">expected_vdu_images</span><span class="p">[</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">vnfc_resource_info</span> <span class="ow">in</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span><span class="p">:</span>
+            <span class="n">vdu_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vdu_id</span>
+
+            <span class="n">vim_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">vim_id</span>
+            <span class="n">vim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vim_helper</span><span class="p">(</span><span class="n">vim_id</span><span class="p">)</span>
+            <span class="n">resource_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">resource_id</span>
+            <span class="n">virtual_compute</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">query_virtualised_compute_resource</span><span class="p">(</span><span class="n">query_compute_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;compute_id&#39;</span><span class="p">:</span> <span class="n">resource_id</span><span class="p">})</span>
+            <span class="n">image_id</span> <span class="o">=</span> <span class="n">virtual_compute</span><span class="o">.</span><span class="n">vc_image_id</span>
+            <span class="n">image_details</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">query_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+            <span class="n">image_name_vim</span> <span class="o">=</span> <span class="n">image_details</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="n">image_name_vnfd</span> <span class="o">=</span> <span class="n">expected_vdu_images</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">image_name_vim</span> <span class="o">!=</span> <span class="n">image_name_vnfd</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Unexpected image for VNFC </span><span class="si">%s</span><span class="s1">, VDU type </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">vdu_id</span><span class="p">))</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected image name: </span><span class="si">%s</span><span class="s1">; actual image name: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_name_vnfd</span><span class="p">,</span> <span class="n">image_name_vim</span><span class="p">))</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.validate_vnf_allocated_vresources"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.validate_vnf_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">validate_vnf_allocated_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">vnfd_id</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span>
+        <span class="n">vnfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vnfd</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="n">expected_vdu_flavor</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">expected_vdu_resources</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vdu</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vdu&#39;</span><span class="p">]:</span>
+            <span class="n">expected_vdu_flavor</span><span class="p">[</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rw-project-vnfd:vm-flavor-name&#39;</span><span class="p">)</span>
+            <span class="n">expected_vdu_resources</span><span class="p">[</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;vcpu-count&#39;</span><span class="p">:</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vcpu-count&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;memory-mb&#39;</span><span class="p">:</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;memory-mb&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;storage-gb&#39;</span><span class="p">:</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm-flavor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;storage-gb&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;nic-count&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;interface&#39;</span><span class="p">])</span>
+            <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">vnfc_resource_info</span> <span class="ow">in</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span><span class="p">:</span>
+            <span class="n">vdu_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vdu_id</span>
+            <span class="c1"># Get VIM adapter object</span>
+            <span class="n">vim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vim_helper</span><span class="p">(</span><span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">vim_id</span><span class="p">)</span>
+
+            <span class="n">resource_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">resource_id</span>
+
+            <span class="c1"># Get the flavor name from the VNFD</span>
+            <span class="n">flavor_name_vnfd</span> <span class="o">=</span> <span class="n">expected_vdu_flavor</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">flavor_name_vnfd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># Get the flavor name from the VIM</span>
+                <span class="n">server_details</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">server_get</span><span class="p">(</span><span class="n">resource_id</span><span class="p">)</span>
+                <span class="n">server_flavor_id</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;flavor_id&#39;</span><span class="p">]</span>
+                <span class="n">flavor_details</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">flavor_get</span><span class="p">(</span><span class="n">server_flavor_id</span><span class="p">)</span>
+                <span class="n">flavor_name_nova</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">flavor_details</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Compare the flavor name in the VNFD to the flavor name of the VM</span>
+                <span class="k">if</span> <span class="n">flavor_name_nova</span> <span class="o">!=</span> <span class="n">flavor_name_vnfd</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Unexpected value for flavor: </span><span class="si">%s</span><span class="s1">. Expected: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">flavor_name_vnfd</span><span class="p">,</span> <span class="n">flavor_name_nova</span><span class="p">))</span>
+                    <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">virtual_compute</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">query_virtualised_compute_resource</span><span class="p">(</span>
+                    <span class="n">query_compute_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;compute_id&#39;</span><span class="p">:</span> <span class="n">resource_id</span><span class="p">})</span>
+
+                <span class="n">actual_vdu_resources</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;vcpu-count&#39;</span><span class="p">:</span> <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_cpu</span><span class="o">.</span><span class="n">num_virtual_cpu</span><span class="p">,</span>
+                    <span class="s1">&#39;memory-mb&#39;</span><span class="p">:</span> <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_memory</span><span class="o">.</span><span class="n">virtual_mem_size</span><span class="p">,</span>
+                    <span class="s1">&#39;storage-gb&#39;</span><span class="p">:</span> <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_disks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size_of_storage</span><span class="p">,</span>
+                    <span class="s1">&#39;nic-count&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_network_interface</span><span class="p">)</span>
+                <span class="p">}</span>
+
+                <span class="k">for</span> <span class="n">resource_name</span><span class="p">,</span> <span class="n">actual_value</span> <span class="ow">in</span> <span class="n">actual_vdu_resources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">expected_value</span> <span class="o">=</span> <span class="n">expected_vdu_resources</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">][</span><span class="n">resource_name</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">actual_value</span> <span class="o">!=</span> <span class="n">expected_value</span><span class="p">:</span>
+                        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Unexpected value for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">. Expected: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                  <span class="o">%</span> <span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">actual_value</span><span class="p">,</span> <span class="n">expected_value</span><span class="p">))</span>
+                        <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">validation_result</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.verify_vnf_nsd_mapping"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.verify_vnf_nsd_mapping">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">verify_vnf_nsd_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">ns_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ns_query</span><span class="p">(</span><span class="n">query_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ns_instance_id&#39;</span><span class="p">:</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="s1">&#39;additional_param&#39;</span><span class="p">:</span> <span class="n">additional_param</span><span class="p">})</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="n">ns_info</span><span class="o">.</span><span class="n">nsd_id</span>
+        <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="n">member_vnf_index_vnfd_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">constituent_vnfd</span> <span class="ow">in</span> <span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;constituent-vnfd&#39;</span><span class="p">]:</span>
+            <span class="n">member_vnf_index_vnfd_mapping</span><span class="p">[</span><span class="n">constituent_vnfd</span><span class="p">[</span><span class="s1">&#39;member-vnf-index&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">constituent_vnfd</span><span class="p">[</span><span class="s1">&#39;vnfd-id-ref&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">vnf_info</span> <span class="ow">in</span> <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span><span class="p">:</span>
+            <span class="n">actual_vnfd_id</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span>
+            <span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_id</span>
+
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/vnfr-catalog/vnfr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get VNFR data for VNF </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span><span class="p">)</span>
+
+            <span class="n">vnfr</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;vnfr:vnfr-catalog&#39;</span><span class="p">][</span><span class="s1">&#39;vnfr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">member_vnf_index_ref</span> <span class="o">=</span> <span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;member-vnf-index-ref&#39;</span><span class="p">]</span>
+
+            <span class="n">expected_vnfd_id</span> <span class="o">=</span> <span class="n">member_vnf_index_vnfd_mapping</span><span class="p">[</span><span class="n">member_vnf_index_ref</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">expected_vnfd_id</span> <span class="o">!=</span> <span class="n">actual_vnfd_id</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Unexpected VNFD ID </span><span class="si">%s</span><span class="s1"> for VNF </span><span class="si">%s</span><span class="s1">. Expected: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">actual_vnfd_id</span><span class="p">,</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span><span class="p">,</span> <span class="n">expected_vnfd_id</span><span class="p">))</span>
+                <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">validation_result</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.get_vnf_mgmt_addr_list"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.get_vnf_mgmt_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vnf_mgmt_addr_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnf_mgmt_addr_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/vnfr-catalog/vnfr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get VNFR data for VNF </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span><span class="p">)</span>
+
+        <span class="n">vnfr</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;vnfr:vnfr-catalog&#39;</span><span class="p">][</span><span class="s1">&#39;vnfr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">vdur</span> <span class="ow">in</span> <span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;vdur&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s1">&#39;vm-management-ip&#39;</span> <span class="ow">in</span> <span class="n">vdur</span><span class="p">:</span>
+                <span class="n">vnf_mgmt_addr_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vdur</span><span class="p">[</span><span class="s1">&#39;vm-management-ip&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">vnf_mgmt_addr_list</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.ns_scale"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.ns_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">scale_ns_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># TODO: add support for scaling steps &gt; 1?</span>
+        <span class="k">if</span> <span class="n">scale_type</span> <span class="o">==</span> <span class="s1">&#39;SCALE_VNF&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">elif</span> <span class="n">scale_type</span> <span class="o">==</span> <span class="s1">&#39;SCALE_NS&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">scale_ns_data</span><span class="o">.</span><span class="n">scale_ns_by_steps_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Rift MANO Adapter only supports NS scaling by steps, but&#39;</span>
+                                           <span class="s1">&#39;scale_ns_by_steps_data was not provided.&#39;</span><span class="p">)</span>
+
+            <span class="n">scaling_group_name</span> <span class="o">=</span> <span class="n">scale_ns_data</span><span class="o">.</span><span class="n">additional_param_for_ns</span><span class="p">[</span><span class="s1">&#39;scaling_group_name&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">scale_ns_data</span><span class="o">.</span><span class="n">scale_ns_by_steps_data</span><span class="o">.</span><span class="n">scaling_direction</span> <span class="o">==</span> <span class="s1">&#39;scale_out&#39;</span><span class="p">:</span>
+                <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/</span><span class="si">%s</span><span class="s1">/ns-instance-config/nsr/</span><span class="si">%s</span><span class="s1">/scaling-group/</span><span class="si">%s</span><span class="s1">/instance&#39;</span>\
+                           <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>  <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scaling_group_name</span><span class="p">)</span>
+
+                <span class="n">scaling_group_instance_id</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65535</span><span class="p">)</span>
+                <span class="n">request_body</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;instance&#39;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">scaling_group_instance_id</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">request_body</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+                    <span class="k">assert</span> <span class="s1">&#39;ok&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to scale out NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="s1">&#39;ns_scale_out&#39;</span><span class="p">,</span> <span class="n">ns_instance_id</span>
+
+            <span class="k">elif</span> <span class="n">scale_ns_data</span><span class="o">.</span><span class="n">scale_ns_by_steps_data</span><span class="o">.</span><span class="n">scaling_direction</span> <span class="o">==</span> <span class="s1">&#39;scale_in&#39;</span><span class="p">:</span>
+                <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/ns-instance-config/nsr/</span><span class="si">%s</span><span class="s1">/scaling-group/</span><span class="si">%s</span><span class="s1">&#39;</span>\
+                           <span class="o">%</span> <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scaling_group_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get existing instances of scaling group </span><span class="si">%s</span><span class="s1"> for NS </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                               <span class="o">%</span> <span class="p">(</span><span class="n">scaling_group_name</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">))</span>
+
+                <span class="n">scaling_groups_ids</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-config&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span>
+                    <span class="s1">&#39;scaling-group&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;instance&#39;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaling_groups_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to scale in NS because no scaling group instances exist&#39;</span><span class="p">)</span>
+
+                <span class="n">removed_scaling_groups_id</span> <span class="o">=</span> <span class="n">scaling_groups_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/</span><span class="si">%s</span><span class="s1">/ns-instance-config/nsr/</span><span class="si">%s</span><span class="s1">/scaling-group/</span><span class="si">%s</span><span class="s1">/instance/</span><span class="si">%s</span><span class="s1">&#39;</span> \
+                           <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scaling_group_name</span><span class="p">,</span> <span class="n">removed_scaling_groups_id</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to scale in NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+                <span class="n">ns_scale_in_op</span> <span class="o">=</span> <span class="s1">&#39;ns_scale_in&#39;</span><span class="p">,</span> <span class="n">ns_instance_id</span>
+                <span class="n">scaling_group_terminate_op</span> <span class="o">=</span> <span class="s1">&#39;scaling_group_terminate&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">removed_scaling_groups_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s1">&#39;multiple_operations&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">ns_scale_in_op</span><span class="p">,</span> <span class="n">scaling_group_terminate_op</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Invalid scaling direction: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                           <span class="o">%</span> <span class="n">scale_ns_data</span><span class="o">.</span><span class="n">scale_ns_by_steps_data</span><span class="o">.</span><span class="n">scaling_direction</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.wait_for_ns_stable_state"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.wait_for_ns_stable_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wait_for_ns_stable_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">,</span> <span class="n">poll_interval</span><span class="p">):</span>
+        <span class="n">stable_states</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;running&#39;</span><span class="p">,</span> <span class="s1">&#39;failed&#39;</span><span class="p">]</span>
+        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+            <span class="n">ns_op_status</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Got NS status </span><span class="si">%s</span><span class="s1"> for NS with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ns_op_status</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ns_op_status</span> <span class="ow">in</span> <span class="n">stable_states</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected NS status to be one of </span><span class="si">%s</span><span class="s1">, got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stable_states</span><span class="p">,</span> <span class="n">ns_op_status</span><span class="p">))</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">poll_interval</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
+                <span class="n">elapsed_time</span> <span class="o">+=</span> <span class="n">poll_interval</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Elapsed time </span><span class="si">%s</span><span class="s1"> seconds out of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elapsed_time</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">))</span>
+
+        <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;NS with ID </span><span class="si">%s</span><span class="s1"> did not reach a stable state after </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                   <span class="o">%</span> <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.verify_ns_vnf_instance_count"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.verify_ns_vnf_instance_count">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">verify_ns_vnf_instance_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Get the NSR</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/operational/project/ns-instance-opdata/nsr/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+            <span class="n">json_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get opdata for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+
+        <span class="n">nsr</span> <span class="o">=</span> <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;rw-project:project&#39;</span><span class="p">][</span><span class="s1">&#39;nsr:ns-instance-opdata&#39;</span><span class="p">][</span><span class="s1">&#39;nsr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Get the NSD</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsr</span><span class="p">[</span><span class="s1">&#39;nsd-ref&#39;</span><span class="p">])</span>
+        <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="c1"># Create dictionary with expected number of instances for each VNF</span>
+        <span class="n">expected_vnf_count</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Since the NS is instantiated, for each VNF in the NS, set the number of instances to 1.</span>
+        <span class="k">for</span> <span class="n">constituent_vnfd</span> <span class="ow">in</span> <span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;constituent-vnfd&#39;</span><span class="p">]:</span>
+            <span class="n">expected_vnf_count</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">constituent_vnfd</span><span class="p">[</span><span class="s1">&#39;member-vnf-index&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">scaling_group_record_list</span> <span class="o">=</span> <span class="n">nsr</span><span class="p">[</span><span class="s1">&#39;scaling-group-record&#39;</span><span class="p">]</span>
+        <span class="n">scaling_group_descriptor_list</span> <span class="o">=</span> <span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;scaling-group-descriptor&#39;</span><span class="p">]</span>
+        <span class="n">scaling_group_descriptor_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">scaling_group_descriptor</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span> <span class="n">scaling_group_descriptor</span> <span class="k">for</span> <span class="n">scaling_group_descriptor</span> <span class="ow">in</span>
+                <span class="n">scaling_group_descriptor_list</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">scaling_group_record</span> <span class="ow">in</span> <span class="n">scaling_group_record_list</span><span class="p">:</span>
+            <span class="n">scaling_group_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">scaling_group_record</span><span class="p">[</span><span class="s1">&#39;scaling-group-name-ref&#39;</span><span class="p">])</span>
+            <span class="n">number_of_instances</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaling_group_record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;instance&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="n">scaling_group_descriptor</span> <span class="o">=</span> <span class="n">scaling_group_descriptor_dict</span><span class="p">[</span><span class="n">scaling_group_name</span><span class="p">]</span>
+            <span class="n">vnfd_member_list</span> <span class="o">=</span> <span class="n">scaling_group_descriptor</span><span class="p">[</span><span class="s1">&#39;vnfd-member&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">vnfd_member</span> <span class="ow">in</span> <span class="n">vnfd_member_list</span><span class="p">:</span>
+                <span class="n">expected_vnf_count</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">vnfd_member</span><span class="p">[</span><span class="s1">&#39;member-vnf-index-ref&#39;</span><span class="p">])]</span> <span class="o">+=</span> <span class="n">vnfd_member</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">*</span> \
+                                                                                <span class="n">number_of_instances</span>
+
+        <span class="c1"># Create dictionary with actual number of instances for each VNF</span>
+        <span class="n">actual_vnf_count</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ns_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ns_query</span><span class="p">(</span><span class="n">query_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ns_instance_id&#39;</span><span class="p">:</span> <span class="n">ns_instance_id</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">vnf_info</span> <span class="ow">in</span> <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span><span class="p">:</span>
+            <span class="n">vnf_product_name</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span>
+            <span class="n">actual_vnf_count</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Compare actual values with expected values</span>
+        <span class="k">for</span> <span class="n">vnf_product_name</span> <span class="ow">in</span> <span class="n">expected_vnf_count</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected number of instances for VNF </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">; actual number: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                      <span class="o">%</span> <span class="p">(</span><span class="n">vnf_product_name</span><span class="p">,</span> <span class="n">expected_vnf_count</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">],</span> <span class="n">actual_vnf_count</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">actual_vnf_count</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">]</span> <span class="o">!=</span> <span class="n">expected_vnf_count</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">]:</span>
+                <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">validation_result</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.nsd_info_create"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.nsd_info_create">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_info_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_defined_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Generating a UUID</span>
+        <span class="n">nsd_info_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+        <span class="c1"># Populate the NsdInfo object</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="n">NsdInfo</span><span class="p">()</span>
+        <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_info_id</span> <span class="o">=</span> <span class="n">nsd_info_id</span>
+        <span class="n">nsd_info</span><span class="o">.</span><span class="n">user_defined_data</span> <span class="o">=</span> <span class="n">user_defined_data</span>
+
+        <span class="c1"># Store the mapping between the NsdInfo object and its UUID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="p">[</span><span class="n">nsd_info_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsd_info</span>
+
+        <span class="k">return</span> <span class="n">nsd_info_id</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.nsd_info_query"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.nsd_info_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_info_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">nsd_info_id</span> <span class="o">=</span> <span class="n">query_filter</span><span class="p">[</span><span class="s1">&#39;nsd_info_id&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.nsd_upload"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.nsd_upload">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">,</span> <span class="n">nsd</span><span class="p">):</span>
+        <span class="c1"># Get the NsdInfo object corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsd_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;No NsdInfo object with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># Uploading the NSD</span>
+        <span class="k">if</span> <span class="n">nsd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Rift does not support ETSI NSD format&#39;</span><span class="p">)</span>
+
+        <span class="n">vendor_nsd</span> <span class="o">=</span> <span class="n">nsd_info</span><span class="o">.</span><span class="n">user_defined_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vendor_nsd&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vendor_nsd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Vendor NSD not present in user_defined_data&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vendor_nsd</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">vendor_nsd</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to parse vendor NSD&#39;</span><span class="p">)</span>
+
+        <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/</span><span class="si">%s</span><span class="s1">/nsd-catalog&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+        <span class="n">request_body</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;nsd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">vendor_nsd</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">request_body</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+            <span class="k">assert</span> <span class="s1">&#39;ok&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to upload the NSD&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Retrieving details about the on-boarded NSD</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vendor_nsd</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Updating the corresponding NsdInfo object with the details of the on-boarded NSD</span>
+        <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_id</span> <span class="o">=</span> <span class="n">nsd_id</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.nsd_fetch"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.nsd_fetch">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">):</span>
+        <span class="c1"># Get the NsdInfo object corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsd_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;No NsdInfo object with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># Get the NSD corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_id</span>
+        <span class="k">if</span> <span class="n">nsd_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;NsdInfo object with ID </span><span class="si">%s</span><span class="s1"> does not have the NsdId attribute set&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsd</span></div>
+
+<div class="viewcode-block" id="RiftManoAdapter.nsd_delete"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.rift.RiftManoAdapter.nsd_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">):</span>
+        <span class="c1"># Get the NsdInfo object corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsd_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;No NsdInfo object with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># If the NsdInfo object holds information about an NSD, delete it</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_id</span>
+        <span class="k">if</span> <span class="n">nsd_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="s1">&#39;/api/config/project/</span><span class="si">%s</span><span class="s1">/nsd-catalog/nsd/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">resource</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to delete NSD </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+
+            <span class="c1"># Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking</span>
+            <span class="c1"># that the NSD has been deleted.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">RiftManoAdapterError</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;NSD </span><span class="si">%s</span><span class="s1"> has been deleted&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RiftManoAdapterError</span><span class="p">(</span><span class="s1">&#39;NSD </span><span class="si">%s</span><span class="s1"> has not been deleted&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="c1"># Delete the NsdInfo object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsd_info_id</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

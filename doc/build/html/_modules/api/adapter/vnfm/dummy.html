@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.adapter.vnfm.dummy &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../../adapter.html">api.adapter</a> &raquo;</li>
+        
+          <li><a href="../vnfm.html">api.adapter.vnfm</a> &raquo;</li>
+        
+      <li>api.adapter.vnfm.dummy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.adapter.vnfm.dummy</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter.vnfm</span> <span class="k">import</span> <span class="n">VnfmAdapterError</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">api.structures.objects</span> <span class="k">import</span> <span class="n">InstantiatedVnfInfo</span><span class="p">,</span> <span class="n">VnfInfo</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+
+<span class="c1"># Instantiate logger</span>
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DummyVnfmAdapterError"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapterError">[docs]</a><span class="k">class</span> <span class="nc">DummyVnfmAdapterError</span><span class="p">(</span><span class="n">VnfmAdapterError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation Dummy VNFM adapter API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DummyVnfmAdapter"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter">[docs]</a><span class="k">class</span> <span class="nc">DummyVnfmAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class of stub functions representing operations exposed by the VNFM towards the NFVO.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.get_operation_status"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">):</span>
+        <span class="n">operation_status</span> <span class="o">=</span> <span class="s1">&#39;Successfully done&#39;</span>
+
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Operation status for operation with ID </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                  <span class="o">%</span> <span class="p">(</span><span class="n">lifecycle_operation_occurrence_id</span><span class="p">,</span> <span class="n">operation_status</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.modify_vnf_configuration"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.modify_vnf_configuration">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">modify_vnf_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">vnf_configuration_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_create_id"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_create_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">vnf_instance_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="s1">&#39;vnfinstanceid&#39;</span>
+
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;VNF ID: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnf_instance_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vnf_instance_id</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_delete_id"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_delete_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">):</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_instantiate"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">ext_managed_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">localization_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">lifecycle_operation_occurrence_id</span> <span class="o">=</span> <span class="s1">&#39;vnf_instantiate_operation_id&#39;</span>
+
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Lifecycle operation occurrence ID: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lifecycle_operation_occurrence_id</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_operate"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_operate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_operate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">change_state_to</span><span class="p">,</span> <span class="n">stop_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graceful_stop_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">lifecycle_operation_occurrence_id</span> <span class="o">=</span> <span class="s1">&#39;12346&#39;</span>
+
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Lifecycle operation occurrence ID: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lifecycle_operation_occurrence_id</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_query"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnf_info</span> <span class="o">=</span> <span class="n">VnfInfo</span><span class="p">()</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiation_state</span> <span class="o">=</span> <span class="s1">&#39;INSTANTIATED&#39;</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span> <span class="o">=</span> <span class="n">InstantiatedVnfInfo</span><span class="p">()</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnf_state</span> <span class="o">=</span> <span class="s1">&#39;STARTED&#39;</span>
+
+        <span class="k">return</span> <span class="n">vnf_info</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_scale"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">lifecycle_operation_occurrence_id</span> <span class="o">=</span> <span class="s1">&#39;vnf_scale_operation_id&#39;</span>
+
+        <span class="k">return</span> <span class="n">lifecycle_operation_occurrence_id</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_scale_to_level"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_scale_to_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_scale_to_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">lifecycle_operation_occurrence_id</span> <span class="o">=</span> <span class="s1">&#39;vnf_scale_to_level_operation_id&#39;</span>
+
+        <span class="k">return</span> <span class="n">lifecycle_operation_occurrence_id</span></div>
+
+<div class="viewcode-block" id="DummyVnfmAdapter.vnf_terminate"><a class="viewcode-back" href="../../../../api.adapter.vnfm.html#api.adapter.vnfm.dummy.DummyVnfmAdapter.vnf_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">termination_type</span><span class="p">,</span> <span class="n">graceful_termination_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">lifecycle_operation_occurrence_id</span> <span class="o">=</span> <span class="s1">&#39;vnf_vnf_terminate_operation_id&#39;</span>
+
+        <span class="k">return</span> <span class="n">lifecycle_operation_occurrence_id</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

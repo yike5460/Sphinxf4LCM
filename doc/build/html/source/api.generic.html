@@ -2286,8 +2286,592 @@ the emission actually stopped.</li>
 </dd></dl>
 
 </div>
-<div class="section" id="api-generic-vim-module">
-<h2>api.generic.vim module<a class="headerlink" href="#api-generic-vim-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.generic.vim">
+<span id="api-generic-vim-module"></span><h2>api.generic.vim module<a class="headerlink" href="#module-api.generic.vim" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.generic.vim.Vim">
+<em class="property">class </em><code class="descclassname">api.generic.vim.</code><code class="descname">Vim</code><span class="sig-paren">(</span><em>vendor</em>, <em>adapter_config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of generic functions representing operations exposed by the VIM towards the NFVO as defined by
+ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<dl class="method">
+<dt id="api.generic.vim.Vim.create_compute_resource_reservation">
+<code class="descname">create_compute_resource_reservation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.create_compute_resource_reservation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.create_compute_resource_reservation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows requesting the reservation of virtualised compute resources as indicated by the consumer
+functional block.</p>
+<p>This function was written in accordance with section 7.8.1.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>compute_pool_reservation</strong> – Amount of compute resources that need to be reserved, e.g.
+{“cpu_cores”: 90, “vm_instances”: 10, “ram”: 10000}.</li>
+<li><strong>virtualisation_container_reservation</strong> – Virtualisation containers that need to be reserved (e.g.
+following a specific compute “flavour”).</li>
+<li><strong>affinity_constraint</strong> – Element with affinity information of the virtualised compute
+resources to reserve. For the resource reservation at resource
+pool granularity level, identifies the affinity information of
+the virtual compute pool resources to reserve. For the resource
+reservation at virtual container granularity level, it defines
+the affinity information of the virtualisation container(s) to
+reserve.</li>
+<li><strong>anti_affinity_constraint</strong> – Element with anti-affinity information of the virtualised
+compute resources to reserve. For the resource reservation at
+resource pool granularity level, it defines the anti-affinity
+information of the virtual compute pool resources to reserve.
+For the resource reservation at virtual container granularity
+level, it defines the anti-affinity information of the
+virtualisation container(s) to reserve.</li>
+<li><strong>start_time</strong> – Timestamp indicating the earliest time to start the consumption
+of the resources. If the time value is 0, resources are reserved
+for immediate use.</li>
+<li><strong>end_time</strong> – Timestamp indicating the end time of the reservation (when the
+issuer of the request expects that the resources will no longer
+be needed) and used by theVIM to schedule the reservation. If
+not present, resources are reserved for unlimited usage time.</li>
+<li><strong>expiry_time</strong> – Timestamp indicating the time the VIM can release the
+reservation in case no allocation request against this
+reservation was made.</li>
+<li><strong>location_constraints</strong> – If present, it defines location constraints for the resource(s)
+is (are) requested to be reserved, e.g. in what particular
+Resource Zone.</li>
+<li><strong>resource_group_id</strong> – Unique identifier of the “infrastructure resource group”,
+logical grouping of virtual resources assigned to a tenant
+within an Infrastructure Domain.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">reservation_data:                      Element containing information about the reserved resource.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.create_network_resource_reservation">
+<code class="descname">create_network_resource_reservation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.create_network_resource_reservation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.create_network_resource_reservation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows requesting the reservation of virtualised network resources as indicated by the consumer
+functional block.</p>
+<p>This function was written in accordance with section 7.8.2.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>network_reservation</strong> – Type and configuration of virtualised network resources that need to be
+reserved, e.g. {“PublicIPs”: 20}.</li>
+<li><strong>resource_group_id</strong> – Unique identifier of the “infrastructure resource group”, logical grouping
+of virtual resources assigned to a tenant within an Infrastructure Domain.</li>
+<li><strong>start_time</strong> – Timestamp to start the consumption of the resources. If the time value is 0,
+resources are reserved for immediate use.</li>
+<li><strong>end_time</strong> – Timestamp indicating the end time of the reservation (when the issuer of the
+request expects that the resources will no longer be needed) and used by the
+VIM to schedule the reservation. If not present, resources are reserved for
+unlimited usage time.</li>
+<li><strong>expiry_time</strong> – Timestamp indicating the time the VIM can release the reservation in case no
+allocation request against this reservation was made.</li>
+<li><strong>affinity_constraint</strong> – Element with affinity information of the virtual network resources to
+reserve.</li>
+<li><strong>anti_affinity_constraint</strong> – Element with anti-affinity information of the virtual network resources to
+reserve.</li>
+<li><strong>location_constraints</strong> – If present, it defines location constraints for the resource(s) is (are)
+requested to be reserved, e.g. in what particular Resource Zone.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">reservation_data:          Element containing information about the reserved resource.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.create_storage_resource_reservation">
+<code class="descname">create_storage_resource_reservation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.create_storage_resource_reservation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.create_storage_resource_reservation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows requesting the reservation of virtualised storage resources as indicated by the consumer
+functional block.</p>
+<p>This function was written in accordance with section 7.8.3.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>storage_pool_reservation</strong> – Type and configuration of virtualised storage that need to be reserved. E.g.
+amount of storage resources that need to be reserved, e.g. {“gigabytes”:
+1000, “snapshots”: 10, “volumes”: 10}.</li>
+<li><strong>resource_group_id</strong> – Unique identifier of the “infrastructure resource group”, logical grouping
+of virtual resources assigned to a tenant within an Infrastructure Domain.</li>
+<li><strong>start_time</strong> – Timestamp to start the consumption of the resources. If the time values is
+0, resources are reserved for immediate use.</li>
+<li><strong>end_time</strong> – Timestamp indicating the end time of the reservation (when the issuer of
+the request expects that the resources will no longer be needed) and used
+by the VIM to schedule the reservation. If not present, resources are
+reserved for unlimited usage time.</li>
+<li><strong>expiry_time</strong> – Timestamp indicating the time the VIM can release the reservation in case
+no allocation request against this reservation was made.</li>
+<li><strong>affinity_constraint</strong> – Element with affinity information of the virtual storage resources to
+reserve.</li>
+<li><strong>anti_affinity_constraint</strong> – Element with anti-affinity information of the virtual storage resources to
+reserve.</li>
+<li><strong>location_constraints</strong> – If present, it defines location constraints for the resource(s) is (are)
+requested to be reserved, e.g. in what particular Resource Zone.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">reservation_data:          Element containing information about the reserved resource.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the status of an operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>operation_id</strong> – ID of the operation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The status of the operation ex. ‘Processing’, ‘Failed’.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.get_resource_group_id">
+<code class="descname">get_resource_group_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.get_resource_group_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.get_resource_group_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves the resource group ID (tenant ID) for the specified project name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.limit_compute_resources">
+<code class="descname">limit_compute_resources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.limit_compute_resources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.limit_compute_resources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function limits the compute resources to the provided number of vCPU, vMemory size and number of
+virtualised container instances by reserving all other compute resources.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vcpus</strong> – Desired number of vCPUs to be available after limiting the compute resources</li>
+<li><strong>vmem</strong> – Desired size of vMemory to be available after limiting the compute resources</li>
+<li><strong>vc_instances</strong> – Desired number of VC instances be available after limiting the compute resources</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The reservation ID if the reservation was successful, None otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.limit_storage_resources">
+<code class="descname">limit_storage_resources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.limit_storage_resources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.limit_storage_resources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function limits the storage resources to the provided vstorage size by reserving all other storage
+resources.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vstorage</strong> – Desired disk size to be available after limiting storage resources</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The reservation ID if the reservation was successful, None otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.operate_virtualised_compute_resource">
+<code class="descname">operate_virtualised_compute_resource</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.operate_virtualised_compute_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.operate_virtualised_compute_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function allows executing specific operation command on instantiated virtualised compute resources.</p>
+<p>This function was written in accordance with section 7.3.1.6 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>compute_id</strong> – Identifier of the virtualised compute resource to operate.</li>
+<li><strong>compute_operation</strong> – Type of operation to perform on the virtualised compute resource.
+Possible values are: “START”, “STOP”, “PAUSE”, “SUSPEND”, “REBOOT”,
+“CREATE_SNAPSHOT”, and “DELETE_SNAPSHOT”.</li>
+<li><strong>compute_operation_input_data</strong> – Additional parameters associated to the operation to perform. For
+example, if the operation is “delete snapshot”, information about what
+snapshot identifier to delete is provided.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return compute_data:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">Element containing information on the new status of the operated
+virtualised compute resource.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return compute_operation_output_data:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">Optional. Set of output values depending on the type of operation. For
+instance, when a snapshot operation is requested, this field provides
+information about the identifier of the snapshot and its location.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.poll_for_operation_completion">
+<code class="descname">poll_for_operation_completion</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.poll_for_operation_completion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.poll_for_operation_completion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function polls the status of an operation until it reaches a final state or time is up.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>operation_id</strong> – ID of the operation.</li>
+<li><strong>final_states</strong> – List of states of the operation that when reached, the polling stops.</li>
+<li><strong>max_wait_time</strong> – Maximum interval of time in seconds to wait for the operation to reach a final state.</li>
+<li><strong>poll_interval</strong> – Interval of time in seconds between consecutive polls.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Operation status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_compute_capacity">
+<code class="descname">query_compute_capacity</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_compute_capacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_compute_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves capacity information for the various types of consumable virtualised compute resources
+available in the Virtualised Compute Resources Information Management Interface.</p>
+<p>This function was written in accordance with section 7.3.4.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>zone_id</strong> – When specified this parameter identifies the resource zone for which the
+capacity is requested.</li>
+<li><strong>compute_resource_type_id</strong> – Identifier of the resource type for which the issuer wants to know the
+available, total, reserved and/or allocated capacity.</li>
+<li><strong>resource_criteria</strong> – Input capacity computation parameter for selecting the virtual memory,
+virtual CPU and acceleration capabilities for which the issuer wants to know
+the available, total, reserved and/or allocated capacity.</li>
+<li><strong>attribute_selector</strong> – Input parameter for selecting which capacity information (i.e. available,
+total, reserved and/or allocated capacity) is queried.</li>
+<li><strong>time_period</strong> – The time interval for which capacity is queried.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Element containing the capacity during the requested time period.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_compute_resource_quota">
+<code class="descname">query_compute_resource_quota</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_compute_resource_quota"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_compute_resource_quota" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function queries the VIM to get information about compute resources that the consumer has access to.</p>
+<p>This function was written in accordance with section 7.9.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_quota_filter</strong> – Query filter based on e.g. name, identifier, meta-data information or status
+information, expressing the type of information to be retrieved. It can also be used
+to specify one or more resources to be queried by providing their identifiers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Element containing information about the quota resource. The cardinality can be 0 if
+no matching quota exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_image">
+<code class="descname">query_image</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows querying information about a specific software image in the image repository managed by
+the VIM.</p>
+<p>This function was written in accordance with section 7.2.4 of ETSI NFV-IFA 005 v2.3.1 (2017-08).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_id</strong> – The identifier of the software image to be queried.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The information of the software image matching the query.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_network_resource_quota">
+<code class="descname">query_network_resource_quota</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_network_resource_quota"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_network_resource_quota" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function queries the VIM to get information about network resources that the consumer has access to.</p>
+<p>This function was written in accordance with section 7.9.2.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_quota_filter</strong> – Query filter based on e.g. name, identifier, meta-data information or status
+information, expressing the type of information to be retrieved. It can also be used
+to specify one or more resources to be queried by providing their identifiers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Element containing information about the quota resource. The cardinality can be 0 if
+no matching quota exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_storage_capacity">
+<code class="descname">query_storage_capacity</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_storage_capacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_storage_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves capacity information for the various types of consumable virtualised storage resources
+available in the Virtualised Storage Resources Information Management Interface.</p>
+<p>This function was written in accordance with section 7.5.4.2 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>zone_id</strong> – When specified this parameter identifies the resource zone for which the
+capacity is requested.</li>
+<li><strong>storage_resource_type_id</strong> – Identifier of the resource type for which the issuer wants to know the
+available, total, reserved and/or allocated capacity.</li>
+<li><strong>resource_criteria</strong> – Input capacity computation parameter for selecting the characteristics of
+the virtual storage for which the issuer wants to know the available, total,
+reserved and/or allocated capacity.</li>
+<li><strong>attribute_selector</strong> – Input parameter for selecting which capacity information (i.e. available,
+total, reserved and/or allocated capacity) is queried.</li>
+<li><strong>time_period</strong> – The time interval for which capacity is queried.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Element containing the capacity during the requested time period.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_storage_resource_quota">
+<code class="descname">query_storage_resource_quota</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_storage_resource_quota"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_storage_resource_quota" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function queries the VIM to get information about storage resources that the consumer has access to.</p>
+<p>This function was written in accordance with section 7.9.3.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_quota_filter</strong> – Query filter based on e.g. name, identifier, meta-data information or status
+information, expressing the type of information to be retrieved. It can also be used
+to specify one or more resources to be queried by providing their identifiers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Element containing information about the quota resource. The cardinality can be 0 if
+no matching quota exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_virtualised_compute_resource">
+<code class="descname">query_virtualised_compute_resource</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_virtualised_compute_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_virtualised_compute_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function allows querying information about instantiated virtualised compute resources.</p>
+<p>This function was written in accordance with section 7.3.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_compute_filter</strong> – Query filter based on e.g. name, identifier, meta-data information or status
+information.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Element containing information about the virtual compute resource(s) matching
+the filter.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_virtualised_network_resource">
+<code class="descname">query_virtualised_network_resource</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_virtualised_network_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_virtualised_network_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function allows querying information about instantiated virtualised network resources.</p>
+<p>This function was written in accordance with section 7.4.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_network_filter</strong> – Query filter based on e.g. name, identifier, meta-data information or status
+information.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Element containing information about the virtual network resource(s)
+matching the filter.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.query_virtualised_storage_resource">
+<code class="descname">query_virtualised_storage_resource</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.query_virtualised_storage_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.query_virtualised_storage_resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function allows querying information about instantiated virtualised storage resources.</p>
+<p>This function was written in accordance with section 7.5.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query_storage_filter</strong> – Query filter based on e.g. name, identifier, meta-data information or status
+information.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Element containing information about the virtual storage resource(s)
+matching the filter.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.terminate_compute_resource_reservation">
+<code class="descname">terminate_compute_resource_reservation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.terminate_compute_resource_reservation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.terminate_compute_resource_reservation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows terminating one or more issued compute resource reservation(s). When the operation is done
+on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail for the
+remaining ones.</p>
+<p>This function was written in accordance with section 7.8.1.5 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reservation_id</strong> – Identifier of the resource reservation(s) to terminate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">reservation_id:    Identifier of the resource reservation(s) successfully terminated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.terminate_network_resource_reservation">
+<code class="descname">terminate_network_resource_reservation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.terminate_network_resource_reservation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.terminate_network_resource_reservation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows terminating one or more issued network resource reservation(s). When the operation is done
+on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail for the
+remaining ones.</p>
+<p>This function was written in accordance with section 7.8.2.5 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reservation_id</strong> – Identifier of the resource reservation(s) to terminate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">reservation_id:    Identifier of the resource reservation(s) successfully terminated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.terminate_storage_resource_reservation">
+<code class="descname">terminate_storage_resource_reservation</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.terminate_storage_resource_reservation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.terminate_storage_resource_reservation" title="Permalink to this definition">¶</a></dt>
+<dd><p>This operation allows terminating one or more issued storage resource reservation(s). When the operation is
+done on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail
+for the remaining ones.</p>
+<p>This function was written in accordance with section 7.8.3.5 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reservation_id</strong> – Identifier of the resource reservation(s) to terminate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">reservation_id:    Identifier of the resource reservation(s) successfully terminated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.terminate_virtualised_compute_resources">
+<code class="descname">terminate_virtualised_compute_resources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.terminate_virtualised_compute_resources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.terminate_virtualised_compute_resources" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function allows de-allocating and terminating one or more instantiated virtualised compute resource(s).</p>
+<p>This function was written in accordance with section 7.3.1.5 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>compute_id</strong> – Identifier(s) of the virtualised compute resource(s) to be terminated.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Identifier(s) of the virtualised compute resource(s) successfully terminated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.trigger_compute_resource_operate">
+<code class="descname">trigger_compute_resource_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.trigger_compute_resource_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.trigger_compute_resource_operate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function triggers the execution of the “operate” command on one or more instantiated virtualised compute
+resource(s).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>compute_id</strong> – Identifier of the virtualised compute resource to operate.</li>
+<li><strong>compute_operation</strong> – Type of operation to perform on the virtualised compute resource.
+Possible values are: “START”, “STOP”, “PAUSE”, “SUSPEND”, “REBOOT”,
+“CREATE_SNAPSHOT”, and “DELETE_SNAPSHOT”.</li>
+<li><strong>compute_operation_input_data</strong> – Additional parameters associated to the operation to perform. For
+example, if the operation is “delete snapshot”, information about what
+snapshot identifier to delete is provided.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Identifier of the operation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.generic.vim.Vim.trigger_compute_resource_terminate">
+<code class="descname">trigger_compute_resource_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/generic/vim.html#Vim.trigger_compute_resource_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim.trigger_compute_resource_terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function triggers the execution of the “terminate” command one one or more instantiated virtualised compute
+resource(s).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>compute_id</strong> – Identifier(s) of the virtualised compute resource(s) to be terminated.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Identifier of operation.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.generic.vim.VimGenericError">
+<em class="property">exception </em><code class="descclassname">api.generic.vim.</code><code class="descname">VimGenericError</code><a class="reference internal" href="../_modules/api/generic/vim.html#VimGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.VimGenericError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.generic.ApiGenericError" title="api.generic.ApiGenericError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.generic.ApiGenericError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation VIM generic API.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-api.generic.vnf">
 <span id="api-generic-vnf-module"></span><h2>api.generic.vnf module<a class="headerlink" href="#module-api.generic.vnf" title="Permalink to this headline">¶</a></h2>
@@ -2441,7 +3025,7 @@ result.</li>
 <dl class="exception">
 <dt id="api.generic.ApiGenericError">
 <em class="property">exception </em><code class="descclassname">api.generic.</code><code class="descname">ApiGenericError</code><a class="reference internal" href="../_modules/api/generic.html#ApiGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.ApiGenericError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../api.html#api.ApiError" title="api.ApiError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.ApiError</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="api.html#api.ApiError" title="api.ApiError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.ApiError</span></code></a></p>
 <p>A problem occurred in the VNF LifeCycle Validation generic API.</p>
 </dd></dl>
 

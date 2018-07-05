@@ -1,0 +1,791 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.generic.vim &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../generic.html">api.generic</a> &raquo;</li>
+        
+      <li>api.generic.vim</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.generic.vim</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter</span> <span class="k">import</span> <span class="n">construct_adapter</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">ApiGenericError</span><span class="p">,</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">api.structures.objects</span> <span class="k">import</span> <span class="n">ComputePoolReservation</span><span class="p">,</span> <span class="n">StoragePoolReservation</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+
+<span class="c1"># Instantiate logger</span>
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="VimGenericError"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.VimGenericError">[docs]</a><span class="k">class</span> <span class="nc">VimGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation VIM generic API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Vim"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim">[docs]</a><span class="k">class</span> <span class="nc">Vim</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class of generic functions representing operations exposed by the VIM towards the NFVO as defined by</span>
+<span class="sd">    ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vendor</span><span class="p">,</span> <span class="n">adapter_config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the VIM object corresponding to the specified vendor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span> <span class="o">=</span> <span class="n">vendor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span> <span class="o">=</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="p">,</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;vim&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">adapter_config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vim.get_operation_status"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides the status of an operation.</span>
+
+<span class="sd">        :param operation_id:    ID of the operation.</span>
+<span class="sd">        :return:                The status of the operation ex. &#39;Processing&#39;, &#39;Failed&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">get_operation_status</span><span class="p">(</span><span class="n">operation_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.poll_for_operation_completion"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.poll_for_operation_completion">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">poll_for_operation_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_id</span><span class="p">,</span> <span class="n">final_states</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">,</span> <span class="n">poll_interval</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function polls the status of an operation until it reaches a final state or time is up.</span>
+
+<span class="sd">        :param operation_id:    ID of the operation.</span>
+<span class="sd">        :param final_states:    List of states of the operation that when reached, the polling stops.</span>
+<span class="sd">        :param max_wait_time:   Maximum interval of time in seconds to wait for the operation to reach a final state.</span>
+<span class="sd">        :param poll_interval:   Interval of time in seconds between consecutive polls.</span>
+<span class="sd">        :return:                Operation status.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation_pending</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">operation_pending</span> <span class="ow">and</span> <span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
+            <span class="n">operation_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_operation_status</span><span class="p">(</span><span class="n">operation_id</span><span class="p">)</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Got status </span><span class="si">%s</span><span class="s1"> for operation with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">operation_status</span><span class="p">,</span> <span class="n">operation_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">operation_status</span> <span class="ow">in</span> <span class="n">final_states</span><span class="p">:</span>
+                <span class="n">operation_pending</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected state to be one of </span><span class="si">%s</span><span class="s1">, got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">final_states</span><span class="p">,</span> <span class="n">operation_status</span><span class="p">))</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">poll_interval</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
+                <span class="n">elapsed_time</span> <span class="o">+=</span> <span class="n">poll_interval</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Elapsed time </span><span class="si">%s</span><span class="s1"> seconds out of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elapsed_time</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">operation_status</span></div>
+
+<div class="viewcode-block" id="Vim.get_resource_group_id"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.get_resource_group_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_resource_group_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function retrieves the resource group ID (tenant ID) for the specified project name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">get_resource_group_id</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Vim.limit_compute_resources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.limit_compute_resources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">limit_compute_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vcpus</span><span class="p">,</span> <span class="n">vmem</span><span class="p">,</span> <span class="n">vc_instances</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function limits the compute resources to the provided number of vCPU, vMemory size and number of</span>
+<span class="sd">        virtualised container instances by reserving all other compute resources.</span>
+
+<span class="sd">        :param vcpus:               Desired number of vCPUs to be available after limiting the compute resources</span>
+<span class="sd">        :param vmem:                Desired size of vMemory to be available after limiting the compute resources</span>
+<span class="sd">        :param vc_instances:        Desired number of VC instances be available after limiting the compute resources</span>
+<span class="sd">        :return:                    The reservation ID if the reservation was successful, None otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the available compute resources from the VIM.</span>
+        <span class="n">virtual_compute_quota</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_compute_resource_quota</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">num_vcpus</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vcpu_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">num_vcpus</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No quota set for the number of vCPUs&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">virtual_mem_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmem_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">virtual_mem_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No quota set for the size of vMemory&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">num_vc_instances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">instance_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">num_vc_instances</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No quota set for the number of virtualised container instances&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">nova_limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_compute_capacity</span><span class="p">()</span>
+        <span class="n">used_vcpus</span> <span class="o">=</span> <span class="n">nova_limits</span><span class="p">[</span><span class="s1">&#39;vcpu&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span>
+        <span class="n">used_vmem</span> <span class="o">=</span> <span class="n">nova_limits</span><span class="p">[</span><span class="s1">&#39;vmem&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span>
+        <span class="n">used_instances</span> <span class="o">=</span> <span class="n">nova_limits</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span>
+
+        <span class="n">available_vcpus</span> <span class="o">=</span> <span class="n">vcpu_limit</span> <span class="o">-</span> <span class="n">used_vcpus</span>
+        <span class="n">available_vmem</span> <span class="o">=</span> <span class="n">vmem_limit</span> <span class="o">-</span> <span class="n">used_vmem</span>
+        <span class="n">available_instances</span> <span class="o">=</span> <span class="n">instance_limit</span> <span class="o">-</span> <span class="n">used_instances</span>
+
+        <span class="c1"># Compute resources to be reserved</span>
+        <span class="n">vcpus_to_be_reserved</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">available_vcpus</span> <span class="o">-</span> <span class="n">vcpus</span><span class="p">))</span>
+        <span class="n">vmem_to_be_reserved</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">available_vmem</span> <span class="o">-</span> <span class="n">vmem</span><span class="p">))</span>
+        <span class="n">vc_instances_to_be_reserved</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">available_instances</span> <span class="o">-</span> <span class="n">vc_instances</span><span class="p">))</span>
+
+        <span class="c1"># Make compute reservations so that only the required compute resources remain</span>
+        <span class="n">compute_pool_reservation</span> <span class="o">=</span> <span class="n">ComputePoolReservation</span>
+        <span class="n">compute_pool_reservation</span><span class="o">.</span><span class="n">num_cpu_cores</span> <span class="o">=</span> <span class="n">vcpus_to_be_reserved</span>
+        <span class="n">compute_pool_reservation</span><span class="o">.</span><span class="n">num_vc_instances</span> <span class="o">=</span> <span class="n">vc_instances_to_be_reserved</span>
+        <span class="n">compute_pool_reservation</span><span class="o">.</span><span class="n">virtual_mem_size</span> <span class="o">=</span> <span class="n">vmem_to_be_reserved</span>
+
+        <span class="n">resource_group_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resource_group_id</span><span class="p">()</span>
+
+        <span class="n">reservation_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_compute_resource_reservation</span><span class="p">(</span><span class="n">resource_group_id</span><span class="o">=</span><span class="n">resource_group_id</span><span class="p">,</span>
+                                                                    <span class="n">compute_pool_reservation</span><span class="o">=</span><span class="n">compute_pool_reservation</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">reservation_data</span><span class="o">.</span><span class="n">reservation_id</span></div>
+
+<div class="viewcode-block" id="Vim.limit_storage_resources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.limit_storage_resources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">limit_storage_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vstorage</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function limits the storage resources to the provided vstorage size by reserving all other storage</span>
+<span class="sd">        resources.</span>
+
+<span class="sd">        :param vstorage:            Desired disk size to be available after limiting storage resources</span>
+<span class="sd">        :return:                    The reservation ID if the reservation was successful, None otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the available storage resources from the VIM.</span>
+        <span class="n">virtual_storage_quota</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_storage_resource_quota</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">virtual_storage_quota</span><span class="o">.</span><span class="n">storage_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vstorage_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">virtual_storage_quota</span><span class="o">.</span><span class="n">storage_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No quota set for the storage size&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">cinder_limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_storage_capacity</span><span class="p">()</span>
+        <span class="n">used_vstorage</span> <span class="o">=</span> <span class="n">cinder_limits</span><span class="p">[</span><span class="s1">&#39;vstorage&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span>
+        <span class="n">available_vstorage</span> <span class="o">=</span> <span class="n">vstorage_limit</span> <span class="o">-</span> <span class="n">used_vstorage</span>
+
+        <span class="c1"># Storage resources to be reserved</span>
+        <span class="n">vstorage_to_be_reserved</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">available_vstorage</span> <span class="o">-</span> <span class="n">vstorage</span><span class="p">))</span>
+
+        <span class="c1"># Make storage reservations so that only the required compute resources remain</span>
+        <span class="n">storage_pool_reservation</span> <span class="o">=</span> <span class="n">StoragePoolReservation</span>
+        <span class="n">storage_pool_reservation</span><span class="o">.</span><span class="n">storage_size</span> <span class="o">=</span> <span class="n">vstorage_to_be_reserved</span>
+        <span class="n">storage_pool_reservation</span><span class="o">.</span><span class="n">num_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">storage_pool_reservation</span><span class="o">.</span><span class="n">num_volumes</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">resource_group_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resource_group_id</span><span class="p">()</span>
+        <span class="n">reservation_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_storage_resource_reservation</span><span class="p">(</span><span class="n">resource_group_id</span><span class="o">=</span><span class="n">resource_group_id</span><span class="p">,</span>
+                                                                    <span class="n">storage_pool_reservation</span><span class="o">=</span><span class="n">storage_pool_reservation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reservation_data</span><span class="o">.</span><span class="n">reservation_id</span></div>
+
+<div class="viewcode-block" id="Vim.query_compute_capacity"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_compute_capacity">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_compute_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zone_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute_resource_type_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resource_criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                               <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function retrieves capacity information for the various types of consumable virtualised compute resources</span>
+<span class="sd">        available in the Virtualised Compute Resources Information Management Interface.</span>
+
+<span class="sd">        This function was written in accordance with section 7.3.4.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param zone_id:                     When specified this parameter identifies the resource zone for which the</span>
+<span class="sd">                                            capacity is requested.</span>
+<span class="sd">        :param compute_resource_type_id:    Identifier of the resource type for which the issuer wants to know the</span>
+<span class="sd">                                            available, total, reserved and/or allocated capacity.</span>
+<span class="sd">        :param resource_criteria:           Input capacity computation parameter for selecting the virtual memory,</span>
+<span class="sd">                                            virtual CPU and acceleration capabilities for which the issuer wants to know</span>
+<span class="sd">                                            the available, total, reserved and/or allocated capacity.</span>
+<span class="sd">        :param attribute_selector:          Input parameter for selecting which capacity information (i.e. available,</span>
+<span class="sd">                                            total, reserved and/or allocated capacity) is queried.</span>
+<span class="sd">        :param time_period:                 The time interval for which capacity is queried.</span>
+<span class="sd">        :return:                            Element containing the capacity during the requested time period.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_compute_capacity</span><span class="p">(</span><span class="n">zone_id</span><span class="p">,</span> <span class="n">compute_resource_type_id</span><span class="p">,</span> <span class="n">resource_criteria</span><span class="p">,</span>
+                                                       <span class="n">attribute_selector</span><span class="p">,</span> <span class="n">time_period</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_storage_capacity"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_storage_capacity">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_storage_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zone_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">storage_resource_type_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resource_criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                               <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function retrieves capacity information for the various types of consumable virtualised storage resources</span>
+<span class="sd">        available in the Virtualised Storage Resources Information Management Interface.</span>
+
+<span class="sd">        This function was written in accordance with section 7.5.4.2 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param zone_id:                     When specified this parameter identifies the resource zone for which the</span>
+<span class="sd">                                            capacity is requested.</span>
+<span class="sd">        :param storage_resource_type_id:    Identifier of the resource type for which the issuer wants to know the</span>
+<span class="sd">                                            available, total, reserved and/or allocated capacity.</span>
+<span class="sd">        :param resource_criteria:           Input capacity computation parameter for selecting the characteristics of</span>
+<span class="sd">                                            the virtual storage for which the issuer wants to know the available, total,</span>
+<span class="sd">                                            reserved and/or allocated capacity.</span>
+<span class="sd">        :param attribute_selector:          Input parameter for selecting which capacity information (i.e. available,</span>
+<span class="sd">                                            total, reserved and/or allocated capacity) is queried.</span>
+<span class="sd">        :param time_period:                 The time interval for which capacity is queried.</span>
+<span class="sd">        :return:                            Element containing the capacity during the requested time period.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_storage_capacity</span><span class="p">(</span><span class="n">zone_id</span><span class="p">,</span> <span class="n">storage_resource_type_id</span><span class="p">,</span> <span class="n">resource_criteria</span><span class="p">,</span>
+                                                       <span class="n">attribute_selector</span><span class="p">,</span> <span class="n">time_period</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_compute_resource_quota"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_compute_resource_quota">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_compute_resource_quota</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_quota_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function queries the VIM to get information about compute resources that the consumer has access to.</span>
+
+<span class="sd">        This function was written in accordance with section 7.9.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param query_quota_filter:  Query filter based on e.g. name, identifier, meta-data information or status</span>
+<span class="sd">                                    information, expressing the type of information to be retrieved. It can also be used</span>
+<span class="sd">                                    to specify one or more resources to be queried by providing their identifiers.</span>
+<span class="sd">        :return:                    Element containing information about the quota resource. The cardinality can be 0 if</span>
+<span class="sd">                                    no matching quota exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_compute_resource_quota</span><span class="p">(</span><span class="n">query_quota_filter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_network_resource_quota"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_network_resource_quota">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_network_resource_quota</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_quota_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function queries the VIM to get information about network resources that the consumer has access to.</span>
+
+<span class="sd">        This function was written in accordance with section 7.9.2.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param query_quota_filter:  Query filter based on e.g. name, identifier, meta-data information or status</span>
+<span class="sd">                                    information, expressing the type of information to be retrieved. It can also be used</span>
+<span class="sd">                                    to specify one or more resources to be queried by providing their identifiers.</span>
+<span class="sd">        :return:                    Element containing information about the quota resource. The cardinality can be 0 if</span>
+<span class="sd">                                    no matching quota exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_network_resource_quota</span><span class="p">(</span><span class="n">query_quota_filter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_storage_resource_quota"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_storage_resource_quota">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_storage_resource_quota</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_quota_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function queries the VIM to get information about storage resources that the consumer has access to.</span>
+
+<span class="sd">        This function was written in accordance with section 7.9.3.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param query_quota_filter:  Query filter based on e.g. name, identifier, meta-data information or status</span>
+<span class="sd">                                    information, expressing the type of information to be retrieved. It can also be used</span>
+<span class="sd">                                    to specify one or more resources to be queried by providing their identifiers.</span>
+<span class="sd">        :return:                    Element containing information about the quota resource. The cardinality can be 0 if</span>
+<span class="sd">                                    no matching quota exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_storage_resource_quota</span><span class="p">(</span><span class="n">query_quota_filter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_virtualised_compute_resource"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_virtualised_compute_resource">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_virtualised_compute_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_compute_filter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function allows querying information about instantiated virtualised compute resources.</span>
+
+<span class="sd">        This function was written in accordance with section 7.3.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param query_compute_filter:    Query filter based on e.g. name, identifier, meta-data information or status</span>
+<span class="sd">                                        information.</span>
+<span class="sd">        :return:                        Element containing information about the virtual compute resource(s) matching</span>
+<span class="sd">                                        the filter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_virtualised_compute_resource</span><span class="p">(</span><span class="n">query_compute_filter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.trigger_compute_resource_terminate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.trigger_compute_resource_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">trigger_compute_resource_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function triggers the execution of the &quot;terminate&quot; command one one or more instantiated virtualised compute</span>
+<span class="sd">        resource(s).</span>
+
+<span class="sd">        :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.</span>
+<span class="sd">        :return:            Identifier of operation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">trigger_compute_resource_terminate</span><span class="p">(</span><span class="n">compute_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.terminate_virtualised_compute_resources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.terminate_virtualised_compute_resources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">terminate_virtualised_compute_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function allows de-allocating and terminating one or more instantiated virtualised compute resource(s).</span>
+
+<span class="sd">        This function was written in accordance with section 7.3.1.5 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).</span>
+
+<span class="sd">        :param compute_id:  Identifier(s) of the virtualised compute resource(s) to be terminated.</span>
+<span class="sd">        :return:            Identifier(s) of the virtualised compute resource(s) successfully terminated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_compute_resource_terminate</span><span class="p">(</span><span class="n">compute_id</span><span class="p">)</span>
+
+        <span class="n">operation_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_for_operation_completion</span><span class="p">(</span><span class="n">operation_id</span><span class="p">,</span>
+                                                              <span class="n">final_states</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FINAL_STATES</span><span class="p">,</span>
+                                                              <span class="n">max_wait_time</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">COMPUTE_TERMINATE_TIMEOUT</span><span class="p">,</span>
+                                                              <span class="n">poll_interval</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">operation_status</span> <span class="o">!=</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VimGenericError</span><span class="p">(</span><span class="s1">&#39;Virtualised compute resource termination failed&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">compute_id</span></div>
+
+<div class="viewcode-block" id="Vim.trigger_compute_resource_operate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.trigger_compute_resource_operate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">trigger_compute_resource_operate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_id</span><span class="p">,</span> <span class="n">compute_operation</span><span class="p">,</span> <span class="n">compute_operation_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function triggers the execution of the &quot;operate&quot; command on one or more instantiated virtualised compute</span>
+<span class="sd">        resource(s).</span>
+
+<span class="sd">        :param compute_id:                      Identifier of the virtualised compute resource to operate.</span>
+<span class="sd">        :param compute_operation:               Type of operation to perform on the virtualised compute resource.</span>
+<span class="sd">                                                Possible values are: &quot;START&quot;, &quot;STOP&quot;, &quot;PAUSE&quot;, &quot;SUSPEND&quot;, &quot;REBOOT&quot;,</span>
+<span class="sd">                                                &quot;CREATE_SNAPSHOT&quot;, and &quot;DELETE_SNAPSHOT&quot;.</span>
+<span class="sd">        :param compute_operation_input_data:    Additional parameters associated to the operation to perform. For</span>
+<span class="sd">                                                example, if the operation is &quot;delete snapshot&quot;, information about what</span>
+<span class="sd">                                                snapshot identifier to delete is provided.</span>
+<span class="sd">        :return:                                Identifier of the operation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">trigger_compute_resource_operate</span><span class="p">(</span><span class="n">compute_id</span><span class="p">,</span> <span class="n">compute_operation</span><span class="p">,</span>
+                                                                 <span class="n">compute_operation_input_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.operate_virtualised_compute_resource"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.operate_virtualised_compute_resource">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">operate_virtualised_compute_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_id</span><span class="p">,</span> <span class="n">compute_operation</span><span class="p">,</span> <span class="n">compute_operation_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function allows executing specific operation command on instantiated virtualised compute resources.</span>
+
+<span class="sd">        This function was written in accordance with section 7.3.1.6 of ETSI GS NFV-IFA 005 v2.4.1 (2018-02).</span>
+
+<span class="sd">        :param compute_id:                      Identifier of the virtualised compute resource to operate.</span>
+<span class="sd">        :param compute_operation:               Type of operation to perform on the virtualised compute resource.</span>
+<span class="sd">                                                Possible values are: &quot;START&quot;, &quot;STOP&quot;, &quot;PAUSE&quot;, &quot;SUSPEND&quot;, &quot;REBOOT&quot;,</span>
+<span class="sd">                                                &quot;CREATE_SNAPSHOT&quot;, and &quot;DELETE_SNAPSHOT&quot;.</span>
+<span class="sd">        :param compute_operation_input_data:    Additional parameters associated to the operation to perform. For</span>
+<span class="sd">                                                example, if the operation is &quot;delete snapshot&quot;, information about what</span>
+<span class="sd">                                                snapshot identifier to delete is provided.</span>
+<span class="sd">        :return compute_data:                   Element containing information on the new status of the operated</span>
+<span class="sd">                                                virtualised compute resource.</span>
+<span class="sd">        :return compute_operation_output_data:  Optional. Set of output values depending on the type of operation. For</span>
+<span class="sd">                                                instance, when a snapshot operation is requested, this field provides</span>
+<span class="sd">                                                information about the identifier of the snapshot and its location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_compute_resource_operate</span><span class="p">(</span><span class="n">compute_id</span><span class="p">,</span> <span class="n">compute_operation</span><span class="p">,</span>
+                                                             <span class="n">compute_operation_input_data</span><span class="p">)</span>
+
+        <span class="n">operation_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_for_operation_completion</span><span class="p">(</span><span class="n">operation_id</span><span class="p">,</span>
+                                                              <span class="n">final_states</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FINAL_STATES</span><span class="p">,</span>
+                                                              <span class="n">max_wait_time</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">COMPUTE_OPERATE_TIMEOUT</span><span class="p">,</span>
+                                                              <span class="n">poll_interval</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">operation_status</span> <span class="o">!=</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VimGenericError</span><span class="p">(</span><span class="s1">&#39;Virtualised compute resource operation failed&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_virtualised_compute_resource</span><span class="p">(</span><span class="n">query_compute_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;compute_id&#39;</span><span class="p">:</span> <span class="n">compute_id</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="Vim.query_virtualised_network_resource"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_virtualised_network_resource">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_virtualised_network_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_network_filter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function allows querying information about instantiated virtualised network resources.</span>
+
+<span class="sd">        This function was written in accordance with section 7.4.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param query_network_filter:        Query filter based on e.g. name, identifier, meta-data information or status</span>
+<span class="sd">                                            information.</span>
+<span class="sd">        :return:                            Element containing information about the virtual network resource(s)</span>
+<span class="sd">                                            matching the filter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_virtualised_network_resource</span><span class="p">(</span><span class="n">query_network_filter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_virtualised_storage_resource"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_virtualised_storage_resource">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_virtualised_storage_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_storage_filter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function allows querying information about instantiated virtualised storage resources.</span>
+
+<span class="sd">        This function was written in accordance with section 7.5.1.3 of ETSI GS NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param query_storage_filter:        Query filter based on e.g. name, identifier, meta-data information or status</span>
+<span class="sd">                                            information.</span>
+<span class="sd">        :return:                            Element containing information about the virtual storage resource(s)</span>
+<span class="sd">                                            matching the filter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_virtualised_storage_resource</span><span class="p">(</span><span class="n">query_storage_filter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.create_compute_resource_reservation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.create_compute_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_compute_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_group_id</span><span class="p">,</span> <span class="n">compute_pool_reservation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">virtualisation_container_reservation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">anti_affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">expiry_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows requesting the reservation of virtualised compute resources as indicated by the consumer</span>
+<span class="sd">        functional block.</span>
+
+<span class="sd">        This function was written in accordance with section 7.8.1.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param compute_pool_reservation:                Amount of compute resources that need to be reserved, e.g.</span>
+<span class="sd">                                                        {&quot;cpu_cores&quot;: 90, &quot;vm_instances&quot;: 10, &quot;ram&quot;: 10000}.</span>
+<span class="sd">        :param virtualisation_container_reservation:    Virtualisation containers that need to be reserved (e.g.</span>
+<span class="sd">                                                        following a specific compute &quot;flavour&quot;).</span>
+<span class="sd">        :param affinity_constraint:                     Element with affinity information of the virtualised compute</span>
+<span class="sd">                                                        resources to reserve. For the resource reservation at resource</span>
+<span class="sd">                                                        pool granularity level, identifies the affinity information of</span>
+<span class="sd">                                                        the virtual compute pool resources to reserve. For the resource</span>
+<span class="sd">                                                        reservation at virtual container granularity level, it defines</span>
+<span class="sd">                                                        the affinity information of the virtualisation container(s) to</span>
+<span class="sd">                                                        reserve.</span>
+<span class="sd">        :param anti_affinity_constraint:                Element with anti-affinity information of the virtualised</span>
+<span class="sd">                                                        compute resources to reserve. For the resource reservation at</span>
+<span class="sd">                                                        resource pool granularity level, it defines the anti-affinity</span>
+<span class="sd">                                                        information of the virtual compute pool resources to reserve.</span>
+<span class="sd">                                                        For the resource reservation at virtual container granularity</span>
+<span class="sd">                                                        level, it defines the anti-affinity information of the</span>
+<span class="sd">                                                        virtualisation container(s) to reserve.</span>
+<span class="sd">        :param start_time:                              Timestamp indicating the earliest time to start the consumption</span>
+<span class="sd">                                                        of the resources. If the time value is 0, resources are reserved</span>
+<span class="sd">                                                        for immediate use.</span>
+<span class="sd">        :param end_time:                                Timestamp indicating the end time of the reservation (when the</span>
+<span class="sd">                                                        issuer of the request expects that the resources will no longer</span>
+<span class="sd">                                                        be needed) and used by theVIM to schedule the reservation. If</span>
+<span class="sd">                                                        not present, resources are reserved for unlimited usage time.</span>
+<span class="sd">        :param expiry_time:                             Timestamp indicating the time the VIM can release the</span>
+<span class="sd">                                                        reservation in case no allocation request against this</span>
+<span class="sd">                                                        reservation was made.</span>
+<span class="sd">        :param location_constraints:                    If present, it defines location constraints for the resource(s)</span>
+<span class="sd">                                                        is (are) requested to be reserved, e.g. in what particular</span>
+<span class="sd">                                                        Resource Zone.</span>
+<span class="sd">        :param resource_group_id:                       Unique identifier of the &quot;infrastructure resource group&quot;,</span>
+<span class="sd">                                                        logical grouping of virtual resources assigned to a tenant</span>
+<span class="sd">                                                        within an Infrastructure Domain.</span>
+<span class="sd">        :return: reservation_data:                      Element containing information about the reserved resource.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">create_compute_resource_reservation</span><span class="p">(</span><span class="n">resource_group_id</span><span class="p">,</span> <span class="n">compute_pool_reservation</span><span class="p">,</span>
+                                                                    <span class="n">virtualisation_container_reservation</span><span class="p">,</span>
+                                                                    <span class="n">affinity_constraint</span><span class="p">,</span> <span class="n">anti_affinity_constraint</span><span class="p">,</span>
+                                                                    <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">expiry_time</span><span class="p">,</span>
+                                                                    <span class="n">location_constraints</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.terminate_compute_resource_reservation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.terminate_compute_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">terminate_compute_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reservation_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows terminating one or more issued compute resource reservation(s). When the operation is done</span>
+<span class="sd">        on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail for the</span>
+<span class="sd">        remaining ones.</span>
+
+<span class="sd">        This function was written in accordance with section 7.8.1.5 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param reservation_id:      Identifier of the resource reservation(s) to terminate.</span>
+<span class="sd">        :return: reservation_id:    Identifier of the resource reservation(s) successfully terminated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">terminate_compute_resource_reservation</span><span class="p">(</span><span class="n">reservation_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.create_network_resource_reservation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.create_network_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_network_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network_reservation</span><span class="p">,</span> <span class="n">resource_group_id</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expiry_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">anti_affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows requesting the reservation of virtualised network resources as indicated by the consumer</span>
+<span class="sd">        functional block.</span>
+
+<span class="sd">        This function was written in accordance with section 7.8.2.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param network_reservation:         Type and configuration of virtualised network resources that need to be</span>
+<span class="sd">                                            reserved, e.g. {&quot;PublicIPs&quot;: 20}.</span>
+<span class="sd">        :param resource_group_id:           Unique identifier of the &quot;infrastructure resource group&quot;, logical grouping</span>
+<span class="sd">                                            of virtual resources assigned to a tenant within an Infrastructure Domain.</span>
+<span class="sd">        :param start_time:                  Timestamp to start the consumption of the resources. If the time value is 0,</span>
+<span class="sd">                                            resources are reserved for immediate use.</span>
+<span class="sd">        :param end_time:                    Timestamp indicating the end time of the reservation (when the issuer of the</span>
+<span class="sd">                                            request expects that the resources will no longer be needed) and used by the</span>
+<span class="sd">                                            VIM to schedule the reservation. If not present, resources are reserved for</span>
+<span class="sd">                                            unlimited usage time.</span>
+<span class="sd">        :param expiry_time:                 Timestamp indicating the time the VIM can release the reservation in case no</span>
+<span class="sd">                                            allocation request against this reservation was made.</span>
+<span class="sd">        :param affinity_constraint:         Element with affinity information of the virtual network resources to</span>
+<span class="sd">                                            reserve.</span>
+<span class="sd">        :param anti_affinity_constraint:    Element with anti-affinity information of the virtual network resources to</span>
+<span class="sd">                                            reserve.</span>
+<span class="sd">        :param location_constraints:        If present, it defines location constraints for the resource(s) is (are)</span>
+<span class="sd">                                            requested to be reserved, e.g. in what particular Resource Zone.</span>
+<span class="sd">        :return: reservation_data:          Element containing information about the reserved resource.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">create_network_resource_reservation</span><span class="p">(</span><span class="n">network_reservation</span><span class="p">,</span> <span class="n">resource_group_id</span><span class="p">,</span>
+                                                                    <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">expiry_time</span><span class="p">,</span>
+                                                                    <span class="n">affinity_constraint</span><span class="p">,</span> <span class="n">anti_affinity_constraint</span><span class="p">,</span>
+                                                                    <span class="n">location_constraints</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.terminate_network_resource_reservation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.terminate_network_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">terminate_network_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reservation_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows terminating one or more issued network resource reservation(s). When the operation is done</span>
+<span class="sd">        on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail for the</span>
+<span class="sd">        remaining ones.</span>
+
+<span class="sd">        This function was written in accordance with section 7.8.2.5 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param reservation_id:      Identifier of the resource reservation(s) to terminate.</span>
+<span class="sd">        :return: reservation_id:    Identifier of the resource reservation(s) successfully terminated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">terminate_network_resource_reservation</span><span class="p">(</span><span class="n">reservation_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.create_storage_resource_reservation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.create_storage_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_storage_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_group_id</span><span class="p">,</span> <span class="n">storage_pool_reservation</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expiry_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">anti_affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows requesting the reservation of virtualised storage resources as indicated by the consumer</span>
+<span class="sd">        functional block.</span>
+
+<span class="sd">        This function was written in accordance with section 7.8.3.2 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param storage_pool_reservation:    Type and configuration of virtualised storage that need to be reserved. E.g.</span>
+<span class="sd">                                            amount of storage resources that need to be reserved, e.g. {&quot;gigabytes&quot;:</span>
+<span class="sd">                                            1000, &quot;snapshots&quot;: 10, &quot;volumes&quot;: 10}.</span>
+<span class="sd">        :param resource_group_id:           Unique identifier of the &quot;infrastructure resource group&quot;, logical grouping</span>
+<span class="sd">                                            of virtual resources assigned to a tenant within an Infrastructure Domain.</span>
+<span class="sd">        :param start_time:                  Timestamp to start the consumption of the resources. If the time values is</span>
+<span class="sd">                                            0, resources are reserved for immediate use.</span>
+<span class="sd">        :param end_time:                    Timestamp indicating the end time of the reservation (when the issuer of</span>
+<span class="sd">                                            the request expects that the resources will no longer be needed) and used</span>
+<span class="sd">                                            by the VIM to schedule the reservation. If not present, resources are</span>
+<span class="sd">                                            reserved for unlimited usage time.</span>
+<span class="sd">        :param expiry_time:                 Timestamp indicating the time the VIM can release the reservation in case</span>
+<span class="sd">                                            no allocation request against this reservation was made.</span>
+<span class="sd">        :param affinity_constraint:         Element with affinity information of the virtual storage resources to</span>
+<span class="sd">                                            reserve.</span>
+<span class="sd">        :param anti_affinity_constraint:    Element with anti-affinity information of the virtual storage resources to</span>
+<span class="sd">                                            reserve.</span>
+<span class="sd">        :param location_constraints:        If present, it defines location constraints for the resource(s) is (are)</span>
+<span class="sd">                                            requested to be reserved, e.g. in what particular Resource Zone.</span>
+<span class="sd">        :return: reservation_data:          Element containing information about the reserved resource.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">create_storage_resource_reservation</span><span class="p">(</span><span class="n">resource_group_id</span><span class="p">,</span> <span class="n">storage_pool_reservation</span><span class="p">,</span>
+                                                                    <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">expiry_time</span><span class="p">,</span>
+                                                                    <span class="n">affinity_constraint</span><span class="p">,</span> <span class="n">anti_affinity_constraint</span><span class="p">,</span>
+                                                                    <span class="n">location_constraints</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.terminate_storage_resource_reservation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.terminate_storage_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">terminate_storage_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reservation_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows terminating one or more issued storage resource reservation(s). When the operation is</span>
+<span class="sd">        done on multiple ids, it is assumed to be best-effort, i.e. it can succeed for a subset of the ids, and fail</span>
+<span class="sd">        for the remaining ones.</span>
+
+<span class="sd">        This function was written in accordance with section 7.8.3.5 of ETSI NFV-IFA 005 v2.1.1 (2016-04).</span>
+
+<span class="sd">        :param reservation_id:      Identifier of the resource reservation(s) to terminate.</span>
+<span class="sd">        :return: reservation_id:    Identifier of the resource reservation(s) successfully terminated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">terminate_storage_resource_reservation</span><span class="p">(</span><span class="n">reservation_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vim.query_image"><a class="viewcode-back" href="../../../api.generic.html#api.generic.vim.Vim.query_image">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation allows querying information about a specific software image in the image repository managed by</span>
+<span class="sd">        the VIM.</span>
+
+<span class="sd">        This function was written in accordance with section 7.2.4 of ETSI NFV-IFA 005 v2.3.1 (2017-08).</span>
+
+<span class="sd">        :param image_id:    The identifier of the software image to be queried.</span>
+<span class="sd">        :return:            The information of the software image matching the query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_adapter</span><span class="o">.</span><span class="n">query_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

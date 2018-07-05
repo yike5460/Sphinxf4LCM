@@ -1481,13 +1481,9 @@ class Mano(object):
         compared to the number of instances indicated by the default instantiation level ID corresponding to that VNF.
 
         :param ns_info:                     NsInfo information element.
-        :param instantiation_level_list:    List of dictionaries containing the VNF name and the corresponding target
-                                            instantiation level ID.
-                                            Example: [{'target_vnf_name': 'empirix',
-                                                       'target_instantiation_level_id': 'scaled'}]
+        :param instantiation_level_list:    List of dictionaries containing the VNF name and the corresponding target instantiation level ID. Example: [{'target_vnf_name': 'empirix', 'target_instantiation_level_id': 'scaled'}]
         :param additional_param:            Additional parameters used for filtering.
-        :return:                            True if the number of VNFC instances for each VNF is correct,
-                                            False otherwise.
+        :return:                            True if the number of VNFC instances for each VNF is correct, False otherwise.
         """
         vnf_name_level_id_mapping = {}
         for scale_to_level in instantiation_level_list:

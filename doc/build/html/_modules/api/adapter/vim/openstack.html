@@ -1,0 +1,761 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.adapter.vim.openstack &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../../adapter.html">api.adapter</a> &raquo;</li>
+        
+          <li><a href="../vim.html">api.adapter.vim</a> &raquo;</li>
+        
+      <li>api.adapter.vim.openstack</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.adapter.vim.openstack</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">novaclient.exceptions</span> <span class="k">import</span> <span class="n">NotFound</span>
+<span class="kn">from</span> <span class="nn">keystoneauth1.exceptions</span> <span class="k">import</span> <span class="n">DiscoveryFailure</span>
+
+<span class="kn">import</span> <span class="nn">os_client_config</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter.vim</span> <span class="k">import</span> <span class="n">VimAdapterError</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">api.structures.objects</span> <span class="k">import</span> <span class="n">VirtualCompute</span><span class="p">,</span> <span class="n">VirtualCpu</span><span class="p">,</span> <span class="n">VirtualMemory</span><span class="p">,</span> <span class="n">VirtualStorage</span><span class="p">,</span> <span class="n">VirtualNetworkInterface</span><span class="p">,</span> \
+    <span class="n">VirtualComputeQuota</span><span class="p">,</span> <span class="n">VirtualNetworkQuota</span><span class="p">,</span> <span class="n">VirtualStorageQuota</span><span class="p">,</span> <span class="n">SoftwareImageInformation</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OpenstackVimAdapterError"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapterError">[docs]</a><span class="k">class</span> <span class="nc">OpenstackVimAdapterError</span><span class="p">(</span><span class="n">VimAdapterError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation Openstack VIM adapter API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="OpenstackVimAdapter"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter">[docs]</a><span class="k">class</span> <span class="nc">OpenstackVimAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class of functions that map the ETSI standard operations exposed by the VIM to the operations exposed by the</span>
+<span class="sd">    OpenStack Heat, Neutron and Nova clients.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">identity_api_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">project_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">project_domain_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_domain_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_clients</span><span class="p">(</span><span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                               <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                               <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                               <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                               <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                               <span class="n">project_domain_name</span><span class="o">=</span><span class="n">project_domain_name</span><span class="p">,</span>
+                               <span class="n">user_domain_name</span><span class="o">=</span><span class="n">user_domain_name</span><span class="p">,</span>
+                               <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create </span><span class="si">%s</span><span class="s1"> instance - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.build_clients"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.build_clients">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">build_clients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">identity_api_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">project_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">project_domain_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_domain_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heat_client</span> <span class="o">=</span> <span class="n">os_client_config</span><span class="o">.</span><span class="n">make_client</span><span class="p">(</span><span class="s1">&#39;orchestration&#39;</span><span class="p">,</span>
+                                                            <span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                                                            <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                                                            <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                                                            <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                                                            <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                                                            <span class="n">project_domain_name</span><span class="o">=</span><span class="n">project_domain_name</span><span class="p">,</span>
+                                                            <span class="n">user_domain_name</span><span class="o">=</span><span class="n">user_domain_name</span><span class="p">,</span>
+                                                            <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">neutron_client</span> <span class="o">=</span> <span class="n">os_client_config</span><span class="o">.</span><span class="n">make_client</span><span class="p">(</span><span class="s1">&#39;network&#39;</span><span class="p">,</span>
+                                                               <span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                                                               <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                                                               <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                                                               <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                                                               <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                                                               <span class="n">project_domain_name</span><span class="o">=</span><span class="n">project_domain_name</span><span class="p">,</span>
+                                                               <span class="n">user_domain_name</span><span class="o">=</span><span class="n">user_domain_name</span><span class="p">,</span>
+                                                               <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span> <span class="o">=</span> <span class="n">os_client_config</span><span class="o">.</span><span class="n">make_client</span><span class="p">(</span><span class="s1">&#39;compute&#39;</span><span class="p">,</span>
+                                                            <span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                                                            <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                                                            <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                                                            <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                                                            <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                                                            <span class="n">project_domain_name</span><span class="o">=</span><span class="n">project_domain_name</span><span class="p">,</span>
+                                                            <span class="n">user_domain_name</span><span class="o">=</span><span class="n">user_domain_name</span><span class="p">,</span>
+                                                            <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">cinder_client</span> <span class="o">=</span> <span class="n">os_client_config</span><span class="o">.</span><span class="n">make_client</span><span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span>
+                                                              <span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                                                              <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                                                              <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                                                              <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                                                              <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                                                              <span class="n">project_domain_name</span><span class="o">=</span><span class="n">project_domain_name</span><span class="p">,</span>
+                                                              <span class="n">user_domain_name</span><span class="o">=</span><span class="n">user_domain_name</span><span class="p">,</span>
+                                                              <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">glance_client</span> <span class="o">=</span> <span class="n">os_client_config</span><span class="o">.</span><span class="n">make_client</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span>
+                                                              <span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                                                              <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                                                              <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                                                              <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                                                              <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                                                              <span class="n">project_domain_name</span><span class="o">=</span><span class="n">project_domain_name</span><span class="p">,</span>
+                                                              <span class="n">user_domain_name</span><span class="o">=</span><span class="n">user_domain_name</span><span class="p">,</span>
+                                                              <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">DiscoveryFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">user_domain_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">project_domain_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Domain params are not present, so not attempting to retry building adapter without them&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Unable to build adapter, because auth_url may be v2.0 and domain params are present. &#39;</span>
+                      <span class="s1">&#39;Retrying without domain params&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_clients</span><span class="p">(</span><span class="n">auth_url</span><span class="o">=</span><span class="n">auth_url</span><span class="p">,</span>
+                               <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                               <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                               <span class="n">identity_api_version</span><span class="o">=</span><span class="n">identity_api_version</span><span class="p">,</span>
+                               <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                               <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.get_operation_status"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_id</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">operation_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Operation ID is absent&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">operation_type</span><span class="p">,</span> <span class="n">resource_id</span> <span class="o">=</span> <span class="n">operation_id</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;compute_terminate&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">resource_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">NotFound</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Resource ID </span><span class="si">%s</span><span class="s1"> no longer present in VIM, as expected&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Resource ID </span><span class="si">%s</span><span class="s1"> still present in VIM, not as expected&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;compute_stop&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">server_details</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_get</span><span class="p">(</span><span class="n">resource_id</span><span class="p">)</span>
+                <span class="n">server_status</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">if</span> <span class="n">server_status</span> <span class="o">==</span> <span class="s1">&#39;SHUTOFF&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;compute_start&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">server_details</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_get</span><span class="p">(</span><span class="n">resource_id</span><span class="p">)</span>
+                <span class="n">server_status</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+            <span class="k">if</span> <span class="n">server_status</span> <span class="o">==</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+
+        <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Cannot get operation status for operation type &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">operation_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.create_compute_resource_reservation"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.create_compute_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_compute_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_group_id</span><span class="p">,</span> <span class="n">compute_pool_reservation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">virtualisation_container_reservation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">anti_affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">expiry_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Reservations are not implemented in Openstack yet&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.terminate_compute_resource_reservation"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.terminate_compute_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">terminate_compute_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reservation_id</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Reservations are not implemented in Openstack yet&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.create_storage_resource_reservation"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.create_storage_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_storage_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_group_id</span><span class="p">,</span> <span class="n">storage_pool_reservation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expiry_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">anti_affinity_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Reservations are not implemented in Openstack yet&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.terminate_storage_resource_reservation"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.terminate_storage_resource_reservation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">terminate_storage_resource_reservation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reservation_id</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Reservations are not implemented in Openstack yet&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.get_resource_group_id"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.get_resource_group_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_resource_group_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">auth_ref</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">][</span><span class="s1">&#39;project&#39;</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get project ID - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_virtualised_compute_resource"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_virtualised_compute_resource">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_virtualised_compute_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_compute_filter</span><span class="p">):</span>
+        <span class="n">virtual_compute</span> <span class="o">=</span> <span class="n">VirtualCompute</span><span class="p">()</span>
+
+        <span class="n">compute_id</span> <span class="o">=</span> <span class="n">query_compute_filter</span><span class="p">[</span><span class="s1">&#39;compute_id&#39;</span><span class="p">]</span>
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">compute_id</span> <span class="o">=</span> <span class="n">compute_id</span>
+        <span class="n">server_details</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_get</span><span class="p">(</span><span class="n">compute_id</span><span class="p">)</span>
+        <span class="n">server_flavor_id</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;flavor_id&#39;</span><span class="p">]</span>
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">flavour_id</span> <span class="o">=</span> <span class="n">server_flavor_id</span>
+        <span class="n">server_status</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">server_status</span> <span class="o">==</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">:</span>
+            <span class="n">virtual_compute</span><span class="o">.</span><span class="n">operational_state</span> <span class="o">=</span> <span class="s1">&#39;ENABLED&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">virtual_compute</span><span class="o">.</span><span class="n">operational_state</span> <span class="o">=</span> <span class="s1">&#39;DISABLED&#39;</span>
+        <span class="n">flavor_details</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flavor_get</span><span class="p">(</span><span class="n">server_flavor_id</span><span class="p">)</span>
+
+        <span class="n">virtual_cpu</span> <span class="o">=</span> <span class="n">VirtualCpu</span><span class="p">()</span>
+        <span class="n">virtual_cpu</span><span class="o">.</span><span class="n">num_virtual_cpu</span> <span class="o">=</span> <span class="n">flavor_details</span><span class="p">[</span><span class="s1">&#39;vcpus&#39;</span><span class="p">]</span>
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_cpu</span> <span class="o">=</span> <span class="n">virtual_cpu</span>
+
+        <span class="n">virtual_memory</span> <span class="o">=</span> <span class="n">VirtualMemory</span><span class="p">()</span>
+        <span class="n">virtual_memory</span><span class="o">.</span><span class="n">virtual_mem_size</span> <span class="o">=</span> <span class="n">flavor_details</span><span class="p">[</span><span class="s1">&#39;ram&#39;</span><span class="p">]</span>
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_memory</span> <span class="o">=</span> <span class="n">virtual_memory</span>
+
+        <span class="n">virtual_storage</span> <span class="o">=</span> <span class="n">VirtualStorage</span><span class="p">()</span>
+        <span class="n">virtual_storage</span><span class="o">.</span><span class="n">size_of_storage</span> <span class="o">=</span> <span class="n">flavor_details</span><span class="p">[</span><span class="s1">&#39;disk&#39;</span><span class="p">]</span>
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_disks</span> <span class="o">=</span> <span class="p">[</span><span class="n">virtual_storage</span><span class="p">]</span>
+
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_network_interface</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">port_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port_list</span><span class="p">(</span><span class="n">device_id</span><span class="o">=</span><span class="n">compute_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">port_list</span> <span class="ow">in</span> <span class="n">port_dict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">port_list</span><span class="p">[</span><span class="s1">&#39;ports&#39;</span><span class="p">]:</span>
+                <span class="n">virtual_network_interface</span> <span class="o">=</span> <span class="n">VirtualNetworkInterface</span><span class="p">()</span>
+                <span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">resource_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">owner_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;device_id&#39;</span><span class="p">])</span>
+                <span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">network_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;network_id&#39;</span><span class="p">])</span>
+                <span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">type_virtual_nic</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;binding:vnic_type&#39;</span><span class="p">])</span>
+                <span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">mac_address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;mac_address&#39;</span><span class="p">])</span>
+                <span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">acceleration_capability</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">virtual_compute</span><span class="o">.</span><span class="n">virtual_network_interface</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">virtual_network_interface</span><span class="p">)</span>
+
+        <span class="n">virtual_compute</span><span class="o">.</span><span class="n">vc_image_id</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;image_id&#39;</span><span class="p">]</span>
+        <span class="c1"># TODO: What should the function return when the specified resources are not found?</span>
+        <span class="k">return</span> <span class="n">virtual_compute</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.trigger_compute_resource_terminate"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.trigger_compute_resource_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">trigger_compute_resource_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_id</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">force_delete</span><span class="p">(</span><span class="n">compute_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to delete server </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">compute_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;compute_terminate&#39;</span><span class="p">,</span> <span class="n">compute_id</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.trigger_compute_resource_operate"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.trigger_compute_resource_operate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">trigger_compute_resource_operate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_id</span><span class="p">,</span> <span class="n">compute_operation</span><span class="p">,</span> <span class="n">compute_operation_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">compute_operation</span> <span class="o">==</span> <span class="s1">&#39;STOP&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">compute_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to stop server </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">compute_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;compute_stop&#39;</span><span class="p">,</span> <span class="n">compute_id</span>
+
+        <span class="k">if</span> <span class="n">compute_operation</span> <span class="o">==</span> <span class="s1">&#39;START&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">compute_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to start server </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">compute_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;compute_start&#39;</span><span class="p">,</span> <span class="n">compute_id</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Cannot perform operation &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">compute_operation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.port_list"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.port_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">port_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">query_filter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function gets the list of ports.</span>
+
+<span class="sd">        :param query_filter:    Additional params.</span>
+<span class="sd">        :return:                List of ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">neutron_ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neutron_client</span><span class="o">.</span><span class="n">list_ports</span><span class="p">(</span><span class="n">retrieve_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">query_filter</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get the list of ports - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">neutron_ports</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.server_list"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.server_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">server_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function gets the list of servers.</span>
+
+<span class="sd">        :param query_filter:    Filter out servers which don&#39;t match the search_opts (optional). The search opts format</span>
+<span class="sd">                                is a dictionary of key / value pairs that will be appended to the query string.</span>
+<span class="sd">        :return:                List of &#39;Server&#39; objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nova_servers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">search_opts</span><span class="o">=</span><span class="n">query_filter</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get the list of servers - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nova_servers</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.server_get"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.server_get">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">server_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function retrieves the details for the server with the given ID.</span>
+
+<span class="sd">        :param server_id:   ID of the server to get details for.</span>
+<span class="sd">        :return:            Dictionary with server details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">server_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get details for server </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">server_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="n">server_details</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;flavor_id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">flavor</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;hostId&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">hostId</span><span class="p">),</span>
+            <span class="s1">&#39;image_id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">image</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
+            <span class="s1">&#39;user_id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">user_id</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">server_details</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.stack_get"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.stack_get">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">stack_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function gets the metadata for the specified stack ID.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stack_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heat_client</span><span class="o">.</span><span class="n">stacks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stack_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get details for stack </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">stack_state</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.stack_resume"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.stack_resume">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">stack_resume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function resumes the stack with the given ID.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heat_client</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">stack_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to resume stack </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.stack_suspend"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.stack_suspend">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">stack_suspend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function suspends the stack with the given ID.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heat_client</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">suspend</span><span class="p">(</span><span class="n">stack_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to suspend stack </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.stack_resource_list"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.stack_resource_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">stack_resource_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function shows a list of resources belonging to a stack.</span>
+
+<span class="sd">        :param stack_id:    ID of the stack to show the resources for.</span>
+<span class="sd">        :return:            List of &#39;Resource&#39; objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stack_resource_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heat_client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">stack_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get resources for stack </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">stack_resource_list</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_compute_capacity"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_compute_capacity">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_compute_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zone_id</span><span class="p">,</span> <span class="n">compute_resource_type_id</span><span class="p">,</span> <span class="n">resource_criteria</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="p">,</span>
+                               <span class="n">time_period</span><span class="p">):</span>
+        <span class="n">limits</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">resource_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;vcpu&#39;</span><span class="p">,</span> <span class="s1">&#39;vmem&#39;</span><span class="p">,</span> <span class="s1">&#39;instances&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">resource_type</span> <span class="ow">in</span> <span class="n">resource_types</span><span class="p">:</span>
+            <span class="n">limits</span><span class="p">[</span><span class="n">resource_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nova_limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">limits</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get compute capacity - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">nova_limit</span> <span class="ow">in</span> <span class="n">nova_limits</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;totalCoresUsed&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;vcpu&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;maxTotalCores&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;vcpu&#39;</span><span class="p">][</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;totalRAMUsed&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;vmem&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;maxTotalRAMSize&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;vmem&#39;</span><span class="p">][</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;totalInstancesUsed&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;maxTotalInstances&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">][</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nova_limit</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">limits</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_storage_capacity"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_storage_capacity">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_storage_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zone_id</span><span class="p">,</span> <span class="n">storage_resource_type_id</span><span class="p">,</span> <span class="n">resource_criteria</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="p">,</span>
+                               <span class="n">time_period</span><span class="p">):</span>
+        <span class="n">limits</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">resource_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;vstorage&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">resource_type</span> <span class="ow">in</span> <span class="n">resource_types</span><span class="p">:</span>
+            <span class="n">limits</span><span class="p">[</span><span class="n">resource_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cinder_limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cinder_client</span><span class="o">.</span><span class="n">limits</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get storage capacity - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cinder_limit</span> <span class="ow">in</span> <span class="n">cinder_limits</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cinder_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;totalGigabytesUsed&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;vstorage&#39;</span><span class="p">][</span><span class="s1">&#39;used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cinder_limit</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">cinder_limit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;maxTotalVolumeGigabytes&#39;</span><span class="p">:</span>
+                <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;vstorage&#39;</span><span class="p">][</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cinder_limit</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">limits</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_compute_resource_quota"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_compute_resource_quota">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_compute_resource_quota</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_quota_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function gets quota information for resources specified in the filter for project_id retrieved from nova.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resource_group_id</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">quotas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">quotas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tenant_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get compute resource quota - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">virtual_compute_quota</span> <span class="o">=</span> <span class="n">VirtualComputeQuota</span><span class="p">()</span>
+        <span class="n">virtual_compute_quota</span><span class="o">.</span><span class="n">resource_group_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">quotas</span><span class="o">.</span><span class="n">_info</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="n">resources</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;num_vcpus&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="o">.</span><span class="n">cores</span><span class="p">,</span>
+            <span class="s1">&#39;num_vc_instances&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="o">.</span><span class="n">instances</span><span class="p">,</span>
+            <span class="s1">&#39;virtual_mem_size&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="o">.</span><span class="n">ram</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">resources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">virtual_compute_quota</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">virtual_compute_quota</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_network_resource_quota"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_network_resource_quota">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_network_resource_quota</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_quota_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function gets quota information for resources specified in the filter for project_id retrieved from</span>
+<span class="sd">        neutron.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resource_group_id</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">quotas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neutron_client</span><span class="o">.</span><span class="n">show_quota</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get network resource quota - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">virtual_network_quota</span> <span class="o">=</span> <span class="n">VirtualNetworkQuota</span><span class="p">()</span>
+        <span class="n">virtual_network_quota</span><span class="o">.</span><span class="n">resource_group_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="n">resources</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;num_public_ips&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="p">[</span><span class="s1">&#39;quota&#39;</span><span class="p">][</span><span class="s1">&#39;floatingip&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;num_ports&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="p">[</span><span class="s1">&#39;quota&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;num_subnets&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="p">[</span><span class="s1">&#39;quota&#39;</span><span class="p">][</span><span class="s1">&#39;subnet&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">resources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">virtual_network_quota</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">virtual_network_quota</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_storage_resource_quota"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_storage_resource_quota">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_storage_resource_quota</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_quota_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function gets quota information for resources specified in the filter for project_id retrieved from</span>
+<span class="sd">        neutron.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resource_group_id</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">quotas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cinder_client</span><span class="o">.</span><span class="n">quotas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get storage resource quota - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">virtual_storage_quota</span> <span class="o">=</span> <span class="n">VirtualStorageQuota</span><span class="p">()</span>
+        <span class="n">virtual_storage_quota</span><span class="o">.</span><span class="n">resource_group_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+        <span class="n">resources</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;storage_size&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="o">.</span><span class="n">gigabytes</span><span class="p">,</span>
+            <span class="s1">&#39;num_snapshots&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="o">.</span><span class="n">snapshots</span><span class="p">,</span>
+            <span class="s1">&#39;num_volumes&#39;</span><span class="p">:</span> <span class="n">quotas</span><span class="o">.</span><span class="n">volumes</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">resources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">virtual_storage_quota</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">virtual_storage_quota</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.flavor_get"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.flavor_get">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">flavor_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flavor_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function retrieves the details for the flavor with the given ID.</span>
+
+<span class="sd">        :param flavor_id:   ID of the flavor to get details for.</span>
+<span class="sd">        :return:            Dictionary with flavor details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">flavor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nova_client</span><span class="o">.</span><span class="n">flavors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">flavor_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get details for flavor </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">flavor_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="n">flavor_details</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">flavor</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;vcpus&#39;</span><span class="p">:</span> <span class="n">flavor</span><span class="o">.</span><span class="n">vcpus</span><span class="p">,</span>
+            <span class="s1">&#39;ram&#39;</span><span class="p">:</span> <span class="n">flavor</span><span class="o">.</span><span class="n">ram</span><span class="p">,</span>
+            <span class="s1">&#39;disk&#39;</span><span class="p">:</span> <span class="n">flavor</span><span class="o">.</span><span class="n">disk</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">flavor_details</span></div>
+
+<div class="viewcode-block" id="OpenstackVimAdapter.query_image"><a class="viewcode-back" href="../../../../api.adapter.vim.html#api.adapter.vim.openstack.OpenstackVimAdapter.query_image">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">query_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_id</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">glance_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenstackVimAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get details for image </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="n">software_image_information</span> <span class="o">=</span> <span class="n">SoftwareImageInformation</span><span class="p">()</span>
+        <span class="n">software_image_information</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">image_id</span>
+        <span class="n">software_image_information</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">software_image_information</span><span class="o">.</span><span class="n">created_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">created_at</span><span class="p">)</span>
+        <span class="n">software_image_information</span><span class="o">.</span><span class="n">updated_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">updated_at</span><span class="p">)</span>
+        <span class="n">software_image_information</span><span class="o">.</span><span class="n">min_disk</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">min_disk</span>
+        <span class="n">software_image_information</span><span class="o">.</span><span class="n">min_ram</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">min_ram</span>
+
+        <span class="k">return</span> <span class="n">software_image_information</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

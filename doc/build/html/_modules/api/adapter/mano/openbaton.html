@@ -1,0 +1,804 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.adapter.mano.openbaton &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../../adapter.html">api.adapter</a> &raquo;</li>
+        
+          <li><a href="../mano.html">api.adapter.mano</a> &raquo;</li>
+        
+      <li>api.adapter.mano.openbaton</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.adapter.mano.openbaton</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.auth</span> <span class="k">import</span> <span class="n">HTTPBasicAuth</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter</span> <span class="k">import</span> <span class="n">construct_adapter</span>
+<span class="kn">from</span> <span class="nn">api.adapter.mano</span> <span class="k">import</span> <span class="n">ManoAdapterError</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">api.structures.objects</span> <span class="k">import</span> <span class="n">ResourceHandle</span><span class="p">,</span> <span class="n">InstantiatedVnfInfo</span><span class="p">,</span> <span class="n">NsInfo</span><span class="p">,</span> <span class="n">VnfInfo</span><span class="p">,</span> <span class="n">VnfExtCpInfo</span><span class="p">,</span> \
+    <span class="n">VnfcResourceInfo</span><span class="p">,</span> <span class="n">NsdInfo</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+
+<span class="c1"># Instantiate logger</span>
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OpenbatonManoAdapterError"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapterError">[docs]</a><span class="k">class</span> <span class="nc">OpenbatonManoAdapterError</span><span class="p">(</span><span class="n">ManoAdapterError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation Openbaton MANO adapter API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="OpenbatonManoAdapterUnauthorized"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapterUnauthorized">[docs]</a><span class="k">class</span> <span class="nc">OpenbatonManoAdapterUnauthorized</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Openbaton access token not valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="OpenbatonManoAdapter"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter">[docs]</a><span class="k">class</span> <span class="nc">OpenbatonManoAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">vim_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vim_info</span> <span class="o">=</span> <span class="n">vim_info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_token</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;project-id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
+            <span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vnf_to_ns_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_id_to_vnfd_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.get_token"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_token">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="n">http_headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span>
+        <span class="p">}</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+            <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">password</span><span class="p">,</span>
+            <span class="s1">&#39;grant_type&#39;</span><span class="p">:</span> <span class="s1">&#39;password&#39;</span>
+        <span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="s1">&#39;/oauth/token&#39;</span><span class="p">,</span>
+                                     <span class="n">auth</span><span class="o">=</span><span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="s1">&#39;openbatonOSClient&#39;</span><span class="p">,</span> <span class="s1">&#39;secret&#39;</span><span class="p">),</span>
+                                     <span class="n">data</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">http_headers</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to fetch Authorization token from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="s1">&#39;/oauth/token&#39;</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;Bearer &#39;</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;access_token&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">token</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.request"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.request">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># Perform the request once. If we get a 401 back then it might be because the auth token expired, so try to</span>
+        <span class="c1"># re-authenticate and try again. If it still fails, bail.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">verify</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">OpenbatonManoAdapterUnauthorized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_token</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">verify</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">body</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.do_request"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.do_request">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">do_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to run request on </span><span class="si">%s</span><span class="s1">, method </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="n">status_code</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span>
+        <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterUnauthorized</span><span class="p">(</span><span class="s1">&#39;Access token </span><span class="si">%s</span><span class="s1"> is invalid&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to parse response. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">body</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.ns_create_id"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_create_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">ns_name</span><span class="p">,</span> <span class="n">ns_description</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;post&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+            <span class="n">ns_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to instantiate NS for NSD ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nsd_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ns_instance_id</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.ns_instantiate"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">sap_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pnf_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">nested_ns_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param_for_ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">additional_param_for_vnf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ns_instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">additional_affinity_or_anti_affinity_rule</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&quot;NS Instantiate&quot; operation is not implemented in Openbaton!&#39;</span><span class="p">)</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Instead of &quot;Lifecycle Operation Occurrence Id&quot;, will just return the &quot;NS Instance Id&quot;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;ns_instantiate&#39;</span><span class="p">,</span> <span class="n">ns_instance_id</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.get_operation_status"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function does not have a direct mapping in Openbaton so it will just return the status of the specified</span>
+<span class="sd">        resource type with given ID.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&quot;Lifecycle Operation Occurrence Id&quot; is not implemented in Openbaton!&#39;</span><span class="p">)</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Will return the state of the resource with given Id&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">lifecycle_operation_occurrence_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Lifecycle Operation Occurrence ID is absent&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">operation_type</span><span class="p">,</span> <span class="n">resource_id</span> <span class="o">=</span> <span class="n">lifecycle_operation_occurrence_id</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;ns_instantiate&#39;</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">resp</span><span class="p">,</span> <span class="n">ns_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+                <span class="n">ns_status</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_config</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve status for NS ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ns_status</span> <span class="o">==</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">vnfr</span> <span class="ow">in</span> <span class="n">ns_config</span><span class="p">[</span><span class="s1">&#39;vnfr&#39;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vnf_to_ns_mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">vnfr</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">resource_id</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+            <span class="k">elif</span> <span class="n">ns_status</span> <span class="o">==</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span>
+
+        <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;ns_terminate&#39;</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">status_code</span><span class="p">,</span> <span class="n">ns_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vnf_to_ns_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vnf_to_ns_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">resource_id</span><span class="p">}</span>
+                    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_SUCCESS</span>
+                <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+                <span class="n">ns_status</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_config</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get status for NS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ns_status</span> <span class="o">==</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_FAILED</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">OPERATION_PENDING</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.ns_query"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">ns_instance_id</span> <span class="o">=</span> <span class="n">query_filter</span><span class="p">[</span><span class="s1">&#39;ns_instance_id&#39;</span><span class="p">]</span>
+        <span class="n">ns_info</span> <span class="o">=</span> <span class="n">NsInfo</span><span class="p">()</span>
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_instance_id</span> <span class="o">=</span> <span class="n">ns_instance_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">ns_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
+                <span class="c1"># ns-instance-id not found, so assuming NOT_INSTANTIATED</span>
+                <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NS_NOT_INSTANTIATED</span>
+                <span class="k">return</span> <span class="n">ns_info</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve status for NS ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                            <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">nsd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ns_config</span><span class="p">[</span><span class="s1">&#39;descriptor_reference&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">ns_config</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">:</span>
+            <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NS_INSTANTIATED</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ns_info</span><span class="o">.</span><span class="n">ns_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NS_NOT_INSTANTIATED</span>
+        <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">constituent_vnfr</span> <span class="ow">in</span> <span class="n">ns_config</span><span class="p">[</span><span class="s1">&#39;vnfr&#39;</span><span class="p">]:</span>
+            <span class="n">vnf_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_vnf_info</span><span class="p">(</span><span class="n">constituent_vnfr</span><span class="p">)</span>
+            <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnf_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ns_info</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.vnf_query"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.vnf_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">vnf_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="n">query_filter</span><span class="p">[</span><span class="s1">&#39;vnf_instance_id&#39;</span><span class="p">]</span>
+        <span class="n">vnf_info</span> <span class="o">=</span> <span class="n">VnfInfo</span><span class="p">()</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="n">vnf_instance_id</span>
+        <span class="n">ns_instance_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vnf_to_ns_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">/vnfrecords/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">)</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">vnf_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiation_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_NOT_INSTANTIATED</span>
+                <span class="k">return</span> <span class="n">vnf_info</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve status for VNF with ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                            <span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="n">vnf_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_vnf_info</span><span class="p">(</span><span class="n">vnf_config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vnf_info</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.get_vim_helper"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vim_helper">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vim_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vim_id</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/datacenters/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vim_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">vim_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve config for VIM with ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vim_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vim_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vim_info</span><span class="p">[</span><span class="n">vim_config</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Input Error. The VIM where the resource is instantiated is </span><span class="si">%s</span><span class="s1">. &#39;</span>
+                                            <span class="s1">&#39;Information about this VIM were not provided.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">vim_config</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="o">=</span><span class="n">vim_params</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;vim&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">vim_params</span><span class="p">[</span><span class="s1">&#39;client_config&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.ns_terminate"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">terminate_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">ns_term</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;delete&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to terminate NS instance ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="s1">&#39;ns_terminate&#39;</span><span class="p">,</span> <span class="n">ns_instance_id</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.ns_delete_id"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ns_delete_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&quot;NS Delete ID&quot; operation is not implemented in Openbaton!&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.wait_for_ns_stable_state"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.wait_for_ns_stable_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wait_for_ns_stable_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">,</span> <span class="n">poll_interval</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ns_instance_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;NS instance ID is absent&#39;</span><span class="p">)</span>
+        <span class="n">stable_states</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;INACTIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span> <span class="s1">&#39;NOTFOUND&#39;</span><span class="p">]</span>
+        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-records/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">resp</span><span class="p">,</span> <span class="n">ns_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+                <span class="n">ns_status</span> <span class="o">=</span> <span class="n">ns_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;NOTFOUND&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ns_status</span> <span class="ow">in</span> <span class="n">stable_states</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected NS status to be one of </span><span class="si">%s</span><span class="s1">, got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stable_states</span><span class="p">,</span> <span class="n">ns_status</span><span class="p">))</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">poll_interval</span><span class="p">)</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
+                    <span class="n">elapsed_time</span> <span class="o">+=</span> <span class="n">poll_interval</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Elapsed time </span><span class="si">%s</span><span class="s1"> seconds out of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elapsed_time</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Could not retrieve status for NS with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ns_instance_id</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;NS with ID </span><span class="si">%s</span><span class="s1"> did not reach a stable state after </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.get_vnfd"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vnfd">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vnfd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/vnf-descriptors/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnfd_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">vnfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve config for VNFD with ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vnfd_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">vnfd</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.verify_vnf_sw_images"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.verify_vnf_sw_images">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">verify_vnf_sw_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">vnfd_id</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span>
+        <span class="n">vnfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vnfd</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="n">expected_vdu_images</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vdu</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vdu&#39;</span><span class="p">]:</span>
+            <span class="n">expected_vdu_images</span><span class="p">[</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vm_image&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">vnfc_resource_info</span> <span class="ow">in</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span><span class="p">:</span>
+            <span class="n">vdu_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vdu_id</span>
+
+            <span class="n">vim_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">vim_id</span>
+            <span class="n">vim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vim_helper</span><span class="p">(</span><span class="n">vim_id</span><span class="p">)</span>
+            <span class="n">resource_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">resource_id</span>
+            <span class="n">virtual_compute</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">query_virtualised_compute_resource</span><span class="p">(</span><span class="n">query_compute_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;compute_id&#39;</span><span class="p">:</span> <span class="n">resource_id</span><span class="p">})</span>
+            <span class="n">image_id</span> <span class="o">=</span> <span class="n">virtual_compute</span><span class="o">.</span><span class="n">vc_image_id</span>
+            <span class="n">image_details</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">query_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+            <span class="n">image_name_vim</span> <span class="o">=</span> <span class="n">image_details</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="n">image_name_vnfd</span> <span class="o">=</span> <span class="n">expected_vdu_images</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">image_name_vim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image_name_vnfd</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Unexpected image for VNFC </span><span class="si">%s</span><span class="s1">, VDU type </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">vdu_id</span><span class="p">))</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expected image name: </span><span class="si">%s</span><span class="s1">; actual image name: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_name_vnfd</span><span class="p">,</span> <span class="n">image_name_vim</span><span class="p">))</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.validate_vnf_allocated_vresources"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.validate_vnf_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">validate_vnf_allocated_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">vnfd_id</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span>
+        <span class="n">vnfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vnfd</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="n">expected_vdu_flavours</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vdu</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;vdu&#39;</span><span class="p">]:</span>
+            <span class="n">vdu_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">expected_vdu_flavours</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">vdu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;computation_requirement&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">vdu_flavour</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;computation_requirement&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="n">expected_vdu_flavours</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vdu_flavour</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">flavour</span> <span class="ow">in</span> <span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;deployment_flavour&#39;</span><span class="p">]:</span>
+                    <span class="n">vdu_flavour</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">flavour</span><span class="p">[</span><span class="s1">&#39;flavour_key&#39;</span><span class="p">])</span>
+                    <span class="n">expected_vdu_flavours</span><span class="p">[</span><span class="n">vdu_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vdu_flavour</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">vnfc_resource_info</span> <span class="ow">in</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span><span class="p">:</span>
+            <span class="n">vdu_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vdu_id</span>
+
+            <span class="c1"># Get VIM adapter object</span>
+            <span class="n">vim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vim_helper</span><span class="p">(</span><span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">vim_id</span><span class="p">)</span>
+
+            <span class="n">server_id</span> <span class="o">=</span> <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">resource_id</span>
+            <span class="n">server_details</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">server_get</span><span class="p">(</span><span class="n">server_id</span><span class="p">)</span>
+            <span class="n">server_flavour_id</span> <span class="o">=</span> <span class="n">server_details</span><span class="p">[</span><span class="s1">&#39;flavor_id&#39;</span><span class="p">]</span>
+            <span class="n">flavour_details</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">flavor_get</span><span class="p">(</span><span class="n">server_flavour_id</span><span class="p">)</span>
+            <span class="n">flavour_name_nova</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">flavour_details</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">flavour_name_nova</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expected_vdu_flavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vdu_id</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">validation_result</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">validation_result</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.verify_vnf_nsd_mapping"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.verify_vnf_nsd_mapping">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">verify_vnf_nsd_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">ns_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ns_query</span><span class="p">(</span><span class="n">query_filter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ns_instance_id&#39;</span><span class="p">:</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="s1">&#39;additional_param&#39;</span><span class="p">:</span> <span class="n">additional_param</span><span class="p">})</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="n">ns_info</span><span class="o">.</span><span class="n">nsd_id</span>
+        <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+        <span class="n">expected_vnf_vnfd_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vnfd</span> <span class="ow">in</span> <span class="n">nsd</span><span class="p">[</span><span class="s1">&#39;vnfd&#39;</span><span class="p">]:</span>
+            <span class="n">vnf_product_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+            <span class="n">expected_vnf_vnfd_mapping</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">vnf_info</span> <span class="ow">in</span> <span class="n">ns_info</span><span class="o">.</span><span class="n">vnf_info</span><span class="p">:</span>
+            <span class="n">vnf_product_name</span> <span class="o">=</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span>
+            <span class="k">if</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span> <span class="o">!=</span> <span class="n">expected_vnf_vnfd_mapping</span><span class="p">[</span><span class="n">vnf_product_name</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.get_nsd"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_nsd">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_nsd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-descriptors/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;get&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve config for NSD with ID </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nsd_id</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">nsd</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.get_vnf_mgmt_addr_list"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vnf_mgmt_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_vnf_mgmt_addr_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Cannot get VNF management address in Openbaton&#39;</span><span class="p">)</span>
+        <span class="n">mgmt_addr_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># TODO The rest of the function is commented because Openbaton populates vnf_address field with the IP addresses</span>
+        <span class="c1"># TODO of all interfaces, hence the tests fail when we ping the management addresses. The comments should be</span>
+        <span class="c1"># TODO removed when Openbaton will populate vnf_address field only with the management interface IP address.</span>
+        <span class="c1"># ns_instance_id = self.vnf_to_ns_mapping.get(vnf_instance_id)</span>
+        <span class="c1"># url = &#39;/api/v1/ns-records/%s/vnfrecords/%s&#39; % (ns_instance_id, vnf_instance_id)</span>
+        <span class="c1"># try:</span>
+        <span class="c1">#     status_code, vnf_config = self.request(url=url, method=&#39;get&#39;)</span>
+        <span class="c1">#     assert status_code == 200</span>
+        <span class="c1"># except Exception as e:</span>
+        <span class="c1">#     LOG.exception(e)</span>
+        <span class="c1">#     raise OpenbatonManoAdapterError(&#39;Unable to retrieve config for VNF with ID %s. Reason: %s&#39; %</span>
+        <span class="c1">#                                     (vnf_instance_id, e))</span>
+        <span class="c1"># mgmt_addr_list = [str(addr) for addr in vnf_config[&#39;vnf_address&#39;]]</span>
+
+        <span class="k">return</span> <span class="n">mgmt_addr_list</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.build_vnf_info"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.build_vnf_info">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">build_vnf_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_config</span><span class="p">):</span>
+        <span class="n">vnf_info</span> <span class="o">=</span> <span class="n">VnfInfo</span><span class="p">()</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;INACTIVE&#39;</span><span class="p">]:</span>
+            <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiation_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_NOT_INSTANTIATED</span>
+            <span class="k">return</span> <span class="n">vnf_info</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiation_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_INSTANTIATED</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnfd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;descriptor_reference&#39;</span><span class="p">])</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span> <span class="o">=</span> <span class="n">InstantiatedVnfInfo</span><span class="p">()</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnf_state</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">VNF_STATE</span><span class="p">[</span><span class="s1">&#39;OPENBATON_VNF_STATE&#39;</span><span class="p">][</span><span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]]</span>
+
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">ext_cp_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">vdu</span> <span class="ow">in</span> <span class="n">vnf_config</span><span class="p">[</span><span class="s1">&#39;vdu&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">vnfc_instance</span> <span class="ow">in</span> <span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;vnfc_instance&#39;</span><span class="p">]:</span>
+                <span class="n">vnfc_resource_info</span> <span class="o">=</span> <span class="n">VnfcResourceInfo</span><span class="p">()</span>
+                <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vnfc_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfc_instance</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">vdu_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;parent_vdu&#39;</span><span class="p">])</span>
+
+                <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span> <span class="o">=</span> <span class="n">ResourceHandle</span><span class="p">()</span>
+                <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">vim_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfc_instance</span><span class="p">[</span><span class="s1">&#39;vim_id&#39;</span><span class="p">])</span>
+                <span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">compute_resource</span><span class="o">.</span><span class="n">resource_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfc_instance</span><span class="p">[</span><span class="s1">&#39;vc_id&#39;</span><span class="p">])</span>
+
+                <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">vnfc_resource_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnfc_resource_info</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">ext_cp</span> <span class="ow">in</span> <span class="n">vnfc_instance</span><span class="p">[</span><span class="s1">&#39;vnfComponent&#39;</span><span class="p">][</span><span class="s1">&#39;connection_point&#39;</span><span class="p">]:</span>
+                    <span class="n">vnf_ext_cp_info</span> <span class="o">=</span> <span class="n">VnfExtCpInfo</span><span class="p">()</span>
+                    <span class="n">port_name</span> <span class="o">=</span> <span class="s1">&#39;VNFD-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ext_cp</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                    <span class="n">vim_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">vnfc_instance</span><span class="p">[</span><span class="s1">&#39;vim_id&#39;</span><span class="p">])</span>
+
+                    <span class="n">vim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vim_helper</span><span class="p">(</span><span class="n">vim_id</span><span class="p">)</span>
+                    <span class="n">port_dict</span> <span class="o">=</span> <span class="n">vim</span><span class="o">.</span><span class="n">port_list</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">port_name</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">port_list</span> <span class="ow">in</span> <span class="n">port_dict</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">port_list</span><span class="p">[</span><span class="s1">&#39;ports&#39;</span><span class="p">]:</span>
+                            <span class="n">vnf_ext_cp_info</span> <span class="o">=</span> <span class="n">VnfExtCpInfo</span><span class="p">()</span>
+                            <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">cp_instance_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                            <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s1">&#39;mac&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">[</span><span class="s1">&#39;mac_address&#39;</span><span class="p">])],</span>
+                                <span class="s1">&#39;ip&#39;</span><span class="p">:</span> <span class="p">[]</span>
+                            <span class="p">}</span>
+
+                            <span class="k">for</span> <span class="n">fixed_ip</span> <span class="ow">in</span> <span class="n">port</span><span class="p">[</span><span class="s1">&#39;fixed_ips&#39;</span><span class="p">]:</span>
+                                <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">address</span><span class="p">[</span><span class="s1">&#39;ip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fixed_ip</span><span class="p">[</span><span class="s1">&#39;ip_address&#39;</span><span class="p">]))</span>
+
+                    <span class="n">virtual_link_reference</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ext_cp</span><span class="p">[</span><span class="s1">&#39;virtual_link_reference&#39;</span><span class="p">])</span>
+                    <span class="n">vnf_ext_cp_info</span><span class="o">.</span><span class="n">cpd_id</span> <span class="o">=</span> <span class="n">virtual_link_reference</span> <span class="o">+</span> <span class="s1">&#39;@&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdu</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+                    <span class="n">vnf_info</span><span class="o">.</span><span class="n">instantiated_vnf_info</span><span class="o">.</span><span class="n">ext_cp_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnf_ext_cp_info</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vnf_info</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.nsd_info_create"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_info_create">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_info_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_defined_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Generating a UUID</span>
+        <span class="n">nsd_info_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+        <span class="c1"># Populate the NsdInfo object</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="n">NsdInfo</span><span class="p">()</span>
+        <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_info_id</span> <span class="o">=</span> <span class="n">nsd_info_id</span>
+        <span class="n">nsd_info</span><span class="o">.</span><span class="n">user_defined_data</span> <span class="o">=</span> <span class="n">user_defined_data</span>
+
+        <span class="c1"># Store the mapping between the NsdInfo object and its UUID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="p">[</span><span class="n">nsd_info_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsd_info</span>
+
+        <span class="k">return</span> <span class="n">nsd_info_id</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.nsd_info_query"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_info_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_info_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">nsd_info_id</span> <span class="o">=</span> <span class="n">query_filter</span><span class="p">[</span><span class="s1">&#39;nsd_info_id&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.nsd_upload"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_upload">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">,</span> <span class="n">nsd</span><span class="p">):</span>
+        <span class="c1"># Get the NsdInfo object corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsd_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;No NsdInfo object with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># Uploading the NSD</span>
+        <span class="k">if</span> <span class="n">nsd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Openbaton does not support ETSI NSD format&#39;</span><span class="p">)</span>
+
+        <span class="n">vendor_nsd</span> <span class="o">=</span> <span class="n">nsd_info</span><span class="o">.</span><span class="n">user_defined_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vendor_nsd&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vendor_nsd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Vendor NSD not present in the user_defined_data&#39;</span><span class="p">)</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-descriptors&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">vendor_nsd</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to upload the NSD&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Retrieving details about the on-boarded NSD</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Storing the IDs of the VNFDs to be deleted after the NSD is deleted</span>
+        <span class="n">constituent_vnfd_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vnfd</span> <span class="ow">in</span> <span class="n">body</span><span class="p">[</span><span class="s1">&#39;vnfd&#39;</span><span class="p">]:</span>
+            <span class="n">constituent_vnfd_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vnfd</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_id_to_vnfd_ids</span><span class="p">[</span><span class="n">nsd_info_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">constituent_vnfd_ids</span>
+
+        <span class="c1"># Updating the corresponding NsdInfo object with the details of the on-boarded NSD</span>
+        <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_id</span> <span class="o">=</span> <span class="n">nsd_id</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.nsd_fetch"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_fetch">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">):</span>
+        <span class="c1"># Get the NsdInfo object corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsd_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;No NsdInfo object with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># Get the NSD corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_id</span>
+        <span class="k">if</span> <span class="n">nsd_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;NsdInfo object with ID </span><span class="si">%s</span><span class="s1"> does not have the NsdId attribute set&#39;</span>
+                                            <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="n">nsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsd</span></div>
+
+<div class="viewcode-block" id="OpenbatonManoAdapter.nsd_delete"><a class="viewcode-back" href="../../../../api.adapter.mano.html#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nsd_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">):</span>
+        <span class="c1"># Get the NsdInfo object corresponding to the provided nsd_info_id</span>
+        <span class="n">nsd_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsd_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;No NsdInfo object with ID </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># If the NsdInfo object holds information about an NSD, delete it</span>
+        <span class="n">nsd_id</span> <span class="o">=</span> <span class="n">nsd_info</span><span class="o">.</span><span class="n">nsd_id</span>
+        <span class="k">if</span> <span class="n">nsd_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/ns-descriptors/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">status_code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;delete&#39;</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to delete NSD </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+
+            <span class="c1"># Check the NSD has been deleted by the MANO. This check is added because there is no other way of checking</span>
+            <span class="c1"># that the NSD has been deleted.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_nsd</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;NSD </span><span class="si">%s</span><span class="s1"> has been deleted&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;NSD </span><span class="si">%s</span><span class="s1"> has not been deleted&#39;</span> <span class="o">%</span> <span class="n">nsd_id</span><span class="p">)</span>
+
+        <span class="c1"># Delete the NsdInfo object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_ids</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span>
+
+        <span class="c1"># Delete the VNFDs on-boarded together with the NSD</span>
+        <span class="n">constituent_vnfd_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsd_info_id_to_vnfd_ids</span><span class="p">[</span><span class="n">nsd_info_id</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">vnfd_id</span> <span class="ow">in</span> <span class="n">constituent_vnfd_ids</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/vnf-descriptors/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnfd_id</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">status_code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;delete&#39;</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">OpenbatonManoAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to delete VNFD </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vnfd_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsd_info_id</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

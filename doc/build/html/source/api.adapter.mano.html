@@ -158,23 +158,908 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="api-adapter-mano-cisconfv-module">
-<h2>api.adapter.mano.cisconfv module<a class="headerlink" href="#api-adapter-mano-cisconfv-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.adapter.mano.cisconfv">
+<span id="api-adapter-mano-cisconfv-module"></span><h2>api.adapter.mano.cisconfv module<a class="headerlink" href="#module-api.adapter.mano.cisconfv" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter">
+<em class="property">class </em><code class="descclassname">api.adapter.mano.cisconfv.</code><code class="descname">CiscoNFVManoAdapter</code><span class="sig-paren">(</span><em>nso_hostname</em>, <em>nso_username</em>, <em>nso_password</em>, <em>esc_hostname</em>, <em>esc_username</em>, <em>esc_password</em>, <em>nso_port=2022</em>, <em>esc_port=830</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of functions that map the generic operations exposed by the MANO to the operations exposed by the
+Cisco NFV MANO solution.</p>
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vdu_cp_list">
+<code class="descname">build_vdu_cp_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.build_vdu_cp_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vdu_cp_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vdu_list">
+<code class="descname">build_vdu_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.build_vdu_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vdu_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnf_operate">
+<code class="descname">build_vnf_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.build_vnf_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnf_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnfd_cp_list">
+<code class="descname">build_vnfd_cp_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.build_vnfd_cp_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnfd_cp_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnfr">
+<code class="descname">build_vnfr</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.build_vnfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnfr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnfr_delete">
+<code class="descname">build_vnfr_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.build_vnfr_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.build_vnfr_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function does not have a direct mapping in Cisco NFV client so it will just return the status of the VNF
+with given ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lifecycle_operation_occurrence_id</strong> – UUID used to retrieve the operation details from the class
+attribute self.lifecycle_operation_occurrence_ids</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.get_vim_helper">
+<code class="descname">get_vim_helper</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.get_vim_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.get_vim_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.get_vnfd">
+<code class="descname">get_vnfd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.get_vnfd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.get_vnfd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>vnf_info</em>, <em>additional_param=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_create_id">
+<code class="descname">vnf_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.vnf_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_delete_id">
+<code class="descname">vnf_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.vnf_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_instantiate">
+<code class="descname">vnf_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.vnf_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_operate">
+<code class="descname">vnf_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.vnf_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_terminate">
+<code class="descname">vnf_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.vnf_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.vnf_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter.wait_for_vnf_stable_state">
+<code class="descname">wait_for_vnf_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter.wait_for_vnf_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter.wait_for_vnf_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapterError">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.cisconfv.</code><code class="descname">CiscoNFVManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.adapter.mano.ManoAdapterError" title="api.adapter.mano.ManoAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.mano.ManoAdapterError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation Cisco NFV MANO adapter API.</p>
+</dd></dl>
+
 </div>
-<div class="section" id="api-adapter-mano-cisconfv45-module">
-<h2>api.adapter.mano.cisconfv45 module<a class="headerlink" href="#api-adapter-mano-cisconfv45-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.adapter.mano.cisconfv45">
+<span id="api-adapter-mano-cisconfv45-module"></span><h2>api.adapter.mano.cisconfv45 module<a class="headerlink" href="#module-api.adapter.mano.cisconfv45" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter">
+<em class="property">class </em><code class="descclassname">api.adapter.mano.cisconfv45.</code><code class="descname">CiscoNFVManoAdapter</code><span class="sig-paren">(</span><em>nso_hostname</em>, <em>nso_username</em>, <em>nso_password</em>, <em>esc_hostname</em>, <em>esc_username</em>, <em>esc_password</em>, <em>nso_port=2022</em>, <em>esc_port=830</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of functions that map the generic operations exposed by the MANO to the operations exposed by the
+Cisco NFV MANO solution.</p>
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_day0_config">
+<code class="descname">build_day0_config</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_day0_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_day0_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_nested_ns_info_list">
+<code class="descname">build_nested_ns_info_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_nested_ns_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_nested_ns_info_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_ns_vnf_info_list">
+<code class="descname">build_ns_vnf_info_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_ns_vnf_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_ns_vnf_info_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_nsr">
+<code class="descname">build_nsr</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_nsr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_nsr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_nsr_delete">
+<code class="descname">build_nsr_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_nsr_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_nsr_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_sap_info_list">
+<code class="descname">build_sap_info_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_sap_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_sap_info_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_scaling">
+<code class="descname">build_scaling</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_scaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_scaling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_scaling_vm_group_list">
+<code class="descname">build_scaling_vm_group_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_scaling_vm_group_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_scaling_vm_group_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vdu_cp_list">
+<code class="descname">build_vdu_cp_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vdu_cp_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vdu_cp_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vdu_device_template">
+<code class="descname">build_vdu_device_template</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vdu_device_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vdu_device_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vdu_list">
+<code class="descname">build_vdu_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vdu_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vdu_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vl_details">
+<code class="descname">build_vl_details</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vl_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vl_details" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vl_info_list">
+<code class="descname">build_vl_info_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vl_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vl_info_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vl_list">
+<code class="descname">build_vl_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vl_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vl_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vm_operate">
+<code class="descname">build_vm_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vm_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vm_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnf_change_flavour">
+<code class="descname">build_vnf_change_flavour</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vnf_change_flavour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnf_change_flavour" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnf_operate">
+<code class="descname">build_vnf_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vnf_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnf_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnfd_cp_list">
+<code class="descname">build_vnfd_cp_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vnfd_cp_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnfd_cp_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnfr">
+<code class="descname">build_vnfr</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vnfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnfr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnfr_delete">
+<code class="descname">build_vnfr_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.build_vnfr_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.build_vnfr_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.generate_vnf_instance_id">
+<code class="descname">generate_vnf_instance_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.generate_vnf_instance_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.generate_vnf_instance_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_nsd">
+<code class="descname">get_nsd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_nsd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_nsd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function does not have a direct mapping in Cisco NFV 4.5 client so it will just return the status of the
+VNF with given ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lifecycle_operation_occurrence_id</strong> – UUID used to retrieve the operation details from the class attribute
+self.lifecycle_operation_occurrence_ids</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vim_helper">
+<code class="descname">get_vim_helper</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_vim_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vim_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vm_groups_aggregated_deployment_state">
+<code class="descname">get_vm_groups_aggregated_deployment_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_vm_groups_aggregated_deployment_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vm_groups_aggregated_deployment_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vm_groups_aggregated_service_state">
+<code class="descname">get_vm_groups_aggregated_service_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_vm_groups_aggregated_service_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vm_groups_aggregated_service_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vm_groups_for_vnf">
+<code class="descname">get_vm_groups_for_vnf</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_vm_groups_for_vnf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vm_groups_for_vnf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vnf_mgmt_addr_list">
+<code class="descname">get_vnf_mgmt_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_vnf_mgmt_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vnf_mgmt_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vnfd">
+<code class="descname">get_vnfd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.get_vnfd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.get_vnfd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_create_id">
+<code class="descname">ns_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_delete_id">
+<code class="descname">ns_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_get_alarm_list">
+<code class="descname">ns_get_alarm_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_get_alarm_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_get_alarm_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_instantiate">
+<code class="descname">ns_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_query">
+<code class="descname">ns_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_scale">
+<code class="descname">ns_scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_terminate">
+<code class="descname">ns_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_update">
+<code class="descname">ns_update</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.ns_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.ns_update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_delete">
+<code class="descname">nsd_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.nsd_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_fetch">
+<code class="descname">nsd_fetch</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.nsd_fetch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_fetch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_info_create">
+<code class="descname">nsd_info_create</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.nsd_info_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_info_create" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_info_query">
+<code class="descname">nsd_info_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.nsd_info_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_info_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_upload">
+<code class="descname">nsd_upload</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.nsd_upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.nsd_upload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.validate_vnf_deployment_flavour">
+<code class="descname">validate_vnf_deployment_flavour</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.validate_vnf_deployment_flavour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.validate_vnf_deployment_flavour" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.validate_vnf_instantiation_level">
+<code class="descname">validate_vnf_instantiation_level</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.validate_vnf_instantiation_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.validate_vnf_instantiation_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.verify_vnf_nsd_mapping">
+<code class="descname">verify_vnf_nsd_mapping</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.verify_vnf_nsd_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.verify_vnf_nsd_mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.verify_vnf_sw_images">
+<code class="descname">verify_vnf_sw_images</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.verify_vnf_sw_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.verify_vnf_sw_images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_change_flavour">
+<code class="descname">vnf_change_flavour</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_change_flavour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_change_flavour" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_create_id">
+<code class="descname">vnf_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_delete_id">
+<code class="descname">vnf_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_instantiate">
+<code class="descname">vnf_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_operate">
+<code class="descname">vnf_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_scale_to_level">
+<code class="descname">vnf_scale_to_level</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_scale_to_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_scale_to_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_terminate">
+<code class="descname">vnf_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.vnf_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.vnf_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.wait_for_ns_stable_state">
+<code class="descname">wait_for_ns_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.wait_for_ns_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.wait_for_ns_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.wait_for_vnf_stable_state">
+<code class="descname">wait_for_vnf_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter.wait_for_vnf_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter.wait_for_vnf_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapterError">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.cisconfv45.</code><code class="descname">CiscoNFVManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.adapter.mano.ManoAdapterError" title="api.adapter.mano.ManoAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.mano.ManoAdapterError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation Cisco NFV MANO adapter API.</p>
+</dd></dl>
+
 </div>
-<div class="section" id="api-adapter-mano-dummy-module">
-<h2>api.adapter.mano.dummy module<a class="headerlink" href="#api-adapter-mano-dummy-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.adapter.mano.dummy">
+<span id="api-adapter-mano-dummy-module"></span><h2>api.adapter.mano.dummy module<a class="headerlink" href="#module-api.adapter.mano.dummy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter">
+<em class="property">class </em><code class="descclassname">api.adapter.mano.dummy.</code><code class="descname">DummyManoAdapter</code><span class="sig-paren">(</span><em>auth_url=None</em>, <em>username=None</em>, <em>password=None</em>, <em>identity_api_version=None</em>, <em>project_name=None</em>, <em>project_domain_name=None</em>, <em>user_domain_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class of functions that map the generic operations exposed by the MANO to dummy client.</p>
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.get_allocated_vresources">
+<code class="descname">get_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.get_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.get_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function does not have a direct mapping so it will just return the status of the VNF with given ID.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.ns_create_id">
+<code class="descname">ns_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.ns_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.ns_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.ns_delete_id">
+<code class="descname">ns_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.ns_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.ns_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.ns_instantiate">
+<code class="descname">ns_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.ns_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.ns_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.ns_query">
+<code class="descname">ns_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.ns_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.ns_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.ns_scale">
+<code class="descname">ns_scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.ns_scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.ns_scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.ns_terminate">
+<code class="descname">ns_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.ns_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.ns_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.poll_for_operation_completion">
+<code class="descname">poll_for_operation_completion</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.poll_for_operation_completion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.poll_for_operation_completion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.dummy.DummyManoAdapter.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapter.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.dummy.DummyManoAdapterError">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.dummy.</code><code class="descname">DummyManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano/dummy.html#DummyManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.adapter.mano.ManoAdapterError" title="api.adapter.mano.ManoAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.mano.ManoAdapterError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation Dummy MANO adapter API.</p>
+</dd></dl>
+
 </div>
-<div class="section" id="api-adapter-mano-openbaton-module">
-<h2>api.adapter.mano.openbaton module<a class="headerlink" href="#api-adapter-mano-openbaton-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.adapter.mano.openbaton">
+<span id="api-adapter-mano-openbaton-module"></span><h2>api.adapter.mano.openbaton module<a class="headerlink" href="#module-api.adapter.mano.openbaton" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter">
+<em class="property">class </em><code class="descclassname">api.adapter.mano.openbaton.</code><code class="descname">OpenbatonManoAdapter</code><span class="sig-paren">(</span><em>url</em>, <em>username</em>, <em>password</em>, <em>project</em>, <em>vim_info</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.build_vnf_info">
+<code class="descname">build_vnf_info</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.build_vnf_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.build_vnf_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.do_request">
+<code class="descname">do_request</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.do_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.do_request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.get_nsd">
+<code class="descname">get_nsd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.get_nsd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_nsd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function does not have a direct mapping in Openbaton so it will just return the status of the specified
+resource type with given ID.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.get_token">
+<code class="descname">get_token</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.get_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vim_helper">
+<code class="descname">get_vim_helper</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.get_vim_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vim_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vnf_mgmt_addr_list">
+<code class="descname">get_vnf_mgmt_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.get_vnf_mgmt_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vnf_mgmt_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vnfd">
+<code class="descname">get_vnfd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.get_vnfd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.get_vnfd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_create_id">
+<code class="descname">ns_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.ns_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_delete_id">
+<code class="descname">ns_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.ns_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_instantiate">
+<code class="descname">ns_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.ns_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_query">
+<code class="descname">ns_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.ns_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_terminate">
+<code class="descname">ns_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.ns_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.ns_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_delete">
+<code class="descname">nsd_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.nsd_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_fetch">
+<code class="descname">nsd_fetch</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.nsd_fetch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_fetch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_info_create">
+<code class="descname">nsd_info_create</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.nsd_info_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_info_create" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_info_query">
+<code class="descname">nsd_info_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.nsd_info_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_info_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_upload">
+<code class="descname">nsd_upload</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.nsd_upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.nsd_upload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.request">
+<code class="descname">request</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.verify_vnf_nsd_mapping">
+<code class="descname">verify_vnf_nsd_mapping</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.verify_vnf_nsd_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.verify_vnf_nsd_mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.verify_vnf_sw_images">
+<code class="descname">verify_vnf_sw_images</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.verify_vnf_sw_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.verify_vnf_sw_images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter.wait_for_ns_stable_state">
+<code class="descname">wait_for_ns_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter.wait_for_ns_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter.wait_for_ns_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapterError">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.openbaton.</code><code class="descname">OpenbatonManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.adapter.mano.ManoAdapterError" title="api.adapter.mano.ManoAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.mano.ManoAdapterError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation Openbaton MANO adapter API.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.openbaton.OpenbatonManoAdapterUnauthorized">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.openbaton.</code><code class="descname">OpenbatonManoAdapterUnauthorized</code><a class="reference internal" href="../_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapterUnauthorized"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapterUnauthorized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.Exception</span></code></p>
+<p>Openbaton access token not valid.</p>
+</dd></dl>
+
 </div>
-<div class="section" id="api-adapter-mano-rift-module">
-<h2>api.adapter.mano.rift module<a class="headerlink" href="#api-adapter-mano-rift-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.adapter.mano.rift">
+<span id="api-adapter-mano-rift-module"></span><h2>api.adapter.mano.rift module<a class="headerlink" href="#module-api.adapter.mano.rift" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.adapter.mano.rift.RiftManoAdapter">
+<em class="property">class </em><code class="descclassname">api.adapter.mano.rift.</code><code class="descname">RiftManoAdapter</code><span class="sig-paren">(</span><em>url</em>, <em>username</em>, <em>password</em>, <em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_nsd">
+<code class="descname">get_nsd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_nsd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_nsd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_nsd_generic">
+<code class="descname">get_nsd_generic</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_nsd_generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_nsd_generic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_vim_helper">
+<code class="descname">get_vim_helper</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_vim_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_vim_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_vnf_mgmt_addr_list">
+<code class="descname">get_vnf_mgmt_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_vnf_mgmt_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_vnf_mgmt_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_vnfd">
+<code class="descname">get_vnfd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_vnfd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_vnfd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.get_vnfd_generic">
+<code class="descname">get_vnfd_generic</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.get_vnfd_generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.get_vnfd_generic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.ns_create_id">
+<code class="descname">ns_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.ns_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.ns_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.ns_delete_id">
+<code class="descname">ns_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.ns_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.ns_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.ns_instantiate">
+<code class="descname">ns_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.ns_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.ns_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.ns_query">
+<code class="descname">ns_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.ns_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.ns_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.ns_scale">
+<code class="descname">ns_scale</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.ns_scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.ns_scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.ns_terminate">
+<code class="descname">ns_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.ns_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.ns_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.nsd_delete">
+<code class="descname">nsd_delete</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.nsd_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.nsd_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.nsd_fetch">
+<code class="descname">nsd_fetch</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.nsd_fetch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.nsd_fetch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.nsd_info_create">
+<code class="descname">nsd_info_create</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.nsd_info_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.nsd_info_create" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.nsd_info_query">
+<code class="descname">nsd_info_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.nsd_info_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.nsd_info_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.nsd_upload">
+<code class="descname">nsd_upload</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.nsd_upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.nsd_upload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.verify_ns_vnf_instance_count">
+<code class="descname">verify_ns_vnf_instance_count</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.verify_ns_vnf_instance_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.verify_ns_vnf_instance_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.verify_vnf_nsd_mapping">
+<code class="descname">verify_vnf_nsd_mapping</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.verify_vnf_nsd_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.verify_vnf_nsd_mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.verify_vnf_sw_images">
+<code class="descname">verify_vnf_sw_images</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.verify_vnf_sw_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.verify_vnf_sw_images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.rift.RiftManoAdapter.wait_for_ns_stable_state">
+<code class="descname">wait_for_ns_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapter.wait_for_ns_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter.wait_for_ns_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.rift.RiftManoAdapterError">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.rift.</code><code class="descname">RiftManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano/rift.html#RiftManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.adapter.mano.ManoAdapterError" title="api.adapter.mano.ManoAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.mano.ManoAdapterError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation Rift MANO adapter API.</p>
+</dd></dl>
+
 </div>
-<div class="section" id="api-adapter-mano-sdl-module">
-<h2>api.adapter.mano.sdl module<a class="headerlink" href="#api-adapter-mano-sdl-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-api.adapter.mano.sdl">
+<span id="api-adapter-mano-sdl-module"></span><h2>api.adapter.mano.sdl module<a class="headerlink" href="#module-api.adapter.mano.sdl" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter">
+<em class="property">class </em><code class="descclassname">api.adapter.mano.sdl.</code><code class="descname">SdlManoAdapter</code><span class="sig-paren">(</span><em>nfv_api_url</em>, <em>ui_api_url</em>, <em>tenant_id</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_cookies">
+<code class="descname">get_cookies</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_cookies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_cookies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_nsd">
+<code class="descname">get_nsd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_nsd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_nsd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_nst_uuid_from_nsd_id">
+<code class="descname">get_nst_uuid_from_nsd_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_nst_uuid_from_nsd_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_nst_uuid_from_nsd_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_openstack_vim_params">
+<code class="descname">get_openstack_vim_params</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_openstack_vim_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_openstack_vim_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_operation_status">
+<code class="descname">get_operation_status</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_operation_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_operation_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_token">
+<code class="descname">get_token</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_vim_helper">
+<code class="descname">get_vim_helper</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_vim_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_vim_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_vnf_mgmt_addr_list">
+<code class="descname">get_vnf_mgmt_addr_list</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_vnf_mgmt_addr_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_vnf_mgmt_addr_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.get_vnfd">
+<code class="descname">get_vnfd</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.get_vnfd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.get_vnfd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.ns_create_id">
+<code class="descname">ns_create_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.ns_create_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.ns_create_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.ns_delete_id">
+<code class="descname">ns_delete_id</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.ns_delete_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.ns_delete_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.ns_instantiate">
+<code class="descname">ns_instantiate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.ns_instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.ns_instantiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.ns_query">
+<code class="descname">ns_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.ns_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.ns_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.ns_terminate">
+<code class="descname">ns_terminate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.ns_terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.ns_terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.ns_update">
+<code class="descname">ns_update</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.ns_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.ns_update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.validate_vnf_allocated_vresources">
+<code class="descname">validate_vnf_allocated_vresources</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.validate_vnf_allocated_vresources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.validate_vnf_allocated_vresources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.verify_vnf_nsd_mapping">
+<code class="descname">verify_vnf_nsd_mapping</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.verify_vnf_nsd_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.verify_vnf_nsd_mapping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.verify_vnf_sw_images">
+<code class="descname">verify_vnf_sw_images</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.verify_vnf_sw_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.verify_vnf_sw_images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.vnf_operate">
+<code class="descname">vnf_operate</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.vnf_operate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.vnf_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.vnf_query">
+<code class="descname">vnf_query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.vnf_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.vnf_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="api.adapter.mano.sdl.SdlManoAdapter.wait_for_ns_stable_state">
+<code class="descname">wait_for_ns_stable_state</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapter.wait_for_ns_stable_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter.wait_for_ns_stable_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.adapter.mano.sdl.SdlManoAdapterError">
+<em class="property">exception </em><code class="descclassname">api.adapter.mano.sdl.</code><code class="descname">SdlManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano/sdl.html#SdlManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#api.adapter.mano.ManoAdapterError" title="api.adapter.mano.ManoAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.mano.ManoAdapterError</span></code></a></p>
+<p>A problem occurred in the VNF LifeCycle Validation SDL MANO adapter API.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="api-adapter-mano-tacker-module">
 <h2>api.adapter.mano.tacker module<a class="headerlink" href="#api-adapter-mano-tacker-module" title="Permalink to this headline">¶</a></h2>
@@ -184,7 +1069,7 @@
 <dl class="exception">
 <dt id="api.adapter.mano.ManoAdapterError">
 <em class="property">exception </em><code class="descclassname">api.adapter.mano.</code><code class="descname">ManoAdapterError</code><a class="reference internal" href="../_modules/api/adapter/mano.html#ManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.ManoAdapterError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../api.adapter.html#api.adapter.ApiAdapterError" title="api.adapter.ApiAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.ApiAdapterError</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="api.adapter.html#api.adapter.ApiAdapterError" title="api.adapter.ApiAdapterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">api.adapter.ApiAdapterError</span></code></a></p>
 <p>A problem occurred in the VNF LifeCycle Validation MANO adapter API.</p>
 </dd></dl>
 

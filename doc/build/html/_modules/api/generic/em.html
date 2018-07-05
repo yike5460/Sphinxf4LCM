@@ -180,14 +180,14 @@
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="EmGenericError"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.EmGenericError">[docs]</a><span class="k">class</span> <span class="nc">EmGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
+<div class="viewcode-block" id="EmGenericError"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.EmGenericError">[docs]</a><span class="k">class</span> <span class="nc">EmGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A problem occurred in the VNF LifeCycle Validation EM generic API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Em"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em">[docs]</a><span class="k">class</span> <span class="nc">Em</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Em"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em">[docs]</a><span class="k">class</span> <span class="nc">Em</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class of generic functions representing operations exposed by the EM towards the Test Interface as defined by</span>
 <span class="sd">    ETSI GS NFV-TST 002 v1.1.1 (2016-10).</span>
@@ -200,11 +200,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_generic_config</span><span class="p">(</span><span class="o">**</span><span class="n">generic_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">em_adapter</span> <span class="o">=</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="p">,</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;em&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">adapter_config</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Em.set_generic_config"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em.set_generic_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_generic_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VNF_SCALE_TIMEOUT</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">VNF_SCALE_TIMEOUT</span><span class="p">,</span> <span class="n">POLL_INTERVAL</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">):</span>
+<div class="viewcode-block" id="Em.set_generic_config"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em.set_generic_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_generic_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VNF_SCALE_TIMEOUT</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">VNF_SCALE_TIMEOUT</span><span class="p">,</span> <span class="n">POLL_INTERVAL</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">VNF_SCALE_TIMEOUT</span><span class="o">=</span><span class="n">VNF_SCALE_TIMEOUT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="o">=</span><span class="n">POLL_INTERVAL</span></div>
 
-<div class="viewcode-block" id="Em.get_operation_status"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Em.get_operation_status"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function provides the status of a VNF lifecycle management operation.</span>
@@ -216,7 +216,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">em_adapter</span><span class="o">.</span><span class="n">get_operation_status</span><span class="p">(</span><span class="n">lifecycle_operation_occurrence_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Em.poll_for_operation_completion"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em.poll_for_operation_completion">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Em.poll_for_operation_completion"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em.poll_for_operation_completion">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">poll_for_operation_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">,</span> <span class="n">final_states</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">,</span>
                                       <span class="n">poll_interval</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -247,7 +247,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Em.modify_vnf_configuration"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em.modify_vnf_configuration">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Em.modify_vnf_configuration"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em.modify_vnf_configuration">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">modify_vnf_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">vnf_configuration_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">vnfc_configuration_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -266,7 +266,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">em_adapter</span><span class="o">.</span><span class="n">modify_vnf_configuration</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">vnf_configuration_data</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="p">,</span>
                                                         <span class="n">vnfc_configuration_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Em.vnf_scale"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em.vnf_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Em.vnf_scale"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em.vnf_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function is exposed by the EM at the Em-tst interface and is used by the Test System to trigger VNF scale</span>
@@ -289,7 +289,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">em_adapter</span><span class="o">.</span><span class="n">vnf_scale</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Em.vnf_scale_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.em.Em.vnf_scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Em.vnf_scale_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.em.Em.vnf_scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_scale_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function synchronously scales a VNF horizontally (out/in).</span>

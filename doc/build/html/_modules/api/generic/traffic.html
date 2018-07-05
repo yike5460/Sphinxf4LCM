@@ -178,14 +178,14 @@
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TrafficGenericError"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.TrafficGenericError">[docs]</a><span class="k">class</span> <span class="nc">TrafficGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
+<div class="viewcode-block" id="TrafficGenericError"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.TrafficGenericError">[docs]</a><span class="k">class</span> <span class="nc">TrafficGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A problem occurred in the VNF LifeCycle Validation traffic generic API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Traffic"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic">[docs]</a><span class="k">class</span> <span class="nc">Traffic</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Traffic"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic">[docs]</a><span class="k">class</span> <span class="nc">Traffic</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class of functions used to control the test traffic.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -194,7 +194,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span> <span class="o">=</span> <span class="n">vendor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span> <span class="o">=</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="p">,</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;traffic&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">adapter_config</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Traffic.any_traffic_loss"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.any_traffic_loss">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.any_traffic_loss"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.any_traffic_loss">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">any_traffic_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function checks if any packets are dropped.</span>
@@ -205,7 +205,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">any_traffic_loss</span><span class="p">(</span><span class="n">delay_time</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.clear_counters"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.clear_counters">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.clear_counters"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.clear_counters">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">clear_counters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function clears all traffic counters.</span>
@@ -214,15 +214,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">clear_counters</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Traffic.config_traffic_load"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.config_traffic_load">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.config_traffic_load"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.config_traffic_load">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">config_traffic_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traffic_load</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">config_traffic_load</span><span class="p">(</span><span class="n">traffic_load</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.reconfig_traffic_dest"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.reconfig_traffic_dest">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.reconfig_traffic_dest"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.reconfig_traffic_dest">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">reconfig_traffic_dest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_addr_list</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">reconfig_traffic_dest</span><span class="p">(</span><span class="n">dest_addr_list</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.configure"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.configure">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.configure"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.configure">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traffic_load</span><span class="p">,</span> <span class="n">traffic_config</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function applies the new traffic load and traffic configurations. If the traffic already flows, the</span>
@@ -235,7 +235,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">traffic_load</span><span class="p">,</span> <span class="n">traffic_config</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.does_traffic_flow"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.does_traffic_flow">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.does_traffic_flow"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.does_traffic_flow">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">does_traffic_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function checks if packets are received. Dropped packets may occur, but are not considered as a negative</span>
@@ -246,19 +246,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">does_traffic_flow</span><span class="p">(</span><span class="n">delay_time</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.calculate_activation_time"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.calculate_activation_time">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.calculate_activation_time"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.calculate_activation_time">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">calculate_activation_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">calculate_activation_time</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Traffic.calculate_deactivation_time"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.calculate_deactivation_time">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.calculate_deactivation_time"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.calculate_deactivation_time">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">calculate_deactivation_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">calculate_deactivation_time</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Traffic.calculate_service_disruption_length"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.calculate_service_disruption_length">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.calculate_service_disruption_length"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.calculate_service_disruption_length">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">calculate_service_disruption_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">calculate_service_disruption_length</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Traffic.start"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.start">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.start"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.start">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_when_emission_starts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function starts the traffic emission.</span>
@@ -270,7 +270,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">delay_time</span><span class="p">,</span> <span class="n">return_when_emission_starts</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.stop"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.stop">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.stop"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.stop">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_when_emission_stops</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function stops the traffic emission.</span>
@@ -282,7 +282,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">delay_time</span><span class="p">,</span> <span class="n">return_when_emission_stops</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Traffic.destroy"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.traffic.Traffic.destroy">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Traffic.destroy"><a class="viewcode-back" href="../../../api.generic.html#api.generic.traffic.Traffic.destroy">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traffic_adapter</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span></div></div>
 </pre></div>

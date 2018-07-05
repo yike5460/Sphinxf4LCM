@@ -1,0 +1,1144 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.structures.objects &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../api.html">api</a> &raquo;</li>
+        
+      <li>api.structures.objects</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.structures.objects</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">MutableSequence</span>
+<span class="kn">from</span> <span class="nn">weakref</span> <span class="k">import</span> <span class="n">WeakKeyDictionary</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="n">this_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
+
+<span class="n">schema_locations_file_name</span> <span class="o">=</span> <span class="s1">&#39;schemas/schemas.json&#39;</span>
+<span class="n">schema_locations</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">schemas</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="get_schema"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.get_schema">[docs]</a><span class="k">def</span> <span class="nf">get_schema</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">schemas</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
+        <span class="n">schemas</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_schema_from_file</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">schemas</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="load_schema_from_file"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.load_schema_from_file">[docs]</a><span class="k">def</span> <span class="nf">load_schema_from_file</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">schema_file_name</span> <span class="o">=</span> <span class="n">get_schema_location</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">schema_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">schema_file_name</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">schema_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">schema_file</span><span class="p">:</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">schema_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_schema_location"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.get_schema_location">[docs]</a><span class="k">def</span> <span class="nf">get_schema_location</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">schema_locations</span>
+    <span class="k">if</span> <span class="n">schema_locations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">schema_locations_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span>
+                                                  <span class="n">schema_locations_file_name</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">schema_locations_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">schema_locations_file</span><span class="p">:</span>
+            <span class="n">schema_locations</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">schema_locations_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">schema_locations</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TypeValidator"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.TypeValidator">[docs]</a><span class="k">class</span> <span class="nc">TypeValidator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">attribute_type</span>
+
+<div class="viewcode-block" id="TypeValidator.validate"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.TypeValidator.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;value </span><span class="si">%s</span><span class="s1"> should be of type: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">)))</span></div></div>
+
+
+<div class="viewcode-block" id="Attribute"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Attribute">[docs]</a><span class="k">class</span> <span class="nc">Attribute</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">WeakKeyDictionary</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type_validator</span> <span class="o">=</span> <span class="n">TypeValidator</span><span class="p">(</span><span class="n">attribute_type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">coerced_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="n">coerced_value</span>
+
+    <span class="k">def</span> <span class="nf">_coerce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type_validator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StaticTypeAttribute"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.StaticTypeAttribute">[docs]</a><span class="k">class</span> <span class="nc">StaticTypeAttribute</span><span class="p">(</span><span class="n">Attribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TYPE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CoercedList"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.CoercedList">[docs]</a><span class="k">class</span> <span class="nc">CoercedList</span><span class="p">(</span><span class="n">MutableSequence</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry_type_validator</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CoercedList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span> <span class="o">=</span> <span class="n">entry_type_validator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list</span><span class="o">.</span><span class="fm">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CoercedList.insert"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.CoercedList.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">InformationElement</span><span class="p">):</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">dump</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="List"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.List">[docs]</a><span class="k">class</span> <span class="nc">List</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">list</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">entry_type</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span> <span class="o">=</span> <span class="n">entry_type</span><span class="p">()</span><span class="o">.</span><span class="n">_type_validator</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">entry_type</span><span class="p">,</span> <span class="n">InformationElement</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span> <span class="o">=</span> <span class="n">Attribute</span><span class="p">(</span><span class="n">entry_type</span><span class="p">)</span><span class="o">.</span><span class="n">_type_validator</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;invalid entry type </span><span class="si">%s</span><span class="s1">. It should be an Attribute or InformationElement subclass&#39;</span> <span class="o">%</span> <span class="n">entry_type</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">entry_type</span> <span class="o">=</span> <span class="n">entry_type</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">List</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_coerce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">CoercedList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">List</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entry_type_validator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Enum"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Enum">[docs]</a><span class="k">class</span> <span class="nc">Enum</span><span class="p">(</span><span class="n">Attribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry_type</span><span class="p">,</span> <span class="n">valid_values</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Enum</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">entry_type</span><span class="o">.</span><span class="n">TYPE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valid_values</span> <span class="o">=</span> <span class="n">valid_values</span>
+
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Enum</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> value should be in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_valid_values</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="String"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.String">[docs]</a><span class="k">class</span> <span class="nc">String</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="Identifier"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Identifier">[docs]</a><span class="k">class</span> <span class="nc">Identifier</span><span class="p">(</span><span class="n">String</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Version"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Version">[docs]</a><span class="k">class</span> <span class="nc">Version</span><span class="p">(</span><span class="n">String</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Boolean"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Boolean">[docs]</a><span class="k">class</span> <span class="nc">Boolean</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">bool</span></div>
+
+
+<div class="viewcode-block" id="Value"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Value">[docs]</a><span class="k">class</span> <span class="nc">Value</span><span class="p">(</span><span class="n">String</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Number"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Number">[docs]</a><span class="k">class</span> <span class="nc">Number</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="Integer"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Integer">[docs]</a><span class="k">class</span> <span class="nc">Integer</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="PositiveInteger"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.PositiveInteger">[docs]</a><span class="k">class</span> <span class="nc">PositiveInteger</span><span class="p">(</span><span class="n">Integer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PositiveInteger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Value </span><span class="si">%s</span><span class="s1"> should be a positive integer&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Mapping"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Mapping">[docs]</a><span class="k">class</span> <span class="nc">Mapping</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">dict</span></div>
+
+
+<div class="viewcode-block" id="NotSpecified"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NotSpecified">[docs]</a><span class="k">class</span> <span class="nc">NotSpecified</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MacAddress"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.MacAddress">[docs]</a><span class="k">class</span> <span class="nc">MacAddress</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="IpAddress"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.IpAddress">[docs]</a><span class="k">class</span> <span class="nc">IpAddress</span><span class="p">(</span><span class="n">StaticTypeAttribute</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="Rule"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Rule">[docs]</a><span class="k">class</span> <span class="nc">Rule</span><span class="p">(</span><span class="n">String</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="TimeStamp"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.TimeStamp">[docs]</a><span class="k">class</span> <span class="nc">TimeStamp</span><span class="p">(</span><span class="n">String</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="TimeDuration"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.TimeDuration">[docs]</a><span class="k">class</span> <span class="nc">TimeDuration</span><span class="p">(</span><span class="n">Number</span><span class="p">):</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="SchemaLoader"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.SchemaLoader">[docs]</a><span class="k">class</span> <span class="nc">SchemaLoader</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">class_dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bases</span> <span class="o">!=</span> <span class="p">(</span><span class="n">InformationElement</span><span class="p">,):</span>
+            <span class="n">information_element_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">class_schemas</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">information_element_name</span> <span class="ow">in</span> <span class="n">information_element_names</span><span class="p">:</span>
+                <span class="n">class_schema</span> <span class="o">=</span> <span class="n">get_schema</span><span class="p">(</span><span class="n">information_element_name</span><span class="p">)</span>
+                <span class="n">class_schemas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">class_schema</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">inherited_information_element</span> <span class="ow">in</span> <span class="n">class_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inherits&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">if</span> <span class="n">inherited_information_element</span> <span class="ow">in</span> <span class="n">information_element_names</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cyclic inheritance detected for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                        <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">information_element_names</span> <span class="o">+</span> <span class="p">[</span><span class="n">inherited_information_element</span><span class="p">]))</span>
+                    <span class="n">information_element_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inherited_information_element</span><span class="p">)</span>
+
+            <span class="n">class_schemas</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">class_schema</span> <span class="ow">in</span> <span class="n">class_schemas</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">class_attribute_name</span><span class="p">,</span> <span class="n">class_attribute_schema</span> <span class="ow">in</span> <span class="n">class_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">class_attribute_name</span> <span class="ow">in</span> <span class="n">class_dict</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;attribute </span><span class="si">%s</span><span class="s1"> already inherited by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_attribute_name</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+                    <span class="n">class_attribute_type</span> <span class="o">=</span> <span class="n">class_attribute_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+                    <span class="n">class_attribute_constraints</span> <span class="o">=</span> <span class="n">class_attribute_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;constraints&#39;</span><span class="p">)</span>
+
+                    <span class="n">constructor</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">this_module</span><span class="p">,</span> <span class="n">class_attribute_type</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">InformationElement</span><span class="p">):</span>
+                            <span class="n">class_attribute</span> <span class="o">=</span> <span class="n">Attribute</span><span class="p">(</span><span class="n">constructor</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> attribute type should be an Attribute subtype&#39;</span>
+                                            <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">class_attribute_type</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">class_attribute_constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">class_attribute</span> <span class="o">=</span> <span class="n">constructor</span><span class="p">(</span>
+                                <span class="n">entry_type</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">this_module</span><span class="p">,</span> <span class="n">class_attribute_constraints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;entry_type&#39;</span><span class="p">)),</span>
+                                <span class="n">valid_values</span><span class="o">=</span><span class="n">class_attribute_constraints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;valid_values&#39;</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">class_attribute</span> <span class="o">=</span> <span class="n">constructor</span><span class="p">()</span>
+                            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unable to call __init__ for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">class_attribute_type</span><span class="p">)</span>
+
+                    <span class="n">class_dict</span><span class="p">[</span><span class="n">class_attribute_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_attribute</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">class_dict</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InformationElement"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.InformationElement">[docs]</a><span class="k">class</span> <span class="nc">InformationElement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;trying to set invalid attribute </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InformationElement</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+                <span class="n">data_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_value</span><span class="p">,</span> <span class="n">InformationElement</span><span class="p">):</span>
+                    <span class="n">data_value</span> <span class="o">=</span> <span class="n">data_value</span><span class="o">.</span><span class="n">dump</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_value</span><span class="p">,</span> <span class="n">CoercedList</span><span class="p">):</span>
+                    <span class="n">data_value</span> <span class="o">=</span> <span class="n">data_value</span><span class="o">.</span><span class="n">dump</span>
+
+                <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_value</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dump</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InformationElementWithExternalSchema"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.InformationElementWithExternalSchema">[docs]</a><span class="k">class</span> <span class="nc">InformationElementWithExternalSchema</span><span class="p">(</span><span class="n">InformationElement</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">SchemaLoader</span></div>
+
+
+<div class="viewcode-block" id="LogicalNodeData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.LogicalNodeData">[docs]</a><span class="k">class</span> <span class="nc">LogicalNodeData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfExtCpInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfExtCpInfo">[docs]</a><span class="k">class</span> <span class="nc">VnfExtCpInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ResourceHandle"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ResourceHandle">[docs]</a><span class="k">class</span> <span class="nc">ResourceHandle</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualLinkResourceInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualLinkResourceInfo">[docs]</a><span class="k">class</span> <span class="nc">VirtualLinkResourceInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfLinkPort"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfLinkPort">[docs]</a><span class="k">class</span> <span class="nc">VnfLinkPort</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ExtVirtualLinkInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ExtVirtualLinkInfo">[docs]</a><span class="k">class</span> <span class="nc">ExtVirtualLinkInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ExtManagedVirtualLinkInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ExtManagedVirtualLinkInfo">[docs]</a><span class="k">class</span> <span class="nc">ExtManagedVirtualLinkInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfcResourceInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfcResourceInfo">[docs]</a><span class="k">class</span> <span class="nc">VnfcResourceInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualStorage"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualStorage">[docs]</a><span class="k">class</span> <span class="nc">VirtualStorage</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualStorageResourceInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualStorageResourceInfo">[docs]</a><span class="k">class</span> <span class="nc">VirtualStorageResourceInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleInfo">[docs]</a><span class="k">class</span> <span class="nc">ScaleInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VimInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VimInfo">[docs]</a><span class="k">class</span> <span class="nc">VimInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="InstantiatedVnfInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.InstantiatedVnfInfo">[docs]</a><span class="k">class</span> <span class="nc">InstantiatedVnfInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfInfo">[docs]</a><span class="k">class</span> <span class="nc">VnfInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualMemory"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualMemory">[docs]</a><span class="k">class</span> <span class="nc">VirtualMemory</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualCpuPinning"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualCpuPinning">[docs]</a><span class="k">class</span> <span class="nc">VirtualCpuPinning</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualCpu"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualCpu">[docs]</a><span class="k">class</span> <span class="nc">VirtualCpu</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkInterface"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkInterface">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkInterface</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualCompute"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualCompute">[docs]</a><span class="k">class</span> <span class="nc">VirtualCompute</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkPort"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkPort">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkPort</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NetworkSubnet"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NetworkSubnet">[docs]</a><span class="k">class</span> <span class="nc">NetworkSubnet</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NetworkQoS"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NetworkQoS">[docs]</a><span class="k">class</span> <span class="nc">NetworkQoS</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetwork"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetwork">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetwork</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsLinkPort"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsLinkPort">[docs]</a><span class="k">class</span> <span class="nc">NsLinkPort</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsVirtualLinkInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsVirtualLinkInfo">[docs]</a><span class="k">class</span> <span class="nc">NsVirtualLinkInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AffinityOrAntiAffinityRule"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AffinityOrAntiAffinityRule">[docs]</a><span class="k">class</span> <span class="nc">AffinityOrAntiAffinityRule</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Nfp"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Nfp">[docs]</a><span class="k">class</span> <span class="nc">Nfp</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnffgInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnffgInfo">[docs]</a><span class="k">class</span> <span class="nc">VnffgInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SapInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.SapInfo">[docs]</a><span class="k">class</span> <span class="nc">SapInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PnfExtCpInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.PnfExtCpInfo">[docs]</a><span class="k">class</span> <span class="nc">PnfExtCpInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PnfInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.PnfInfo">[docs]</a><span class="k">class</span> <span class="nc">PnfInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsScaleInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsScaleInfo">[docs]</a><span class="k">class</span> <span class="nc">NsScaleInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsInfo">[docs]</a><span class="k">class</span> <span class="nc">NsInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleByStepData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleByStepData">[docs]</a><span class="k">class</span> <span class="nc">ScaleByStepData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleToLevelData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleToLevelData">[docs]</a><span class="k">class</span> <span class="nc">ScaleToLevelData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleVnfData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleVnfData">[docs]</a><span class="k">class</span> <span class="nc">ScaleVnfData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfLocationConstraint"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfLocationConstraint">[docs]</a><span class="k">class</span> <span class="nc">VnfLocationConstraint</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ParamsForVnf"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ParamsForVnf">[docs]</a><span class="k">class</span> <span class="nc">ParamsForVnf</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleNsToLevelData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleNsToLevelData">[docs]</a><span class="k">class</span> <span class="nc">ScaleNsToLevelData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleNsByStepsData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleNsByStepsData">[docs]</a><span class="k">class</span> <span class="nc">ScaleNsByStepsData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfInstanceData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfInstanceData">[docs]</a><span class="k">class</span> <span class="nc">VnfInstanceData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleNsData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleNsData">[docs]</a><span class="k">class</span> <span class="nc">ScaleNsData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualComputeQuota"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualComputeQuota">[docs]</a><span class="k">class</span> <span class="nc">VirtualComputeQuota</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkQuota"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkQuota">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkQuota</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualStorageQuota"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualStorageQuota">[docs]</a><span class="k">class</span> <span class="nc">VirtualStorageQuota</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualStorageData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualStorageData">[docs]</a><span class="k">class</span> <span class="nc">VirtualStorageData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkInterfaceData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkInterfaceData">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkInterfaceData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AffinityOrAntiAffinityResourceList"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AffinityOrAntiAffinityResourceList">[docs]</a><span class="k">class</span> <span class="nc">AffinityOrAntiAffinityResourceList</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AffinityOrAntiAffinityConstraint"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AffinityOrAntiAffinityConstraint">[docs]</a><span class="k">class</span> <span class="nc">AffinityOrAntiAffinityConstraint</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkAttributesReservationData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkAttributesReservationData">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkAttributesReservationData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkPortReservationData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkPortReservationData">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkPortReservationData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualComputeAttributesReservationData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualComputeAttributesReservationData">[docs]</a><span class="k">class</span> <span class="nc">VirtualComputeAttributesReservationData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ComputePoolReservation"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ComputePoolReservation">[docs]</a><span class="k">class</span> <span class="nc">ComputePoolReservation</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualComputeFlavour"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualComputeFlavour">[docs]</a><span class="k">class</span> <span class="nc">VirtualComputeFlavour</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkReservation"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkReservation">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkReservation</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="StoragePoolReservation"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.StoragePoolReservation">[docs]</a><span class="k">class</span> <span class="nc">StoragePoolReservation</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualisationContainerReservation"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualisationContainerReservation">[docs]</a><span class="k">class</span> <span class="nc">VirtualisationContainerReservation</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualComputeAttributes"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualComputeAttributes">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualComputeAttributes</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedComputePool"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedComputePool">[docs]</a><span class="k">class</span> <span class="nc">ReservedComputePool</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualisationContainer"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualisationContainer">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualisationContainer</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualNetworkPort"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualNetworkPort">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualNetworkPort</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualNetworkAttributes"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualNetworkAttributes">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualNetworkAttributes</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualCompute"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualCompute">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualCompute</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualNetwork"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualNetwork">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualNetwork</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedStoragePool"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedStoragePool">[docs]</a><span class="k">class</span> <span class="nc">ReservedStoragePool</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ReservedVirtualStorage"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ReservedVirtualStorage">[docs]</a><span class="k">class</span> <span class="nc">ReservedVirtualStorage</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AffectedVnfc"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AffectedVnfc">[docs]</a><span class="k">class</span> <span class="nc">AffectedVnfc</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AffectedVirtualStorage"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AffectedVirtualStorage">[docs]</a><span class="k">class</span> <span class="nc">AffectedVirtualStorage</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AffectedVirtualLink"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AffectedVirtualLink">[docs]</a><span class="k">class</span> <span class="nc">AffectedVirtualLink</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfLifecycleChangeNotification"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfLifecycleChangeNotification">[docs]</a><span class="k">class</span> <span class="nc">VnfLifecycleChangeNotification</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="L3AddressData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.L3AddressData">[docs]</a><span class="k">class</span> <span class="nc">L3AddressData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AddressData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AddressData">[docs]</a><span class="k">class</span> <span class="nc">AddressData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="CpProtocolData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.CpProtocolData">[docs]</a><span class="k">class</span> <span class="nc">CpProtocolData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Cpd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Cpd">[docs]</a><span class="k">class</span> <span class="nc">Cpd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualNetworkInterfaceRequirements"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualNetworkInterfaceRequirements">[docs]</a><span class="k">class</span> <span class="nc">VirtualNetworkInterfaceRequirements</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VduCpd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VduCpd">[docs]</a><span class="k">class</span> <span class="nc">VduCpd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualCpuPinningData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualCpuPinningData">[docs]</a><span class="k">class</span> <span class="nc">VirtualCpuPinningData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LinkBitrateRequirements"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.LinkBitrateRequirements">[docs]</a><span class="k">class</span> <span class="nc">LinkBitrateRequirements</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfQoS"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfQoS">[docs]</a><span class="k">class</span> <span class="nc">VnfQoS</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfLocalAffinityOrAntiAffinityRule"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfLocalAffinityOrAntiAffinityRule">[docs]</a><span class="k">class</span> <span class="nc">VnfLocalAffinityOrAntiAffinityRule</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VduLevel"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VduLevel">[docs]</a><span class="k">class</span> <span class="nc">VduLevel</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualLinkBitrateLevel"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualLinkBitrateLevel">[docs]</a><span class="k">class</span> <span class="nc">VirtualLinkBitrateLevel</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScalingDelta"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScalingDelta">[docs]</a><span class="k">class</span> <span class="nc">ScalingDelta</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AspectDeltaDetails"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.AspectDeltaDetails">[docs]</a><span class="k">class</span> <span class="nc">AspectDeltaDetails</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScalingAspect"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScalingAspect">[docs]</a><span class="k">class</span> <span class="nc">ScalingAspect</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="InstantiateVnfOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.InstantiateVnfOpConfig">[docs]</a><span class="k">class</span> <span class="nc">InstantiateVnfOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleVnfOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleVnfOpConfig">[docs]</a><span class="k">class</span> <span class="nc">ScaleVnfOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ScaleVnfToLevelOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ScaleVnfToLevelOpConfig">[docs]</a><span class="k">class</span> <span class="nc">ScaleVnfToLevelOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="HealVnfOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.HealVnfOpConfig">[docs]</a><span class="k">class</span> <span class="nc">HealVnfOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="TerminateVnfOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.TerminateVnfOpConfig">[docs]</a><span class="k">class</span> <span class="nc">TerminateVnfOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="OperateVnfOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.OperateVnfOpConfig">[docs]</a><span class="k">class</span> <span class="nc">OperateVnfOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SwImageDesc"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.SwImageDesc">[docs]</a><span class="k">class</span> <span class="nc">SwImageDesc</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfMonitoringParameter"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfMonitoringParameter">[docs]</a><span class="k">class</span> <span class="nc">VnfMonitoringParameter</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfcConfigurableProperties"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfcConfigurableProperties">[docs]</a><span class="k">class</span> <span class="nc">VnfcConfigurableProperties</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="RequestedAdditionalCapabilityData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.RequestedAdditionalCapabilityData">[docs]</a><span class="k">class</span> <span class="nc">RequestedAdditionalCapabilityData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualMemoryData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualMemoryData">[docs]</a><span class="k">class</span> <span class="nc">VirtualMemoryData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualCpuData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualCpuData">[docs]</a><span class="k">class</span> <span class="nc">VirtualCpuData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ConnectivityType"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ConnectivityType">[docs]</a><span class="k">class</span> <span class="nc">ConnectivityType</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualLinkDescFlavour"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualLinkDescFlavour">[docs]</a><span class="k">class</span> <span class="nc">VirtualLinkDescFlavour</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VduProfile"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VduProfile">[docs]</a><span class="k">class</span> <span class="nc">VduProfile</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfVirtualLinkProfile"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfVirtualLinkProfile">[docs]</a><span class="k">class</span> <span class="nc">VnfVirtualLinkProfile</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="InstantiationLevel"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.InstantiationLevel">[docs]</a><span class="k">class</span> <span class="nc">InstantiationLevel</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ChangeVnfFlavourOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ChangeVnfFlavourOpConfig">[docs]</a><span class="k">class</span> <span class="nc">ChangeVnfFlavourOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ChangeExtVnfConnectivityOpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ChangeExtVnfConnectivityOpConfig">[docs]</a><span class="k">class</span> <span class="nc">ChangeExtVnfConnectivityOpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfLcmOperationsConfiguration"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfLcmOperationsConfiguration">[docs]</a><span class="k">class</span> <span class="nc">VnfLcmOperationsConfiguration</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfAffinityOrAntiAffinityGroup"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfAffinityOrAntiAffinityGroup">[docs]</a><span class="k">class</span> <span class="nc">VnfAffinityOrAntiAffinityGroup</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Vdu"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Vdu">[docs]</a><span class="k">class</span> <span class="nc">Vdu</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualComputeDesc"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualComputeDesc">[docs]</a><span class="k">class</span> <span class="nc">VirtualComputeDesc</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualStorageDesc"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualStorageDesc">[docs]</a><span class="k">class</span> <span class="nc">VirtualStorageDesc</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfVirtualLinkDesc"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfVirtualLinkDesc">[docs]</a><span class="k">class</span> <span class="nc">VnfVirtualLinkDesc</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfExtCpd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfExtCpd">[docs]</a><span class="k">class</span> <span class="nc">VnfExtCpd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfDf"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfDf">[docs]</a><span class="k">class</span> <span class="nc">VnfDf</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfConfigurableProperties"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfConfigurableProperties">[docs]</a><span class="k">class</span> <span class="nc">VnfConfigurableProperties</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfInfoModifiableAttributes"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfInfoModifiableAttributes">[docs]</a><span class="k">class</span> <span class="nc">VnfInfoModifiableAttributes</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfLifeCycleManagementScript"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfLifeCycleManagementScript">[docs]</a><span class="k">class</span> <span class="nc">VnfLifeCycleManagementScript</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfdElementGroup"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfdElementGroup">[docs]</a><span class="k">class</span> <span class="nc">VnfdElementGroup</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfIndicator"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfIndicator">[docs]</a><span class="k">class</span> <span class="nc">VnfIndicator</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Vnfd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Vnfd">[docs]</a><span class="k">class</span> <span class="nc">Vnfd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SoftwareImageInformation"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.SoftwareImageInformation">[docs]</a><span class="k">class</span> <span class="nc">SoftwareImageInformation</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsToLevelMapping"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsToLevelMapping">[docs]</a><span class="k">class</span> <span class="nc">NsToLevelMapping</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfToLevelMapping"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfToLevelMapping">[docs]</a><span class="k">class</span> <span class="nc">VnfToLevelMapping</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualLinkToLevelMapping"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualLinkToLevelMapping">[docs]</a><span class="k">class</span> <span class="nc">VirtualLinkToLevelMapping</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Dependencies"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Dependencies">[docs]</a><span class="k">class</span> <span class="nc">Dependencies</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsQoS"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsQoS">[docs]</a><span class="k">class</span> <span class="nc">NsQoS</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsVirtualLinkConnectivity"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsVirtualLinkConnectivity">[docs]</a><span class="k">class</span> <span class="nc">NsVirtualLinkConnectivity</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsProfile"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsProfile">[docs]</a><span class="k">class</span> <span class="nc">NsProfile</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsLevel"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsLevel">[docs]</a><span class="k">class</span> <span class="nc">NsLevel</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsScalingAspect"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsScalingAspect">[docs]</a><span class="k">class</span> <span class="nc">NsScalingAspect</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsLocalAffinityOrAntiAffinityRule"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsLocalAffinityOrAntiAffinityRule">[docs]</a><span class="k">class</span> <span class="nc">NsLocalAffinityOrAntiAffinityRule</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsAffinityOrAntiAffinityGroup"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsAffinityOrAntiAffinityGroup">[docs]</a><span class="k">class</span> <span class="nc">NsAffinityOrAntiAffinityGroup</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsVirtualLinkProfile"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsVirtualLinkProfile">[docs]</a><span class="k">class</span> <span class="nc">NsVirtualLinkProfile</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfProfile"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfProfile">[docs]</a><span class="k">class</span> <span class="nc">VnfProfile</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PnfProfile"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.PnfProfile">[docs]</a><span class="k">class</span> <span class="nc">PnfProfile</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SecurityParameters"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.SecurityParameters">[docs]</a><span class="k">class</span> <span class="nc">SecurityParameters</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsDf"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsDf">[docs]</a><span class="k">class</span> <span class="nc">NsDf</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="OperateVnfData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.OperateVnfData">[docs]</a><span class="k">class</span> <span class="nc">OperateVnfData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsMonitoringParameter"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsMonitoringParameter">[docs]</a><span class="k">class</span> <span class="nc">NsMonitoringParameter</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfIndicatorData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfIndicatorData">[docs]</a><span class="k">class</span> <span class="nc">VnfIndicatorData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="MonitoredData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.MonitoredData">[docs]</a><span class="k">class</span> <span class="nc">MonitoredData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Nfpd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Nfpd">[docs]</a><span class="k">class</span> <span class="nc">Nfpd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Vnffgd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Vnffgd">[docs]</a><span class="k">class</span> <span class="nc">Vnffgd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VirtualLinkDf"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VirtualLinkDf">[docs]</a><span class="k">class</span> <span class="nc">VirtualLinkDf</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsVirtualLinkDesc"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsVirtualLinkDesc">[docs]</a><span class="k">class</span> <span class="nc">NsVirtualLinkDesc</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Sapd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Sapd">[docs]</a><span class="k">class</span> <span class="nc">Sapd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsLifeCycleManagementScript"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsLifeCycleManagementScript">[docs]</a><span class="k">class</span> <span class="nc">NsLifeCycleManagementScript</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Nsd"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Nsd">[docs]</a><span class="k">class</span> <span class="nc">Nsd</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NsdInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.NsdInfo">[docs]</a><span class="k">class</span> <span class="nc">NsdInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfExtCpConfig"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfExtCpConfig">[docs]</a><span class="k">class</span> <span class="nc">VnfExtCpConfig</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VnfExtCpData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.VnfExtCpData">[docs]</a><span class="k">class</span> <span class="nc">VnfExtCpData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ExtLinkPortData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ExtLinkPortData">[docs]</a><span class="k">class</span> <span class="nc">ExtLinkPortData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ExtVirtualLinkData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ExtVirtualLinkData">[docs]</a><span class="k">class</span> <span class="nc">ExtVirtualLinkData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ExtManagedVirtualLinkData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ExtManagedVirtualLinkData">[docs]</a><span class="k">class</span> <span class="nc">ExtManagedVirtualLinkData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ChangeVnfFlavourData"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.ChangeVnfFlavourData">[docs]</a><span class="k">class</span> <span class="nc">ChangeVnfFlavourData</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="FaultyComponentInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.FaultyComponentInfo">[docs]</a><span class="k">class</span> <span class="nc">FaultyComponentInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="FaultyResourceInfo"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.FaultyResourceInfo">[docs]</a><span class="k">class</span> <span class="nc">FaultyResourceInfo</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Alarm"><a class="viewcode-back" href="../../../api.structures.html#api.structures.objects.Alarm">[docs]</a><span class="k">class</span> <span class="nc">Alarm</span><span class="p">(</span><span class="n">InformationElementWithExternalSchema</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,750 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>api.adapter.traffic.stc &mdash; LCM 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> LCM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.html">api.adapter package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.em.html">api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.mano.html">api.adapter.mano package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.traffic.html">api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vim.html">api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnf.html">api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.generic.html">api.generic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">api</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">LCM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">api</a> &raquo;</li>
+        
+          <li><a href="../../adapter.html">api.adapter</a> &raquo;</li>
+        
+          <li><a href="../traffic.html">api.adapter.traffic</a> &raquo;</li>
+        
+      <li>api.adapter.traffic.stc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for api.adapter.traffic.stc</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2018 by Spirent Communications Plc.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is confidential and proprietary to Spirent Communications Inc.</span>
+<span class="c1"># No part of this software may be reproduced, transmitted, disclosed or used</span>
+<span class="c1"># in violation of the Software License Agreement without the expressed</span>
+<span class="c1"># written consent of Spirent Communications Inc.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Lock</span><span class="p">,</span> <span class="n">Thread</span>
+
+<span class="kn">from</span> <span class="nn">stcrestclient</span> <span class="k">import</span> <span class="n">resthttp</span><span class="p">,</span> <span class="n">stchttp</span>
+
+<span class="kn">from</span> <span class="nn">api.adapter.traffic</span> <span class="k">import</span> <span class="n">TrafficAdapterError</span>
+<span class="kn">from</span> <span class="nn">api.generic</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">utils.logging_module</span> <span class="k">import</span> <span class="n">log_entry_exit</span>
+<span class="kn">from</span> <span class="nn">utils.misc</span> <span class="k">import</span> <span class="n">generate_name</span>
+
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="StcTrafficAdapterError"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapterError">[docs]</a><span class="k">class</span> <span class="nc">StcTrafficAdapterError</span><span class="p">(</span><span class="n">TrafficAdapterError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A problem occurred in the VNF LifeCycle Validation STC traffic adapter API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="StcTrafficAdapter"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter">[docs]</a><span class="k">class</span> <span class="nc">StcTrafficAdapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lab_server_addr</span><span class="p">,</span> <span class="n">lab_server_port</span><span class="o">=</span><span class="mi">80</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span> <span class="o">=</span> <span class="n">stchttp</span><span class="o">.</span><span class="n">StcHttp</span><span class="p">(</span><span class="n">lab_server_addr</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">lab_server_port</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create adapter - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tx_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tx_port</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rx_port</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arp_needed</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_to_start_traffic</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_traffic_attempt_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_emission_started</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_emission_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_service_disruption_length</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_service_disruption_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_session"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_session">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user_name</span> <span class="o">=</span> <span class="s1">&#39;vnflcv&#39;</span>
+            <span class="n">session_name</span> <span class="o">=</span> <span class="n">generate_name</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="n">user_name</span><span class="p">,</span> <span class="n">session_name</span><span class="o">=</span><span class="n">session_name</span><span class="p">,</span> <span class="n">kill_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;project&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create session - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">attempt_to_start_traffic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traffic_attempt_lock</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_to_start_traffic</span>
+
+    <span class="nd">@attempt_to_start_traffic</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">attempt_to_start_traffic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traffic_attempt_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attempt_to_start_traffic</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">emission_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emission_lock</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emission_started</span>
+
+    <span class="nd">@emission_started</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">emission_started</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emission_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_emission_started</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">service_disruption_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_disruption_lock</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_disruption_length</span>
+
+    <span class="nd">@service_disruption_length</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">service_disruption_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_disruption_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_service_disruption_length</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_port"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_port">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port_location</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;port&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">port_location</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create port - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">port</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_eth_ipv4_host_iface"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_eth_ipv4_host_iface">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_eth_ipv4_host_iface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">plen</span><span class="p">,</span> <span class="n">gw</span><span class="p">,</span> <span class="n">affiliated_port</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">affiliatedPort</span><span class="o">=</span><span class="n">affiliated_port</span><span class="p">)</span>
+
+            <span class="n">eth_iface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;EthIIIf&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">useDefaultPhyMac</span><span class="o">=</span><span class="s1">&#39;TRUE&#39;</span><span class="p">)</span>
+            <span class="n">ipv4_iface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;Ipv4If&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span> <span class="n">prefixLength</span><span class="o">=</span><span class="n">plen</span><span class="p">,</span>
+                                         <span class="n">usePortDefaultIpv4Gateway</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gateway</span><span class="o">=</span><span class="n">gw</span><span class="p">,</span> <span class="n">resolveGatewayMac</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">ipv4_iface</span><span class="p">,</span> <span class="n">stackedOn</span><span class="o">=</span><span class="n">eth_iface</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">topLevelIf</span><span class="o">=</span><span class="n">ipv4_iface</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">primaryIf</span><span class="o">=</span><span class="n">ipv4_iface</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create host - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ipv4_iface</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_bound_ipv4_stream"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_bound_ipv4_stream">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_bound_ipv4_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">source_ipv4_iface</span><span class="p">,</span> <span class="n">dest_ipv4_iface</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stream_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;streamBlock&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">source_port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">frameConfig</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ethernet:EthernetII&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ipv4:IPv4&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">srcBinding</span><span class="o">=</span><span class="n">source_ipv4_iface</span><span class="p">,</span> <span class="n">dstBinding</span><span class="o">=</span><span class="n">dest_ipv4_iface</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create stream - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">stream_block</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_raw_ipv4_stream"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_raw_ipv4_stream">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_raw_ipv4_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">source_ipv4_addr</span><span class="p">,</span> <span class="n">dest_ipv4_addr</span><span class="p">,</span> <span class="n">dest_mac_addr</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arp_needed</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">stream_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;streamBlock&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">source_port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">frameConfig</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ethernet:EthernetII&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_ETH&#39;</span><span class="p">,</span>
+                            <span class="n">dstMac</span><span class="o">=</span><span class="n">dest_mac_addr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ipv4:IPv4&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">sourceAddr</span><span class="o">=</span><span class="n">source_ipv4_addr</span><span class="p">,</span>
+                            <span class="n">destAddr</span><span class="o">=</span><span class="n">dest_ipv4_addr</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create stream - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">stream_block</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_raw_ipv4_stream_with_dest_ipv4_modifier"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_raw_ipv4_stream_with_dest_ipv4_modifier">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_raw_ipv4_stream_with_dest_ipv4_modifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">source_ipv4_addr</span><span class="p">,</span> <span class="n">dest_ipv4_addr</span><span class="p">,</span>
+                                                       <span class="n">payload</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arp_needed</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">stream_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;streamBlock&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">source_port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">frameConfig</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ethernet:EthernetII&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_ETH&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ipv4:IPv4&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_IPV4&#39;</span><span class="p">,</span>
+                            <span class="n">sourceAddr</span><span class="o">=</span><span class="n">source_ipv4_addr</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">)</span>
+
+            <span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;TableModifier&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">modifier</span><span class="p">,</span> <span class="n">Data</span><span class="o">=</span><span class="n">dest_ipv4_addr</span><span class="p">,</span> <span class="n">RepeatCount</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">OffsetReference</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_IPV4.destAddr&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create stream - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">stream_block</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.create_raw_ipv4_stream_with_dest_mac_modifier"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.create_raw_ipv4_stream_with_dest_mac_modifier">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_raw_ipv4_stream_with_dest_mac_modifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">source_ipv4_addr</span><span class="p">,</span> <span class="n">dest_ipv4_addr</span><span class="p">,</span>
+                                                      <span class="n">dest_mac_addr</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arp_needed</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">stream_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;streamBlock&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">source_port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">frameConfig</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ethernet:EthernetII&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_ETH&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;ipv4:IPv4&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_IPV4&#39;</span><span class="p">,</span>
+                            <span class="n">sourceAddr</span><span class="o">=</span><span class="n">source_ipv4_addr</span><span class="p">,</span> <span class="n">destAddr</span><span class="o">=</span><span class="n">dest_ipv4_addr</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">)</span>
+
+            <span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;TableModifier&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="n">stream_block</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">modifier</span><span class="p">,</span> <span class="n">Data</span><span class="o">=</span><span class="n">dest_mac_addr</span><span class="p">,</span> <span class="n">RepeatCount</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">OffsetReference</span><span class="o">=</span><span class="s1">&#39;RAW_STREAM_ETH.dstMac&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create stream - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">stream_block</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.config_port_rate"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.config_port_rate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">config_port_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_rate</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">port_name</span><span class="p">,</span> <span class="s1">&#39;children-Generator&#39;</span><span class="p">)</span>
+            <span class="n">generator_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="s1">&#39;children-GeneratorConfig&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">generator_config</span><span class="p">,</span> <span class="n">DurationMode</span><span class="o">=</span><span class="s1">&#39;CONTINUOUS&#39;</span><span class="p">,</span> <span class="n">LoadMode</span><span class="o">=</span><span class="s1">&#39;FIXED&#39;</span><span class="p">,</span>
+                            <span class="n">FixedLoad</span><span class="o">=</span><span class="n">port_rate</span><span class="p">,</span>
+                            <span class="n">LoadUnit</span><span class="o">=</span><span class="s1">&#39;PERCENT_LINE_RATE&#39;</span><span class="p">,</span> <span class="n">SchedulingMode</span><span class="o">=</span><span class="s1">&#39;PORT_BASED&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to configure port rate - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.config_traffic_load"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.config_traffic_load">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">config_traffic_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traffic_load</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_port_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tx_port</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">traffic_load_percent_mapping</span><span class="p">[</span><span class="n">traffic_load</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.reconfig_traffic_dest"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.reconfig_traffic_dest">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">reconfig_traffic_dest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_addr_list</span><span class="p">):</span>
+        <span class="c1"># Delete existing modifier (we assume there is only one), if any.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">existing_modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span><span class="p">,</span> <span class="s1">&#39;children-TableModifier&#39;</span><span class="p">)</span>
+            <span class="n">offset_reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">existing_modifier</span><span class="p">)[</span><span class="s1">&#39;OffsetReference&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">existing_modifier</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">resthttp</span><span class="o">.</span><span class="n">RestHttpError</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No modifiers to delete&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create new modifier with the provided destination address list.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">object_type</span><span class="o">=</span><span class="s1">&#39;TableModifier&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="n">modifier</span><span class="p">,</span> <span class="n">Data</span><span class="o">=</span><span class="n">dest_addr_list</span><span class="p">,</span> <span class="n">RepeatCount</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">OffsetReference</span><span class="o">=</span><span class="n">offset_reference</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to create stream modifier - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.configure"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.configure">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traffic_load</span><span class="p">,</span> <span class="n">traffic_config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_session</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;VNF_TERMINATED&#39;</span><span class="p">:</span>
+            <span class="n">gen_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">port_location</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;port_location&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tx_port</span> <span class="o">=</span> <span class="n">gen_port</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_raw_ipv4_stream_with_dest_ipv4_modifier</span><span class="p">(</span>
+                                                                    <span class="n">source_port</span><span class="o">=</span><span class="n">gen_port</span><span class="p">,</span>
+                                                                    <span class="n">source_ipv4_addr</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;traffic_src_addr&#39;</span><span class="p">],</span>
+                                                                    <span class="n">dest_ipv4_addr</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;traffic_dst_addr&#39;</span><span class="p">],</span>
+                                                                    <span class="n">payload</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;payload&#39;</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;VNF_TRANSIENT&#39;</span><span class="p">:</span>
+            <span class="n">l_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">port_location</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;left_port_location&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tx_port</span> <span class="o">=</span> <span class="n">l_port</span>
+
+            <span class="n">r_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">port_location</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;right_port_location&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rx_port</span> <span class="o">=</span> <span class="n">r_port</span>
+
+            <span class="n">r_ipv4_iface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_eth_ipv4_host_iface</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;right_traffic_addr&#39;</span><span class="p">],</span>
+                                                           <span class="n">plen</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;right_traffic_plen&#39;</span><span class="p">],</span>
+                                                           <span class="n">gw</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;right_traffic_gw&#39;</span><span class="p">],</span>
+                                                           <span class="n">affiliated_port</span><span class="o">=</span><span class="n">r_port</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_raw_ipv4_stream_with_dest_mac_modifier</span><span class="p">(</span>
+                                                                   <span class="n">source_port</span><span class="o">=</span><span class="n">l_port</span><span class="p">,</span>
+                                                                   <span class="n">source_ipv4_addr</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;left_traffic_addr&#39;</span><span class="p">],</span>
+                                                                   <span class="n">dest_ipv4_addr</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;right_traffic_addr&#39;</span><span class="p">],</span>
+                                                                   <span class="n">dest_mac_addr</span><span class="o">=</span><span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;left_traffic_gw_mac&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unknown traffic type: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traffic_config</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_traffic_load</span><span class="p">(</span><span class="n">traffic_load</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;AttachPorts&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;DevicesStartAll&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;ResultsSubscribe&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">ConfigType</span><span class="o">=</span><span class="s1">&#39;StreamBlock&#39;</span><span class="p">,</span>
+                             <span class="n">ResultType</span><span class="o">=</span><span class="s1">&#39;TxStreamResults&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;ResultsSubscribe&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">ConfigType</span><span class="o">=</span><span class="s1">&#39;StreamBlock&#39;</span><span class="p">,</span>
+                             <span class="n">ResultType</span><span class="o">=</span><span class="s1">&#39;RxStreamSummaryResults&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">tx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span><span class="p">,</span> <span class="s1">&#39;children-TxStreamResults&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream_block</span><span class="p">,</span> <span class="s1">&#39;children-RxStreamSummaryResults&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to configure traffic - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.start"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.start">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="p">,</span> <span class="n">return_when_emission_starts</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attempt_to_start_traffic</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">def</span> <span class="nf">traffic_starter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arp_needed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">resolution_status</span> <span class="o">=</span> <span class="s1">&#39;NOT_STARTED&#39;</span>
+                <span class="k">while</span> <span class="n">resolution_status</span> <span class="o">!=</span> <span class="s1">&#39;SUCCESSFUL&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">attempt_to_start_traffic</span><span class="p">:</span>
+                        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Aborting attempt to start traffic&#39;</span><span class="p">)</span>
+                        <span class="k">return</span>
+
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Address resolution status: </span><span class="si">%s</span><span class="s1">. Will retry.&#39;</span> <span class="o">%</span> <span class="n">resolution_status</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">resolution_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;ArpNdStart&#39;</span><span class="p">)[</span><span class="s1">&#39;ArpNdState&#39;</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to start ArpNd - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Address resolution status: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">resolution_status</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">delay_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds before starting emission&#39;</span> <span class="o">%</span> <span class="n">delay_time</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay_time</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;StreamBlockStart&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to start stream - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emission_started</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Emission successfully started&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">service_disruption_calculation_loop</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_disruption_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Sleep for 5 seconds to make sure first packets have been received.</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">attempt_to_start_traffic</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span><span class="p">)</span>
+                    <span class="n">rx_frame_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;SigFrameRate&#39;</span><span class="p">])</span>
+                    <span class="n">rx_dropped_frame_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;DroppedFrameRate&#39;</span><span class="p">])</span>
+
+                    <span class="n">current_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RX frame rate: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">rx_frame_rate</span><span class="p">)</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RX dropped frame rate: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">rx_dropped_frame_rate</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">rx_dropped_frame_rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rx_frame_rate</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">service_disruption_length</span> <span class="o">+=</span> <span class="n">current_timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
+                        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Service disruption length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_disruption_length</span><span class="p">)</span>
+
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">current_timestamp</span>
+                <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;STC RX results are not ready to be subscribed to&#39;</span><span class="p">)</span>
+
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">traffic_starter_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">traffic_starter</span><span class="p">)</span>
+        <span class="n">traffic_starter_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="n">service_disruption_calculation_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">service_disruption_calculation_loop</span><span class="p">)</span>
+        <span class="n">service_disruption_calculation_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">return_when_emission_starts</span><span class="p">:</span>
+            <span class="n">traffic_starter_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.stop"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.stop">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="p">,</span> <span class="n">return_when_emission_stops</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attempt_to_start_traffic</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">def</span> <span class="nf">traffic_stopper</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emission_started</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">delay_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds before stopping emission&#39;</span> <span class="o">%</span> <span class="n">delay_time</span><span class="p">)</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay_time</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;StreamBlockStop&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to stop stream - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emission_started</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Emission successfully stopped&#39;</span><span class="p">)</span>
+
+        <span class="n">traffic_stopper_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">traffic_stopper</span><span class="p">)</span>
+        <span class="n">traffic_stopper_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">return_when_emission_stops</span><span class="p">:</span>
+            <span class="n">traffic_stopper_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.does_traffic_flow"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.does_traffic_flow">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">does_traffic_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">delay_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds before polling traffic rate&#39;</span> <span class="o">%</span> <span class="n">delay_time</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay_time</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rx_frame_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span><span class="p">)[</span><span class="s1">&#39;FrameRate&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get RX frame rate - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RX frame rate is: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">rx_frame_rate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rx_frame_rate</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.any_traffic_loss"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.any_traffic_loss">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">any_traffic_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">delay_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Sleeping </span><span class="si">%s</span><span class="s1"> seconds before polling traffic rate&#39;</span> <span class="o">%</span> <span class="n">delay_time</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay_time</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tx_results</span><span class="p">)</span>
+            <span class="n">rx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get TX and RX results - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="n">tx_frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tx_results</span><span class="p">[</span><span class="s1">&#39;FrameCount&#39;</span><span class="p">])</span>
+        <span class="n">rx_frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;SigFrameCount&#39;</span><span class="p">])</span>
+
+        <span class="n">tx_frame_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tx_results</span><span class="p">[</span><span class="s1">&#39;FrameRate&#39;</span><span class="p">])</span>
+        <span class="n">rx_frame_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;SigFrameRate&#39;</span><span class="p">])</span>
+
+        <span class="n">rx_frames_dropped</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;DroppedFrameCount&#39;</span><span class="p">])</span>
+        <span class="c1"># DroppedFramePercent shows the percent of dropped frames since the stream was started.</span>
+        <span class="c1"># It is not an instantaneous value.</span>
+        <span class="n">rx_dropped_frame_percent</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;DroppedFramePercent&#39;</span><span class="p">])</span>
+
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;TX frame - count: </span><span class="si">%s</span><span class="s1">; rate: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tx_frame_count</span><span class="p">,</span> <span class="n">tx_frame_rate</span><span class="p">))</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RX frame - count: </span><span class="si">%s</span><span class="s1">; rate: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rx_frame_count</span><span class="p">,</span> <span class="n">rx_frame_rate</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">rx_frames_dropped</span> <span class="o">&gt;</span> <span class="n">tolerance</span> <span class="o">*</span> <span class="n">tx_frame_count</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Dropped frames: count = </span><span class="si">%d</span><span class="s1">; rate = </span><span class="si">%.2f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rx_frames_dropped</span><span class="p">,</span> <span class="n">rx_dropped_frame_percent</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If no dropped frames detected, it means that either:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No dropped frames detected&#39;</span><span class="p">)</span>
+            <span class="c1"># 1. emission was not started =&gt; no traffic loss</span>
+            <span class="k">if</span> <span class="n">tx_frame_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No traffic emitted, so no traffic loss&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="c1"># 2. 100% traffic loss from the beginning =&gt; all traffic lost</span>
+            <span class="k">if</span> <span class="n">rx_frame_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Traffic emitted, but nothing received, so assuming all traffic is lost&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="c1"># 3. 0% traffic loss followed by 100% traffic loss (happening now) =&gt; some traffic lost</span>
+            <span class="k">if</span> <span class="n">rx_frame_rate</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># 3a. Still emitting traffic</span>
+                <span class="k">if</span> <span class="n">tx_frame_rate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Emitting traffic, but not receiving, so assuming all traffic is momentarily dropped&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+
+                <span class="c1"># 3b. Traffic emission stopped. Expecting RX count == TX count</span>
+                <span class="k">if</span> <span class="n">rx_frame_count</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">tolerance</span><span class="p">)</span> <span class="o">*</span> <span class="n">tx_frame_count</span><span class="p">:</span>
+                    <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Traffic stopped. Not all emitted traffic was received&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No traffic loss detected&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.calculate_activation_time"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.calculate_activation_time">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">calculate_activation_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Activation time is calculated per RFC 6201 Frame-Loss Method&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tx_results</span><span class="p">)</span>
+            <span class="n">rx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get TX and RX results - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="n">rx_frame_count</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;FrameCount&#39;</span><span class="p">])</span>
+        <span class="n">tx_frame_count</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tx_results</span><span class="p">[</span><span class="s1">&#39;FrameCount&#39;</span><span class="p">])</span>
+        <span class="n">tx_frame_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tx_results</span><span class="p">[</span><span class="s1">&#39;FrameRate&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">tx_frame_count</span> <span class="o">-</span> <span class="n">rx_frame_count</span><span class="p">)</span> <span class="o">/</span> <span class="n">tx_frame_rate</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.calculate_deactivation_time"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.calculate_deactivation_time">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">calculate_deactivation_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Deactivation time is calculated per RFC 6201 Frame-Loss Method&#39;</span><span class="p">)</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Make sure counters were cleared at the time of calling DUT termination&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tx_results</span><span class="p">)</span>
+            <span class="n">rx_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rx_results</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to get TX and RX results - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="n">rx_frame_count</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rx_results</span><span class="p">[</span><span class="s1">&#39;FrameCount&#39;</span><span class="p">])</span>
+        <span class="n">tx_frame_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tx_results</span><span class="p">[</span><span class="s1">&#39;FrameRate&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">rx_frame_count</span> <span class="o">/</span> <span class="n">tx_frame_rate</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.calculate_service_disruption_length"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.calculate_service_disruption_length">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">calculate_service_disruption_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_disruption_length</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.clear_counters"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.clear_counters">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">clear_counters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;ResultsClearAll&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to clear counters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_disruption_length</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="StcTrafficAdapter.destroy"><a class="viewcode-back" href="../../../../api.adapter.traffic.html#api.adapter.traffic.stc.StcTrafficAdapter.destroy">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;DetachPorts&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="s1">&#39;ResetConfig&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">handle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stc</span><span class="o">.</span><span class="n">end_session</span><span class="p">(</span><span class="n">end_tcsession</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StcTrafficAdapterError</span><span class="p">(</span><span class="s1">&#39;Unable to destroy session - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Spirent.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

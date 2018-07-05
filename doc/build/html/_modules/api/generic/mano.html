@@ -184,14 +184,14 @@
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ManoGenericError"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.ManoGenericError">[docs]</a><span class="k">class</span> <span class="nc">ManoGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
+<div class="viewcode-block" id="ManoGenericError"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.ManoGenericError">[docs]</a><span class="k">class</span> <span class="nc">ManoGenericError</span><span class="p">(</span><span class="n">ApiGenericError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A problem occurred in the VNF LifeCycle Validation MANO generic API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Mano"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano">[docs]</a><span class="k">class</span> <span class="nc">Mano</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Mano"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano">[docs]</a><span class="k">class</span> <span class="nc">Mano</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class of generic functions representing operations exposed by the MANO.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -204,7 +204,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span> <span class="o">=</span> <span class="n">construct_adapter</span><span class="p">(</span><span class="n">vendor</span><span class="p">,</span> <span class="n">module_type</span><span class="o">=</span><span class="s1">&#39;mano&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">adapter_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notification_queues</span> <span class="o">=</span> <span class="p">{}</span>
 
-<div class="viewcode-block" id="Mano.set_generic_config"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.set_generic_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_generic_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="Mano.set_generic_config"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.set_generic_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_generic_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                            <span class="n">VNF_INSTANTIATE_TIMEOUT</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">VNF_INSTANTIATE_TIMEOUT</span><span class="p">,</span>
                            <span class="n">VNF_SCALE_TIMEOUT</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">VNF_SCALE_TIMEOUT</span><span class="p">,</span>
                            <span class="n">VNF_STOP_TIMEOUT</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">VNF_STOP_TIMEOUT</span><span class="p">,</span>
@@ -230,7 +230,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">NS_STABLE_STATE_TIMEOUT</span> <span class="o">=</span> <span class="n">NS_STABLE_STATE_TIMEOUT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">POLL_INTERVAL</span> <span class="o">=</span> <span class="n">POLL_INTERVAL</span></div>
 
-<div class="viewcode-block" id="Mano.get_operation_status"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_operation_status"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_operation_status">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_operation_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function provides the status of a VNF lifecycle management operation.</span>
@@ -242,7 +242,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">get_operation_status</span><span class="p">(</span><span class="n">lifecycle_operation_occurrence_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.get_vnfd_scaling_properties"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_vnfd_scaling_properties">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_vnfd_scaling_properties"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_vnfd_scaling_properties">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_vnfd_scaling_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function returns the scaling properties for the provided scaling policy name from the VNFD with the</span>
@@ -254,7 +254,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">get_vnfd_scaling_properties</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.get_vim_helper"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_vim_helper">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_vim_helper"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_vim_helper">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_vim_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vim_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function returns an instance of Vim class</span>
@@ -263,7 +263,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">get_vim_helper</span><span class="p">(</span><span class="n">vim_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.get_nsd_scaling_properties"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_nsd_scaling_properties">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_nsd_scaling_properties"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_nsd_scaling_properties">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_nsd_scaling_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function returns the scaling properties for the provided scaling policy name from the NSD with the</span>
@@ -275,7 +275,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">get_nsd_scaling_properties</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.limit_compute_resources_for_ns_scaling"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.limit_compute_resources_for_ns_scaling">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.limit_compute_resources_for_ns_scaling"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.limit_compute_resources_for_ns_scaling">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">limit_compute_resources_for_ns_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">,</span> <span class="n">desired_scale_out_steps</span><span class="p">,</span>
                                                <span class="n">generic_vim_object</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -293,7 +293,7 @@
                                                                         <span class="n">desired_scale_out_steps</span><span class="p">,</span>
                                                                         <span class="n">generic_vim_object</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.limit_compute_resources_for_vnf_instantiation"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.limit_compute_resources_for_vnf_instantiation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.limit_compute_resources_for_vnf_instantiation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.limit_compute_resources_for_vnf_instantiation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">limit_compute_resources_for_vnf_instantiation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">generic_vim_object</span><span class="p">,</span> <span class="n">limit_vcpus</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">limit_vmem</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limit_vc_instances</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                       <span class="n">scaling_policy_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -314,7 +314,7 @@
                                                                                <span class="n">limit_vmem</span><span class="p">,</span> <span class="n">limit_vc_instances</span><span class="p">,</span>
                                                                                <span class="n">scaling_policy_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.limit_storage_resources_for_vnf_instantiation"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.limit_storage_resources_for_vnf_instantiation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.limit_storage_resources_for_vnf_instantiation"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.limit_storage_resources_for_vnf_instantiation">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">limit_storage_resources_for_vnf_instantiation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">generic_vim_object</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function reserves storage resources so that the remaining resources are not enough for instantiating the</span>
@@ -328,7 +328,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">limit_storage_resources_for_vnf_instantiation</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">,</span> <span class="n">generic_vim_object</span><span class="p">,</span>
                                                                                <span class="n">scaling_policy_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.limit_compute_resources_for_vnf_scaling"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.limit_compute_resources_for_vnf_scaling">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.limit_compute_resources_for_vnf_scaling"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.limit_compute_resources_for_vnf_scaling">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">limit_compute_resources_for_vnf_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">,</span> <span class="n">desired_scale_out_steps</span><span class="p">,</span>
                                                 <span class="n">generic_vim_object</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -345,7 +345,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">limit_compute_resources_for_vnf_scaling</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">,</span> <span class="n">scaling_policy_name</span><span class="p">,</span>
                                                                          <span class="n">desired_scale_out_steps</span><span class="p">,</span> <span class="n">generic_vim_object</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.poll_for_operation_completion"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.poll_for_operation_completion">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.poll_for_operation_completion"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.poll_for_operation_completion">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">poll_for_operation_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lifecycle_operation_occurrence_id</span><span class="p">,</span> <span class="n">final_states</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">,</span>
                                       <span class="n">poll_interval</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -376,7 +376,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.validate_vnf_allocated_vresources"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_vnf_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_vnf_allocated_vresources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_vnf_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_vnf_allocated_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function checks that the virtual resources allocated to the VNF match the ones in the VNFD.</span>
@@ -389,7 +389,7 @@
                                                 <span class="s1">&#39;additional_param&#39;</span><span class="p">:</span> <span class="n">additional_param</span><span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">validate_vnf_allocated_vresources</span><span class="p">(</span><span class="n">vnf_info</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.validate_ns_allocated_vresources"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_ns_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_ns_allocated_vresources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_ns_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_ns_allocated_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function checks that the virtual resources allocated to the NS match the ones in the NSD.</span>
@@ -407,7 +407,7 @@
 
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Mano.validate_ns_released_vresources"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_ns_released_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_ns_released_vresources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_ns_released_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_ns_released_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_info</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This functions validates that the resources allocated to an NS instance have been released.</span>
@@ -420,7 +420,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Mano.validate_vnf_released_vresources"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_vnf_released_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_vnf_released_vresources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_vnf_released_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_vnf_released_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info_initial</span><span class="p">,</span> <span class="n">vnf_info_final</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This functions validates that the resources allocated to a VNF instance have been released.</span>
@@ -456,7 +456,7 @@
                     <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Resource ID </span><span class="si">%s</span><span class="s1"> not found in VIM, as expected&#39;</span> <span class="o">%</span> <span class="n">resource_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Mano.validate_vnf_vresource_state"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_vnf_vresource_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_vnf_vresource_state"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_vnf_vresource_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_vnf_vresource_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function validates if the VNF state indicated by the VNFM matches the state indicated by the VIM</span>
@@ -496,7 +496,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Mano.get_allocated_vresources"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_allocated_vresources"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_allocated_vresources">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_allocated_vresources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This functions retrieves the virtual resources allocated to the VNF with the provided instance ID.</span>
@@ -542,7 +542,7 @@
 
         <span class="k">return</span> <span class="n">vresources</span></div>
 
-<div class="viewcode-block" id="Mano.modify_vnf_configuration"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.modify_vnf_configuration">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.modify_vnf_configuration"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.modify_vnf_configuration">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">modify_vnf_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">vnf_configuration_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function enables providing configuration parameters information for a VNF instance.</span>
@@ -556,7 +556,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">modify_vnf_configuration</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">vnf_configuration_data</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_create_id"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_create_id"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_create_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">ns_name</span><span class="p">,</span> <span class="n">ns_description</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function creates an NS instance ID and an associated instance of a NsInfo information element, identified</span>
@@ -572,7 +572,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">ns_create_id</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">,</span> <span class="n">ns_name</span><span class="p">,</span> <span class="n">ns_description</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_create_and_instantiate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_create_and_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_create_and_instantiate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_create_and_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_create_and_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">ns_name</span><span class="p">,</span> <span class="n">ns_description</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">sap_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pnf_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                   <span class="n">vnf_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nested_ns_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                   <span class="n">additional_param_for_ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param_for_vnf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -614,7 +614,7 @@
 
         <span class="k">return</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.ns_delete_id"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_delete_id"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_delete_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function an NS instance identifier and the associated NsInfo information element.</span>
@@ -626,7 +626,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">ns_delete_id</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_instantiate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_instantiate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">sap_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pnf_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">nested_ns_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param_for_ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">additional_param_for_vnf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ns_instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -663,7 +663,7 @@
                                                 <span class="n">additional_param_for_vnf</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">ns_instantiation_level_id</span><span class="p">,</span>
                                                 <span class="n">additional_affinity_or_anti_affinity_rule</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_instantiate_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_instantiate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_instantiate_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_instantiate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_instantiate_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">sap_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pnf_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">nested_ns_instance_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">location_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param_for_ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">additional_param_for_vnf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ns_instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -708,7 +708,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.ns_query"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_query"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function enables the OSS/BSS to query from the NFVO information on one or more NS(s). The operation also</span>
@@ -727,7 +727,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">ns_query</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_scale"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_scale"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">scale_ns_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function scales an NS instance.</span>
@@ -746,7 +746,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">ns_scale</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">scale_ns_data</span><span class="p">,</span> <span class="n">scale_vnf_data</span><span class="p">,</span> <span class="n">scale_time</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_scale_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_scale_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_scale_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">scale_ns_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function synchronously scales an NS instance.</span>
@@ -769,7 +769,7 @@
                                                               <span class="n">poll_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.ns_terminate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_terminate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">terminate_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function terminates an NS.</span>
@@ -786,7 +786,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">ns_terminate</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">terminate_time</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_terminate_and_delete"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_terminate_and_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_terminate_and_delete"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_terminate_and_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_terminate_and_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">terminate_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function synchronously terminates an NS and deletes its instance ID.</span>
@@ -804,7 +804,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.ns_terminate_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_terminate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_terminate_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_terminate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_terminate_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">terminate_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function synchronously terminates an NS.</span>
@@ -825,7 +825,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.ns_update"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_update">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_update"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_update">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">update_type</span><span class="p">,</span> <span class="n">add_vnf_instance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_vnf_instance_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">instantiate_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">change_vnf_flavour_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">operate_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">modify_vnf_info_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">change_ext_vnf_connectivity_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_sap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_sap_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -937,7 +937,7 @@
                                            <span class="n">assoc_new_nsd_version_data</span><span class="p">,</span> <span class="n">move_vnf_instance_data</span><span class="p">,</span> <span class="n">add_vnffg</span><span class="p">,</span>
                                            <span class="n">remove_vnffg_id</span><span class="p">,</span> <span class="n">update_vnffg</span><span class="p">,</span> <span class="n">change_ns_flavour_data</span><span class="p">,</span> <span class="n">update_time</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.ns_update_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_update_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_update_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_update_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_update_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">update_type</span><span class="p">,</span> <span class="n">add_vnf_instance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_vnf_instance_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">instantiate_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">change_vnf_flavour_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">operate_vnf_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">modify_vnf_info_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">change_ext_vnf_connectivity_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_sap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1014,7 +1014,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_create_id"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_create_id"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_create_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_create_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">vnf_instance_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function creates a VNF instance ID and an associated instance of a VnfInfo information element, identified</span>
@@ -1031,7 +1031,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_create_id</span><span class="p">(</span><span class="n">vnfd_id</span><span class="p">,</span> <span class="n">vnf_instance_name</span><span class="p">,</span> <span class="n">vnf_instance_description</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_create_and_instantiate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_create_and_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_create_and_instantiate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_create_and_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_create_and_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnfd_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">vnf_instance_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vnf_instance_description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                    <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_managed_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                    <span class="n">localization_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1064,7 +1064,7 @@
             <span class="k">raise</span> <span class="n">ManoGenericError</span><span class="p">(</span><span class="s1">&#39;VNF instantiation operation failed&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">vnf_instance_id</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_delete_id"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_delete_id"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_delete_id">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_delete_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function deletes a VNF instance ID and the associated instance of a VnfInfo information element.</span>
@@ -1076,7 +1076,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_delete_id</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_instantiate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_instantiate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_instantiate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">ext_managed_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">localization_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1100,7 +1100,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_instantiate</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="p">,</span>
                                                  <span class="n">ext_managed_virtual_link</span><span class="p">,</span> <span class="n">localization_language</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_instantiate_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_instantiate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_instantiate_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_instantiate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_instantiate_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">flavour_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                              <span class="n">ext_managed_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">localization_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1131,7 +1131,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_operate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_operate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_operate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_operate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_operate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">change_state_to</span><span class="p">,</span> <span class="n">stop_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graceful_stop_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1152,7 +1152,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_operate</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">change_state_to</span><span class="p">,</span> <span class="n">stop_type</span><span class="p">,</span> <span class="n">graceful_stop_timeout</span><span class="p">,</span>
                                              <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_operate_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_operate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_operate_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_operate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_operate_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">change_state_to</span><span class="p">,</span> <span class="n">stop_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graceful_stop_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1183,7 +1183,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_query"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_query"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This operation provides information about VNF instances. The applicable VNF instances can be chosen based on</span>
@@ -1201,7 +1201,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_query</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_scale"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_scale"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_scale">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function scales a VNF horizontally (out/in).</span>
@@ -1220,7 +1220,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_scale</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_scale_to_level"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_scale_to_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_scale_to_level"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_scale_to_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_scale_to_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function scales an instantiated VNF of a particular DF to a target size.</span>
@@ -1241,7 +1241,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_scale_to_level</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="p">,</span> <span class="n">scale_info</span><span class="p">,</span>
                                                     <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_scale_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_scale_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_scale_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_scale_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function synchronously scales a VNF horizontally (out/in).</span>
@@ -1266,7 +1266,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_scale_to_level_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_scale_to_level_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_scale_to_level_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_scale_to_level_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_scale_to_level_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1293,7 +1293,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_terminate"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_terminate"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_terminate">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">termination_type</span><span class="p">,</span> <span class="n">graceful_termination_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1313,7 +1313,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_terminate</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">termination_type</span><span class="p">,</span> <span class="n">graceful_termination_timeout</span><span class="p">,</span>
                                                <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_terminate_and_delete"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_terminate_and_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_terminate_and_delete"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_terminate_and_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_terminate_and_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">termination_type</span><span class="p">,</span> <span class="n">graceful_termination_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1338,7 +1338,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">vnf_delete_id</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_terminate_sync"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_terminate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_terminate_sync"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_terminate_sync">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_terminate_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">termination_type</span><span class="p">,</span> <span class="n">graceful_termination_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1363,7 +1363,7 @@
 
         <span class="k">return</span> <span class="n">operation_status</span></div>
 
-<div class="viewcode-block" id="Mano.ns_lifecycle_change_notification_subscribe"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_lifecycle_change_notification_subscribe">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_lifecycle_change_notification_subscribe"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_lifecycle_change_notification_subscribe">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_lifecycle_change_notification_subscribe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notification_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function allows the OSS/BSS to subscribe to NS lifecycle change notifications, and the NFVO to provide such</span>
@@ -1379,20 +1379,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notification_queues</span><span class="p">[</span><span class="n">subscription_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">notification_queue</span>
         <span class="k">return</span> <span class="n">subscription_id</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_lifecycle_change_notification_subscribe"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_lifecycle_change_notification_subscribe">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_lifecycle_change_notification_subscribe"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_lifecycle_change_notification_subscribe">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_lifecycle_change_notification_subscribe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notification_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">subscription_id</span><span class="p">,</span> <span class="n">notification_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">vnf_lifecycle_change_notification_subscribe</span><span class="p">(</span>
                                                                                                     <span class="n">notification_filter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notification_queues</span><span class="p">[</span><span class="n">subscription_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">notification_queue</span>
         <span class="k">return</span> <span class="n">subscription_id</span></div>
 
-<div class="viewcode-block" id="Mano.get_notification_queue"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_notification_queue">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_notification_queue"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_notification_queue">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_notification_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription_id</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notification_queues</span><span class="p">[</span><span class="n">subscription_id</span><span class="p">],</span> <span class="n">notification_queue_copy</span> <span class="o">=</span> <span class="n">tee</span><span class="p">(</span>
                                                                               <span class="bp">self</span><span class="o">.</span><span class="n">notification_queues</span><span class="p">[</span><span class="n">subscription_id</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">notification_queue_copy</span></div>
 
-<div class="viewcode-block" id="Mano.search_in_notification_queue"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.search_in_notification_queue">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.search_in_notification_queue"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.search_in_notification_queue">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">search_in_notification_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notification_queue</span><span class="p">,</span> <span class="n">notification_type</span><span class="p">,</span> <span class="n">notification_pattern</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
         <span class="n">timeout_occurred</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1423,12 +1423,12 @@
         <span class="k">with</span> <span class="n">lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;found&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.wait_for_notification"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.wait_for_notification">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.wait_for_notification"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.wait_for_notification">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wait_for_notification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription_id</span><span class="p">,</span> <span class="n">notification_type</span><span class="p">,</span> <span class="n">notification_pattern</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
         <span class="n">notification_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_notification_queue</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_in_notification_queue</span><span class="p">(</span><span class="n">notification_queue</span><span class="p">,</span> <span class="n">notification_type</span><span class="p">,</span> <span class="n">notification_pattern</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.wait_for_vnf_stable_state"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.wait_for_vnf_stable_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.wait_for_vnf_stable_state"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.wait_for_vnf_stable_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wait_for_vnf_stable_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function waits for the VNF with the specified ID to be in a stable state. This is useful when an operation</span>
@@ -1440,7 +1440,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">wait_for_vnf_stable_state</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">VNF_STABLE_STATE_TIMEOUT</span><span class="p">,</span>
                                                     <span class="n">poll_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.wait_for_ns_stable_state"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.wait_for_ns_stable_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.wait_for_ns_stable_state"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.wait_for_ns_stable_state">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wait_for_ns_stable_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function waits for the NS with the specified ID to be in a stable state. This is useful when an operation</span>
@@ -1452,7 +1452,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">wait_for_ns_stable_state</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NS_STABLE_STATE_TIMEOUT</span><span class="p">,</span>
                                                    <span class="n">poll_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">POLL_INTERVAL</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.verify_vnf_nsd_mapping"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.verify_vnf_nsd_mapping">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.verify_vnf_nsd_mapping"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.verify_vnf_nsd_mapping">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">verify_vnf_nsd_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function verifies that the VNF instance(s) that are part of the NS with the provided instance ID have been</span>
@@ -1465,7 +1465,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">verify_vnf_nsd_mapping</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.get_vnf_ingress_cp_addr_list"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_vnf_ingress_cp_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_vnf_ingress_cp_addr_list"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_vnf_ingress_cp_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_vnf_ingress_cp_addr_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info</span><span class="p">,</span> <span class="n">ingress_cp_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function retrieves from the provided VnfInfo information element the destination address(es) for each</span>
@@ -1493,7 +1493,7 @@
 
         <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest_addr_list</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.get_ns_ingress_cp_addr_list"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_ns_ingress_cp_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_ns_ingress_cp_addr_list"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_ns_ingress_cp_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_ns_ingress_cp_addr_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_info</span><span class="p">,</span> <span class="n">ingress_cp_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function goes through each VNF inside the NS with the provided instance ID and retrieves the destination</span>
@@ -1528,7 +1528,7 @@
                                                                         <span class="n">ns_ingress_cps</span><span class="p">[</span><span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span><span class="p">]))</span>
         <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest_addr_list</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.verify_vnf_sw_images"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.verify_vnf_sw_images">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.verify_vnf_sw_images"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.verify_vnf_sw_images">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">verify_vnf_sw_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function verifies that each VNFC part of the VNF with the given instance ID uses the image indicated in the</span>
@@ -1542,7 +1542,7 @@
                                                 <span class="s1">&#39;additional_param&#39;</span><span class="p">:</span> <span class="n">additional_param</span><span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">verify_vnf_sw_images</span><span class="p">(</span><span class="n">vnf_info</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.verify_ns_sw_images"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.verify_ns_sw_images">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.verify_ns_sw_images"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.verify_ns_sw_images">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">verify_ns_sw_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function verifies that each VNFC in each VNF of the NS with the given instance ID uses the image indicated</span>
@@ -1559,7 +1559,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Mano.get_vnfd_name_from_nsd_vnf_name"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_vnfd_name_from_nsd_vnf_name">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_vnfd_name_from_nsd_vnf_name"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_vnfd_name_from_nsd_vnf_name">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_vnfd_name_from_nsd_vnf_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_id</span><span class="p">,</span> <span class="n">vnf_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function retrieves from the NSD with the provided instance ID the VNFD name that corresponds to the</span>
@@ -1571,7 +1571,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">get_vnfd_name_from_nsd_vnf_name</span><span class="p">(</span><span class="n">nsd_id</span><span class="p">,</span> <span class="n">vnf_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.get_vnf_instance_id_from_ns_vnf_name"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_vnf_instance_id_from_ns_vnf_name">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_vnf_instance_id_from_ns_vnf_name"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_vnf_instance_id_from_ns_vnf_name">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_vnf_instance_id_from_ns_vnf_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_info</span><span class="p">,</span> <span class="n">vnf_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function retrieves from the provided NsInfo information element the VNF instance ID that corresponds to the</span>
@@ -1585,7 +1585,7 @@
             <span class="k">if</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_product_name</span> <span class="o">==</span> <span class="n">vnf_name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">vnf_info</span><span class="o">.</span><span class="n">vnf_instance_id</span></div>
 
-<div class="viewcode-block" id="Mano.get_vnf_mgmt_addr_list"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.get_vnf_mgmt_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.get_vnf_mgmt_addr_list"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.get_vnf_mgmt_addr_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_vnf_mgmt_addr_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function retrieves the management addresses of the VNFCs that belong to the VNF with the given instance ID.</span>
@@ -1596,7 +1596,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">get_vnf_mgmt_addr_list</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.verify_ns_vnf_instance_count"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.verify_ns_vnf_instance_count">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.verify_ns_vnf_instance_count"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.verify_ns_vnf_instance_count">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">verify_ns_vnf_instance_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function verifies that the NS with the provided instance ID contains the correct number of VNF instances.</span>
@@ -1612,7 +1612,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">verify_ns_vnf_instance_count</span><span class="p">(</span><span class="n">ns_instance_id</span><span class="p">,</span> <span class="n">aspect_id</span><span class="p">,</span> <span class="n">number_of_steps</span><span class="p">,</span>
                                                               <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.validate_vnf_instantiation_level"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_vnf_instantiation_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_vnf_instantiation_level"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_vnf_instantiation_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_vnf_instantiation_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_info</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function verifies that the number of VNFC instances in the provided VnfInfo information element matches the</span>
@@ -1629,7 +1629,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">validate_vnf_instantiation_level</span><span class="p">(</span><span class="n">vnf_info</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.validate_ns_instantiation_level"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_ns_instantiation_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_ns_instantiation_level"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_ns_instantiation_level">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_ns_instantiation_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_info</span><span class="p">,</span> <span class="n">instantiation_level_list</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function verifies that the number of VNFC instances for each VNF in the provided NsInfo information element</span>
@@ -1639,13 +1639,9 @@
 <span class="sd">        compared to the number of instances indicated by the default instantiation level ID corresponding to that VNF.</span>
 
 <span class="sd">        :param ns_info:                     NsInfo information element.</span>
-<span class="sd">        :param instantiation_level_list:    List of dictionaries containing the VNF name and the corresponding target</span>
-<span class="sd">                                            instantiation level ID.</span>
-<span class="sd">                                            Example: [{&#39;target_vnf_name&#39;: &#39;empirix&#39;,</span>
-<span class="sd">                                                       &#39;target_instantiation_level_id&#39;: &#39;scaled&#39;}]</span>
+<span class="sd">        :param instantiation_level_list:    List of dictionaries containing the VNF name and the corresponding target instantiation level ID. Example: [{&#39;target_vnf_name&#39;: &#39;empirix&#39;, &#39;target_instantiation_level_id&#39;: &#39;scaled&#39;}]</span>
 <span class="sd">        :param additional_param:            Additional parameters used for filtering.</span>
-<span class="sd">        :return:                            True if the number of VNFC instances for each VNF is correct,</span>
-<span class="sd">                                            False otherwise.</span>
+<span class="sd">        :return:                            True if the number of VNFC instances for each VNF is correct, False otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">vnf_name_level_id_mapping</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">scale_to_level</span> <span class="ow">in</span> <span class="n">instantiation_level_list</span><span class="p">:</span>
@@ -1659,7 +1655,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Mano.vnf_change_flavour"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.vnf_change_flavour">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.vnf_change_flavour"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.vnf_change_flavour">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">vnf_change_flavour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">new_flavour_id</span><span class="p">,</span> <span class="n">instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">ext_managed_virtual_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vim_connection_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1688,7 +1684,7 @@
                                                     <span class="n">ext_virtual_link</span><span class="p">,</span> <span class="n">ext_managed_virtual_link</span><span class="p">,</span> <span class="n">vim_connection_info</span><span class="p">,</span>
                                                     <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.validate_vnf_deployment_flavour"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.validate_vnf_deployment_flavour">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.validate_vnf_deployment_flavour"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.validate_vnf_deployment_flavour">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">validate_vnf_deployment_flavour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">expected_flavour_id</span><span class="p">,</span>
                                         <span class="n">expected_instantiation_level_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1706,7 +1702,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">validate_vnf_deployment_flavour</span><span class="p">(</span><span class="n">vnf_instance_id</span><span class="p">,</span> <span class="n">expected_flavour_id</span><span class="p">,</span>
                                                                  <span class="n">expected_instantiation_level_id</span><span class="p">,</span> <span class="n">additional_param</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.nsd_info_create"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.nsd_info_create">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.nsd_info_create"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.nsd_info_create">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">nsd_info_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_defined_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function will create an NSD information object in the NFVO for the NSD to be uploaded.</span>
@@ -1718,7 +1714,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">nsd_info_create</span><span class="p">(</span><span class="n">user_defined_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.nsd_info_query"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.nsd_info_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.nsd_info_query"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.nsd_info_query">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">nsd_info_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function will enable the OSS/BSS to query the NFVO concerning details of one or more NSD information</span>
@@ -1736,7 +1732,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">nsd_info_query</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">attribute_selector</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.nsd_upload"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.nsd_upload">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.nsd_upload"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.nsd_upload">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">nsd_upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">,</span> <span class="n">nsd</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function will upload an NSD to the NFVO.</span>
@@ -1749,7 +1745,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">nsd_upload</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">,</span> <span class="n">nsd</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.nsd_fetch"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.nsd_fetch">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.nsd_fetch"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.nsd_fetch">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">nsd_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function will fetch an NSD from the NFVO.</span>
@@ -1761,7 +1757,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">nsd_fetch</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.nsd_delete"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.nsd_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.nsd_delete"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.nsd_delete">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">nsd_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsd_info_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function will delete one or more NSD(s). The associated NSD information objects will be deleted as well.</span>
@@ -1773,7 +1769,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mano_adapter</span><span class="o">.</span><span class="n">nsd_delete</span><span class="p">(</span><span class="n">nsd_info_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mano.resolve_ns_cp_addr"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.resolve_ns_cp_addr">[docs]</a>    <span class="nd">@recursive_map</span>
+<div class="viewcode-block" id="Mano.resolve_ns_cp_addr"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.resolve_ns_cp_addr">[docs]</a>    <span class="nd">@recursive_map</span>
     <span class="k">def</span> <span class="nf">resolve_ns_cp_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns_info</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function will search for pattern like ${vnf_name:cp_name:addr_type} (e.g ${VNF1:east:ip}) recursively</span>
@@ -1790,7 +1786,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="Mano.ns_get_alarm_list"><a class="viewcode-back" href="../../../source/api.generic.html#api.generic.mano.Mano.ns_get_alarm_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
+<div class="viewcode-block" id="Mano.ns_get_alarm_list"><a class="viewcode-back" href="../../../api.generic.html#api.generic.mano.Mano.ns_get_alarm_list">[docs]</a>    <span class="nd">@log_entry_exit</span><span class="p">(</span><span class="n">LOG</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ns_get_alarm_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_filter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function enables the OSS/BSSs to query the active alarms from the NFVO.</span>
