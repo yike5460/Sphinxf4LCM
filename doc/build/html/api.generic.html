@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1. api.generic &mdash; LCM 1.0 documentation</title>
+  <title>api.generic &mdash; LCM 1.0 documentation</title>
   
 
   
@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2. api.structures" href="api.structures.html" />
-    <link rel="prev" title="6. api.adapter.vnfm package" href="api.adapter.vnfm.html" /> 
+    <link rel="prev" title="6. api.adapter.vnfm" href="api.adapter.vnfm.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -81,42 +81,17 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.em.html">1. api.adapter.em package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.mano.html">2. api.adapter.mano package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.traffic.html">3. api.adapter.traffic package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vim.html">4. api.adapter.vim package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">5. api.adapter.vnf package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">6. api.adapter.vnfm package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">1. api.generic</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.constants">1.1. api.generic.constants</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.em">1.2. api.generic.em</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.mano">1.3. api.generic.mano</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.traffic">1.4. api.generic.traffic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.vim">1.5. api.generic.vim</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.vnf">1.6. api.generic.vnf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.generic">1.7. __init__.py</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">api.generic</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.constants">api.generic.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.em">api.generic.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.mano">api.generic.mano</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.traffic">api.generic.traffic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.vim">api.generic.vim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic.vnf">api.generic.vnf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.generic">__init__.py</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.structures.html">2. api.structures</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">api</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="api.html">api</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="api.adapter.html">api.adapter</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">1. api.generic</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.constants">1.1. api.generic.constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.em">1.2. api.generic.em</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.mano">1.3. api.generic.mano</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.traffic">1.4. api.generic.traffic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.vim">1.5. api.generic.vim</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic.vnf">1.6. api.generic.vnf</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-api.generic">1.7. __init__.py</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="api.structures.html">2. api.structures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api.html#module-api">__init__.py</a></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 
             
@@ -162,7 +137,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>1. api.generic</li>
+      <li>api.generic</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -182,13 +157,15 @@
            <div itemprop="articleBody">
             
   <div class="section" id="api-generic">
-<h1>1. api.generic<a class="headerlink" href="#api-generic" title="Permalink to this headline">¶</a></h1>
+<h1>api.generic<a class="headerlink" href="#api-generic" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
 <div class="section" id="module-api.generic.constants">
-<span id="api-generic-constants"></span><h2>1.1. api.generic.constants<a class="headerlink" href="#module-api.generic.constants" title="Permalink to this headline">¶</a></h2>
+<span id="api-generic-constants"></span><h2>api.generic.constants<a class="headerlink" href="#module-api.generic.constants" title="Permalink to this headline">¶</a></h2>
 <p>Various constants and mappings.</p>
 </div>
 <div class="section" id="module-api.generic.em">
-<span id="api-generic-em"></span><h2>1.2. api.generic.em<a class="headerlink" href="#module-api.generic.em" title="Permalink to this headline">¶</a></h2>
+<span id="api-generic-em"></span><h2>api.generic.em<a class="headerlink" href="#module-api.generic.em" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.generic.em.Em">
 <em class="property">class </em><code class="descclassname">api.generic.em.</code><code class="descname">Em</code><span class="sig-paren">(</span><em>vendor</em>, <em>generic_config</em>, <em>adapter_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/em.html#Em"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.em.Em" title="Permalink to this definition">¶</a></dt>
@@ -337,7 +314,7 @@ to the VNF being scaled.</li>
 
 </div>
 <div class="section" id="module-api.generic.mano">
-<span id="api-generic-mano"></span><h2>1.3. api.generic.mano<a class="headerlink" href="#module-api.generic.mano" title="Permalink to this headline">¶</a></h2>
+<span id="api-generic-mano"></span><h2>api.generic.mano<a class="headerlink" href="#module-api.generic.mano" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.generic.mano.Mano">
 <em class="property">class </em><code class="descclassname">api.generic.mano.</code><code class="descname">Mano</code><span class="sig-paren">(</span><em>vendor</em>, <em>generic_config</em>, <em>adapter_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/mano.html#Mano"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.mano.Mano" title="Permalink to this definition">¶</a></dt>
@@ -2140,7 +2117,7 @@ requires the VNF to be in a particular state.</p>
 
 </div>
 <div class="section" id="module-api.generic.traffic">
-<span id="api-generic-traffic"></span><h2>1.4. api.generic.traffic<a class="headerlink" href="#module-api.generic.traffic" title="Permalink to this headline">¶</a></h2>
+<span id="api-generic-traffic"></span><h2>api.generic.traffic<a class="headerlink" href="#module-api.generic.traffic" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.generic.traffic.Traffic">
 <em class="property">class </em><code class="descclassname">api.generic.traffic.</code><code class="descname">Traffic</code><span class="sig-paren">(</span><em>vendor</em>, <em>adapter_config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/traffic.html#Traffic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.traffic.Traffic" title="Permalink to this definition">¶</a></dt>
@@ -2306,7 +2283,7 @@ the emission actually stopped.</li>
 
 </div>
 <div class="section" id="module-api.generic.vim">
-<span id="api-generic-vim"></span><h2>1.5. api.generic.vim<a class="headerlink" href="#module-api.generic.vim" title="Permalink to this headline">¶</a></h2>
+<span id="api-generic-vim"></span><h2>api.generic.vim<a class="headerlink" href="#module-api.generic.vim" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.generic.vim.Vim">
 <em class="property">class </em><code class="descclassname">api.generic.vim.</code><code class="descname">Vim</code><span class="sig-paren">(</span><em>vendor</em>, <em>adapter_config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vim.html#Vim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vim.Vim" title="Permalink to this definition">¶</a></dt>
@@ -2893,7 +2870,7 @@ resource(s).</p>
 
 </div>
 <div class="section" id="module-api.generic.vnf">
-<span id="api-generic-vnf"></span><h2>1.6. api.generic.vnf<a class="headerlink" href="#module-api.generic.vnf" title="Permalink to this headline">¶</a></h2>
+<span id="api-generic-vnf"></span><h2>api.generic.vnf<a class="headerlink" href="#module-api.generic.vnf" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.generic.vnf.Vnf">
 <em class="property">class </em><code class="descclassname">api.generic.vnf.</code><code class="descname">Vnf</code><span class="sig-paren">(</span><em>vendor</em>, <em>adapter_config</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/generic/vnf.html#Vnf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.vnf.Vnf" title="Permalink to this definition">¶</a></dt>
@@ -3040,7 +3017,7 @@ result.</li>
 
 </div>
 <div class="section" id="module-api.generic">
-<span id="init-py"></span><h2>1.7. __init__.py<a class="headerlink" href="#module-api.generic" title="Permalink to this headline">¶</a></h2>
+<span id="init-py"></span><h2>__init__.py<a class="headerlink" href="#module-api.generic" title="Permalink to this headline">¶</a></h2>
 <dl class="exception">
 <dt id="api.generic.ApiGenericError">
 <em class="property">exception </em><code class="descclassname">api.generic.</code><code class="descname">ApiGenericError</code><a class="reference internal" href="_modules/api/generic.html#ApiGenericError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.generic.ApiGenericError" title="Permalink to this definition">¶</a></dt>
@@ -3084,7 +3061,7 @@ result.</li>
         <a href="api.structures.html" class="btn btn-neutral float-right" title="2. api.structures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="api.adapter.vnfm.html" class="btn btn-neutral" title="6. api.adapter.vnfm package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="api.adapter.vnfm.html" class="btn btn-neutral" title="6. api.adapter.vnfm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

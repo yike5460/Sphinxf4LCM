@@ -1,6 +1,9 @@
 api.generic
 ===================
 
+.. toctree::
+    :maxdepth: 2
+    :numbered: 2
 
 api.generic.constants 
 ----------------------------

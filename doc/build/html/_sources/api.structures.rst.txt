@@ -1,6 +1,9 @@
 api.structures
 ======================
 
+.. toctree::
+    :maxdepth: 2
+    :numbered: 2
 
 api.structures.objects
 -----------------------------
