@@ -1,10 +1,8 @@
-api.adapter package
+api.adapter
 ===================
-
-Subpackages
------------
-
 .. toctree::
+    :maxdepth: 2
+    :numbered: 2
 
     api.adapter.em
     api.adapter.mano
@@ -13,7 +11,7 @@ Subpackages
     api.adapter.vnf
     api.adapter.vnfm
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.adapter

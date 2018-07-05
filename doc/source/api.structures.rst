@@ -1,10 +1,8 @@
-api.structures package
+api.structures
 ======================
 
-Submodules
-----------
 
-api.structures.objects module
+api.structures.objects
 -----------------------------
 
 .. automodule:: api.structures.objects
@@ -13,7 +11,7 @@ api.structures.objects module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.structures

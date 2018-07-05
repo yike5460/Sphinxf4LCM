@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>api.adapter.mano package &mdash; LCM 1.0 documentation</title>
+  <title>2. api.adapter.mano package &mdash; LCM 1.0 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="api.adapter.traffic package" href="api.adapter.traffic.html" />
-    <link rel="prev" title="api.adapter.em package" href="api.adapter.em.html" /> 
+    <link rel="next" title="3. api.adapter.traffic package" href="api.adapter.traffic.html" />
+    <link rel="prev" title="1. api.adapter.em package" href="api.adapter.em.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,27 +80,26 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="api.html">api package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.em.html">api.adapter.em package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">api.adapter.mano package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.cisconfv">api.adapter.mano.cisconfv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.cisconfv45">api.adapter.mano.cisconfv45 module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.dummy">api.adapter.mano.dummy module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.openbaton">api.adapter.mano.openbaton module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.rift">api.adapter.mano.rift module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.sdl">api.adapter.mano.sdl module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.tacker">api.adapter.mano.tacker module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.em.html">1. api.adapter.em package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. api.adapter.mano package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">2.1. Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.cisconfv">2.2. api.adapter.mano.cisconfv module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.cisconfv45">2.3. api.adapter.mano.cisconfv45 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.dummy">2.4. api.adapter.mano.dummy module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.openbaton">2.5. api.adapter.mano.openbaton module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.rift">2.6. api.adapter.mano.rift module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.sdl">2.7. api.adapter.mano.sdl module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano.tacker">2.8. api.adapter.mano.tacker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.mano">2.9. Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.traffic.html">api.adapter.traffic package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vim.html">api.adapter.vim package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">api.adapter.vnf package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.generic.html">api.generic package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.traffic.html">3. api.adapter.traffic package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vim.html">4. api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">5. api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">6. api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.generic.html">1. api.generic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.structures.html">2. api.structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">api</a></li>
 </ul>
 
@@ -147,11 +146,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="api.html">api package</a> &raquo;</li>
+          <li><a href="api.adapter.html">api.adapter</a> &raquo;</li>
         
-          <li><a href="api.adapter.html">api.adapter package</a> &raquo;</li>
-        
-      <li>api.adapter.mano package</li>
+      <li>2. api.adapter.mano package</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -171,12 +168,12 @@
            <div itemprop="articleBody">
             
   <div class="section" id="api-adapter-mano-package">
-<h1>api.adapter.mano package<a class="headerlink" href="#api-adapter-mano-package" title="Permalink to this headline">¶</a></h1>
+<h1>2. api.adapter.mano package<a class="headerlink" href="#api-adapter-mano-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<h2>2.1. Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-api.adapter.mano.cisconfv">
-<span id="api-adapter-mano-cisconfv-module"></span><h2>api.adapter.mano.cisconfv module<a class="headerlink" href="#module-api.adapter.mano.cisconfv" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-cisconfv-module"></span><h2>2.2. api.adapter.mano.cisconfv module<a class="headerlink" href="#module-api.adapter.mano.cisconfv" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.cisconfv.CiscoNFVManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.cisconfv.</code><code class="descname">CiscoNFVManoAdapter</code><span class="sig-paren">(</span><em>nso_hostname</em>, <em>nso_username</em>, <em>nso_password</em>, <em>esc_hostname</em>, <em>esc_username</em>, <em>esc_password</em>, <em>nso_port=2022</em>, <em>esc_port=830</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/cisconfv.html#CiscoNFVManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv.CiscoNFVManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -290,7 +287,7 @@ attribute self.lifecycle_operation_occurrence_ids</td>
 
 </div>
 <div class="section" id="module-api.adapter.mano.cisconfv45">
-<span id="api-adapter-mano-cisconfv45-module"></span><h2>api.adapter.mano.cisconfv45 module<a class="headerlink" href="#module-api.adapter.mano.cisconfv45" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-cisconfv45-module"></span><h2>2.3. api.adapter.mano.cisconfv45 module<a class="headerlink" href="#module-api.adapter.mano.cisconfv45" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.cisconfv45.CiscoNFVManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.cisconfv45.</code><code class="descname">CiscoNFVManoAdapter</code><span class="sig-paren">(</span><em>nso_hostname</em>, <em>nso_username</em>, <em>nso_password</em>, <em>esc_hostname</em>, <em>esc_username</em>, <em>esc_password</em>, <em>nso_port=2022</em>, <em>esc_port=830</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/cisconfv45.html#CiscoNFVManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.cisconfv45.CiscoNFVManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -604,7 +601,7 @@ self.lifecycle_operation_occurrence_ids</td>
 
 </div>
 <div class="section" id="module-api.adapter.mano.dummy">
-<span id="api-adapter-mano-dummy-module"></span><h2>api.adapter.mano.dummy module<a class="headerlink" href="#module-api.adapter.mano.dummy" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-dummy-module"></span><h2>2.4. api.adapter.mano.dummy module<a class="headerlink" href="#module-api.adapter.mano.dummy" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.dummy.DummyManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.dummy.</code><code class="descname">DummyManoAdapter</code><span class="sig-paren">(</span><em>auth_url=None</em>, <em>username=None</em>, <em>password=None</em>, <em>identity_api_version=None</em>, <em>project_name=None</em>, <em>project_domain_name=None</em>, <em>user_domain_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/dummy.html#DummyManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.dummy.DummyManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -677,7 +674,7 @@ self.lifecycle_operation_occurrence_ids</td>
 
 </div>
 <div class="section" id="module-api.adapter.mano.openbaton">
-<span id="api-adapter-mano-openbaton-module"></span><h2>api.adapter.mano.openbaton module<a class="headerlink" href="#module-api.adapter.mano.openbaton" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-openbaton-module"></span><h2>2.5. api.adapter.mano.openbaton module<a class="headerlink" href="#module-api.adapter.mano.openbaton" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.openbaton.OpenbatonManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.openbaton.</code><code class="descname">OpenbatonManoAdapter</code><span class="sig-paren">(</span><em>url</em>, <em>username</em>, <em>password</em>, <em>project</em>, <em>vim_info</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/openbaton.html#OpenbatonManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.openbaton.OpenbatonManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -822,7 +819,7 @@ resource type with given ID.</p>
 
 </div>
 <div class="section" id="module-api.adapter.mano.rift">
-<span id="api-adapter-mano-rift-module"></span><h2>api.adapter.mano.rift module<a class="headerlink" href="#module-api.adapter.mano.rift" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-rift-module"></span><h2>2.6. api.adapter.mano.rift module<a class="headerlink" href="#module-api.adapter.mano.rift" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.rift.RiftManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.rift.</code><code class="descname">RiftManoAdapter</code><span class="sig-paren">(</span><em>url</em>, <em>username</em>, <em>password</em>, <em>project</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/rift.html#RiftManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.rift.RiftManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -958,7 +955,7 @@ resource type with given ID.</p>
 
 </div>
 <div class="section" id="module-api.adapter.mano.sdl">
-<span id="api-adapter-mano-sdl-module"></span><h2>api.adapter.mano.sdl module<a class="headerlink" href="#module-api.adapter.mano.sdl" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-sdl-module"></span><h2>2.7. api.adapter.mano.sdl module<a class="headerlink" href="#module-api.adapter.mano.sdl" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.sdl.SdlManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.sdl.</code><code class="descname">SdlManoAdapter</code><span class="sig-paren">(</span><em>nfv_api_url</em>, <em>ui_api_url</em>, <em>tenant_id</em>, <em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/sdl.html#SdlManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.sdl.SdlManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -1079,7 +1076,7 @@ resource type with given ID.</p>
 
 </div>
 <div class="section" id="module-api.adapter.mano.tacker">
-<span id="api-adapter-mano-tacker-module"></span><h2>api.adapter.mano.tacker module<a class="headerlink" href="#module-api.adapter.mano.tacker" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-mano-tacker-module"></span><h2>2.8. api.adapter.mano.tacker module<a class="headerlink" href="#module-api.adapter.mano.tacker" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.mano.tacker.TackerManoAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.mano.tacker.</code><code class="descname">TackerManoAdapter</code><span class="sig-paren">(</span><em>auth_url=None</em>, <em>username=None</em>, <em>password=None</em>, <em>identity_api_version=None</em>, <em>project_name=None</em>, <em>project_domain_name=None</em>, <em>user_domain_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/mano/tacker.html#TackerManoAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.tacker.TackerManoAdapter" title="Permalink to this definition">¶</a></dt>
@@ -1281,7 +1278,7 @@ VNF with given ID.</p>
 
 </div>
 <div class="section" id="module-api.adapter.mano">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-api.adapter.mano" title="Permalink to this headline">¶</a></h2>
+<span id="module-contents"></span><h2>2.9. Module contents<a class="headerlink" href="#module-api.adapter.mano" title="Permalink to this headline">¶</a></h2>
 <dl class="exception">
 <dt id="api.adapter.mano.ManoAdapterError">
 <em class="property">exception </em><code class="descclassname">api.adapter.mano.</code><code class="descname">ManoAdapterError</code><a class="reference internal" href="_modules/api/adapter/mano.html#ManoAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.mano.ManoAdapterError" title="Permalink to this definition">¶</a></dt>
@@ -1300,10 +1297,10 @@ VNF with given ID.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.adapter.traffic.html" class="btn btn-neutral float-right" title="api.adapter.traffic package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api.adapter.traffic.html" class="btn btn-neutral float-right" title="3. api.adapter.traffic package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="api.adapter.em.html" class="btn btn-neutral" title="api.adapter.em package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="api.adapter.em.html" class="btn btn-neutral" title="1. api.adapter.em package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -1,10 +1,8 @@
-api.generic package
+api.generic
 ===================
 
-Submodules
-----------
 
-api.generic.constants module
+api.generic.constants 
 ----------------------------
 
 .. automodule:: api.generic.constants
@@ -12,7 +10,7 @@ api.generic.constants module
     :undoc-members:
     :show-inheritance:
 
-api.generic.em module
+api.generic.em 
 ---------------------
 
 .. automodule:: api.generic.em
@@ -20,7 +18,7 @@ api.generic.em module
     :undoc-members:
     :show-inheritance:
 
-api.generic.mano module
+api.generic.mano
 -----------------------
 
 .. automodule:: api.generic.mano
@@ -28,7 +26,7 @@ api.generic.mano module
     :undoc-members:
     :show-inheritance:
 
-api.generic.traffic module
+api.generic.traffic
 --------------------------
 
 .. automodule:: api.generic.traffic
@@ -36,7 +34,7 @@ api.generic.traffic module
     :undoc-members:
     :show-inheritance:
 
-api.generic.vim module
+api.generic.vim
 ----------------------
 
 .. automodule:: api.generic.vim
@@ -44,7 +42,7 @@ api.generic.vim module
     :undoc-members:
     :show-inheritance:
 
-api.generic.vnf module
+api.generic.vnf
 ----------------------
 
 .. automodule:: api.generic.vnf
@@ -53,7 +51,7 @@ api.generic.vnf module
     :show-inheritance:
 
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api.generic

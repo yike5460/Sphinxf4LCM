@@ -1,16 +1,14 @@
-api package
+api
 ===========
-
-Subpackages
------------
-
 .. toctree::
+    :maxdepth: 2
+    :glob:
 
     api.adapter
     api.generic
     api.structures
 
-Module contents
+__init__.py
 ---------------
 
 .. automodule:: api

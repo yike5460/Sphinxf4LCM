@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>api.adapter.traffic package &mdash; LCM 1.0 documentation</title>
+  <title>3. api.adapter.traffic package &mdash; LCM 1.0 documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="api.adapter.vim package" href="api.adapter.vim.html" />
-    <link rel="prev" title="api.adapter.mano package" href="api.adapter.mano.html" /> 
+    <link rel="next" title="4. api.adapter.vim package" href="api.adapter.vim.html" />
+    <link rel="prev" title="2. api.adapter.mano package" href="api.adapter.mano.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,22 +80,21 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="api.html">api package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.em.html">api.adapter.em package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.mano.html">api.adapter.mano package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">api.adapter.traffic package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.traffic.ping">api.adapter.traffic.ping module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.traffic.stc">api.adapter.traffic.stc module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.traffic">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.html">api.adapter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.em.html">1. api.adapter.em package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.mano.html">2. api.adapter.mano package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. api.adapter.traffic package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">3.1. Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.traffic.ping">3.2. api.adapter.traffic.ping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.traffic.stc">3.3. api.adapter.traffic.stc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-api.adapter.traffic">3.4. Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vim.html">api.adapter.vim package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">api.adapter.vnf package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">api.adapter.vnfm package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.generic.html">api.generic package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.structures.html">api.structures package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vim.html">4. api.adapter.vim package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnf.html">5. api.adapter.vnf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.adapter.vnfm.html">6. api.adapter.vnfm package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.generic.html">1. api.generic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.structures.html">2. api.structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">api</a></li>
 </ul>
 
@@ -142,11 +141,9 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="api.html">api package</a> &raquo;</li>
+          <li><a href="api.adapter.html">api.adapter</a> &raquo;</li>
         
-          <li><a href="api.adapter.html">api.adapter package</a> &raquo;</li>
-        
-      <li>api.adapter.traffic package</li>
+      <li>3. api.adapter.traffic package</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -166,12 +163,12 @@
            <div itemprop="articleBody">
             
   <div class="section" id="api-adapter-traffic-package">
-<h1>api.adapter.traffic package<a class="headerlink" href="#api-adapter-traffic-package" title="Permalink to this headline">¶</a></h1>
+<h1>3. api.adapter.traffic package<a class="headerlink" href="#api-adapter-traffic-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<h2>3.1. Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-api.adapter.traffic.ping">
-<span id="api-adapter-traffic-ping-module"></span><h2>api.adapter.traffic.ping module<a class="headerlink" href="#module-api.adapter.traffic.ping" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-traffic-ping-module"></span><h2>3.2. api.adapter.traffic.ping module<a class="headerlink" href="#module-api.adapter.traffic.ping" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.traffic.ping.PingTrafficAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.traffic.ping.</code><code class="descname">PingTrafficAdapter</code><a class="reference internal" href="_modules/api/adapter/traffic/ping.html#PingTrafficAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.traffic.ping.PingTrafficAdapter" title="Permalink to this definition">¶</a></dt>
@@ -227,7 +224,7 @@
 
 </div>
 <div class="section" id="module-api.adapter.traffic.stc">
-<span id="api-adapter-traffic-stc-module"></span><h2>api.adapter.traffic.stc module<a class="headerlink" href="#module-api.adapter.traffic.stc" title="Permalink to this headline">¶</a></h2>
+<span id="api-adapter-traffic-stc-module"></span><h2>3.3. api.adapter.traffic.stc module<a class="headerlink" href="#module-api.adapter.traffic.stc" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="api.adapter.traffic.stc.StcTrafficAdapter">
 <em class="property">class </em><code class="descclassname">api.adapter.traffic.stc.</code><code class="descname">StcTrafficAdapter</code><span class="sig-paren">(</span><em>lab_server_addr</em>, <em>lab_server_port=80</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api/adapter/traffic/stc.html#StcTrafficAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.traffic.stc.StcTrafficAdapter" title="Permalink to this definition">¶</a></dt>
@@ -358,7 +355,7 @@
 
 </div>
 <div class="section" id="module-api.adapter.traffic">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-api.adapter.traffic" title="Permalink to this headline">¶</a></h2>
+<span id="module-contents"></span><h2>3.4. Module contents<a class="headerlink" href="#module-api.adapter.traffic" title="Permalink to this headline">¶</a></h2>
 <dl class="exception">
 <dt id="api.adapter.traffic.TrafficAdapterError">
 <em class="property">exception </em><code class="descclassname">api.adapter.traffic.</code><code class="descname">TrafficAdapterError</code><a class="reference internal" href="_modules/api/adapter/traffic.html#TrafficAdapterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.adapter.traffic.TrafficAdapterError" title="Permalink to this definition">¶</a></dt>
@@ -377,10 +374,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.adapter.vim.html" class="btn btn-neutral float-right" title="api.adapter.vim package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api.adapter.vim.html" class="btn btn-neutral float-right" title="4. api.adapter.vim package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="api.adapter.mano.html" class="btn btn-neutral" title="api.adapter.mano package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="api.adapter.mano.html" class="btn btn-neutral" title="2. api.adapter.mano package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
