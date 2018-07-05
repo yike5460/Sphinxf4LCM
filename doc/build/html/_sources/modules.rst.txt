@@ -1,7 +1,7 @@
-api
-===
+Sphinxf4LCM
+===========
 
 .. toctree::
    :maxdepth: 4
 
-   api
+   Sphinxf4LCM
