@@ -12,7 +12,6 @@ Welcome to LCM's documentation!
 
    api
    api.adapter
-   api.adapter
    api.adapter.mano
    api.adapter.traffic
    api.adapter.vim
