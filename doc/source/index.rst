@@ -13,7 +13,6 @@ Welcome to LCM's documentation!
    api.adapter
    api.generic
    api.structures
-   modules
 
 Indices and tables
 ==================
