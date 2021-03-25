@@ -41,7 +41,7 @@ python-swiftclient==3.3.0
 python-tackerclient==0.10.0
 python-glanceclient==2.8.0
 pytz==2017.2
-PyYAML==3.12
+PyYAML==5.4
 requests==2.18.1
 requestsexceptions==1.2.0
 rfc3986==1.0.0
