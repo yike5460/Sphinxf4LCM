@@ -1,6 +1,6 @@
 appdirs==1.4.3
 Babel==2.3.4
-bottle==0.12.13
+bottle==0.12.20
 certifi==2017.4.17
 chardet==3.0.4
 cliff==2.7.0
