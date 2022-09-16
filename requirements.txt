@@ -23,7 +23,7 @@ oslo.context==2.15.0
 oslo.i18n==3.15.3
 oslo.log==3.28.1
 oslo.serialization==2.18.0
-oslo.utils==3.26.0
+oslo.utils==4.10.1
 oslosphinx==4.15.0
 Paste==2.0.3
 pbr==3.1.1
